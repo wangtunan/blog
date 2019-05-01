@@ -1,12 +1,12 @@
 module.exports = {
   title: '一蓑烟雨、汪汪汪',
   description: '一蓑烟雨、汪汪汪的个人站点',
-  sidebarDepth: 2,
   base: '/blog/',
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }]
   ],
   themeConfig: {
+    sidebar: 'auto',
     nav: [
       { text: '前端面试之道',link: '/interview/'},
       { text: 'JavaScript书籍', items: [
@@ -21,6 +21,7 @@ module.exports = {
         { text: 'Vue原理剖析', link: '/vue/principle.md' }
       ]},
       { text: 'Webpack',link: '/webpack/'},
+      { text: 'VuePress',link: '/vuepress/'},
       // { text: 'CSS奇淫技巧',link: '/css/'},
       { text: 'Git',link: '/git/'},
       { text: 'Github',link: 'https://github.com/wangtunan/blog'}

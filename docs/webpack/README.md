@@ -216,9 +216,8 @@ $ npm uninstall webpack webpack-cli -g
 
 ### 本地安装(推荐)
 ::: tip 参数说明
-本地安装的`webpack`意思是，只在你当前项目下有效。而通过全局安装的`webpack`，如果两个项目的`webpack`主版本不一致，则可能会造成其中一个项目无法正常打包。本地安装方式也是实际开发中推荐的一种
-`webpack`安装方式。
-:::s
+本地安装的`webpack`意思是，只在你当前项目下有效。而通过全局安装的`webpack`，如果两个项目的`webpack`主版本不一致，则可能会造成其中一个项目无法正常打包。本地安装方式也是实际开发中推荐的一种`webpack`安装方式。
+:::
 ```js
 $ npm install webpack webpack-cli -D 或者 npm install webpack webpack-cli --save-dev
 ```

@@ -1,6 +1,6 @@
 ---
 home: true
-lang: 'zh-CN'
+lang: zh-CN
 heroText: A  Personal Blog
 heroImage: /logo.jpg
 actionText: 开始 →
