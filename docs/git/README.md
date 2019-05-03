@@ -1,6 +1,3 @@
----
-sidebar: auto
----
 # Git常见命令
 
 ## 配置name和email

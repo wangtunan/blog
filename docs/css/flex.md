@@ -1,8 +1,3 @@
----
-sidebar: auto
----
-
-
 # FlexBox布局
 
 ## FlexBobx语法

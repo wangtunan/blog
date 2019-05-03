@@ -1,6 +1,3 @@
----
-sidebar: auto
----
 # Webpack <Badge text="4.0+" type="tip"/>
 
 ::: tip 概念

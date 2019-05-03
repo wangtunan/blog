@@ -5,8 +5,14 @@ module.exports = {
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }]
   ],
+  markdown: {
+    lineNumbers: true
+  },
   themeConfig: {
+    lastUpdated: '最后更新时间',
     sidebar: 'auto',
+    repo: 'https://github.com/wangtunan/blog',
+    repoLabel: 'Github',
     nav: [
       { text: '前端面试之道',link: '/interview/'},
       { text: 'JavaScript书籍', items: [
@@ -23,7 +29,6 @@ module.exports = {
       { text: 'Webpack',link: '/webpack/'},
       { text: 'VuePress',link: '/vuepress/'},
       // { text: 'CSS奇淫技巧',link: '/css/'},
-      { text: 'Git',link: '/git/'},
-      { text: 'Github',link: 'https://github.com/wangtunan/blog'}
+      { text: 'Git',link: '/git/'}
   ]}
 }

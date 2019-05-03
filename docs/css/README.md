@@ -1,6 +1,3 @@
----
-sidebar: auto
----
 # CSS奇淫技巧
 
 ## CSS基础
