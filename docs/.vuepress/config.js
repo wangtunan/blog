@@ -6,7 +6,7 @@ module.exports = {
     ['link', { rel: 'icon', href: '/icon.png' }]
   ],
   markdown: {
-    lineNumbers: true
+    lineNumbers: false
   },
   themeConfig: {
     lastUpdated: '最后更新时间',

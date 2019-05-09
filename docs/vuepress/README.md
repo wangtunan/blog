@@ -251,6 +251,7 @@ module.exports = {
     lastUpdated: false
 }
 ```
+
 ### 上一篇/下一篇
 上一篇下一篇可以通过配置`YAML`的`prev`和`next`来显示的配置，链接地址同导航的地址一样的书写规则，一个配置了上一篇/下一篇的`.md`文件可以如下所示
 ```yaml
@@ -265,6 +266,7 @@ next: /JavaScript/
 
 上一篇/下一篇的配置结果如下图所示
 ![上一篇/下一篇的结果](../images/vuepress/5.png)
+
 ### Git仓库和编辑链接
 在我们输出我们的静态网站的时候，我们可能需要有一个导航链接到我们的`GitHub`仓库，对于这个需求我们可以通过如下配置来解决
 ::: tip Git仓库说明
@@ -315,85 +317,14 @@ module.exports = {
 配置了编辑链接后结果可能如下图所示
 ![编辑功能](../images/vuepress/6.png)
 
-### 基本配置API
-#### title(标题)
-::: tip 说明
-`title`标题能让我们配置静态站点的标题，它固定在我们顶部左上角
-:::
-可以像下面这样来配置`title`
-```js
-module.exports = {
-  // 其它配置
-  title: 'VuePress Blog'
-}
-```
-配置后的结果如下图所示
-![title配置结果](../images/vuepress/7.png)
-
-#### description(网站的描述)
-::: tip 说明
-`description`它将会以 `<meta>` 标签渲染到当前页面的 HTML 中，它是给搜索引擎去识别的，这属于`SEO`配置
-:::
-可以像下面这样配置`description`
-```js
-module.exports = {
-  // 其它配置
-  title: 'VuePress Blog',
-  description: 'VuePress Blog 的网站描述'
-}
-```
-配置后的结果如下图所示
-![description配置结果](../images/vuepress/8.png)
-
-#### base
-::: tip 说明
-`base`默认值为`/`,它属于部署环节，配置它我们可以在`GitHub Pages`哪个目录下访问我们的项目
-:::
-简单来说，如果我们要配置在`https://xxx.github.io/blog/`这个地址，那么我们的`base`需要进行如下配置
-```js
-module.exports = {
-  // 其它配置
-  base: '/blog/',
-  title: 'VuePress Blog',
-  description: 'VuePress Blog 的网站描述'
-}
+你也可以通过设置`YAML`来单独禁止某个`.md`文件启用编辑链接功能
+``` yaml
+---
+editLink: false
+---
 ```
 
-#### host(主机名)和post(端口)
-::: tip 说明
-`host`默认值为`0.0.0.0`，此参数可以指明我们主机名(IP地址)<br>
-`port`默认值为`8080`，此参数可以知名我们的端口号
-:::
-配置了`host`和`port`后，我们可以在浏览器上通过IP地址+port端口进行访问，例如
-```js
-module.exports = {
-  // 其它配置
-  port: 3000,
-  host: '127.0.0.1',
-  base: '/blog/',
-  title: 'VuePress Blog',
-  description: 'VuePress Blog 的网站描述'
-}
-```
-以上配置成功后我们可以`127.0.0.1:3000`来访问我们的项目
 
-
-#### dest(输出目录)
-::: tip 说明
-`dest`默认值为`.vuepress/dist`，配置它可以显示的帮助我们设置打包文件的输出目录
-:::
-如果我们想把`dist`目录输出在根路径下，而不是`.vuepress`文件夹下，可以进行如下配置
-```js
-module.exports = {
-  // 其它配置
-  dest: 'dist',
-  port: 3000,
-  host: '127.0.0.1',
-  base: '/blog/',
-  title: 'VuePress Blog',
-  description: 'VuePress Blog 的网站描述'
-}
-```
 ## Markdown扩展
 
 ### 链接
@@ -673,17 +604,162 @@ VuePress 运行结果
 
 ## 进阶配置
 
+### 基本配置API
+
+#### title(标题)
+::: tip 说明
+`title`标题能让我们配置静态站点的标题，它固定在我们顶部左上角
+:::
+可以像下面这样来配置`title`
+```js
+module.exports = {
+  // 其它配置
+  title: 'VuePress Blog'
+}
+```
+配置后的结果如下图所示
+![title配置结果](../images/vuepress/7.png)
+
+#### description(网站的描述)
+::: tip 说明
+`description`它将会以 `<meta>` 标签渲染到当前页面的 HTML 中，它是给搜索引擎去识别的，这属于`SEO`配置
+:::
+可以像下面这样配置`description`
+```js
+module.exports = {
+  // 其它配置
+  title: 'VuePress Blog',
+  description: 'VuePress Blog 的网站描述'
+}
+```
+配置后的结果如下图所示
+![description配置结果](../images/vuepress/8.png)
+
+#### base
+::: tip 说明
+`base`默认值为`/`,它属于部署环节，配置它我们可以在`GitHub Pages`哪个目录下访问我们的项目
+:::
+简单来说，如果我们要配置在`https://xxx.github.io/blog/`这个地址，那么我们的`base`需要进行如下配置
+```js
+module.exports = {
+  // 其它配置
+  base: '/blog/',
+  title: 'VuePress Blog',
+  description: 'VuePress Blog 的网站描述'
+}
+```
+
+#### host(主机名)和post(端口)
+::: tip 说明
+`host`默认值为`0.0.0.0`，此参数可以指明我们主机名(IP地址)<br>
+`port`默认值为`8080`，此参数可以知名我们的端口号
+:::
+配置了`host`和`port`后，我们可以在浏览器上通过IP地址+port端口进行访问，例如
+```js
+module.exports = {
+  // 其它配置
+  port: 3000,
+  host: '127.0.0.1',
+  base: '/blog/',
+  title: 'VuePress Blog',
+  description: 'VuePress Blog 的网站描述'
+}
+```
+以上配置成功后我们可以`127.0.0.1:3000`来访问我们的项目
+
+
+#### dest(输出目录)
+::: tip 说明
+`dest`默认值为`.vuepress/dist`，配置它可以显示的帮助我们设置打包文件的输出目录
+:::
+如果我们想把`dist`目录输出在根路径下，而不是`.vuepress`文件夹下，可以进行如下配置
+```js
+module.exports = {
+  // 其它配置
+  dest: 'dist',
+  port: 3000,
+  host: '127.0.0.1',
+  base: '/blog/',
+  title: 'VuePress Blog',
+  description: 'VuePress Blog 的网站描述'
+}
+```
+
+
 ### 简单的样式覆盖
+如果你只是希望能够在默认样式中进行一些简单的样式覆盖，你需要在`.vuepress`目录下创建两个样式文件`override.styl`和`style.styl`，它们都是`stylus`文件，这两个文件的具体作用如下
+1. **`override.styl`** 重置默认主题的样式变量
+2. **`style.style`** 运用到默认主题下的自定义样式
+
+#### override.styl
+对于 VuePress 的默认主题，它提供了一些主题常量来让我们可以自由配置，可以配置的常量和其对应的解释如下
+``` stylus
+// 默认主题下的hover颜色(主题绿)
+$accentColor = #3eaf7c 
+// 默认主题下的文本颜色
+$textColor = #2c3e50
+// 默认主题下的border颜色
+$borderColor = #eaecef
+// 默认主题下的代码块背景色(背景黑)
+$codeBgColor = #282c34
+```
+为了演示效果，我们给这些常亮设置一个醒目的颜色
+``` stylus
+$accentColor = #fb3 
+$textColor = green
+$borderColor = red
+$codeBgColor = #58a
+```
+以上设置的效果如下
+![样式覆盖的结果](../images/vuepress/14.png)
+
+#### style.styl
+什么是自定义的样式？举个栗子，如果我们觉得默认主题下单行代码块的文字颜色和背景色不够醒目，在利用浏览器审查元素后，我们可以这样设置我们的自定义样式
+``` stylus
+.content
+  code
+    background-color: #fff5f5;
+    color: #ff502c;
+```
+运用以上自定义样式后，默认主题下的单行代码块的效果如下
+![自定义样式的效果](../images/vuepress/15.png)
 
 ### 引入代码片段
+如果我们在写`.md`文档中，需要导入我们已经存在的`js`代码的，而我们又不想再去使用代码块复制粘贴一遍，这个时候 VuePress 允许我们带入已经存在的`js`代码片段，它的语法如下
+``` md
+<<< @filepath
+// 导入的同时也支持高亮
+<<< @filepath{highlightLines}
+```
+具体示例如下
+``` md
+<<< @/docs/.vuepress/js/hello.js {2}
+```
+导入代码片段的结果
+
+<<< @/docs/.vuepress/js/hello.js {2}
 
 ### Algolia搜索
+在基础配置章节我们讲到了内置搜索，内置搜索只会为页面的`h2`和`h3`标题建立索引，而如果我们想进行全文搜索，就需要使用到本小结的`Algolia`搜索了，它的配置可以是下面这样的
+```js
+module.exports = {
+  // 其它配置
+  themeConfig: {
+    algolia: {
+      apiKey: '<API_KEY>',
+      indexName: '<INDEX_NAME>'
+    }
+  }
+}
+```
+::: warning 注意
+不同于内置搜索的开箱即用，使用`Algolia`搜索，需要我们将网站提交给它们已建立索引
+:::
+此小结的配置由于特殊性，并没有配置成功，如果你感兴趣，请移步这里:point_right:[Algolia搜索](https://community.algolia.com/docsearch/)<br/>
+如果你配置成功了，它们他们的搜索效果会是下面这样子的
+![Algolia搜索](../images/vuepress/16.png)
 
 ### 管理静态资源
-
-### PWA配置
-
-### 国际化
 
 ### 自定义页面样式类
 
@@ -691,13 +767,16 @@ VuePress 运行结果
 
 ### 使用第三方主题
 
+### 使用第三方包
+
+### PWA配置
+
+### 国际化
+
 ## 自定义主题
 撰写中
 
 ## 部署
-
-### 部署到私有服务器
-撰写中
 
 ### 部署到Github Pages
 撰写中
