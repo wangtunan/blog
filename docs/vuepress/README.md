@@ -760,18 +760,72 @@ module.exports = {
 ![Algolia搜索](../images/vuepress/16.png)
 
 ### 管理静态资源
+在`.md`文件中选择文档时，如果我们要使用静态资源，我们有三种方式来引用资源
+* 相对路径绝对路径
+* `Webpack` 别名
+下面我们来一一进行介绍
+#### 相对路径
+要在`.md`文件中引用一个图片资源，它的固定格式如下
+``` md
+// 格式
+![图片确实时的alt](图片的路径)
+
+// 示例：绝对路径
+![百度logo](https://www.baidu.com/logo.png)
+// 示例：相对路径
+![Algolia搜索](../images/vuepress/16.png)
+```
+如果你的目录结构相对简单，那么使用相对路径或者利用图床技术，先把图片上传到图床服务器，再填写绝对路径，这往往是**非常简便和易懂**的一种做法。
+
+#### Webpack别名
+就像`Vue-cli`脚手架那样，在路径比较长或者目录结构比较复杂的时候，使用`Webpack`别名进行访问，它通常是非常友好的，它的配置可以是这样的
+```js
+// .vuepress/config.js下配置
+module.exports = {
+  // 其它配置
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@vuepress': '../images/vuepress',
+        '@vue': '../images/vue',
+        '@interview': '../images/interview'
+      }
+    }
+  }
+}
+```
+通过上面的配置以后，我们就可以在`.md`文件中这样使用
+```md
+// 不使用别名
+![Algolia搜索](../images/vuepress/16.png)
+
+// 使用别名
+![Algolia搜索](~@vuepress/16.png)
+```
 
 ### 自定义页面样式类
+有时候我们希望在特定的页面使用特定的样式，VuePress允许我们这样做，你只需要在`.vuepress/style.styl`中编写自定义样式并在对应的页面使用即可，它们可能是这样配置的
+```stylus
+// .vuepress/style.styl
+.customer-page-class
+  color: #fb3;
+  background-color: #333;
+```
+在对应的`.md`文件的最顶部，使用`YAML`语法进行引用自定义样式
+```yaml
+---
+pageClass: customer-page-class
+---
+```
+使用自定义样式它的结果
+![自定义样式的结果](../images/vuepress/17.png)
+
 
 ### 自定义页面布局
 
 ### 使用第三方主题
 
-### 使用第三方包
-
-### PWA配置
-
-### 国际化
+### 使用第三方库
 
 ## 自定义主题
 撰写中
