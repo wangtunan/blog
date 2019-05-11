@@ -1,17 +1,17 @@
-# VuePress
+# VuePress <Badge text="0.x"/>
 ## 介绍
 
 ### 如何而来
-VuePress 是一个**静态网站生成器**，使用它我们一方面可以专注输出技术类文档，也可以使用基于Vue的开发方式来开发我们的其他静态网站。<br/>
+VuePress 是一个**静态网站生成器**，使用它我们一方面可以专注输出技术类文档，也可以使用基于Vue的开发方式来开发我们其它的静态网站。<br/>
 每一个由 VuePress 生成的静态页面都是经过服务端渲染(SSR)而来，因此由 VuePress 生成的页面在加载性能和搜索引擎优化(SEO)上有很明显的优势。
 
 
 ### 组成部分
-通常而言，一个由 VuePress 生成的网站，它是用过`Vue`、`Vue-router`、`Webpack`以及利用服务端渲染(`SSR`)而来，它不仅支持 Vue 组件的写法，还内置 `Stylus` 语法。
+通常而言，一个由 VuePress 生成的网站，它是用`Vue`、`Vue-router`、`Webpack`以及利用服务端渲染(`SSR`)而来，它不仅支持 Vue 组件的写法，还内置 `Stylus` 语法。
 
 ## 安装
 ::: warning 注意
-请确认Node.js >= 8
+本博客VuePress主版本为`0.x`，相关配置最新的`1.x`也兼容，请放心使用。另请确认你的Node.js >= 8 
 :::
 
 ### 全局安装(推荐)
@@ -31,6 +31,26 @@ $ npm install vuepress webpack-dev-middleware --save-dev
 基本配置下的内容适用于 VuePress 的默认主题，对于自定义主题配置可能会不太一样
 :::
 
+### 脚本命令
+我们需要至少两个脚本命令，分别用于本地开发和打包上线，脚本命令需要配置在`docs/package.json`文件中，它的配置如下
+``` json
+{
+  "scripts": {
+    // 本地开发
+    "docs:dev": "vuepress dev docs",
+    // 打包上线
+    "docs:build": "vuepress build docs"
+  }
+}
+```
+本地开发请使用如下命令，它在本地启用了一个小型的服务器，你可以在浏览器中使用`localhost:8080`(默认情况下)进行访问
+``` sh
+$ npm run docs:dev
+```
+打包命令请使用如下命令，它在`.vuepress`目录下生成一个`dist`文件夹
+``` sh
+$ npm run docs:build
+```
 ### 项目目录
 VuePress 作为一个静态网站生成器，它对于项目的目录是有一定的限制的，一个基本的项目结构如下所示
 ``` js
@@ -38,7 +58,7 @@ VuePress 作为一个静态网站生成器，它对于项目的目录是有一�
     |-- README.md // 首页
     |-- .vuepress // 特定的目录
         |-- config.js // 特定的配置文件
-|-- package.json // 打包命令
+|-- package.json // 脚本命令
 ```
 
 ### 首页
@@ -65,14 +85,14 @@ footer: Copyright © 2019-present Wangtunan
 ![vuepress首页效果](../images/vuepress/1.png)
 
 #### 首页配置说明
-在首页的`YAML`格式配置中，我们填写了一些配置，下面我们将详细描述每一个配置的具体含义：
+在首页的`YAML`格式配置中，我们填写了一些配置，下面我们将详细描述每一个配置的具体含义
 * `home:true`：标记此页面是否为首页
 * `lang:zh-CN`：表示本页面的语言为zh-CN(简体中文)
 * `heroText`: 首页的标题内容
 * `heroImage`: 首页的标题图片，其中全路径为`docs/.vuepress/public/logo.jpg`，默认去`public`目录下找静态资源
 * `actionText`: 首页跳转按钮的内容
-* `actionLink`: 首页跳转按钮挑战的路径，其中全路径为`docs/interview/readme.md`，默认`readme`命名的文件可以省略不写链接的后面内容
-* `features`: 表明首页的特征，固定的格式为`title` + `details`，以三栏流失布局的方式展示
+* `actionLink`: 首页跳转按钮挑战的路径，其中全路径为`docs/interview/readme.md`，默认`readme`命名的文件可以省略不写链接的后面内容，省略后的链接如上
+* `features`: 表明首页的特征，固定的格式为`title` + `details`，以三栏流式布局的方式展示
 * `footer`: 为底部内容，与普通的网页一样，我们可以在`footer`里面写版权信息
 
 ### 导航栏
@@ -225,6 +245,7 @@ sidebar: auto
 # Vue.js
 这里是Vue.js文件的内容部分
 ```
+
 #### 禁用侧边栏
 正如上面所提到的单独配置文件的侧边栏，同样的道理，我们也能单独禁用侧边栏。
 ```yaml
@@ -243,16 +264,19 @@ sidebar: false
 ```js
 module.exports = {
   themeConfig: {
-    // 1.接受字符串，它设置了最后更新事件的label，例如：最后更新事件：2019年5月3日 21:51:53
+    // 1.接受字符串，它设置了最后更新时间的label，例如：最后更新时间：2019年5月3日 21:51:53
     lastUpdated: '最后更新时间',
     // 2.设置true，开启最后更新时间
     lastUpdated: true,
-    // 3.设置false，不开启最后更新时间
+    // 3.设置false，不开启最后更新时间(默认)
     lastUpdated: false
 }
 ```
 
 ### 上一篇/下一篇
+::: tip 提醒
+如果我们没有上一篇或者下一篇，只需要把其对应的`YAML`属性设置为`false`即可
+:::
 上一篇下一篇可以通过配置`YAML`的`prev`和`next`来显示的配置，链接地址同导航的地址一样的书写规则，一个配置了上一篇/下一篇的`.md`文件可以如下所示
 ```yaml
 ---
@@ -268,7 +292,7 @@ next: /JavaScript/
 ![上一篇/下一篇的结果](../images/vuepress/5.png)
 
 ### Git仓库和编辑链接
-在我们输出我们的静态网站的时候，我们可能需要有一个导航链接到我们的`GitHub`仓库，对于这个需求我们可以通过如下配置来解决
+在输出我们的静态网站的时候，我们可能需要有一个导航链接到我们的`GitHub`仓库，对于这个需求我们可以通过如下配置来解决
 ::: tip Git仓库说明
 `repo`代表我们的链接地址，`repoLabel`代表链接的名称，配置后它会自动出现在我们`nav`导航的最后一个位置
 :::
@@ -291,7 +315,7 @@ module.exports = {
 }
 ```
 ::: tip 编辑链接说明
-编辑功能默认是没有开启的，我们可以通过配置`repo`指向我们的仓库地址，`repoLabel`指明编辑功能的文字
+编辑功能默认是没有开启的，我们可以通过配置`editLinks`来设置是否出现编辑链接，`editLinkText`指明编辑功能的文字内容
 :::
 一个启用了编辑链接的配置可以如下所示
 ```js
@@ -329,7 +353,7 @@ editLink: false
 
 ### 链接
 #### 锚链接
-在VuePress 中所有`.md`文件中的标题(默认h2和h3)都会自动添加锚点链接(anchor)，所以如果我们需要跳转至固定的锚点，可以如下进行设置
+在VuePress 中所有`.md`文件中的标题(默认`h2`和`h3`)都会自动添加锚点链接(`anchor`)，所以如果我们需要跳转至固定的锚点，可以如下进行设置
 ```md
 [锚点链接](/vuepress/#pwa配置)
 ```
@@ -339,7 +363,7 @@ editLink: false
 如果文件名为`README.md`，它会被编译成`index.html`，所以当我们访问`/vuepress/`时，其实就是在访问`/vuepress/README.md`或者`/vuepress/index.html`
 
 ### 自定义容器
-VuePress 内置了三种不同状态的自定义容器，分别有`tip`、`warning`和`danger`三种类型，在紧挨着类型的旁边，可以设置自定义容器标题，它们的书写规则如下所示
+VuePress 内置了三种不同状态的自定义容器，分别有`tip`、`warning`和`danger`三种类型，在紧挨着类型的旁边，可以设置自定义容器标题，不写的话默认为`TIP`，它们的书写规则如下所示
 ``` md
 ::: tip 提醒
 这里是tip容器
@@ -366,10 +390,38 @@ VuePress 内置了三种不同状态的自定义容器，分别有`tip`、`warni
 这里是危险容器
 :::
 
+### 代码块类别
+对于不同的代码块，需要设置不同的类型进行展示，常见的代码块类型有如下所示
+* **`html`** 类型：它表示代码块是`html`格式的
+* **`css`** 类型：它表示代码块是`css`格式的
+* **`js`** 类型：它表示代码块是`javascript`格式的
+* **`stylus`** 类型：它表示代码块是`stylus`格式的，类似的类型还有`less`和`scss`
+* **`md`** 类型：它表示代码块是`markdown`格式的
+* **`json`** 类型：它表示代码块是`json`格式的<br>
+
+他们的对应的配置如下所示<br>
+`HTML`格式的代码块(观测代码块右上角小角标)
+```html
+<div class="box">html类型的代码块</html>
+```
+`css`格式的代码块(观测代码块右上角小角标)
+```css
+.box {
+  width: 100px;
+  height: 100px;
+}
+```
+`js`格式的代码块(观测代码块右上角小角标)
+```js
+console.log('js格式的代码块')
+```
+其它格式的代码块**同理**，就不再次累述
+
+
 ### 代码块高亮和行号
 
 #### 代码块高亮
-在`Markdown`中，我们可以如下所示来进行代码块的高亮设置
+在`Markdown`中，我们可以如下所示来进行代码块的高亮设置(**类型后跟一个花括号**)
 ``` md
 `` js{4}
 export default {
@@ -381,7 +433,7 @@ export default {
 }
 ``
 ```
-它的结果可能会是这样的
+它的结果可能会是这样的(第四行高亮，**行数不是从0开始的**)
 ``` js{4}
 export default {
   data () {
@@ -407,6 +459,7 @@ export default {
 module.exports = {
   // 其它配置
   markdown: {
+    // 显示代码块行号
     lineNumbers: true
   }
 }
@@ -435,12 +488,13 @@ module.exports = {
 | 2             | 20180102     |   $12  |
 | 3             | 20180103     |    $1  |
 ```
-以上表格同`Github`表格风格是一直的，它的结果如下所示
+以上表格同`Github`表格风格是一致的，它的结果如下所示
 | 序号          | 订单编号      | 订单金额|
 | -------------|:-------------:| ------:|
 | 1             | 20180101     | $1600  |
 | 2             | 20180102     |   $12  |
 | 3             | 20180103     |    $1  |
+
 ### 自动生成目录
 我们有时候希望根据标题自动生成目录，可以使用`[[toc]]`来输出我们的目录，它默认只列举`h2`标题和`h3`标题
 ```md
@@ -462,7 +516,7 @@ module.exports = {
 ### 使用Vue模板语法
 
 #### 使用插值
-在`.md`文件中，可以使用 Vue 的插值表达式，像这样这样
+在`.md`文件中，可以使用 Vue 的插值表达式，像下面这样
 ```md
 # 插值表达式
 1 + 1 的结果是 {{1+1}}
@@ -503,11 +557,11 @@ window.onload = function() {
 }
 </script>
 ```
-以上代码的结果如下图所示：
+以上代码的结果如下图所示
 ![使用原生JS和CSS](../images/vuepress/11.png)
 
 ### 使用CSS预处理器
-VuePress 不仅像上面一样赋予我们使用原生`JS`和`CSS`的能力，还赋予我们使用`CSS`预处理器的能力，它内置了相关`CSS`预处理器的配置，我们只需要安装依赖并使用即可，特别要注意的是，VuePress 内置了`Stylus`，我们无需安装，直接使用即可，现在让我们使用`Stylus`来改写上面的例子
+VuePress 不仅像上面一样赋予我们使用原生`JS`和`CSS`的能力，还赋予我们使用`CSS`预处理器的能力，它内置了相关`CSS`预处理器的配置，我们只需要安装对应的依赖并使用即可，特别要注意的是，VuePress 内置了`Stylus`，我们无需安装，直接使用即可，现在让我们使用`Stylus`来改写上面的例子
 ``` html {1, 8}
 <style lang="stylus">
 .box
@@ -652,9 +706,9 @@ module.exports = {
 #### host(主机名)和post(端口)
 ::: tip 说明
 `host`默认值为`0.0.0.0`，此参数可以指明我们主机名(IP地址)<br>
-`port`默认值为`8080`，此参数可以知名我们的端口号
+`port`默认值为`8080`，此参数可以指明我们的端口号
 :::
-配置了`host`和`port`后，我们可以在浏览器上通过IP地址+port端口进行访问，例如
+配置了`host`和`port`后，我们可以在浏览器上通过`IP`地址+`port`端口进行访问，例如
 ```js
 module.exports = {
   // 其它配置
@@ -687,9 +741,9 @@ module.exports = {
 
 
 ### 简单的样式覆盖
-如果你只是希望能够在默认样式中进行一些简单的样式覆盖，你需要在`.vuepress`目录下创建两个样式文件`override.styl`和`style.styl`，它们都是`stylus`文件，这两个文件的具体作用如下
+如果你只是希望能够在默认样式中进行一些简单的样式覆盖，你需要在`.vuepress`目录下创建两个样式文件`override.styl`和`style.styl`，它们都是`stylus`文件(**也可以是其它类型的样式文件**)，这两个文件的具体作用如下
 1. **`override.styl`** 重置默认主题的样式变量
-2. **`style.style`** 运用到默认主题下的自定义样式
+2. **`style.styl`** 运用到默认主题下的自定义样式
 
 #### override.styl
 对于 VuePress 的默认主题，它提供了一些主题常量来让我们可以自由配置，可以配置的常量和其对应的解释如下
@@ -725,7 +779,7 @@ $codeBgColor = #58a
 ![自定义样式的效果](../images/vuepress/15.png)
 
 ### 引入代码片段
-如果我们在写`.md`文档中，需要导入我们已经存在的`js`代码的，而我们又不想再去使用代码块复制粘贴一遍，这个时候 VuePress 允许我们带入已经存在的`js`代码片段，它的语法如下
+如果我们在写`.md`文档中，需要导入我们已经存在的`js`代码，而我们又不想再去使用代码块复制粘贴一遍，这个时候 VuePress 允许我们引入已经存在的`js`代码片段，它的语法如下
 ``` md
 <<< @filepath
 // 导入的同时也支持高亮
@@ -753,22 +807,23 @@ module.exports = {
 }
 ```
 ::: warning 注意
-不同于内置搜索的开箱即用，使用`Algolia`搜索，需要我们将网站提交给它们已建立索引
+不同于内置搜索的开箱即用，使用`Algolia`搜索，需要我们将网站提交给它们以建立索引
 :::
 此小结的配置由于特殊性，并没有配置成功，如果你感兴趣，请移步这里:point_right:[Algolia搜索](https://community.algolia.com/docsearch/)<br/>
-如果你配置成功了，它们他们的搜索效果会是下面这样子的
+如果你配置成功了，它们的搜索效果会是下面这样子的(**Vue官网**)
 ![Algolia搜索](../images/vuepress/16.png)
 
 ### 管理静态资源
-在`.md`文件中选择文档时，如果我们要使用静态资源，我们有三种方式来引用资源
-* 相对路径绝对路径
-* `Webpack` 别名
+在`.md`文件中，如果我们要使用静态资源，我们有如下几种方式来引用资源
+* 相对路径/绝对路径
+* `Webpack` 别名<br>
+
 下面我们来一一进行介绍
 #### 相对路径
 要在`.md`文件中引用一个图片资源，它的固定格式如下
 ``` md
 // 格式
-![图片确实时的alt](图片的路径)
+![图片缺失时的alt](图片的路径)
 
 // 示例：绝对路径
 ![百度logo](https://www.baidu.com/logo.png)
@@ -822,15 +877,134 @@ pageClass: customer-page-class
 
 
 ### 自定义页面布局
-
+在默认主题下，每一个`.md`文件都会被渲染在`<div class="page"></div>`这样的一个标签中，同时生成页面的侧边栏、编辑链接(如果有)、最新更新时间(如果有)以及上一篇/下一篇(如果有)。<br/>
+但是如果我们不想生成这样的页面，而是想使用自定义布局，也就是使用`Vue`组件来进行自定义页面开发，VuePress提供给了我们这样的能力，它在**保留导航栏**的基础上，其它一切我们都可以自定义的，它的配置可能是这样的
+```yaml
+// 在需要自定义的.md文件中使用YAML语法
+---
+layout: customerComponent
+---
+```
+上面这样的一个组件名，它对应的路径为`.vuepress/components/customerComponent.vue`，由于 VuePress会自动帮我们把`.vuepress/components`目录下的所有组件全部注册，这样我们可以在任何一个`.md`文件中进行使用，`customerComponent.vue`中的代码可以是下面这样的
+```vue
+<template>
+  <div class="customer-component">
+    <div class="left">123</div>
+    <div class="center">123</div>
+    <div class="right">123</div>
+  </div>
+</template>
+<style lang="stylus">
+  .customer-component
+    height: calc(100vh - 60px);
+    display: flex;
+    background-color: #333;
+    color: #fff;
+    & > div
+      flex: 0 0 200px;
+      width: 200px;
+      text-align: center
+    .left
+      background-color: #58a;
+    .center
+      flex: 1;
+      background-color: #fb3;
+    .right
+      background-color: #58a;
+</style>
+```
+使用自定义布局的结果如下
+![自定义布局](../images/vuepress/18.png)
 ### 使用第三方主题
+VuePress支持使用第三方主题，需要在`.vuepress/config.js`中如下进行配置即可
+::: tip 提醒
+VuePress的插件，命名是固定的，一般为`vuepress-theme-xxx`，`npm install`安装第三方主题后，在配置时只需要写最后一个名字即可。例如：`vuepress-theme-reco`主题，只需如下进行配置即可。
+:::
+```js
+module.exports = {
+  // 其它配置
+  theme: 'reco'
+}
+```
 
 ### 使用第三方库
+在写文档的时候，我们如果希望使用`npm`包或者其它第三方库，我们该如何进行使用，VuePress提供给我们`enhanceApp.js`来让我们可以进行应用级别的配置，它的路径为`.vuepress/enhanceApp.js`，相关配置如下
+```js
+// 使用自定义样式
+import './style/index.styl'
+// 使用第三方包
+import _ from 'lodash'
+// 其它
+// import xxx from xxx
 
-## 自定义主题
-撰写中
+export default ({
+  Vue,
+  options,
+  router,
+  siteData 
+}) => {
+  // ...做一些其他的应用级别的优化
+}
+```
 
 ## 部署
 
 ### 部署到Github Pages
-撰写中
+部署到`Github Pages`，我们需要以下几个步骤
+* 打包生成`dist`文件夹
+* 新建一个仓库，再在此仓库下新建一个`gh-pages`分支
+* 提交代码到远程仓库(包含`master`分支和`gh-pages`分支)
+
+
+#### 打包
+在部署前，我们需要使用我们配置的打包命令
+```json {4}
+{
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  }
+}
+```
+运行打包命令`npm run docs:build`，它会在`.vuepress`目录下生成一个`dist`文件夹，随后我们只需要把这个文件夹上传到`Github`即可，它的打包结果可以参考如下
+``` js
+> vuepress build docs
+ WAIT  Extracting site metadata...
+[23:53:00] Compiling Client
+[23:53:00] Compiling Server
+Language does not exist sh
+Language does not exist sh
+[23:53:07] Compiled Server in 7s
+[23:53:12] Compiled Client in 12s
+WAIT  Rendering static HTML...
+DONE  Success! Generated static files in docs\.vuepress\dist.
+```
+
+#### 新建仓库并创建Github Pages分支
+新建一个`github`仓库和新建分支的具体步骤就不在此累述，如果你新建成功了的话，你的仓库看起来应该是这样子的
+![新建仓库和分支](../images/vuepress/19.png)
+
+#### 提交到Github
+上面我们新建了一个远程仓库，我们可以在`dist`目录下进行如下的命令
+```sh
+// 新建仓库
+$ git init
+
+// 关联你的远程仓库
+$ git remote add origin xxxx
+
+// 切换到gh-pages分支
+$ git checkout gh-pages
+
+// 提交代码到gh-pages分支
+$ git push origin gh-pages
+
+// 合并到master分支
+$ git checkout master
+$ git merge gh-pages
+```
+在提交成功后，可以通过`https://xxx.github.io`或者`https://xxx.github.io/xxx/`进行访问
+
+::: warning 提醒
+关于自动化部署，如果你是新手，那么按照正常的流程提交代码到远程仓库即可，不建议新手使用自动化部署。
+:::
