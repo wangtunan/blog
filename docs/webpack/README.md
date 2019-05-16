@@ -1,28 +1,28 @@
 # Webpack <Badge text="4.0+" type="tip"/>
-
-::: tip 概念
-`Webpack`的核心概念是一个模块打包工具，它的主要目标是将`JavaScript`文件打包在一起，打包后的文件用于在浏览器中使用，但它也能胜任转换(transform)、打包(bundle)或包裹(package)任何其他资源。
+::: tip 说明
+本篇博客由慕课网视频[从基础到实战手把手带你掌握新版Webpack4.0](https://coding.imooc.com/class/316.html)(**Dell-Lee**)阅读整理而来，观看视频请支持正版。
 :::
+::: warning 注意
+本篇博客 Webpack 版本是`4.0+`，请确保你安装了`Node.js`最新版本。
+:::
+
+Webpack 的核心概念是一个 **模块打包工具** ，它的主要目标是将`js`文件打包在一起，打包后的文件用于在浏览器中使用，但它也能胜任 **转换(`transform`)** 、**打包(`bundle`)** 或 **包裹(`package`)** 任何其他资源。
 
 ## 追本溯源
-::: warning 注意
-请确保你安装了`Node.js`最新版本 <br/>
-`webpack4.0+`使用了许多最新版`Node.js`新特性，它极大的提高了打包的速度。
-:::
 在学习 Webpack 之前，我们有必要来了解一些前端领域的开发历程，只有明白了这些开发历程，才能更加清楚 Webpack 是怎么应运而生的，又能给我们解决什么样的问题。
 
 
 ### 面向过程开发
 **特征：** 一锅乱炖<br/>
-在早期 JavaScript 能力还非常有限的时候，我们通过面向过程的方式把代码写在同一个`.js`文件中，一个面向对象开发的过程可能如下所示。<br/>
-**Index.html部分代码：**
+在早期 `js` 能力还非常有限的时候，我们通过面向过程的方式把代码写在同一个`.js`文件中，一个面向过程的开发模式可能如下所示。<br/>
 ```html
+<!-- index.html代码 -->
 <p>这里是我们网页的内容</p>
 <div id="root"></div>
 <script src="./index.js"></script>
 ```
-**Index.js部分代码：**
 ```js
+// index.js代码
 var root = document.getElementById('root');
 
 // header模块
@@ -43,9 +43,12 @@ root.appendChild(content);
 
 ### 面向对象开发
 **特征：** 面向对象开发模式便于代码维护，深入人心。<br/>
-随着 JavaScript 的不断发展，它所能解决的问题也越来越多，如果再像**面向过程**那样把所有代码写在同一个`.js`文件中，那么代码将变得非常难以理解和维护，此时**面向对象**开发模式便出现了，一个面向对象开发模式可能如下所示。<br/>
-**Index.html部分代码：** 在HTML中分别引入不同模块的`.js`文件<br/>
+随着 `js` 的不断发展，它所能解决的问题也越来越多，如果再像**面向过程**那样把所有代码写在同一个`.js`文件中，那么代码将变得非常难以理解和维护，此时**面向对象**开发模式便出现了，一个面向对象开发模式可能如下所示。<br/>
+
+
+在`index.html`中引入不同的模块：
 ```html
+<!-- index.html代码 -->
 <p>这里是我们网页的内容</p>
 <div id="root"></div>
 <script src="./src/header.js"></script>
@@ -53,8 +56,10 @@ root.appendChild(content);
 <script src="./src/content.js"></script>
 <script src="./index.js"></script>
 ```
-**Header.js部分代码：**
+
+`header.js`代码：
 ```js
+// header.js代码
 function Header() {
   var header = document.createElement('div');
   header.innerText = 'header';
@@ -62,8 +67,9 @@ function Header() {
 }
 ```
 
-**Sidebar.jss部分代码：**
+`sidebar.js`代码：
 ```js
+// sidebar.js代码
 function Sidebar() {
   var sidebar = document.createElement('div');
   sidebar.innerText = 'sidebar';
@@ -71,8 +77,9 @@ function Sidebar() {
 }
 ```
 
-**Content.js部分代码：**
+`content.js`代码：
 ```js
+// content.js代码
 function Content() {
   var content = document.createElement('div');
   content.innerText = 'content';
@@ -80,7 +87,7 @@ function Content() {
 }
 
 ```
-**Index.js部分代码：**
+`index.js`代码：
 ```js
 var root = document.getElementById('root');
 new Header();
@@ -89,22 +96,25 @@ new Content();
 ```
 
 **不足：** 以上的代码示例中，虽然使用**面向对象**开发模式解决了**面向过程**开发模式中的一些问题，但似乎又引入了一些新的问题。<br/>
-1. 每一个模块都需要引入一个`.js`文件，这会影响页面性能
-2. 在`index.js`文件中，并不能直接找到模块`.js`文件的引用关系，必须去页面才能找到
+1. 每一个模块都需要引入一个`.js`文件，随着模块的增多，这会影响页面性能
+2. 在`index.js`文件中，并不能直接看出模块的逻辑关系，必须去页面才能找到
 3. 在`index.html`页面中，文件的引入顺序必须严格按顺序来引入，例如：`index.js`必须放在最后引入，如果把`header.js`文件放在`index.js`文件后引入，那么代码会报错
 
 
 ### 现代开发模式
 **特征：** 模块化加载方案让前端开发进一步工程化 <br>
-根据**面向对象**开发模式中的一些列问题，随后各种**模块化**加载的方案如雨后春笋，例如：`ES Module`、`AMD`、`CMD`以及`CommonJS`等，一个`ES Module`模块化加载方案可能如下所示。<br/>
-**Index.html部分代码：**
+根据**面向对象**开发模式中的一系列问题，随后各种**模块化**加载的方案如雨后春笋，例如：`ES Module`、`AMD`、`CMD`以及`CommonJS`等，一个`ES Module`模块化加载方案可能如下所示。<br/>
+
+`index.html`代码：
 ```html
+<!-- index.html代码 -->
 <p>这里是我们网页的内容</p>
 <div id="root"></div>
 <script src="./index.js"></script>
 ```
-**Header.js部分代码：**
+`header.js`代码：
 ```js
+// header.js
 export default function Header() {
   var root = document.getElementById('root');
   var header = document.createElement('div');
@@ -112,8 +122,7 @@ export default function Header() {
   root.appendChild(header);
 }
 ```
-
-**Sidebar.js部分代码：**
+`sidebar.js`代码：
 ```js
 // sidebar.js
 export default function Sidebar() {
@@ -123,9 +132,9 @@ export default function Sidebar() {
   root.appendChild(sidebar);
 }
 ```
-
-**Content.js部分代码：**
+`content.js`代码：
 ```js
+// content.js代码
 export default function Content() {
   var root = document.getElementById('root');
   var content = document.createElement('div');
@@ -133,8 +142,9 @@ export default function Content() {
   root.appendChild(content);
 }
 ```
-**Index.js部分代码：**
+`index.js`代码：
 ```js
+// index.js代码
 import Header from './src/header.js';
 import Sidebar from './src/sidebar.js';
 import Content from './src/content.js';
@@ -145,26 +155,40 @@ new Content();
 ```
 **注意：** 以上代码并不能直接在浏览器上执行，因为浏览器并不能直接识别`ES Module`代码，需要借助其他工具来进行翻译，此时 Webpack 就粉墨登场了。
 
-### webpack初体验
-::: tip
-不建议跟随此小结一起安装，此次示例仅仅作为一个例子，详细学习步骤请直接阅读下一章节《安装》
-:::
+### Webpack初体验
+
+不建议跟随此小结一起安装，此次示例仅仅作为一个例子，详细学习步骤请直接阅读下一章节[安装](/webpack/#安装)
+
 
 #### 生成package.json文件
 ::: tip 参数说明
-`-y`参数表示直接生成默认配置项的`package.json`文件，不加此参数可以进行一步步按需进行配置。
+`-y`参数表示直接生成默认配置项的`package.json`文件，不加此参数需要一步步按需进行配置。
 :::
-```
+```sh
 $ npm init -y
 ```
-生成的默认`package.json`文件：
-![package.json文件](../images/webpack/1.png)
+生成的`package.json`文件：
+```json
+{
+  "name": "webpack-vuepress",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
 
-#### 安装webpack
-::: tip 参数说明
-`-D`参数代表在本项目下安装`webpack`，它是`--save-dev`的简写
-:::
 ```
+
+#### 安装Webpack
+::: tip 参数说明
+`-D`参数代表在本项目下安装 Webpack ，它是`--save-dev`的简写
+:::
+```sh
 $ npm install webpack webpack-cli -D
 ```
 
@@ -172,34 +196,36 @@ $ npm install webpack webpack-cli -D
 ::: tip 配置说明
 `webpack`默认打包路径到`dist`文件夹，打包后的`.js`文件名字叫`main.js`
 :::
-其他代码不动，将`index.html`中的`.js`文件改成如下引用方式：
+其他代码不动，将`index.html`中的`.js`文件改成如下引用方式(引用打包后的文件)：
 ```html
+<!-- index.html代码 -->
 <p>这里是我们网页的内容</p>
 <div id="root"></div>
 <script src="./dist/main.js"></script>
 ```
-#### webpack打包
+#### Webpack打包
 ::: tip 参数说明
-1. `npx webpack`代表在本项目下寻找`webpack打包命令`，它区别于`npm`命令
+1. `npx webpack`代表在本项目下寻找 Webpack 打包命令，它区别于`npm`命令
 2. `index.js`参数代表本次打包的入口是`index.js`
 :::
-```
+``` sh
 $ npx webpack index.js
 ```
 打包结果：
 ![webpack打包结果](../images/webpack/2.png)
 
+正如上面你所看到的那样，网页正确显示了我们期待的结果，这也是 Webpack 能为我们解决问题的一小部分能力，下面将正式开始介绍 Webpack 。
 ## 安装
 
 ### 全局安装
 ::: warning 注意
-如果你只是想做一个`webpack`的Demo案例，那么全局安装方法可能会比较适合你。如果你是在实际生产开发中使用，那么推荐你使用本地安装方法。
+如果你只是想做一个 Webpack 的 Demo 案例，那么全局安装方法可能会比较适合你。如果你是在实际生产开发中使用，那么推荐你使用本地安装方法。
 :::
 #### 全局安装命令
 :::tip 参数说明
 `webpack4.0+`的版本，必须安装`webpack-cli`，`-g`命令代表全局安装的意思
 :::
-``` js
+``` sh
 $ npm install webpack webpack-cli -g
 ```
 
@@ -207,91 +233,96 @@ $ npm install webpack webpack-cli -g
 ::: tip 参数说明
 通过`npm install`安装的模块，对应的可通过`npm uninstall`进行卸载
 :::
-```js
+```sh
 $ npm uninstall webpack webpack-cli -g
 ```
 
 ### 本地安装(推荐)
 ::: tip 参数说明
-本地安装的`webpack`意思是，只在你当前项目下有效。而通过全局安装的`webpack`，如果两个项目的`webpack`主版本不一致，则可能会造成其中一个项目无法正常打包。本地安装方式也是实际开发中推荐的一种`webpack`安装方式。
+本地安装的`Webpack`意思是，只在你当前项目下有效。而通过全局安装的`Webpack`，如果两个项目的`Webpack`主版本不一致，则可能会造成其中一个项目无法正常打包。本地安装方式也是实际开发中推荐的一种`Webpack`安装方式。
 :::
-```js
+```sh
 $ npm install webpack webpack-cli -D 或者 npm install webpack webpack-cli --save-dev
 ```
 
 ### 版本号安装
 ::: tip 参数说明
-如果你对`webpack`的具体版本有严格要求，那么可以先去github的`webpack`官网查看历史版本记录或者使用`npm view webpack versions`查看`webpack`的`npm`历史版本记录
+如果你对`Webpack`的具体版本有严格要求，那么可以先去github的`Webpack`仓库查看历史版本记录或者使用`npm view webpack versions`查看`Webpack`的`npm`历史版本记录
 :::
-```js
+```sh
 // 查看webpack的历史版本记录
 $ npm view webpack versions
 
 // 按版本号安装
 $ npm install webpack@4.25.0 -D
 ```
+
 ## 起步
 
-### 创建项目目录
-创建项目主目录`webpack-vuepress`：
-```js
-$ mkdir webpack-vuepress
+### 创建项目结构
+现在我们来创建基本的项目结构，它可能是下面这样
+``` sh
+|-- webpack-vuepress
+|   |-- index.html
+|   |-- index.js
+|   |-- package.json
 ```
-创建`package.json`文件：
-```js
+其中`package.json`是利用下面的命令自动生成的配置文件
+``` sh
 $ npm init -y
 ```
-创建`index.html`页面：
-```js
-$ touch index.html
-```
-创建`index.js`文件：
-```js
-$ touch index.js
-```
-安装后的项目目录如下图所示：
-![安装目录](../images/webpack/3.png)
+
 
 ### 添加基础代码
-改写`index.html`页面代码：
+在创建了基本的项目结构以后，我们需要为我们创建的文件添加一些代码<br>
+
+`index.html`页面中的代码：
 ```html
 <p>这是最原始的网页内容</p>
 <div id="root"></div>
 <!-- 引用打包后的js文件 -->
-<script src="./bundle/bundle.js"></script>
+<script src="./dist/main.js"></script>
 ```
-改写`index.js`文件代码：
+`index.js`文件中的代码：
 ```js
 console.log('hello,world');
 ```
 
-### 安装webpck
+### 安装Webpack
 运行如下命令安装`webpack4.0+`和`webpack-cli`：
-```
+```sh
 $ npm install webpack webpack-cli -D
 ```
 
 ### 添加配置文件
-使用如下命令添加`webpack.config.js`配置文件：
-```
+使用如下命令添加 Webpack 配置文件：
+```sh
 $ touch webpack.config.js
 ```
-使用此命令后，项目目录大概如下图所示：
-![添加webpack配置文件后的项目目录](../images/webpack/4.png)
+使用此命令，变更后的项目结构大概如下所示：
+```sh
+|-- webpack-vuepress
+|   |-- index.html
+|   |-- index.js
+|   |-- webpack.config.js
+|   |-- package.json
+```
 
-改写`webpack.config.js`文件，如下：
+至此我们的基础目录已创建完毕，接下来需要改写`webpack.config.js`文件，它的代码如下：
 ::: tip 解释
 1. `entry`配置项说明了`webpack`打包的入口文件。
-2. `output`配置项说明了`webpack`输出配置：`filename`配置了打包后的文件叫`bundle.js`，`path`配置了打包后的输出目录为`bundle`文件夹下
+2. `output`配置项说明了`webpack`输出配置：`filename`配置了打包后的文件叫`main.js`
+3. `path`配置了打包后的输出目录为`dist`文件夹下
 :::
 ```js
 // path为Node的核心模块
 const path = require('path');
+
 module.exports = {
   entry: './index.js',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'bundle');
+    filename: 'main.js',
+    path: path.resolve(__dirname, 'dist')
   }
 }
 ```
@@ -303,7 +334,7 @@ module.exports = {
 3. 添加`scripts`命令：即我们的打包命令
 :::
 改写后的`package.json`文件如下所示：
-```js
+```json {5,7}
 {
   "name": "webpack-vuepress",
   "version": "1.0.0",
@@ -316,8 +347,8 @@ module.exports = {
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3"
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2"
   }
 }
 ```
@@ -327,20 +358,27 @@ module.exports = {
 `npm run`代表运行一个脚本命令，而`bundle`就是我们配置的打包命令，即`npm run bundle`就是我们配置的`webpack`打包命令。
 :::
 运行如下命令进行项目打包：
-```js
+```sh
 $ npm run bundle
 ```
 打包后的效果如下所示：
 ![第一次打包后的效果](../images/webpack/5.png)
 
-打包后的项目目录：
-![第一次打包后的效果](../images/webpack/7.png)
-
-在浏览器中运行`index.html`：
+打包后的项目目录如下所示，可以看到我们多出了一个叫`dist`的目录，它里面有一个`main.js`文件
+``` sh
+|-- webpack-vuepress
+|   |-- dist
+|   |   |-- main.js
+|   |-- index.html
+|   |-- index.js
+|   |-- webpack.config.js
+|   |-- package.json
+```
+打包成功后，我们需要在浏览器中运行`index.html`，它的运行结果如下图所示
 ![第一次打包后的效果](../images/webpack/6.png)
 
 ### 理解webpack打包输出
-在上一节中，我们第一次运行了一个打包命令，它在控制台上有一些输出内容，这一节我们详细来介绍这些输出内容：
+在上一节中，我们第一次运行了一个打包命令，它在控制台上有一些输出内容，这一节我们详细来介绍这些输出是什么意思：
 ![第一次打包后的效果](../images/webpack/5.png)
 
 1. **Hash：** `hash`代表本次打包的唯一`hash`值，每一次打包此值都是不一样的
@@ -349,7 +387,7 @@ $ npm run bundle
 
 3. **Time：** 代表我们本次打包的耗时
 
-4. **Assets：** 代表我们打包出的文件名称
+4. **Asset：** 代表我们打包出的文件名称
 
 5. **Size：** 代表我们打包出的文件的大小
 
@@ -357,49 +395,41 @@ $ npm run bundle
 
 7. **Chunks Names：** 代表我们打包后的`.js`文件的名字，至于为何是`main`，而不是其他的内容，这是因为在我们的`webpack.config.js`中，`entry:'./index.js'`是对如下方式的简写形式：
 ```js
+// path为Node的核心模块
 const path = require('path');
+
 module.exports = {
   // entry: './index.js',
   entry: {
     main: './index.js'
-  },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'bundle')
   }
+  // 其它配置
 }
 ```
 8. **Entrypoint main = bundle.js：** 代表我们打包的入口为`main`
 
-9. **warning in configuration：** 提示警告，意思是我们没有给`webpack.config.js`设置`mode`属性，`mode`属性有三个值：`development`代表开发环境、`production`代表生产环境、`none`代表既不是开发环境也不是生产环境。如果不写的话，默认是生产环境，可在配置文件中配置此项，配置后将不会再出现此警告。
+9. **warning in configuration：** 提示警告，意思是我们没有给`webpack.config.js`设置`mode`属性，`mode`属性有三个值：`development`代表开发环境、`production`代表生产环境、`none`代表既不是开发环境也不是生产环境。如果不写的话，默认是生产环境，可在配置文件中配置此项，配置后再次打包将不会再出现此警告。
 ```js
 // path为Node的核心模块
 const path = require('path');
+
 module.exports = {
-  // entry: './index.js',
-  mode: 'development',
-  entry: {
-    main: './index.js'
-  },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'bundle')
-  }
+  // 其它配置
+  mode: 'development'
 }
 ```
-再一次打包，无警告：
-![配置Mode属性](../images/webpack/8.png)
 
 
 ## 打包静态资源
 
 ### 什么是loader？
 ::: tip 概念
-loader是一种打包规则，它告诉了`webpack`在遇到非`.js`文件时，应该如何处理这些文件，`loader`有如下几种固定的运用规则：
+`loader`是一种打包规则，它告诉了 Webpack 在遇到非`.js`文件时，应该如何处理这些文件
+:::
+`loader`有如下几种固定的运用规则：
 * 使用`test`正则来匹配相应的文件
 * 使用`use`来添加文件对应的`loader`
-* 对于多个`loader`而言，从右到左依次调用
-:::
+* 对于多个`loader`而言，从 **右到左** 依次调用
 
 
 ### 使用loader打包图片
@@ -407,89 +437,94 @@ loader是一种打包规则，它告诉了`webpack`在遇到非`.js`文件时，
 打包图片需要用到`file-loader`或者`url-loader`，需使用`npm install`进行安装
 :::
 
+#### 一点小改动
+在打包图片之前，让我们把`index.html`移动到上一节打包后的`dist`目录下，`index.html`中相应的`.js`引入也需要修改一下，像下面这样
+```html
+<script src="./main.js"></script>
+```
+
 #### 添加打包图片规则
-::: tip 改写说明
-改写`webpack.config.js`配置文件，如下所示
-:::
+对于打包图片，我们需要在`webpack.config.js`中进行相应的配置，它可以像下面这样
 ```js
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader'
+// path为Node的核心模块
+const path = require('path');
+
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader'
+        }
       }
-    }
-  ]
+    ]
+  }
 }
 ```
 #### 改写`index.js`
 ```js
-import avatar from './avatar.jpg';
-
-var img = new Image();
-img.src = avatar;
+import avatar from './avatar.jpg'
 
 var root = document.getElementById('root');
-root.appendChild(img);
+var img = document.createElement('img');
+img.src = avatar
+root.appendChild(img)
 ```
 #### 打包后的项目目录
 ```js
-.
-|-- avatar.jpg
-|-- bundle
+|-- dist
 |   |-- bd7a45571e4b5ccb8e7c33b7ce27070a.jpg
-|   |-- bundle.js
-|   -- index.html
+|   |-- main.js
+|   |-- index.html
 |-- index.js
-|-- package-lock.json
+|-- avatar.jpg
 |-- package.json
--- webpack.config.js
+|-- webpack.config.js
 ```
 #### 打包结果
 ![打包结果](../images/webpack/9.png)
 
 
 #### 运用占位符
-在以上打包图片的过程中，我们发现打包生成的图片好像名字是一串乱码，如果我们要原样输出原图片的名字的话，又该如何进行配置呢？这个问题，可以使用占位符进行解决。
+在以上打包图片的过程中，我们发现打包生成的图片好像名字是一串乱码，如果我们要原样输出原图片的名字的话，又该如何进行配置呢？这个问题，可以使用 **占位符** 进行解决。
 ::: tip 占位符说明
-再次改写`webpack.config.js`文件，运用文件占位符，规则如下：
+文件占位符它有一些固定的规则，像下面这样：
 * `[name]`代表原本文件的名字
 * `[ext]`代表原本文件的后缀
 * `[hash]`代表一个`md5`的唯一编码
 :::
+根据占位符的规则再次改写`webpack.config.js`文件，
 ```js
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name]_[hash].[ext]'
+// path为Node的核心模块
+const path = require('path');
+
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name]_[hash].[ext]'
+          }
         }
       }
-    }
-  ]
+    ]
+  }
 }
 ```
-**打包后的目录**
-```js
-.
-|-- avatar.jpg
-|-- bundle
+根据上面占位符的运用，打包生成的图片，它的名字如下
+```sh
+|-- dist
 |   |-- avatar_bd7a45571e4b5ccb8e7c33b7ce27070a.jpg
-|   |-- bd7a45571e4b5ccb8e7c33b7ce27070a.jpg
-|   |-- bundle.js
-|   -- index.html
-|-- index.js
-|-- package-lock.json
-|-- package.json
--- webpack.config.js
 ```
 
 
-### 使用loader打包样式文件
+### 使用loader打包CSS
 ::: tip 打包说明
 样式文件分为几种情况，每一种都需要不同的`loader`来处理：
 1. 普通`.css`文件，使用`style-loader`和`css-loader`来处理
@@ -503,43 +538,48 @@ module: {
 ::: tip 安装依赖
 首先安装`style-loader`和`css-loader`
 :::
-**改写webpack配置文件**：
+改写webpack配置文件：
 ```js
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name]_[hash].[ext]'
+// path为Node的核心模块
+const path = require('path');
+
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name]_[hash].[ext]'
+          }
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
       }
-    },
-    {
-      test: /\.css$/,
-      use: ['style-loader','css-loader']
-    }
-  ]
+    ]
+  }
 }
 ```
-**创建index.css**
+根目录下创建`index.css`
 ```css
 .avatar{
   width: 150px;
   height: 150px;
 }
 ```
-**改写index.js文件**
+改写`index.js`文件
 ```js
 import avatar from './avatar.jpg';
 import './index.css';
 
+var root = document.getElementById('root');
 var img = new Image();
 img.src = avatar;
 img.classList.add('avatar');
-
-var root = document.getElementById('root');
 root.appendChild(img);
 ```
 
@@ -552,32 +592,38 @@ root.appendChild(img);
 需要安装`sass-loader`和`node-sass`
 :::
 
-**改写webpack配置文件**
+改写`webpack.config.js`文件
 ```js
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name]_[hash].[ext]'
+// path为Node的核心模块
+const path = require('path');
+
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name]_[hash].[ext]'
+          }
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(sass|scss)$/,
+        use: ['style-loader','css-loader','sass-loader']
       }
-    },
-    {
-      test: /\.css$/,
-      use: ['style-loader','css-loader']
-    },
-    {
-      test: /\.(sass|scss)$/,
-      use: ['style-loader','css-loader','sass-loader']
-    }
-  ]
+    ]
+  }
 }
 ```
-**添加index-scss.scss文件**
-```css
+根目录下添加`index-sass.sass`文件
+```scss
 body{
   .avatar-sass{
     width: 150px;
@@ -586,7 +632,7 @@ body{
 }
 ```
 
-**改写index.js**
+改写`index.js`
 ```js
 import avatar from './avatar.jpg';
 import './index.css';
@@ -600,13 +646,18 @@ var root = document.getElementById('root');
 root.appendChild(img);
 ```
 
-**打包结果**
+根据上面的配置和代码改写后，再次打包，打包的结果会是下面这个样子
 ![打包结果](../images/webpack/11.png)
 
-#### 自动添加css厂商前缀
-当我们在css文件中写一些需要处理兼容性的样式的时候，需要我们分别对于不同的浏览器书添加不同的厂商前缀，使用`postcss-loader`可以帮我们在`webpack`打包的时候自动添加这些厂商前缀。
-
-**修改index.scss**
+#### 自动添加CSS厂商前缀
+当我们在`css`文件中写一些需要处理兼容性的样式的时候，需要我们分别对于不同的浏览器书添加不同的厂商前缀，使用`postcss-loader`可以帮我们在`webpack`打包的时候自动添加这些厂商前缀。
+::: tip 安装依赖
+自动添加厂商前缀需要`npm install`安装`postcss-loader`和`autoprefixer`
+:::
+```sh
+npm install postcss-loader autoprefixer -D
+```
+修改`index-sass.sass`
 ```css
 .avatar-sass {
   width: 150px;
@@ -615,67 +666,51 @@ root.appendChild(img);
 }
 ```
 
-**安装postcss-loader和autoprefixer**
-```
-npm install postcss-loader autoprefixer -D
-```
+在修改`sass`文件代码后，我们需要对`webpack.config.js`
+```json {23}
+// path为Node的核心模块
+const path = require('path');
 
-**修改webpack.config.js**
-```js{18}
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name]_[hash].[ext]'
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name]_[hash].[ext]'
+          }
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(sass|scss)$/,
+        use: ['style-loader','css-loader','sass-loader','postcss-loader']
       }
-    },
-    {
-      test: /\.css$/,
-      use: ['style-loader','css-loader']
-    },
-    {
-      test: /\.(sass|scss)$/,
-      use: ['style-loader','css-loader','sass-loader','postcss-loader']
-    }
-  ]
+    ]
+  }
 }
 ```
-**添加postcss.config.js**
+根目录下添加`postcss.config.js`，并添加代码
 ```js
 module.exports = {
   plugins: [require('autoprefixer')]
 }
 ```
-添加`postcss.config.js`后项目的目录如下所示
-```js{13}
-|-- avatar.jpg
-|-- bundle
-|   |-- avatar_bd7a45571e4b5ccb8e7c33b7ce27070a.jpg
-|   |-- bd7a45571e4b5ccb8e7c33b7ce27070a.jpg
-|   |-- bundle.js
-|   -- index.html
-|-- index-scss.scss
-|-- index-styl.styl
-|-- index.css
-|-- index.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
--- webpack.config.js
-```
 
-**打包运行**
+根据上面的配置，我们再次打包运行，在浏览器中运行`index.html`，它的结果如下图所示
 ![打包运行结果](../images/webpack/12.png)
 
-#### 模块化打包.css文件
+#### 模块化打包CSS文件
 ::: tip 概念
-css文件的模块化打包的概念是：除非我主动引用你的样式，否则你打包的样式不能影响到我。
+`CSS`的模块化打包的理解是：除非我主动引用你的样式，否则你打包的样式不能影响到我。
 :::
-**添加createAvatar.js文件**
+根目录下添加`createAvatar.js`文件，并填写下面这段代码
 ```js
 import avatar from './avatar.jpg';
 export default function CreateAvatar() {
@@ -688,12 +723,12 @@ export default function CreateAvatar() {
 }
 ```
 
-**改写index.js**
-```js{6}
+改写`index.js`，引入`createAvatar.js`并调用
+```js {2,6}
 import avatar from './avatar.jpg';
 import createAvatar from './createAvatar';
 import './index.css';
-import './index-scss.scss';
+import './index-sass.sass';
 
 createAvatar();
 
@@ -708,43 +743,45 @@ root.appendChild(img);
 **打包运行**
 ![打包运行](../images/webpack/13.png)
 
-我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-scss.scss`样式文件的影响，如果要消除这种影响，需要我们开启对css样式文件的模块化打包。
+我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.sass`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
 
-**改写webpack.config.js**
-```js{21}
-module: {
-  rules: [
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name]_[hash].[ext]'
+进一步改写`webpack.config.js`
+```js {22}
+// path为Node的核心模块
+const path = require('path');
+
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name]_[hash].[ext]'
+          }
         }
+      },
+      {
+        test: /\.(sass|scss)$/,
+        use: ['style-loader', {
+          loader: 'css-loader',
+          options: {
+            modules: true
+          }
+        }, 'sass-loader', 'postcss-loader']
       }
-    },
-    {
-      test: /\.css$/,
-      use: ['style-loader','css-loader']
-    },
-    {
-      test: /\.(sass|scss)$/,
-      use: ['style-loader',{
-        loader: 'css-loader',
-        options: {
-          modules: true
-        }
-      },'sass-loader','postcss-loader']
-    }
-  ]
+    ]
+  }
 }
 ```
-**改写index.js**
-```js{10}
+开启`css`模块化打包后，我们需要在`index.js`中做一点小小的改动，像下面这样子
+```js {4,10}
 import avatar from './avatar.jpg';
 import createAvatar from './createAvatar';
 import './index.css';
-import style from  './index-scss.scss';
+import style from  './index-sass.sass';
 
 createAvatar();
 
@@ -756,7 +793,7 @@ var root = document.getElementById('root');
 root.appendChild(img);
 ```
 
-**打包结果**
+打包运行后，我们发现使用`createAvatar.js`创建出来的`img`没有受到样式文件的影响，证明我们的`css`模块化配置已经生效，下图是`css`模块化打包的结果：
 ![打包结果](../images/webpack/14.png)
 
 ## Webpack核心
