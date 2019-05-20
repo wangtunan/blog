@@ -215,6 +215,7 @@ $ npx webpack index.js
 ![webpack打包结果](../images/webpack/2.png)
 
 正如上面你所看到的那样，网页正确显示了我们期待的结果，这也是 Webpack 能为我们解决问题的一小部分能力，下面将正式开始介绍 Webpack 。
+
 ## 安装
 
 ### 全局安装
@@ -799,28 +800,31 @@ root.appendChild(img);
 ## Webpack核心
 
 ### 使用WebpackPlugin
-::: tip
-`plugin`的作用是：当`webpack`运行到某一个阶段时，可以使用`plugin`来帮我们做一些事情。
+::: tip 理解
+`plugin`的理解是：当 Webpack 运行到某一个阶段时，可以使用`plugin`来帮我们做一些事情。
 :::
-在使用`plugin`之前，我们先来改造一下我们的代码，首先删掉无用的文件，随后把`index.js`移动到`src`文件夹下。
+在使用`plugin`之前，我们先来改造一下我们的代码，首先删掉无用的文件，随后在根目录下新建一个`src`文件夹，并把`index.js`移动到`src`文件夹下，移动后你的目录看起来应该是下面这样子的
 ```js
 |-- dist
-|   -- index.html
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
+|   |-- index.html
 |-- src
-|   -- index.js
--- webpack.config.js
+|   |-- index.js
+|-- postcss.config.js
+|-- webpack.config.js
+|-- package.json
 ```
-接下来再来清空一下`index.js`文件的代码
+接下来再来处理一下`index.js`文件的代码，写成下面这样
 ```js
+// src/index.js
 var root = document.getElementById('root');
 var dom = document.createElement('div');
 dom.innerHTML = 'hello,world';
 root.appendChild(dom);
 ```
-最后我们来清理一下我们的`webpack.config.js`文件
+最后我们来处理一下我们的`webpack.config.js`文件，它的改动有下面这些
+* 因为`index.js`文件的位置变动了，我们需要改动一下`entry`
+* 删除掉我们配置的所有`loader`规则
+按照上面的改动后，`webpack.config.js`中的代码看起来是下面这样的
 ```js
 const path = require('path');
 module.exports = {
@@ -829,21 +833,21 @@ module.exports = {
     main: './src/index.js'
   },
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname,'bundle')
+    filename: 'main.js',
+    path: path.resolve(__dirname,'dist')
   }
 }
 ```
 #### html-webpack-plugin
-::: tip
-`html-webpack-plugin`可以让我们使用固定的模板，再每次打包的时候自动生成一个`index.html`文件，并且它会自动帮我们引入我们打包后的`.js`文件
+::: tip 说明
+`html-webpack-plugin`可以让我们使用固定的模板，在每次打包的时候 **自动生成** 一个`index.html`文件，并且它会 **自动** 帮我们引入我们打包后的`.js`文件
 :::
-**安装html-webpack-plugin**
-```
-npm install html-webpack-plugin -D
+使用如下命令安装`html-webpack-plugin`
+``` sh
+$ npm install html-webpack-plugin -D
 ```
 
-**在src目录下创建index.html模板文件**
+在`src`目录下创建`index.html`模板文件，它的代码可以写成下面这样子
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -859,8 +863,8 @@ npm install html-webpack-plugin -D
 </html>
 ```
 
-**改写webpack.config.js**
-```js{10}
+因为我们要使用`html-webpack-plugin`插件，所以我们需要再次改写`webpack.config.js`文件(具体改动部分见高亮部分)
+```js {2,8,9,10,11,12}
 const path = require('path');
 const htmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
@@ -874,25 +878,40 @@ module.exports = {
     })
   ],
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname,'bundle')
+    filename: 'main.js',
+    path: path.resolve(__dirname,'dist')
   }
 }
 ```
-**打包并运行bundle文件夹下的index.html页面**
-![打包结果](../images/webpack/15.png)
+在完成上面的配置后，我们使用`npm run bundle`命令来打包一下测试一下，在打包完毕后，我们能在`dist`目录下面，看到`index.html`中的代码变成下面这样子
+``` html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>HTML模板</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/javascript" src="main.js"></script>
+</body>
+</html>
+```
+我们发现，以上`index.html`的结构，正是我们在`src`目录下`index.html`模板的结构，并且还能发现，在打包完成后，还自动帮我们引入了打包输出的`.js`文件，这正是`html-webpack-plugin`的基本功能，当然它还有其它更多的功能，我们将在后面进行详细的说明。
 
 #### clean-webpack-plugin
-::: tip
-`clean-webpack-plugin`能帮我们在打包之前自动删除打包目录以及打包目录下的所有文件
+::: tip 理解
+`clean-webpack-plugin`的理解是：它能帮我们在打包之前 **自动删除** `dist`打包目录及其目录下所有文件，不用我们手动进行删除。
 :::
-**安装clean-webpack-plugin**
-```
-npm install clean-webpack-plugin -D
-```
 
-**改写webpack.config.js配置文件**
-```js{13}
+我们使用如下命令来安装`clean-webpack-plugin`
+``` sh
+$ npm install clean-webpack-plugin -D
+```
+安装完毕以后，我们同样需要在`webpack.config.js`中进行配置(改动部分参考高亮代码块)
+```js {3,13}
 const path = require('path');
 const htmlWebpackPlugin = require('html-webpack-plugin');
 const cleanWebpackPlugin = require('clean-webpack-plugin');
@@ -908,227 +927,117 @@ module.exports = {
     new cleanWebpackPlugin()
   ],
   output: {
-    filename: 'dist.js',
-    path: path.resolve(__dirname,'bundle')
+    filename: 'main.js',
+    path: path.resolve(__dirname,'dist')
   }
 }
 ```
+在完成以上配置后，我们使用`npm run bundle`打包命令进行打包，它的打包结果请自行在你的项目下观看自动清理`dist`目录的实时效果。<br>
 
-**打包结果**<br>
-在运行打包命令后，自行在项目目录中观察
+在使用`WebpackPlugin`小节，我们只介绍了两种常用的`plugin`，更多`plugin`的用法我们将在后续进行讲解，你也可以点击[Webpack Plugins](https://webpack.js.org/plugins)来学习更多官网推荐的`plugin`用法。
 
 ### 配置SourceMap
-::: tip
-`source-map`是一种映射关系，它映射了打包后的代码和源代码之间的对应关系，一般通过`devtool`来配置。在开发环境中，推荐将`devtool`设置成`cheap-module-eval-source-map`，而在生产环境中，推荐将`devtool`设置成`cheap-module-source-map`
+::: tip 理解
+`source-map`的理解：它是一种映射关系，它映射了打包后的代码和源代码之间的对应关系，一般通过`devtool`来配置。
 :::
 
-**devtool各个属性的解释以及打包速度：**
-![devtool](../images/webpack/16.png);
+以下是官方提供的`devtool`各个属性的解释以及打包速度对比图：
+![devtool](../images/webpack/16.png)
+
+通过上图我们可以看出，良好的`source-map`配置不仅能帮助我们提高打包速度，同时在代码维护和调错方面也能有很大的帮助，一般来说，`source-map`的最佳实践是下面这样的：
+* 开发环境下(`development`)：推荐将`devtool`设置成`cheap-module-eval-source-map`
+* 生产环境下(`production`)：推荐将`devtool`设置成`cheap-module-source-map`
 
 
 ### 使用WebpackDevServer
-::: tip
-`webpack-dev-server`能帮助我们在源代码更改的情况下，自动帮我们打包我们的代码并启动一个小型的服务器。如果与热更新一起使用，它更能帮助我们高效的开发。
+::: tip 理解
+`webpack-dev-server`的理解：它能帮助我们在源代码更改的情况下，**自动** 帮我们打包我们的代码并 **启动** 一个小型的服务器。如果与热更新一起使用，它能帮助我们高效的开发。
 :::
 
-#### 使用watch参数自动打包
-::: tip
-`--watch`参数能帮我们在源代码更改的情况下，虽然能自动打包，但我们必须得手动刷新浏览器，而且它不能帮我们开启一个小型的服务器。
-:::
-**改写package.json**：
-```js{8}
+自动打包的方案，通常来说有如下几种：
+* `watch`参数自动打包：它是在打包命令后面跟了一个`--watch`参数，它虽然能帮我们自动打包，但我们任然需要手动刷新浏览器，同时它不能帮我们在本地启动一个小型服务器，一些`http`请求不能通过。
+* `webpack-dev-server`插件打包(推荐)：它是我们推荐的一种自动打包方案，在开发环境下使用尤其能帮我们高效的开发，它能解决`watch`参数打包中的问题，如果我们与热更新(`HMR`)一起使用，我们将拥有非常良好的开发体验。
+
+#### watch参数自动打包
+使用`watch`参数进行打包，我们需要在`package.json`中新增一个`watch`打包命令，它的配置如下
+``` json {5}
 {
-  "name": "webpack-vuepress",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
+  // 其它配置
   "scripts": {
     "bundle": "webpack",
     "watch": "webpack --watch"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "autoprefixer": "^9.4.10",
-    "clean-webpack-plugin": "^2.0.0",
-    "css-loader": "^2.1.1",
-    "file-loader": "^3.0.1",
-    "html-webpack-plugin": "^3.2.0",
-    "node-sass": "^4.11.0",
-    "postcss-loader": "^3.0.0",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
-    "url-loader": "^1.1.2",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
   }
 }
 ```
-**npm run watch打包：**
-```js
-npm run watch
-```
-**打包结果：**
-```js
-$ npm run watch
-> webpack-vuepress@1.0.0 watch F:\webpack\webpack-vuepress
-> webpack --watch
-webpack is watching the files…
-Hash: b051bf9c5cbc09e334ef
-Version: webpack 4.29.6
-Time: 332ms
-Built at: 2019-03-15 00:06:28
-      Asset       Size  Chunks             Chunk Names
-    dist.js   3.78 KiB    main  [emitted]  main
-dist.js.map    3.6 KiB    main  [emitted]  main
- index.html  338 bytes          [emitted]
-Entrypoint main = dist.js dist.js.map
-[./src/index.js] 28 bytes {main} [built]
-Child html-webpack-plugin for "index.html":
-```
+在配置好上面的打包命令后，我们使用`npm run watch`命令进行打包，然后在浏览器中运行`dist`目录下的`index.html`，运行后，我们尝试修改`src/index.js`中的代码，例如把`hello,world`改成`hello,dell-lee`，改动完毕后，我们刷新一下浏览器，会发现浏览器成功输出`hello,dell-lee`，这也证明了`watch`参数确实能自动帮我们进行打包。
 
-#### 使用webpack-dev-server打包
-**修改package.json文件：**
-```js{9}
-{
-  "name": "webpack-vuepress",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
+
+#### webpack-dev-server打包
+要使用`webpack-dev-server`，我们需要使用如下命令进行安装
+``` sh
+$ npm install webpack-dev-server -D
+```
+安装完毕后，我们和`watch`参数配置打包命令一样，也需要新增一个打包命令，在`package.json`中做如下改动：
+``` json {5}
+// 其它配置
   "scripts": {
     "bundle": "webpack",
     "watch": "webpack --watch",
-    "dev": "webpack-dev-server"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "autoprefixer": "^9.4.10",
-    "clean-webpack-plugin": "^2.0.0",
-    "css-loader": "^2.1.1",
-    "file-loader": "^3.0.1",
-    "html-webpack-plugin": "^3.2.0",
-    "node-sass": "^4.11.0",
-    "postcss-loader": "^3.0.0",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
-    "url-loader": "^1.1.2",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
+    "dev": "webpack-dev-server'
   }
-}
 ```
-
-**修改webpack.config.js：**
+配置完打包命令后，我们最后需要对`webpack.config.js`做一下处理：
 ```js
-const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
 module.exports = {
-  mode: 'development',
-  devtool: 'source-map',
-  entry: {
-    main: './src/index.js'
-  },
+  // 其它配置
   devServer: {
-    // 启动bundle文件夹
-    contentBase: './bundle',
-    // 自动打开浏览器
+    // 以dist为基础启动一个服务器，服务器运行在4200端口上，每次启动时自动打开浏览器
+    contentBase: 'dist',
     open: true,
-    // 端口3000
-    port: 3000
-  },
-  plugins: [
-    new htmlWebpackPlugin({
-      template: 'src/index.html'
-    }),
-    new cleanWebpackPlugin()
-  ],
-  output: {
-    filename: 'dist.js',
-    path: path.resolve(__dirname,'bundle')
+    port: 4200
   }
 }
 ```
-**打包结果：**
-```js
-$ npm run dev
-> webpack-vuepress@1.0.0 dev F:\webpack\webpack-vuepress
-> webpack-dev-server
-i ｢wds｣: Project is running at http://localhost:3000/
-i ｢wds｣: webpack output is served from /
-i ｢wds｣: Content not from webpack is served from ./bundle
-i ｢wdm｣: wait until bundle finished: /
-i ｢wdm｣: Hash: 752df284a4aadbd70bd7
-Version: webpack 4.29.6
-Time: 606ms
-Built at: 2019-03-15 00:10:07
-      Asset       Size  Chunks             Chunk Names
-    dist.js    334 KiB    main  [emitted]  main
-dist.js.map    385 KiB    main  [emitted]  main
- index.html  338 bytes          [emitted]
-Entrypoint main = dist.js dist.js.map
-```
+在以上都配置完毕后，我们使用`npm run dev`命令进行打包，它会自动帮我们打开浏览器，现在你可以在`src/index.js`修改代码，再在浏览器中查看效果，它会有惊喜的哦，ღ( ´･ᴗ･` )比心<br/>
+
+这一小节主要介绍了如何让工具自动帮我们打包，下一节我们将讲解模块热更新(HMR)。
 
 ### 模块热更新(HMR)
-::: tip
-HMR模块热更新能够让我们在不刷新浏览器的情况下，替换我们最新的代码。
+::: tip 理解
+模块热更新(HMR)的理解：它能够让我们在不刷新浏览器(或自动刷新)的前提下，在运行时帮我们更新最新的代码。
 :::
+模块热更新(HMR)已内置到 Webpack ,我们只需要在`webpack.config.js`中像下面这样简单的配置即可，无需安装别的东西。
 
-**修改webpack.config.js：**
-```js
-const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+```js {1,8,9,13}
 const webpack = require('webpack');
 module.exports = {
-  mode: 'development',
-  devtool: 'source-map',
-  entry: {
-    main: './src/index.js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader','css-loader']
-      }
-    ]
-  },
+  // 其它配置
   devServer: {
-    // 启动bundle文件夹
-    contentBase: './bundle',
-    // 自动打开浏览器
+    contentBase: 'dist',
     open: true,
-    // 端口3000
     port: 3000,
-    // 模块热更新
-    hot: true,
-    hotOnly: true
+    hot: true, // 启用模块热更新
+    hotOnly: true // 模块热更新启动失败时，重新刷新浏览器
   },
   plugins: [
-    new htmlWebpackPlugin({
-      template: 'src/index.html'
-    }),
-    new cleanWebpackPlugin(),
+    // 其它插件
     new webpack.HotModuleReplacementPlugin()
-  ],
-  output: {
-    filename: 'dist.js',
-    path: path.resolve(__dirname,'bundle')
-  }
+  ]
 }
 ```
+在模块热更新(HMR)配置完毕后，我们现在来想一下，什么样的代码是我们希望能够热更新的，我们发现大多数情况下，我们似乎只需要关心两部分内容：`CSS`文件和`.js`文件，根据这两部分，我们将分别来进行介绍。
 
-#### 在css中的模块热更新
-
-**改写index.js**
+#### CSS中的模块热更新
+首先我们在`src`目录下新建一个`style.css`样式文件，它的代码可以这样下：
+``` css
+div:nth-of-type(odd) {
+  background-color: yellow;
+}
+```
+随后我们改写一下`src`目录下的`index.js`中的代码，像下面这样子：
 ```js
 import './style.css';
+
 var btn = document.createElement('button');
 btn.innerHTML = '新增';
 document.body.appendChild(btn);
@@ -1139,27 +1048,32 @@ btn.onclick = function() {
   document.body.appendChild(dom);
 }
 ```
-
-**创建style.css**
-```css
-div:nth-of-type(odd) {
-  background-color: yellow;
+由于我们需要处理`CSS`文件，所以我们需要保留处理`CSS`文件的`loader`规则，像下面这样
+``` js
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      }
+    ]
+  }
 }
 ```
-
-**打包：**
-::: tip
-`item`的div是动态生成的，当我们改变`style.css`里面的代码时，模块热更新能帮我们在不刷新浏览器的情况下，替换掉样式的内容。
-:::
-```js
-npm run dev
-```
+在以上代码添加和配置完毕后，我们使用`npm run dev`进行打包，我们点击按钮后，它会出现如下的情况
 ![打包结果](../images/webpack/17.png)
 
+**理解**： 由于`item`是动态生成的，当我们要将`yellow`颜色改变成`red`时，模块热更新能帮我们在不刷新浏览器的情况下，替换掉样式的内容。直白来说：自动生成的`item`依然存在，只是颜色变了。
+
+
 #### 在js中的模块热更新
-**添加counter.js和number.js**：
+在介绍完`CSS`中的模块热更新后，我们接下来介绍在`js`中的模块热更新。<br/>
+
+首先，我们在`src`目录下创建两个`.js`文件，分别叫`counter.js`和`number.js`，它的代码可以写成下面这样：
 ```js
-// counter.js
+// counter.js代码
 export default function counter() {
   var dom = document.createElement('div');
   dom.setAttribute('id', 'counter');
@@ -1169,8 +1083,10 @@ export default function counter() {
   }
   document.body.appendChild(dom);
 }
-
-// number.js
+```
+`number.js`中的代码是下面这样的：
+```js
+// number.js代码
 export default function number() {
   var dom = document.createElement('div');
   dom.setAttribute('id','number');
@@ -1178,16 +1094,27 @@ export default function number() {
   document.body.appendChild(dom);
 }
 ```
-**改写index.js：**
+添加完以上两个`.js`文件后，我们再来对`index.js`文件做一下小小的改动：
 ```js
+// index.js代码
 import counter from './counter';
 import number from './number';
 counter();
 number();
 ```
-::: warning
-这部分代码虽然在`webpack.config.js`文件中配置了HMR，但是并不能做到模块热更新，还需要额外的写一点代码。
-:::
+在以上都改动完毕后，我们使用`npm run dev`进行打包，在页面上点击数字`1`，让它不断的累计到你喜欢的一个数值(记住这个数值)，这个时候我们再去修改`number.js`中的代码，将`1000`修改为`3000`，也就是下面这样修改：
+```js {5}
+// number.js代码
+export default function number() {
+  var dom = document.createElement('div');
+  dom.setAttribute('id','number');
+  dom.innerHTML = '3000';
+  document.body.appendChild(dom);
+}
+```
+我们发现，虽然`1000`成功变成了`3000`，但我们累计的数值却重置到了`1`，这个时候你可能会问，我们不是配置了模块热更新了吗，为什么不像`CSS`一样，直接替换即可？
+
+**回答**：这是因为`CSS`文件，我们是使用了`loader`来进行处理，有些`loader`已经帮我们写好了模块热更新的代码，我们直接使用即可(类似的还有`.vue`文件，`vue-loader`也帮我们处理好了模块热更新)。而对于`js`代码，还需要我们写一点点额外的代码，像下面这样子：
 ```js
 import counter from './counter';
 import number from './number';
@@ -1203,44 +1130,43 @@ if(module.hot) {
 }
 ```
 
-**模块热更新结果：** 在初始化打开页面时，`number.js`中的`innerHTML`为1000，再次修改`number.js`中的`innerHTML`为122222000，模块热更新成功。
-![模块热更新结果](../images/vue/25.png)
+写完上面的额外代码后，我们再在浏览器中重复我们刚才的操作，即：
+* 累加数字`1`带你喜欢的一个值
+* 修改`number.js`中的`1000`为你喜欢的一个值
 
-::: tip 思考
-为什么在书写`.css`样式时，不用写`module.hot`，而自己写的`.js`还要额外的写这些代码？<br/>
-:::
-这是因为，在写`.css`文件时，`css-loader`已经帮我们书写了`module.hot`，我们直接使用`css-loader`即可实现HMR。相同的道理，在变更`.vue`文件时也不用写`module.hot`，这是因为`vue-loader`已经帮我们写了。
+以下截图是我的测试结果，同时我们也可以在控制台`console`上，看到模块热更新第二次启动时，已经成功帮我们把`number.js`中的代码输出到了浏览器。
+![模块热更新结果](../images/webpack/251.png)
+
+
+**小结**：在更改`CSS`样式文件时，我们不用书写`module.hot`，这是因为各种`CSS`的`loader`已经帮我们处理了，相同的道理还有`.vue`文件的`vue-loader`，它也帮我们处理了模块热更新，但在`.js`文件中，我们还是需要根据实际的业务来书写一点`module.hot`代码的。
 
 ### 处理ES6语法
-::: tip
+::: tip 说明
 我们在项目中书写的`ES6`代码，由于考虑到低版本浏览器的兼容性问题，需要把`ES6`代码转换成低版本浏览器能够识别的`ES5`代码。使用`babel-loader`和`@babel/core`来进行`ES6`和`ES5`之间的链接，使用`@babel/preset-env`来进行`ES6`转`ES5`
 :::
-
-**清理项目目录：**
-* 删除`counter.js`文件
-* 删除`number.js`文件
-* 删除`style.css`文件
+在处理`ES6`代码之前，我们先来清理一下前面小节的中的代理，我们需要删除`counter.js`、`number.js`和`style.css`这个三个文件，删除后的文件目录大概是下面这样子的：
 ```js
-|-- bundle
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
+|-- dist
+|   |-- index.html
+|   |-- main.js
 |-- src
 |   |-- index.html
 |   |-- index.js
--- webpack.config.js
+|-- package.json
+|-- webpack.config.js
 ```
-**安装必要包：**
-```js
+要处理`ES6`代码，需要我们安装几个`npm`包，可以使用如下的命令去安装
+``` sh
 // 安装 babel-loader @babel/core
-npm install --save-dev babel-loader @babel/core
+$ npm install babel-loader @babel/core --save-dev
 
 // 安装 @babel/preset-env
-npm install @babel/preset-env --save-dev
+$ npm install @babel/preset-env --save-dev
 
 // 安装 @babel/polyfill进行ES5代码补丁
+$ npm install @babel/polyfill --save-dev
 ```
-**改写index.js文件：**
+安装完毕后，我们需要改写`src/index.js`中的代码，可以是下面这个样子：
 ```js
 import '@babel/polyfill';
 const arr = [
@@ -1253,64 +1179,58 @@ arr.map(item => {
   console.log(item);
 })
 ```
-
-**改写webpack.config.js文件：** 添加`rules`规则
-```js
-module: {
-  rules: [
-    {
-      test: /\.css$/,
-      use: ['style-loader','css-loader']
-    },
-    { 
-      test: /\.js$/, 
-      exclude: /node_modules/, 
-      loader: "babel-loader" 
-    }
-  ]
+处理`ES6`代码，需要我们使用`loader`，所以需要在`webpack.config.js`中添加如下的代码：
+``` js
+module.exports = {
+  // 其它配置
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
+      }
+    ]
+  }
 }
 ```
-
-**根目录下添加.babelrc文件：**
+`@babel/preset-env`需要在根目录下有一个`.babelrc`文件，所以我们新建一个`.babelrc`文件，它的代码如下：
 ```js
 {
   "presets": ["@babel/preset-env"]
 }
 ```
+
+为了让我们的打包变得更加清晰，我们需要在`webpack.config.js`中把`source-map`配置成`none`，像下面这样：
 ```js
-|-- bundle
-|   |-- dist.js
-|   |-- dist.js.map
-|   |-- index.html
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
-|-- src
-|   |-- index.html
-|   |-- index.js
--- .babelrc
--- webpack.config.js
+module.exports = {
+  // 其他配置
+  mode: 'development',
+  devtool: 'none'
+}
 ```
+本次打包，我们需要使用`npx webpack`，打包的结果如下图所示：
+![打包结果](../images/webpack/261.png)
 
-**打包结果：** 使用`npx webpack`打包
-![打包结果](../images/vue/26.png)
+在以上的打包中，我们可以发现：
+* 箭头函数被转成了普通的函数形式
+* 如果你仔细观察这次打包输出的话，你会发现打包体积会非常大，有几百K，这是因为我们将`@babel/polyfill`中的代码全部都打包进了我们的代码中
 
-::: warning
-这种方式打包，我们可以看到，由于添加了`@babel/polyfill`，导致整个转`ES6`的包都打包到了`dist.js`文件夹下，导致`dist.js`文件非常大，我们理想的是我们用到了哪些`ES6`语法，就帮我们转`ES5`，没有用到的，就不转。<br/>
-可以在`.babelrc`文件中使用属性`useBuiltIns:'usage'`来进行按需引入打包。
-:::
-![打包结果](../images/vue/27.png)
-
-**更改.babelrc文件：**
-```js
+针对以上最后一个问题，我们希望，我们使用了哪些`ES6`代码，就引入它对应的`polyfill`包，达到一种按需引入的目的，要实现这样一个效果，我们需要在`.babelrc`文件中做一下小小的改动，像下面这样：
+``` json
 {
   "presets": [["@babel/preset-env", {
+    "corejs": 2,
     "useBuiltIns": "usage"
   }]]
 }
 ```
-**打包结果：** 可以明显看到`dist.js`变小了，只有86.3kb
-![打包结果](../images/vue/28.png)
+同时需要注意的时，我们使用了`useBuiltIns:"usage"`后，在`index.js`中就不用使用`import '@babel/polyfill'`这样的写法了，因为它已经帮我们自动这样做了。<br/>
+
+在以上配置完毕后，我们再次使用`npx webpack`进行打包，如下图，可以看到此次打包后，`main.js`的大小明显变小了。
+![打包结果](../images/webpack/281.png)
 
 ## Webpack进阶
 
