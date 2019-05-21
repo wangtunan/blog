@@ -1235,33 +1235,29 @@ module.exports = {
 ## Webpack进阶
 
 ### Tree Shaking
-::: tip
-Tree Shaking是一个术语，通常用于描述移除JavaScript中未使用的代码，在开发环境中，Tree Shaking还是会起作用，但未使用的代码依然还进行打包，这是因为保存正确的`source-map`的缘故。
+::: tip 理解
+`Tree Shaking`是一个术语，通常用于描述移除`js`中未使用的代码。
 :::
 ::: warning 注意
 Tree Shaking 只适用于`ES Module`语法(既通过`export`导出，`import`引入)，因为它依赖于`ES Module`的静态结构特性。
 :::
 
-**添加src/math.js文件：** 定义两个方法并export出去
+在正式介绍`Tree Shaking`之前，我们需要现在`src`目录下新建一个`math.js`文件，它的代码如下：
 ```js
 export function add(a, b) {
   console.log(a + b);
 }
-
 export function minus(a, b) {
   console.log(a - b);
 }
 ```
-
-**改写index.js：**
+接下来我们对`index.js`做一下处理，它的代码像下面这样，从`math.js`中引用`add`方法并调用：
 ```js
 import { add } from './math'
-
 add(1, 4);
 ```
-
-**改写webpack.config.js：** 更改 webpack 配置文件，进行 Tree Shaking配置
-```js
+在上面的`.js`改动完毕后，我们最后需要对`webpack.config.js`做一下配置，让它支持`Tree Shaking`，它的改动如下：
+```js {8,9,10}
 const path = require('path');
 module.exports = {
   mode: 'development',
@@ -1273,17 +1269,14 @@ module.exports = {
     usedExports: true
   },
   output: {
-    filename: '[name].js',
+    filename: 'main.js',
     path: path.resolve(__dirname,'dist')
   }
 }
 ```
-
-**开发环境下打包结果：** 使用`npx webpack`进行打包
-::: tip 打包结果分析
-虽然我们配置了 Tree Shaking，但在开发环境下，我们依然能够看到未使用过的`minus`方法，以下注释也清晰了说明了这一点，这是因为我们处于开发环境下打包。
-:::
+在以上`webpack.config.js`配置完毕后，我们需要使用`npx webpack`进行打包，它的打包结果如下：
 ```js
+// dist/main.js
 "use strict";
 /* harmony export (binding) */ 
 __webpack_require__.d(__webpack_exports__, "a", function() { return add; });
@@ -1295,12 +1288,33 @@ function minus(a, b) {
   console.log(a - b);
 }
 ```
+**打包结果分析**：虽然我们配置了 `Tree Shaking`，但在开发环境下，我们依然能够看到未使用过的`minus`方法，以上注释也清晰了说明了这一点，这个时候你可能会问：为什么我们配置了`Tree Shaking`，`minus`方法也没有被使用，但依然还是被打包进了`main.js`中？<br/>
 
-**生产环境下打包结果：** 将`webpack.config.js`中的`Mode`属性，由`development`改为`production`，再运行`npx webpack`
-::: tip 打包代码分析
-这是一段`add`方法压缩后的代码，我们在打包后的`.js`文件中，并没有找到`minus`方法，证明在生产环境下，Tree Shaking 真正起了作用。
-:::
+其实这个原因很简单，这是因为我们处于开发环境下打包，当我们处于开发环境下时，由于`source-map`等相关因素的影响，如果我们不把没有使用的代码一起打包进来的话，`source-map`就不是很准确，这会影响我们本地开发的效率。<br/>
+
+看完以上本地开发`Tree Shaking`的结果，我们也知道了本地开发`Tree Shaking`相对来说是不起作用的，那么在生产环境下打包时，`Tree Shaking`的表现又如何呢？<br/>
+
+在生产环境下打包，需要我们对`webpack.config.js`中的`mode`属性，需要由`development`改为`production`，它的改动如下：
+``` js {3}
+const path = require('path');
+module.exports = {
+  mode: 'production',
+  devtool: 'source-map',
+  entry: {
+    main: './src/index.js'
+  },
+  optimization: {
+    usedExports: true
+  },
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname,'dist')
+  }
+}
+```
+配置完毕后，我们依然使用`npx webpack`进行打包，可以看到，它的打包结果如下所示：
 ```js
+// dist/main.js
 ([function(e,n,r){
   "use strict";
   var t,o;
@@ -1310,11 +1324,14 @@ function minus(a, b) {
   console.log(t+o)
 }]);
 ```
+**打包代码分析**：以上代码是一段被压缩过后的代码，我们可以看到，上面只有`add`方法，未使用的`minus`方法并没有被打包进来，这说明在生产环境下我们的`Tree Shaking`才能真正起作用。
+
+
 
 #### SideEffects
-::: tip
-由于 Tree Shaking作用于所有通过`import`引入的文件，如果我们引入第三方库，例如：`import _ from 'lodash'`或者`.css`文件，例如`import './style.css'` 时，如果我们不
-做限制的话，Tree Shaking将起副作用，`SideEffects`属性能帮我们解决这个问题：它告诉`webpack`，我们可以对哪些文件不做 Tree Shaking
+::: tip 说明
+由于`Tree Shaking`作用于所有通过`import`引入的文件，如果我们引入第三方库，例如：`import _ from 'lodash'`或者`.css`文件，例如`import './style.css'` 时，如果我们不
+做限制的话，Tree Shaking将起副作用，`SideEffects`属性能帮我们解决这个问题：它告诉`webpack`，我们可以对哪些文件不做 `Tree Shaking`
 :::
 ```js
 // 修改package.json
@@ -1328,14 +1345,18 @@ function minus(a, b) {
 ```
 
 ### 区分开发模式和生产模式
-像上一节所提到的那样，如果我们要区分 Tree Shaking的开发环境和生产环境，那么我们每次打包的都要去更改相应的 Webpack配置文件
-有没有什么办法能让我们少改一点代码呢？
-::: tip
-区分开发环境和生产环境，最好的办法是把公用配置提取到一个配置文件，生产环境和开发环境只写自己需要的配置，在打包的时候再进行合并即可<br/>
-**`webpack-merge`** 可以帮我们做到这个事情。
+像上一节那样，如果我们要区分`Tree Shaking`的开发环境和生产环境，那么我们每次打包的都要去更改`webpack.config.js`文件，有没有什么办法能让我们少改一点代码呢？ 答案是有的！
+::: tip 说明
+区分开发环境和生产环境，最好的办法是把公用配置提取到一个配置文件，生产环境和开发环境只写自己需要的配置，在打包的时候再进行合并即可，**`webpack-merge`** 可以帮我们做到这个事情。
 :::
 
-**新建build/webpack.common.js：** 新建build文件夹，在此文件夹下新建`webpack.common.js`，提起公共配置到此文件
+首先，我们效仿各大框架的脚手架的形式，把 Webpack 相关的配置都放在根目录下的`build`文件夹下，所以我们需要新建一个`build`文件夹，随后我们要在此文件夹下新建三个`.js`文件和删除`webpack.config.js`，它们分别是：
+* `webpack.common.js`：Webpack 公用配置文件
+* `webpack.dev.js`：开发环境下的 Webpack 配置文件
+* `webpack.prod.js`：生产环境下的 Webpack 配置文件
+* `webpack.config.js`：**删除**根目录下的此文件
+
+新建完`webpack.common.js`文件后，我们需要把公用配置提取出来，它的代码看起来应该是下面这样子的：
 ```js
 const path = require('path');
 const htmlWebpackPlugin = require('html-webpack-plugin');
@@ -1370,49 +1391,46 @@ module.exports = {
 }
 ```
 
-**新建build/webpack.dev.js：** 保留开发环境独有的配置
+提取完 Webpack 公用配置文件后，我们开发环境下的配置，也就是`webpack.dev.js`中的代码，将剩下下面这些：
 ```js
 const webpack = require('webpack');
 module.exports = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
   devServer: {
-    // 启动bundle文件夹
-    contentBase: './dist',
-    // 自动打开浏览器
+    contentBase: 'dist',
     open: true,
-    // 端口3000
     port: 3000,
-    // 模块热更新
     hot: true,
     hotOnly: true
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin()
-  ],
+  ]
+}
+```
+而生产环境下的配置，也就是`webpack.prod.js`中的代码，可能是下面这样子的：
+```js
+module.exports = {
+  mode: 'production',
+  devtool: 'cheap-module-source-map',
   optimization: {
     usedExports: true
   }
 }
 ```
 
-**新建build/webpack.prod.js：** 保留生产环境独有的配置
-```js
-module.exports = {
-  mode: 'production',
-  devtool: 'cheap-module-source-map'
-}
-```
+在处理完以上三个`.js`文件后，我们需要做一件事情：
+* 当处于开发环境下时，把`webpack.common.js`中的配置和`webpack.dev.js`中的配置合并在一起
+* 当处于开发环境下时，把`webpack.common.js`中的配置和`webpack.prod.js`中的配置合并在一起
 
-::: tip webpack-merge
-利用`webpack-merge`进行文件合并，它需要用 npm 进行安装
-:::
-```js
+针对以上问题，我们可以使用`webpack-merge`进行合并，在使用之前，我们需要使用如下命令进行安装：
+``` sh
 $ npm install webpack-merge -D
 ```
 
-**再次改造build/webpack.dev.js：** 通过`webpack-merge`进行文件合并
-```js
+安装完毕后，我们需要对`webpack.dev.js`和`webpack.prod.js`做一下手脚，其中`webpack.dev.js`中的改动如下(代码高亮部分)：
+```js {2,3,4,18}
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const commonConfig = require('./webpack.common');
@@ -1420,51 +1438,40 @@ const devConfig = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
   devServer: {
-    // 启动bundle文件夹
-    contentBase: './bundle',
-    // 自动打开浏览器
+    contentBase: 'dist',
     open: true,
-    // 端口3000
     port: 3000,
-    // 模块热更新
     hot: true,
     hotOnly: true
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin()
-  ],
-  optimization: {
-    usedExports: true
-  }
+  ]
 }
 module.exports = merge(commonConfig, devConfig);
 ```
-
-**再次改造build/webpack.prod.js：** 通过`webpack-merge`进行文件合并
-```js
+相同的代码，`webpack.prod.js`中的改动部分如下(代码高亮)：
+```js {1,2,3,10}
 const merge = require('webpack-merge');
 const commonConfig = require('./webpack.common');
 const prodConfig = {
   mode: 'production',
-  devtool: 'cheap-module-source-map'
+  devtool: 'cheap-module-source-map',
+  optimization: {
+    usedExports: true
+  }
 }
 module.exports = merge(commonConfig, prodConfig);
 ```
-
-#### 添加脚本命令
-::: tip
-通过更改`package.json`文件，添加`dev`和`build` 两个Script脚本命令
-:::
-```js
+聪明的你一定想到了，因为上面我们已经删除了`webpack.config.js`文件，所以我们需要重新在`package.json`中配置一下我们的打包命令，它们是这样子写的：
+``` json
 "scripts": {
   "dev": "webpack-dev-server --config ./build/webpack.dev.js",
   "build": "webpack --config ./build/webpack.prod.js"
 },
 ```
 
-::: warning 注意
-当我们运行`npm run build`时，dist目录打包到了`build`文件夹下了，这是因为我们把`webpack`相关的配置放到了`build`文件夹下后，并没有做其他配置，`webpack`会认为`build`文件夹会是根目录
-:::
+配置完打包命令，心急的你可能会马上开始尝试进行打包，你的打包目录可能长成下面这个样子：
 ```js
 |-- build
 |   |-- dist
@@ -1474,23 +1481,22 @@ module.exports = merge(commonConfig, prodConfig);
 |   |-- webpack.common.js
 |   |-- webpack.dev.js
 |   |-- webpack.prod.js
-|-- package-lock.json
-|-- package.json
+|-- src
+|   |-- index.html
+|   |-- index.js
+|   |-- math.js
+|-- .babelrc
 |-- postcss.config.js
--- src
-    |-- index.html
-    |-- index.js
-    |-- math.js
+|-- package.json
 ```
-
-**再次修改build/webpack.common.js：** 修改`output`属性即可
-```js{3}
+**问题分析**：当我们运行`npm run build`时，`dist`目录打包到了`build`文件夹下了，这是因为我们把Webpack 相关的配置放到了`build`文件夹下后，并没有做其他配置，Webpack 会认为`build`文件夹会是根目录，要解决这个问题，需要我们在`webpack.common.js`中修改`output`属性，具体改动的部分如下所示：
+```json {3}
 output: {
   filename: '[name].js',
   path: path.resolve(__dirname,'../dist')
 }
 ```
-**打包结果：**
+那么解决完上面这个问题，赶紧使用你的打包命令测试一下吧，我的打包目录是下面这样子，如果你按上面的配置后，你的应该跟此目录类似
 ```js
 |-- build
 |   |-- webpack.common.js
@@ -1500,40 +1506,81 @@ output: {
 |   |-- index.html
 |   |-- main.js
 |   |-- main.js.map
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
 |-- src
-    |-- index.html
-    |-- index.js
-    |-- math.js
+|   |-- index.html
+|   |-- index.js
+|   |-- math.js
+|-- .babelrc
+|-- postcss.config.js
+|-- package.json
 ```
 
 ### 代码分离(CodeSplitting)
-::: tip
-Code Splitting 的核心是把很大的文件，分离成更小的块，让浏览器进行并行加载。常见的代码分割有三种形式：
-* 收到进行分割，例如项目如果用到`lodash`，则把`lodash`单独打包成一个文件。
-* 同步导入的代码使用`webpack`配置进行代码分割。
-* 异步导入的代码，通过模块中的内联函数调用来分割代码。
+::: tip 理解
+`Code Splitting` 的核心是把很大的文件，分离成更小的块，让浏览器进行并行加载。
 :::
+常见的代码分割有三种形式：
+* 手动进行分割：例如项目如果用到`lodash`，则把`lodash`单独打包成一个文件。
+* 同步导入的代码：使用 Webpack 配置进行代码分割。
+* 异步导入的代码：通过模块中的内联函数调用来分割代码。
 
-**修改index.js代码：** 在使用 npm 安装`lodash`后，修改`index.js`文件
+#### 手动进行分割
+手动进行分割的意思是在`entry`上配置多个入口，例如像下面这样：
+``` js
+module.exports = {
+  entry: {
+    main: './src/index.js',
+    lodash: 'lodash'
+  }
+}
+```
+这样配置后，我们使用`npm run build`打包命令，它的打包输出结果为：
+```
+        Asset       Size  Chunks             Chunk Names
+  index.html  462 bytes          [emitted]
+    lodash.js   1.46 KiB       1  [emitted]  lodash
+lodash.js.map   5.31 KiB       1  [emitted]  lodash
+      main.js   1.56 KiB       2  [emitted]  main
+  main.js.map   5.31 KiB       2  [emitted]  main
+```
+它输出了两个模块，也能在一定程度上进行代码分割，不过这种分割是十分脆弱的，如果两个模块公用引用了第三个模块，那么第三个模块会被同时打包进去，而不是分离出来。<br/>
+
+
+无论是同步代码还是异步代码，都需要在`webpack.common.js`中配置`splitChunks`属性，像下面这样子：
+```js
+module.exports = {
+  // 其它配置
+  optimization: {
+    splitChunks: {
+      chunks: 'initial'
+    }
+  }
+}
+```
+你可能已经看到了其中有一个`chunks`属性，它告诉 Webpack 应该对哪些模式进行打包，它的参数有三种：
+* `async`：此值为默认值，只有异步导入的代码才会进行代码分割。
+* `initial`：与`async`相对，只有同步引入的代码才会进行代码分割。
+* `all`：表示无论是同步代码还是异步代码都会进行代码分割。
+
+在完成上面的配置后，让我们来安装一个相对大一点的包，例如：`lodash`，然后对`index.js`中的代码做一些手脚，像下面这样：
 ```js
 import _ from 'lodash'
 console.log(_.join(['Dell','Lee'], ' '));
 ```
 
-#### 同步导入代码分割
-::: tip
-在`webpack.common.js`中配置`splitChunks`属性即可
-:::
-```js
-optimization: {
-  splitChunks: {
-    chunks: 'all'
+#### 同步代码分割
+就像上面提到的那样，同步代码分割，我们只需要在`webpack.common.js`配置`chunks`属性值为`initial`即可：
+``` js
+module.exports = {
+  // 其它配置
+  optimization: {
+    splitChunks: {
+      chunks: 'initial'
+    }
   }
 }
 ```
+
 **打包结果：** `main.js`中是我们的业务代码，`vendors~main.js`是我们的公用库代码
 ```js
 |-- build
