@@ -1543,16 +1543,16 @@ lodash.js.map   5.31 KiB       1  [emitted]  lodash
       main.js   1.56 KiB       2  [emitted]  main
   main.js.map   5.31 KiB       2  [emitted]  main
 ```
-它输出了两个模块，也能在一定程度上进行代码分割，不过这种分割是十分脆弱的，如果两个模块公用引用了第三个模块，那么第三个模块会被同时打包进去，而不是分离出来。<br/>
+它输出了两个模块，也能在一定程度上进行代码分割，不过这种分割是十分脆弱的，如果两个模块共同引用了第三个模块，那么第三个模块会被同时打包进这两个入口文件中，而不是分离出来。<br/><br/>
 
 
-无论是同步代码还是异步代码，都需要在`webpack.common.js`中配置`splitChunks`属性，像下面这样子：
+所以我们常见的做法是关心最后两种代码分割方法，无论是同步代码还是异步代码，都需要在`webpack.common.js`中配置`splitChunks`属性，像下面这样子：
 ```js
 module.exports = {
   // 其它配置
   optimization: {
     splitChunks: {
-      chunks: 'initial'
+      chunks: 'all'
     }
   }
 }
@@ -1562,15 +1562,14 @@ module.exports = {
 * `initial`：与`async`相对，只有同步引入的代码才会进行代码分割。
 * `all`：表示无论是同步代码还是异步代码都会进行代码分割。
 
+#### 同步代码分割
 在完成上面的配置后，让我们来安装一个相对大一点的包，例如：`lodash`，然后对`index.js`中的代码做一些手脚，像下面这样：
 ```js
 import _ from 'lodash'
 console.log(_.join(['Dell','Lee'], ' '));
 ```
-
-#### 同步代码分割
 就像上面提到的那样，同步代码分割，我们只需要在`webpack.common.js`配置`chunks`属性值为`initial`即可：
-``` js
+``` js {5}
 module.exports = {
   // 其它配置
   optimization: {
@@ -1580,61 +1579,82 @@ module.exports = {
   }
 }
 ```
-
-**打包结果：** `main.js`中是我们的业务代码，`vendors~main.js`是我们的公用库代码
+在`webpack.common.js`配置完毕后，我们使用`npm run build`来进行打包， 你的打包`dist`目录看起来应该像下面这样子：
 ```js
-|-- build
-|   |-- webpack.common.js
-|   |-- webpack.dev.js
-|   |-- webpack.prod.js
 |-- dist
 |   |-- index.html
 |   |-- main.js
+|   |-- main.js.map
 |   |-- vendors~main.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
-|-- src
-    |-- index.html
-    |-- index.js
-    |-- math.js
+|   |-- vendors~main.js.map
 ```
+**打包分析**：`main.js`使我们的业务代码，`vendors~main.js`是第三方模块的代码，在此案例中也就是`_lodash`中的代码。
 
-#### 异步导入代码分割
-::: tip
-异步带入的代码，不需要我们进行代码分割，`webpack`会自动帮我们把第三方库单独打包成一个文件
-:::
-::: warning
-由于异步带入语法目前并没有得到全面支持，需要通过 npm 安装 `@babel/plugin-syntax-dynamic-import` 插件来进行转译
-:::
-```js
+#### 异步代码分割
+由于`chunks`属性的默认值为`async`，如果我们只需要针对异步代码进行代码分割的话，我们只需要进行异步导入，Webpack会自动帮我们进行代码分割，异步代码分割它的配置如下：
+```js {5}
+module.exports = {
+  // 其它配置
+  optimization: {
+    splitChunks: {
+      chunks: 'async'
+    }
+  }
+}
+```
+**注意**：由于异步导入语法目前并没有得到全面支持，需要通过 npm 安装 `@babel/plugin-syntax-dynamic-import` 插件来进行转译
+``` sh
 $ npm install @babel/plugin-syntax-dynamic-import -D
 ```
-
-**打包结果：** 使用`npm run build`进行打包，`0.js`为第三方库打包的代码，`main.js`为我们的业务代码
+安装完毕后，我们需要在根目录下得`.babelrc`文件做一下改动，像下面这样子：
+```json {6}
+{
+  "presets": [["@babel/preset-env", {
+    "corejs": 2,
+    "useBuiltIns": "usage"
+  }]],
+  "plugins": ["@babel/plugin-syntax-dynamic-import"]
+}
+```
+配置完毕后，我们需要对`index.js`做一下代码改动，让它使用异步导入代码块:
 ```js
-|-- build
-|   |-- webpack.common.js
-|   |-- webpack.dev.js
-|   |-- webpack.prod.js
+// 点击页面，异步导入lodash模块
+document.addEventListener('click', () => {
+  getComponent().then((element) => {
+    document.getElementById('root').appendChild(element)
+  })
+})
+
+function getComponent () {
+  return import(/* chunksName: 'lodash' */'lodash').then(({ default: _ }) => {
+    var element = document.createElement('div');
+    element.innerHTML = _.join(['Dell', 'lee'], ' ')
+    return element;
+  })
+}
+```
+写好以上代码后，我们同样使用`npm run build`进行打包，`dist`打包目录的输出结果如下：
+```js
 |-- dist
-|   |-- 0.js
+|   |-- 1.js
+|   |-- 1.js.map
 |   |-- index.html
 |   |-- main.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
-|-- src
-    |-- index.html
-    |-- index.js
-    |-- math.js
+|   |-- main.js.map
 ```
+我们在浏览器中运行`dist`目录下的`index.html`，切换到`network`面板时，我们可以发现只加载了`main.js`，如下图：
+![异步导入的结果](../images/webpack/32.png)
+<br/><br/>
+
+当我们点击页面时，才 **真正开始加载** 第三方模块，如下图(`1.js`)：
+![异步导入的结果](../images/webpack/33.png)
+
 
 ### SplitChunksPlugin配置参数详解
 在上一节中，我们配置了`splitChunk`属性，它能让我们进行代码分割，其实这是因为 Webpack 底层使用了 **`splitChunksPlugin`** 插件。这个插件有很多可以配置的属性，它也有一些默认的配置参数，它的默认配置参数如下所示，我们将在下面为一些常用的配置项做一些说明。
 ```js
 module.exports = {
-  //...其它配置项
+  // 其它配置项
   optimization: {
     splitChunks: {
       chunks: 'async',
@@ -1662,23 +1682,10 @@ module.exports = {
 ```
 
 #### chunks参数
-::: tip
-`chunks`参数，它告诉`webpack`应该对哪些模式进行打包，它的参数有三种：
-* `async`，此值为默认值，只有异步导入的代码才会进行代码分割。
-* `initial`，与`async`相对，只有同步引入的代码才会进行代码分割。
-* `all`，此值可以看做是`async`和`inintal`的结合，表示无论是同步的代码还是异步的代码，都能进行代码分割。
-:::
-**async：** 配置了`async`，以下同步的代码无法进行代码分割
-```js
-// chunks: async 同步的代码不会进行代码分割。
-import _ from 'lodash';
-var element = document.createElement('div');
-element.innerHTML = element.innerHTML = _.join(['1', '2', '3'], '**');
-document.body.appendChild(element);
-```
+此参数的含义在上一节中已详细说明，同时也配置了相应的案例，就**不再次累述**。
 
 #### minSize 和 maxSize
-::: tip
+::: tip 说明
 `minSize`默认值是30000，也就是30kb，当代码超过30kb时，才开始进行代码分割，小于30kb的则不会进行代码分割;与`minSize`相对的，`maxSize`默认值为0，为0表示不限制打包后文件的大小，一般这个属性不推荐设置，一定要设置的话，它的意思是：打包后的文件最大不能超过设定的值，超过的话就会进行代码分割。
 :::
 **写一个很小的math.js文件：** 自己写一个很小的js文件，它小于30kb，以下代码不会进行代码分割
