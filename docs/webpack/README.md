@@ -1606,7 +1606,7 @@ module.exports = {
 ``` sh
 $ npm install @babel/plugin-syntax-dynamic-import -D
 ```
-安装完毕后，我们需要在根目录下得`.babelrc`文件做一下改动，像下面这样子：
+安装完毕后，我们需要在根目录下的`.babelrc`文件做一下改动，像下面这样子：
 ```json {6}
 {
   "presets": [["@babel/preset-env", {
@@ -1626,7 +1626,7 @@ document.addEventListener('click', () => {
 })
 
 function getComponent () {
-  return import(/* chunksName: 'lodash' */'lodash').then(({ default: _ }) => {
+  return import(/* webpackChunkName: 'lodash' */'lodash').then(({ default: _ }) => {
     var element = document.createElement('div');
     element.innerHTML = _.join(['Dell', 'lee'], ' ')
     return element;
@@ -1651,7 +1651,7 @@ function getComponent () {
 
 
 ### SplitChunksPlugin配置参数详解
-在上一节中，我们配置了`splitChunk`属性，它能让我们进行代码分割，其实这是因为 Webpack 底层使用了 **`splitChunksPlugin`** 插件。这个插件有很多可以配置的属性，它也有一些默认的配置参数，它的默认配置参数如下所示，我们将在下面为一些常用的配置项做一些说明。
+在上一节中，我们配置了`splitChunks`属性，它能让我们进行代码分割，其实这是因为 Webpack 底层使用了 **`splitChunksPlugin`** 插件。这个插件有很多可以配置的属性，它也有一些默认的配置参数，它的默认配置参数如下所示，我们将在下面为一些常用的配置项做一些说明。
 ```js
 module.exports = {
   // 其它配置项
@@ -1686,22 +1686,23 @@ module.exports = {
 
 #### minSize 和 maxSize
 ::: tip 说明
-`minSize`默认值是30000，也就是30kb，当代码超过30kb时，才开始进行代码分割，小于30kb的则不会进行代码分割;与`minSize`相对的，`maxSize`默认值为0，为0表示不限制打包后文件的大小，一般这个属性不推荐设置，一定要设置的话，它的意思是：打包后的文件最大不能超过设定的值，超过的话就会进行代码分割。
+`minSize`默认值是30000，也就是30kb，当代码超过30kb时，才开始进行代码分割，小于30kb的则不会进行代码分割；与`minSize`相对的，`maxSize`默认值为0，为0表示不限制打包后文件的大小，一般这个属性不推荐设置，一定要设置的话，它的意思是：打包后的文件最大不能超过设定的值，超过的话就会进行代码分割。
 :::
-**写一个很小的math.js文件：** 自己写一个很小的js文件，它小于30kb，以下代码不会进行代码分割
+为了测试以上两个属性，我们来写一个小小的例子，在`src`目录下新建一个`math.js`文件，它的代码如下：
 ```js
 export function add(a, b) {
   return a + b;
 }
 ```
-**引用`js`文件** ：
+新建完毕后，在`index.js`中引入`math.js`:
 ```js
 import { add } from './math.js'
 console.log(add(1, 2));
 ```
+**打包分析**：因为我们写的`math.js`文件的大小非常小，如果应用默认值，它是不会进行代码分割的，如果你要进一步测试`minSize`和`maxSize`，请自行修改后打包测试。
 
 #### minChunks
-::: tip
+::: tip 说明
 默认值为1，表示某个模块复用的次数大于或等于一次，就进行代码分割。
 :::
 如果将其设置大于1，例如：`minChunks:2`，在不考虑其他模块的情况下，以下代码不会进行代码分割：
@@ -1712,32 +1713,26 @@ console.log(_.join(['Dell', 'Lee'], '-'));
 ```
 
 
-#### maxAsyncRequests
-::: tip
-它的默认值是5，代表在进行异步代码分割时，前五个会进行代码分割，超过五个的不再进行代码分割
-:::
-
-#### maxInitialRequests
-::: tip
-它的默认值是3，代表在进行同步代码分割时，前三个会进行代码分割，超过三个的不在进行代码分割
-:::
+#### maxAsyncRequests 和 maxInitialRequests
+* `maxAsyncRequests`：它的默认值是5，代表在进行异步代码分割时，前五个会进行代码分割，超过五个的不再进行代码分割。
+* `maxInitialRequests`：它的默认值是3，代表在进行同步代码分割时，前三个会进行代码分割，超过三个的不再进行代码分割。
 
 #### automaticNameDelimiter
 这是一个连接符，左边是代码分割的缓存组，右边是打包的入口文件的项，例如`vendors~main.js`
 
 #### cacheGroups
-::: tip
+::: tip 说明
 在进行代码分割时，会把符合条件的放在一组，然后把一组中的所有文件打包在一起，默认配置项中有两个分组，一个是`vendors`和`default`
 :::
 
-**vendors组：** 以下代码的含义是：将所有通过引用`node_modules`文件夹下的都放在`vendors`组中
+**vendors组：** 以下代码的含义是，将所有通过引用`node_modules`文件夹下的都放在`vendors`组中
 ```js
 vendors: {
   test: /[\\/]node_modules[\\/]/,
   priority: -10
 }
 ```
-**default组：** 默认组，意思是，不符合`vendors`的分组都将分配在`default`组中，如果一个文件即满足`vendors`分组，又满足`default`分组，那么通过`priority`的值进行取舍，值最大优先级越高。
+**default组：** 默认组，意思是，不符合`vendors`的分组都将分配在`default`组中，如果一个文件即满足`vendors`分组，又满足`default`分组，那么通过`priority`的值进行取舍，值最大**优先级**越高。
 ```js
 default: {
   minChunks: 2,
@@ -1746,89 +1741,102 @@ default: {
 }
 ```
 
-**reuseExistingChunk：** 中文解释是复用已存在的文件。意思是，如果有一个`a.js`文件，它里面引用了`b.js`，但我们其他模块又有引用`b.js`的地方。开启这个配置项后，在打包时会分析，`b.js`已经打包过了，直接可以复用，不用再次打包。
+**reuseExistingChunk：** 中文解释是复用已存在的文件。意思是，如果有一个`a.js`文件，它里面引用了`b.js`，但我们其他模块又有引用`b.js`的地方。开启这个配置项后，在打包时会分析`b.js`已经打包过了，直接可以复用不用再次打包。
 ```js
-import a from 'a.js';
+// a.js
 import b from 'b.js';
+console.log('a.js');
+
+// c.js
+import b from 'b.js';
+console.log('c.js');
 ```
 
 ### Lazy Loading懒加载
-::: tip
-`Lazy Loading`懒加载的概念是，通过异步引入代码，它说的异步，并不是在页面一开始就加在，而是在合适的时机进行加载。
+::: tip 理解
+`Lazy Loading`懒加载的理解是：通过异步引入代码，它说的异步，并不是在页面一开始就加载，而是在合适的时机进行加载。
 :::
-**一个懒加载的例子**：以下代码中的`lodash`，只有在页面点击的时候才加载。
+`Lazy Loading`懒加载的实际案例我们已经在上一小节书写了一个例子，不过我们依然可以做一下小小的改动，让它使用`async/await`进行异步加载，它的代码如下：
 ```js
+// 页面点击的时候才加载lodash模块
+document.addEventListener('click', () => {
+  getComponet().then(element => {
+    document.body.appendChild(element);
+  })
+})
 async function getComponet() {
   const { default: _ }  = await import(/* webpackChunkName: 'lodash' */ 'lodash');
   var element = document.createElement('div');
   element.innerHTML = _.join(['1', '2', '3'], '**')
   return element;
 }
+```
+以上懒加载的结果与上一小节的结果类似，就不在此展示，你可以在你本地的项目中打包后自行测试和查看。
 
+### PreLoading 和Prefetching
+::: tip 理解
+在以上`Lazy Loading`的例子中，只有当我们在页面点击时才会加载`lodash`，也有一些模块虽然是异步导入的，但我们希望能提前进行加载，`PreLoading`和`Prefetching`可以帮助我们实现这一点，它们的用法类似，但它们还是有区别的：`Prefetching`不会跟随主进程一些下载，而是等到主进程加载完毕，带宽释放后才进行加载，`PreLoading`会随主进程一起加载。
+:::
+实现`PreLoading`或者`Prefetching`非常简单，我们只需要在上一节的例子中加一点点代码即可(参考高亮部分)：
+``` js {8}
+// 页面点击的时候才加载lodash模块
 document.addEventListener('click', () => {
   getComponet().then(element => {
     document.body.appendChild(element);
   })
 })
-```
-**懒加载结果：**
-![懒加载结果](../images/webpack/18.png)
-
-### PreLoading 和Prefetching
-::: tip
-在以上`Lazy Loading`的例子中，只有当我们在页面点击时才会加载`lodash`，也有一些模块虽然是异步导入的，但我们希望能提前进行加载，`PreLoading`和`Prefetching`可以帮助我们实现这一点，但它们还有一个区别在于：`Prefetching`不会跟随主进程一些下载，而是等到主进程加载完毕，带宽释放后才进行加载，`PreLoading`会随主进程一起加载。
-:::
-**新建click.js**：
-```js
-// click.js
-export default function handleClick() {
+async function getComponet() {
+  const { default: _ }  = await import(/* webpackPrefetch: true */ 'lodash');
   var element = document.createElement('div');
-  element.innerHTML = 'Dell - Lee';
-  document.body.appendChild(element);
+  element.innerHTML = _.join(['1', '2', '3'], '**')
+  return element;
 }
 ```
-**添加index.js代码**：
-```js
-// Prefetching代码预加载
-document.addEventListener('click', () => {
-  import(/* webpackChunkName: 'lodash' */ './click.js', (func) => {
-    func();
-  })
-})
-```
-
-**Prefetch结果：**
+改写完毕后，我们使用`npm run dev`或者`npm run build`进行打包，在浏览器中点击页面，我们将在`network`面板看到如下图所示：
 ![Prefetch结果](../images/webpack/19.png)
 
+相信聪明的你一定看到了`0.js`，它是`from disk cache`，那为什么？原因在于，`Prefetching`的代码它会在`head`头部，添加像这样的一段内容：
+``` css
+<link rel="prefetch" as="script" href="0.js">
+```
+这样一段内容追加到`head`头部后，指示浏览器在空闲时间里去加载`0.js`，这正是`Prefetching`它所能帮我们做到的事情，而`PreLoading`的用法于此类似，请自行测试。
 
-
-### CSS代码分隔
-::: tip
-当我们在使用`style-loader`和`css-loader`打包`.css`文件时会直接把CSS文件打包进`.js`文件中，然后直接把样式通过`<style></style>`的方式写在页面，如果我们要把CSS单独打包在一起，然后通过`link`标签引入，那么可以使用`mini-css-extract-plugin`插件进行打包
+### CSS代码分割
+::: tip 理解
+当我们在使用`style-loader`和`css-loader`打包`.css`文件时会直接把CSS文件打包进`.js`文件中，然后直接把样式通过`<style></style>`的方式写在页面，如果我们要把CSS单独打包在一起，然后通过`link`标签引入，那么可以使用`mini-css-extract-plugin`插件进行打包。
 :::
 ::: warning
-截止到写此文档时，此插件还未支持HMR，意味着我们要使用这个插件进行打包CSS时，为了开发效率，我们需要配置在生产环境下，开发环境依然还是使用`style-loader`进行打包。
+~~截止到写此文档时，此插件还未支持HMR，意味着我们要使用这个插件进行打包CSS时，为了开发效率，我们需要配置在生产环境下，开发环境依然还是使用`style-loader`进行打包~~。<br/>
+**此插件的最新版已支持HMR**。
 :::
-**新建src/style.css文件：** 在 src 目录下新建`style.css`文件并写如下样式
-```css
-body {
-  background-color: green;
-}
+在配置之前，我们需要使用`npm install`进行安装此插件：
+``` sh
+$ npm install mini-css-extract-plugin -D
 ```
-
-**改写webpack.prod.js：** 除了需要在`plugins`中使用插件以外，还需要在`Module`中，把CSS的`style-loader`替换成`MiniCssExtractPlugin.loader`
-```js{3,11,21}
-const merge = require('webpack-merge');
-const commonConfig = require('./webpack.common');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const prodConfig = {
-  mode: 'production',
-  devtool: 'cheap-module-source-map',
+安装完毕后，由于此插件已支持`HMR`，那我们可以把配置写在`webpack.common.js`中(以下配置为完整配置，改动参考高亮代码块)：
+```js {4,15,16,17,18,19,36,37,38}
+const path = require('path');
+const htmlWebpackPlugin = require('html-webpack-plugin');
+const cleanWebpackPlugin = require('clean-webpack-plugin');
+const miniCssExtractPlugin = require('mini-css-extract-plugin');
+module.exports = {
+  entry: {
+    main: './src/index.js'
+  },
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader,'css-loader']
+        use: [
+          { 
+            loader: miniCssExtractPlugin.loader,
+            options: {
+              hmr: true,
+              reloadAll: true
+            }
+          },
+          'css-loader'
+        ]
       },
       { 
         test: /\.js$/, 
@@ -1838,42 +1846,55 @@ const prodConfig = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({})
-  ]
+    new htmlWebpackPlugin({
+      template: 'src/index.html'
+    }),
+    new cleanWebpackPlugin(),
+    new miniCssExtractPlugin({
+      filename: '[name].css'
+    })
+  ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  },
+  output: {
+    filename: '[name].js',
+    path: path.resolve(__dirname,'../dist')
+  }
 }
-module.exports = merge(commonConfig, prodConfig);
 ```
-**改写index.js：** 改写`index.js`文件，通过`import`引入我们所写的CSS文件。
+配置完毕以后，我们来在`src`目录下新建一个`style.css`文件，它的代码如下：
+```css
+body {
+  color: green;
+}
+```
+接下来，我们改动一下`index.js`文件，让它引入`style.css`，它的代码可以这样写：
 ```js
 import './style.css';
-console.log('hello,world');
+var root = document.getElementById('root');
+root.innerHTML = 'Hello,world'
 ```
 
-**打包结果：** 使用`npm run build`进行打包，打包结果如下所示
-::: tip
-如果发现并没有打包生成`main.css`文件，可能是`Tree Shaking`的副作用，应该在`package.json`中添加属性`sideEffects:['*.css']`
-:::
+使用`npm run build`进行打包，`dist`打包目录如下所示：
 ```js
-|-- build
-|   |-- webpack.common.js
-|   |-- webpack.dev.js
-|   |-- webpack.prod.js
 |-- dist
 |   |-- index.html
 |   |-- main.css
 |   |-- main.css.map
 |   |-- main.js
 |   |-- main.js.map
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
--- src
-    |-- index.html
-    |-- index.js
-    |-- style.css
 ```
+::: warning 注意
+如果发现并没有打包生成`main.css`文件，可能是`Tree Shaking`的副作用，应该在`package.json`中添加属性`sideEffects:['*.css']`
+:::
 
 #### CSS压缩
+::: tip 理解
+`CSS`压缩的理解是：当我们有两个相同的样式分开写的时候，我们可以把它们合并在一起；为了减少`CSS`文件的体积，我们需要像压缩`JS`文件一样，压缩一下`CSS`文件。
+:::
 我们再在`src`目录下新建`style1.css`文件，内容如下：
 ```css
 body{
@@ -1884,66 +1905,44 @@ body{
 ```js
 import './style.css';
 import './style1.css';
-
-console.log('hello,world');
+var root = document.getElementById('root');
+root.innerHTML = 'Hello,world'
 ```
-
-**打包结果：** 我们发现，虽然插件帮我们把CSS打包在了一个文件，但并没有合并压缩。
+使用打包`npm run build`打包命令，我们发现虽然插件帮我们把CSS打包在了一个文件，但并没有合并压缩。
 ```css
 body {
-  background-color: green;
+  color: green;
 }
 body{
   line-height: 100px;
 }
-
-/*# sourceMappingURL=main.css.map*/
 ```
-::: tip
-要想把CSS文件进行合并压缩，需要安装`optimize-css-assets-webpack-plugin`插件
-:::
-
-**再次改写webpack.prod.js：** 再次改写此配置文件
-```js{4,12}
-const merge = require('webpack-merge');
-const commonConfig = require('./webpack.common');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const prodConfig = {
-  mode: 'production',
-  devtool: 'cheap-module-source-map',
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader,'css-loader']
-      },
-      { 
-        test: /\.js$/, 
-        exclude: /node_modules/, 
-        loader: "babel-loader" 
-      }
-    ]
-  },
+要实现`CSS`的压缩，我们需要再安装一个插件：
+``` sh
+$ npm install optimize-css-assets-webpack-plugin -D
+```
+安装完毕后我们需要再一次改写`webpack.common.js`的配置，如下：
+```js {1,8,9,10}
+const optimizaCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
+module.exports = {
+  // 其它配置
   optimization: {
+    splitChunks: {
+      chunks: 'all'
+    },
     minimizer: [
-      new OptimizeCSSAssetsPlugin({})
+      new optimizaCssAssetsWebpackPlugin()
     ]
-  },
-  plugins: [
-    new MiniCssExtractPlugin({})
-  ]
+  }
 }
-module.exports = merge(commonConfig, prodConfig);
 ```
-
-**打包结果：** 再次使用`npm run build`进行打包，打包结果如下所示，可以看见，两个CSS文件的代码已经压缩合并了。
+配置完毕以后，我们再次使用`npm run build`进行打包，打包结果如下所示，可以看见，两个CSS文件的代码已经压缩合并了。
 ```css
-body{background-color:green;line-height:100px}
+body{color:red;line-height:100px}
 ```
 
 ### Webpack和浏览器缓存(Caching)
-在讲这一小节之前，让我们清理下项目目录，改写下我们的`index.js`，删除掉一些没用的文件
+在讲这一小节之前，让我们清理下项目目录，改写下我们的`index.js`，删除掉一些没用的文件：
 ```js
 import _ from 'lodash';
 
@@ -1957,14 +1956,13 @@ document.body.append(dom);
 |   |-- webpack.common.js
 |   |-- webpack.dev.js
 |   |-- webpack.prod.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
 |-- src
     |-- index.html
     |-- index.js
+|-- postcss.config.js
+|-- package.json
 ```
-我们使用`npm run build`打包命令，打包我们的代码，可能会生成如下的文件
+我们使用`npm run build`打包命令，打包我们的代码，可能会生成如下的文件：
 ```js
 |-- build
 |   |-- webpack.common.js
@@ -1973,64 +1971,50 @@ document.body.append(dom);
 |-- dist
 |   |-- index.html
 |   |-- main.js
-|   |-- vendors~main.chunk.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
+|   |-- main.js.map
+|   |-- vendors~main.js
+|   |-- vendors~main.js.map
 |-- src
     |-- index.html
     |-- index.js
+|-- package.json
+|-- postcss.config.js
 ```
-我们可以看到，打包生成的dist目录下，文件名是`main.js`和`vendors~main.chunk.js`，如果我们把dist目录放在服务器部署的话，当用户第一次访问页面时，浏览器会自动把这两个`.js`文件缓存起来，下一次非强制性刷新页面时，会直接使用缓存起来的文件。<br/>
-假如，我们在用户第一次刷新页面和第二次刷新页面之间，我们修改了我们的代码，并再一次部署，这个时候由于浏览器缓存了这两个`.js`文件，所以用户界面无法获取最新的代码。<br>
+我们可以看到，打包生成的`dist`目录下，文件名是`main.js`和`vendors~main.js`，如果我们把`dist`目录放在服务器部署的话，当用户第一次访问页面时，浏览器会自动把这两个`.js`文件缓存起来，下一次非强制性刷新页面时，会直接使用缓存起来的文件。<br/><br/>
+假如，我们在用户第一次刷新页面和第二次刷新页面之间，我们修改了我们的代码，并再一次部署，这个时候由于浏览器缓存了这两个`.js`文件，所以用户界面无法获取最新的代码。<br><br/>
 那么，我们有办法能解决这个问题呢，答案是`[contenthash]`占位符，它能根据文件的内容，在每一次打包时生成一个唯一的hash值，只要我们文件发生了变动，就重新生成一个hash值，没有改动的话，`[contenthash]`则不会发生变动，可以在`output`中进行配置，如下所示：
 ```js
-// 开发环境下的output配置还是原来的那样，因为开发环境下，我们不用考虑缓存问题
-output: {
-  filename: '[name].js',
-  chunkFileName: '[name].chunk.js',
-  path: path.resolve(__dirname,'../dist')
-}
-
-// 生产环境下的output配置
+// 开发环境下的output配置还是原来的那样，也就是webpack.common.js中的output配置
+// 因为开发环境下，我们不用考虑缓存问题
+// webpack.prod.js中添加output配置
 output: {
   filename: '[name].[contenthash].js',
-  chunkFilename: '[name].[contenthash].chunk.js',
-  path: path.resolve(__dirname,'../dist')
+  chunkFilename: '[name].[contenthash].js'
 }
 ```
 
-**打包结果：** 使用`npm install build`进行打包，结果如下所示，可以看到每一个`.js`文件都有一个唯一的`hash`值，这样配置后就能有效解决浏览器缓存的问题。
+使用`npm run build`进行打包，`dist`打包目录的结果如下所示，可以看到每一个`.js`文件都有一个唯一的`hash`值，这样配置后就能有效解决浏览器缓存的问题。
 ```js
-|-- build
-|   |-- webpack.common.js
-|   |-- webpack.dev.js
-|   |-- webpack.prod.js
 |-- dist
 |   |-- index.html
 |   |-- main.8bef05e11ca1dc804836.js
-|   |-- vendors~main.20137a4ad072bc0461a8.chunk.js
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
-|-- src
-    |-- index.html
-    |-- index.js
+|   |-- main.8bef05e11ca1dc804836.js.map
+|   |-- vendors~main.4b711ce6ccdc861de436.js
+|   |-- vendors~main.4b711ce6ccdc861de436.js.map
 ```
 
 ### Shimming
 有时候我们在引入第三方库的时候，不得不处理一些全局变量的问题，例如jQuery的`$`，lodash的`_`，但由于一些老的第三方库不能直接修改它的代码，这时我们能不能定义一个全局变量，当文件中存在`$`或者`_`的时候自动的帮他们引入对应的包。
 ::: tip 解决办法
-这个问题，可以使用`ProvidePlugin`插件来解决，这个插件已经被Webpack内置，无需安装，直接使用即可。
+这个问题，可以使用`ProvidePlugin`插件来解决，这个插件已经被 Webpack 内置，无需安装，直接使用即可。
 :::
-**添加src/jquery.ui.js文件：** 在src目录下新建`jquery.ui.js`文件，代码如下所示，它使用了jQuery的`$`符号，创建这个文件，目的是为了来模仿第三方库。
+在`src`目录下新建`jquery.ui.js`文件，代码如下所示，它使用了`jQuery`的`$`符号，创建这个文件目的是为了来模仿第三方库。
 ```js
 export function UI() {
   $('body').css('background','green');
 }
 ```
-
-**修改index.js文件：** 改写`index.js`文件，并在其中引入我们的`jquery.ui.js`文件
+创建完毕后，我们修改一下`index.js`文件， 让它使用刚才我们创建的文件：
 ```js
 import _ from 'lodash';
 import $ from 'jquery';
@@ -2038,32 +2022,25 @@ import { UI } from './jquery.ui';
 
 UI();
 
-
-var dom = $('<div>');
-dom.html(_.join(['Dell', 'Lee'], '---'));
-$('body').appendChild(dom);
+var dom = $(`<div>${_.join(['Dell', 'Lee'], '---')}</div>`);
+$('#root').append(dom);
 ```
 
-**打包结果：** 使用`npm run dev`进行打包，会发现，代码运行不起来，报错`$ is not defined`，这是因为虽然我们在`index.js`中引入的jQuery文件，但`$`符号只能在`index.js`才有效，在`jquery.ui.js`无效，报错是因为`jquery.ui.js`中`$`符号找不到引起的。
+接下来我们使用`npm run dev`进行打包，它的结果如下：
 ![打包结果](../images/webpack/20.png)
 
-**改写webpack.common.js文件：** 在`webpack.common.js`文件中使用`ProvidePlugin`插件
-::: tip
+**问题：** 我们发现，根本运行不起来，报错`$ is not defined`<br/>
+**解答：** 这是因为虽然我们在`index.js`中引入的`jquery`文件，但`$`符号只能在`index.js`才有效，在`jquery.ui.js`无效，报错是因为`jquery.ui.js`中`$`符号找不到引起的。<br/>
+
+以上场景完美再现了我们最开始提到的问题，那么我们接下来就通过配置解决，首先在`webpack.common.js`文件中使用`ProvidePlugin`插件：
+::: tip 说明
 配置`$:'jquery'`，只要我们文件中使用了`$`符号，它就会自动帮我们引入`jquery`，相当于`import $ from 'jquery'`
 :::
-```js{3,13,14,15,16}
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+```js {3,13,14,15,16}
 const webpack = require('webpack');
 module.exports = {
-  entry: {
-    main: './src/index.js'
-  },
+  // 其它配置
   plugins: [
-    new htmlWebpackPlugin({
-      template: 'src/index.html'
-    }),
-    new cleanWebpackPlugin(),
     new webpack.ProvidePlugin({
       $: 'jquery',
       _: 'lodash'
@@ -2085,13 +2062,13 @@ console.log(this===window);
 ::: tip 解决办法
 安装使用`imports-loader`来解决这个问题
 :::
-```js
+``` sh
 $ npm install imports-loader -D
 ```
-**改写webpack.common.js文件：** 在`.js`的loader处理中，添加`imports-loader`
-```js{13}
+安装完毕后，我们在`webpack.common.js`加一点配置，在`.js`的loader处理中，添加`imports-loader`
+```js {13}
 module.exports = {
-  // ... 其他配置
+  // ... 其它配置
   module: {
     rules: [
       { 
@@ -2107,12 +2084,10 @@ module.exports = {
         ]
       }
     ]
-  },
-  // ... 其他配置
+  }
 }
 ```
-
-**打包结果：** 使用`npm run dev`来进行打包，运行`index.html`，查看`console`控制台，输出`true`，证明`this`这个时候已经指向了全局`window`对象，问题解决。
+配置完毕后使用`npm run dev`来进行打包，查看`console`控制台输出`true`，证明`this`这个时候已经指向了全局`window`对象，问题解决。
 ![打包结果](../images/webpack/22.png)
 
 
