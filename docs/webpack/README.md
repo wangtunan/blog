@@ -2771,26 +2771,25 @@ console.log(greeter.greet());
 ## Webpack性能优化
 
 ### 打包分析
-::: tip
-在进行 Webpack 性能优化之前，我们有必要知道我们打包的文件到底有多大，打包时间是多少，我们使用`webpack-bundle-analyzer`来帮助我们
+::: tip 前提
+在进行 Webpack 性能优化之前，如果我们知道我们每一个打包的文件有多大，打包时间是多少，它对于我们进行性能优化是很有帮助的，这里我们使用`webpack-bundle-analyzer`来帮助我们解决这个问题。
 :::
-**安装打包分析插件：**
-```js
+首先需要使用如下命令去安装这个插件：
+``` sh
 $ npm install webpack-bundle-analyzer --save-dev
 ```
-**改写webpack.prod.js配置：** 在`webpack.prod.js`文件中添加`webpack-bundle-analyzer`插件
+安装完毕后，我们需要在`webpack.prod.js`文件中做一点小小的改动：
 ```js
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const prodConfig = {
-  // ... 其它配置项
+  // 其它配置项
   mode: 'production',
   plugins: [
     new BundleAnalyzerPlugin()
   ]
 }
 ```
-
-**打包结果：** 运行`npm run build`命令来查看打包分析结果
+配置完毕后，我们运行`npm run build`命令来查看打包分析结果，以下打包结果仅供参考：
 ![打包分析结果](../images/webpack/30.png)
 
 ### 缩小文件的搜索范围
@@ -2817,7 +2816,7 @@ import main from 'main'
 :::
 ```js
 module.exports = {
-  // ... 其他配置
+  // 其它配置
   resolve: {
     extensions: ['.js', '.json', '.vue']
   }
@@ -2844,12 +2843,12 @@ import BaseHeader from '@components/base-header/index.vue';
 import BaseHeader from '@components/base-header/main.vue';
 ```
 我们也可以去配置自己的`mainFields`参数：
-::: tip
+::: tip 说明
 同`extensions`参数类似，我们也不建议过多的配置`mainFields`的值，原因如上。
 :::
 ```js
 module.exports = {
-  // ... 其他配置
+  // 其它配置
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     mainFields: ['main', 'index']
@@ -2875,7 +2874,7 @@ import React from 'react';
 // 别名配置
 const path = require('path');
 module.exports = {
-  // ... 其他配置
+  // 其它配置
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     mainFields: ['main', 'index'],
@@ -2888,18 +2887,18 @@ module.exports = {
 ```
 
 ### Tree Shaking去掉冗余的代码
-::: tip
-Tree Shaking配置我们已经在上面讲过，配置Tree Shaking也很简单。
+::: tip 说明
+`Tree Shaking`配置我们已经在上面讲过，配置`Tree Shaking`也很简单。
 :::
 ```js
 module.exports = {
-  // ... 其他配置
+  // 其它配置
   optimization: {
     usedExports: true
   }
 }
 ```
-
+如果你对`Tree Shaking`还不是特别理解，请点击[Tree Shaking](/webpack/#tree-shaking)阅读更多。
 ### DllPlugin减少第三方库的编译次数
 对于有些固定的第三方库，因为它是固定的，我们每次打包，Webpack 都会对它们的代码进行分析，然后打包。那么有没有什么办法，让我们只打包一次，后面的打包直接使用第一次的分析结果就行。答案当然是有的，我们可以使用 Webpack 内置的`DllPlugin`来解决这个问题，解决这个问题可以分如下的步骤进行：
 * 把第三方库单独打包在一个`xxx.dll.js`文件中
