@@ -1344,6 +1344,8 @@ module.exports = {
 ],
 ```
 
+**小结**：对于`Tree Shaking`的争议比较多，推荐看:point_right:[你的Tree Shaking并没有什么卵用](https://zhuanlan.zhihu.com/p/32831172)，看完你会发现我们对`Tree Shaking`的了解太浅薄了:sob:
+
 ### 区分开发模式和生产模式
 像上一节那样，如果我们要区分`Tree Shaking`的开发环境和生产环境，那么我们每次打包的都要去更改`webpack.config.js`文件，有没有什么办法能让我们少改一点代码呢？ 答案是有的！
 ::: tip 说明
@@ -2899,6 +2901,7 @@ module.exports = {
 }
 ```
 如果你对`Tree Shaking`还不是特别理解，请点击[Tree Shaking](/webpack/#tree-shaking)阅读更多。
+
 ### DllPlugin减少第三方库的编译次数
 对于有些固定的第三方库，因为它是固定的，我们每次打包，Webpack 都会对它们的代码进行分析，然后打包。那么有没有什么办法，让我们只打包一次，后面的打包直接使用第一次的分析结果就行。答案当然是有的，我们可以使用 Webpack 内置的`DllPlugin`来解决这个问题，解决这个问题可以分如下的步骤进行：
 * 把第三方库单独打包在一个`xxx.dll.js`文件中
@@ -2912,19 +2915,19 @@ module.exports = {
 为了单独打包第三方库，我们需要进行如下步骤：
 * 根目录下生成`dll`文件夹
 * 在`build`目录下生成一个`webpack.dll.js`的配置文件，并进行配置。
-* 在`package.json`文件中，生成`build:dll`命令
+* 在`package.json`文件中，配置`build:dll`命令
 * 使用`npm run build:dll`进行打包
 :::
 生成`dll`文件夹：
-```js
+``` sh
 $ mkdir dll
 ```
-在`build`文件夹下生层`webpack.dll.js`:
-```js
+在`build`文件夹下生成`webpack.dll.js`:
+```sh
 $ cd build
 $ touch webpack.dll.js
 ```
-`webpack.dll.js`文件的代码：
+创建完毕后，需要在`webpack.dll.js`文件中添加如下代码：
 ```js
 const path = require('path');
 module.exports = {
@@ -2939,20 +2942,20 @@ module.exports = {
   }
 }
 ```
-`package.json`文件中的打包命令
-```js{7}
+
+最后需要在`package.json`文件中添加新的打包命令：
+```js {6}
 {
-  // ... 其他配置
+  // 其它配置
   "scripts": {
     "dev": "webpack-dev-server --config ./build/webpack.dev.js",
     "build": "webpack --config ./build/webpack.prod.js",
-    "report": "webpack --profile --json > stats.json --config ./build/webpack.prod.js",
     "build:dll": "webpack --config ./build/webpack.dll.js"
   }
 }
 ```
 
-使用`npm run build:dll`打包结果：
+使用`npm run build:dll`打包结果，你的打包结果看起来是下面这样的：
 ```js
 |-- build
 |   |-- webpack.common.js
@@ -2964,28 +2967,20 @@ module.exports = {
 |-- src
 |   |-- index.html
 |   |-- index.js
-|-- package-lock.json
 |-- package.json
 ```
 
 #### 引用`xxx.dll.js`文件
-要在`index.html`中引入其他的文件，需要安装`add-asset-html-webpack-plugin`插件：
-```js
+在上一小节中我们成功拿到了`xxx.dll.js`文件，那么如何在`index.html`中引入这个文件呢？答案是需要安装`add-asset-html-webpack-plugin`插件：
+``` sh
 $ npm install add-asset-html-webpack-plugin -D
 ```
 在`webpack.common.js`中使用`add-asset-html-webpack-plugin`插件：
-```js {13}
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+```js
 const addAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin');
-const path = require('path');
 const configs = {
-  // ... 其他配置
+  // 其它配置
   plugins: [
-    new cleanWebpackPlugin(),
-    new htmlWebpackPlugin({
-      template: 'src/index.html'
-    }),
     new addAssetHtmlWebpackPlugin({
       filepath: path.resolve(__dirname, '../dll/vendors.dll.js')
     })
@@ -3031,7 +3026,7 @@ const addAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 module.exports = {
-  // ... 其他配置
+  // 其它配置
   plugins: [
     new cleanWebpackPlugin(),
     new htmlWebpackPlugin({
@@ -3048,8 +3043,8 @@ module.exports = {
 ```
 
 #### 优化
-现在我们思考一个问题，我们目前是把`lodash`和`jquery`全部打包到了`vendors`文件中，那么如果我们要拆分怎么办，拆分后又改如何去配置引入？一个可能的拆分结果如下：
-```js {7}
+现在我们思考一个问题，我们目前是把`lodash`和`jquery`全部打包到了`vendors`文件中，那么如果我们要拆分怎么办，拆分后又该如何去配置引入？一个可能的拆分结果如下：
+```js {6,7}
 const path = require('path');
 const webpack = require('webpack');
 module.exports = {
@@ -3136,7 +3131,7 @@ configs.plugins = makePlugins(configs);
 module.exports = configs;
 ```
 使用`npm run build:dll`进行打包第三方库，再使用`npm run build`打包，打包结果如下:
-::: tip
+::: tip 说明
 本次试验，第一次打包时间为1100ms+，后面的打包稳定在800ms+，说明我们的 Webpack性能优化已经生效。
 :::
 ```js
@@ -3155,17 +3150,14 @@ module.exports = configs;
 |   |-- jquery.manifest.json
 |   |-- vendors.dll.js
 |   |-- vendors.manifest.json
-|-- package-lock.json
-|-- package.json
-|-- postcss.config.js
 |-- src
 |   |-- index.html
 |   |-- index.js
+|-- package.json
+|-- postcss.config.js
 ```
 
-### HappyPack插件开启多线程打包
-
-### UglifyJS插件压缩代码
+**小结**：Webpack 性能优化是一个长久的话题，本章也仅仅只是浅尝辄止，后续会有关于 Webpack 更加深入的解读博客，敬请期待(立个`flag`:triangular_flag_on_post:)。
 
 ## 编写自己的Loader
 在我们使用 Webpack 的过程中，我们使用了很多的`loader`，那么那些`loader`是哪里来的？我们能不能写自己的`loader`然后使用？
@@ -3174,25 +3166,24 @@ module.exports = configs;
 ::: tip 场景
 我们需要把`.js`文件中，所有出现`Webpack is good!`，改成`Webpack is very good!`。实际上我们需要编写自己的`loader`，所以我们有如下的步骤需要处理：
 * 新建`webpack-loader`项目
-* 使用`npm init -y`命令生成package.json文件
+* 使用`npm init -y`命令生成`package.json`文件
 * 创建`webpack.config.js`文件
 * 创建`src`目录，并在`src`目录下新建`index.js`
 * 创建`loaders`目录，并在`loader`目录下新建`replaceLoader.js`
 * 安装`webpack`、`webpack-cli`
 :::
 
-新建后的项目目录如下：
+按上面的步骤新建后的项目目录如下：
 ```js
 |-- loaders
 |   | -- replaceLoader.js
 |-- src
 |   | -- index.js
 |-- webpack.config.js
-|-- package-lock.json
 |-- package.json
 ```
 
-`webpack.config.js`文件的代码如下：
+首先需要在`webpack.config.js`中添加下面的代码：
 ```js
 const path = require('path');
 module.exports = {
@@ -3213,21 +3204,22 @@ module.exports = {
 }
 ```
 
-`package.json`文件添加`build`打包命令：
+随后在`package.json`文件添加`build`打包命令：
 ```js {2}
+// 其它配置
 "scripts": {
   "build": "webpack"
 }
 ```
 
-`src/index.js`文件中的代码：这个文件使用最简单的例子，只是打印一句话。
+接下来在`src/index.js`文件中添加一行代码：这个文件使用最简单的例子，只是打印一句话。
 ```js
 console.log('Webpack is good!');
 ```
 
-`loader/replaceLoader.js`文件中的代码：
-::: tip 技巧点
-* 编写`loader`时，`module.exports`是固定写法，并且它只能是一个普通函数，不能写箭头函数
+最后就是在`loader/replaceLoader.js`编写我们自己`loader`文件中的代码：
+::: tip 说明
+* 编写`loader`时，`module.exports`是固定写法，并且它只能是一个普通函数，不能写箭头函数(`this`指向)
 * `source`是打包文件的源文件内容
 :::
 ```js
@@ -3238,10 +3230,10 @@ module.exports = function(source) {
 ```
 
 使用我们的`loader`: 要使用我们的`loader`，则需要在`modules`中写`loader`:
-::: tip
-`resolveLoader`配置，告诉了 Webpack 使用`loader`时，应该去哪些目录下去找，默认是`node_modules`，做了此项配置后，我们就不用`path.resolve(__dirname, './loaders/replaceLoader.js')`路径了，因为它会自动去`loaders`文件夹下面去找。
+::: tip 理解
+`resolveLoader`：它告诉了 Webpack 使用`loader`时，应该去哪些目录下去找，默认是`node_modules`，做了此项配置后，我们就不用去显示的填写其路径了，因为它会自动去`loaders`文件夹下面去找。
 :::
-```js
+```js {13}
 const path = require('path');
 module.exports = {
   mode: 'development',
@@ -3268,7 +3260,7 @@ module.exports = {
   }
 }
 ```
-打包结果：运行`npm run build`，在生成的`dist`目录下，打开`main.js`文件，可以看到文件内容已经成功替换了，说明我们的`loader`已经使用成功了。
+最后我们运行`npm run build`，在生成的`dist`目录下打开`main.js`文件，可以看到文件内容已经成功替换了，说明我们的`loader`已经使用成功了。
 ```js
 /***/ "./src/index.js":
 /*!**********************!*\
@@ -3285,19 +3277,19 @@ eval("console.log('Webpack is very good!');\n\n//# sourceURL=webpack:///./src/in
 ```
 
 
-### 如何向自己的Loader传参
-::: tip 要解决的问题
+### 如何向Loader传参及返回多个值
+::: tip 问题
 * 我们如何返回多个值？
-* 我们如何向自己的Loader传递？
+* 我们如何向自己的Loader传递参数？
 :::
 
 #### 如何返回多个值
-::: tip
-Webpack 的 API允许我们使用`callback(error, result, sourceMap, meta)`返回多个值，它有四个参数：
+::: tip 说明
+Webpack 的 API允许我们使用`callback(error, result, sourceMap?, meta?)`返回多个值，它有四个参数：
 * `Error || Null` ：错误类型， 没有错误传递`null`
 * `result` ：转换后的结果
-* `sourceMap`：处理分析后的`sourceMap`
-* `meta`: 元信息
+* `sourceMap`：可选参数，处理分析后的`sourceMap`
+* `meta`: 可选参数，元信息
 :::
 
 返回多个值，可能有如下情况：
@@ -3307,7 +3299,7 @@ this.callback(null, result);
 ```
 
 #### 如何传递参数
-我们知道，在使用`loader`的时候，可以写成如下的形式：
+我们知道在使用`loader`的时候，可以写成如下的形式：
 ```js
 // options里面可以传递一些参数
 {
@@ -3321,7 +3313,7 @@ this.callback(null, result);
 }
 ```
 
-再使用`options`传递参数后，我们可以使用官方提供的`loader-utils`来获取`options`参数，可以向下面这样写：
+再使用`options`传递参数后，我们可以使用官方提供的[loader-utils](https://github.com/webpack/loader-utils)来获取`options`参数，可以像下面这样写：
 ```js
 const loaderUtils = require('loader-utils');
 module.exports = function(source) {
@@ -3330,8 +3322,8 @@ module.exports = function(source) {
 }
 ```
 
-### 如何在自己的Loader写异步代码
-在上面的例子中，我们都是使用了同步的代码，那么如果我们有必须异步的场景，改如何实现呢？我们不妨做这样的假设，先写一个`setTimeout`：
+### 如何在Loader中写异步代码
+在上面的例子中，我们都是使用了同步的代码，那么如果我们有必须异步的场景，该如何实现呢？我们不妨做这样的假设，先写一个`setTimeout`：
 ```js
 const loaderUtils = require('loader-utils');
 module.exports = function(source) {
@@ -3343,7 +3335,7 @@ module.exports = function(source) {
 }
 ```
 如果你运行了`npm run build`进行打包，那么一定会报错，解决办法是：使用`this.async()`主动标识有异步代码：
-```js
+```js {4}
 const loaderUtils = require('loader-utils');
 module.exports = function(source) {
   var options = loaderUtils.getOptions(this);
@@ -3354,24 +3346,25 @@ module.exports = function(source) {
   }, 0);
 }
 ```
-至此，我们已经掌握了如何编写、如何引用、如何传递参数以及如何写异步代码，在下一小节当中我们学习如何编写自己的`plugin`。
+至此，我们已经掌握了如何编写、如何引用、如何传递参数以及如何写异步代码，在下一小节当中我们将学习如何编写自己的`plugin`。
 
 ## 编写自己的Plugin
 与`loader`一样，我们在使用 Webpack 的过程中，也经常使用`plugin`，那么我们学习如何编写自己的`plugin`是十分有必要的。
+::: tip 场景
+编写我们自己的`plugin`的场景是在打包后的`dist`目录下生成一个`copyright.txt`文件
+:::
 ### plugin基础
 `plugin`基础讲述了怎么编写自己的`plugin`以及如何使用，与创建自己的`loader`相似，我们需要创建如下的项目目录结构：
 ```js
-|-- webpack-plugin
-    |-- plugins
-    |   |-- copyWebpackPlugin.js
-    |-- src
-    |   |-- index.js
-    |-- webpack.config.js
-    |-- package-lock.json
-    |-- package.json
+|-- plugins
+|   -- copyWebpackPlugin.js
+|-- src
+|   -- index.js
+|-- webpack.config.js
+|-- package.json
 ```
 `copyWebpackPlugins.js`中的代码：使用`npm run build`进行打包时，我们会看到控制台会输出`hello, my plugin`这段话。
-::: tip
+::: tip 说明
 `plugin`与`loader`不同，`plugin`需要我们提供的是一个类，这也就解释了我们必须在使用插件时，为什么要进行`new`操作了。
 :::
 ```js
@@ -3425,7 +3418,7 @@ module.exports = {
   ]
 }
 ```
-在`plugin`的构造函数中调用：使用`npm run build`进行打包，在控制台可以打印出我们传递的参数`why`
+在`plugin`的构造函数中调用：使用`npm run build`进行打包，在控制台可以打印出我们传递的参数值`why`
 ```js {3}
 class copyWebpackPlugin {
   constructor(options) {
@@ -3439,7 +3432,7 @@ module.exports = copyWebpackPlugin;
 ```
 
 ### 如何编写及使用自己的Plugin
-::: tip
+::: tip 说明
 * `apply`函数是我们插件在调用时，需要执行的函数
 * `apply`的参数，指的是 Webpack 的实例
 * `compilation.assets`打包的文件信息
@@ -3467,7 +3460,7 @@ class CopyWebpackPlugin {
 }
 module.exports = CopyWebpackPlugin;
 ```
-使用`npm run build`命名打包后，我们可以看到`dist`目录下，确实生成了我们的`copyright.txt`文件：
+使用`npm run build`命名打包后，我们可以看到`dist`目录下，确实生成了我们的`copyright.txt`文件。
 ```js
 |-- dist
 |   |-- copyright.txt
@@ -3477,6 +3470,22 @@ module.exports = CopyWebpackPlugin;
 |-- src
 |   |-- index.js
 |-- webpack.config.js
-|-- package-lock.json
 |-- package.json
 ```
+我们打开`copyright.txt`文件，它的内容如下：
+``` html
+copyright by why
+```
+
+## 总结
+
+### 总结
+在经过上面的学习后我们不难发现，Webpack 紧紧围绕以下几个核心概念进行配置：
+* `entry`入口
+* `output`输出
+* `loader`
+* `plugins`插件
+* `mode`模式
+* `module`模块解析
+
+最后如果你想学习更多 Webpack 的相关知识，那么强烈推荐 [Webpack官网](https://webpack.js.org/)，同时也请留意后续本博客关于 Webpack 的文章，完结撒花:tada::tada::tada:
