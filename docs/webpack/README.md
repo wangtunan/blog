@@ -3476,16 +3476,3 @@ module.exports = CopyWebpackPlugin;
 ``` html
 copyright by why
 ```
-
-## 总结
-
-### 总结
-在经过上面的学习后我们不难发现，Webpack 紧紧围绕以下几个核心概念进行配置：
-* `entry`入口
-* `output`输出
-* `loader`
-* `plugins`插件
-* `mode`模式
-* `module`模块解析
-
-最后如果你想学习更多 Webpack 的相关知识，那么强烈推荐 [Webpack官网](https://webpack.js.org/)，同时也请留意后续本博客关于 Webpack 的文章，完结撒花:tada::tada::tada:
