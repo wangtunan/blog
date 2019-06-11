@@ -1,5 +1,5 @@
 # VuePress <Badge text="0.x"/>
-本`blog`配套了一个基于 VuePress 的一个简单的配置案例，此配置案例包含了本`blog`绝大部分配置案例，更多详情请移步这里进行[VuePress配置案例](https://github.com/wangtunan/vuepress-blog-demo)
+本`blog`配套了一个基于 VuePress 的一个简单的配置案例，此配置案例包含了本`blog`绝大部分配置案例，更多详情请移步这里[VuePress配置案例](https://github.com/wangtunan/vuepress-blog-demo)
 ## 介绍
 
 ### 如何而来
@@ -95,6 +95,21 @@ footer: Copyright © 2019-present Wangtunan
 * `actionLink`: 首页跳转按钮挑战的路径，其中全路径为`docs/interview/readme.md`，默认`readme`命名的文件可以省略不写链接的后面内容，省略后的链接如上
 * `features`: 表明首页的特征，固定的格式为`title` + `details`，以三栏流式布局的方式展示
 * `footer`: 为底部内容，与普通的网页一样，我们可以在`footer`里面写版权信息
+### 配置icon图标
+配置`icon`需要在`config.js`进行设置，其中`icon`图标**必须**存放在`.vuepress/public`文件夹下面，它的配置如下：
+``` js
+module.exports = {
+  head: [
+    ['link', { rel: 'icon', href: '/icon.png' }]
+  ]
+}
+```
+按上面的要求放置图片后，我们的`public`文件夹的目录如下：
+```js
+|-- public
+|   |-- logo.png
+|   |-- icon.png
+```
 
 ### 导航栏
 ::: tip 提示
@@ -141,6 +156,52 @@ module.exports = {
 导航栏下拉列表配置结果
 ![导航栏下拉列表配置结果](../images/vuepress/3.png)
 
+#### 下拉列表分组
+::: tip 说明
+下拉列表分组适用于下拉选项较多的情况
+:::
+相信熟悉`Vue.js`官网的你，一定看过如下的下拉框情况
+![下拉列表分组](../images/vuepress/20.png)
+要实现以上的情况，可以如下进行配置
+``` js
+module.exports = {
+  themeConfig: {
+    nav: [
+      { text: '首页', link: '/' },
+      { text: '前端三剑客', items: [
+        { text: 'HTML', link: '/html/' },
+        { text: 'CSS', link: '/CSS/' },
+        { text: 'JavaScript', link: '/JavaScript/' }
+      ]},
+      { text: 'Vue.jss', link: '/vue/' },
+      {
+        text: '生态系统',
+        items: [
+          {
+            text: '帮助',
+            items: [
+              { text: '论坛', link: '/xxx' },
+              { text: '聊天室', link: '/xxx' },
+              { text: '聚会', link: '/xxx' },
+            ]
+          },
+          {
+            text: '工具',
+            items: [
+              { text: 'Devtools', link: '/xxx' },
+              { text: 'Vue Cli', link: '/xxx' },
+              { text: 'Vue Loader', link: '/xxx' },
+            ]
+          },
+        ]
+      }
+    ]
+  }
+}
+```
+以上配置完毕后，务必重新启动一下服务器，再查看效果，会有惊喜哦。:heart::heart::heart:
+
+
 #### 禁用导航栏
 禁用导航栏分为两种情况，第一种禁用所有的导航栏，第二种在某个页面禁用导航栏，针对这两种不同的情况，相关的配置是不同的，具体如下所示<br/>
 **第一种：** 禁用所有导航栏，通过配置`navbar`属性为`false`，此种方式禁用后，将**不会存在**任何导航栏
@@ -177,7 +238,7 @@ module.exports = {
 
 #### 侧边栏分组
 ::: tip 解释
-侧边栏分组即意味着把链接进行分组，每一个链接对应一个页面
+侧边栏分组即意味着把链接进行分组，每一个链接对应一个页面，配置侧边栏分组后，自动生成侧边栏`sidebar:auto`会自动失效。
 :::
 侧边栏分组可以如下进行配置，其中`collapsable`属性设置为`false`，意味着展开这个分组，属性设置为`true`，意味着折叠这个分组。
 ```js
@@ -947,6 +1008,28 @@ export default ({
   // ...做一些其他的应用级别的优化
 }
 ```
+
+#### 引入Element-ui案例
+先使用如下命令安装`element-ui`
+```sh
+$ npm install element-ui --save
+```
+安装完毕后，在`enhanceApp.js`中引入`element-ui`
+```js
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
+export default ({
+  Vue,
+  options,
+  router,
+  siteData 
+}) => {
+  // 使用element-ui
+  Vue.use(ElementUI)
+}
+```
+以上配置完毕后，就可以在 VuePress 中使用`element-ui`了，快去试一试吧。
 
 ## 部署
 
