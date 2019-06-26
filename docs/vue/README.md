@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 # Vue
 
 ## Vue基础知识

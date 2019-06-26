@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 # VuePress <Badge text="0.x"/>
 本`blog`配套了一个基于 VuePress 的一个简单的配置案例，此配置案例包含了本`blog`绝大部分配置案例，更多详情请移步这里[VuePress配置案例](https://github.com/wangtunan/vuepress-blog-demo)
 ## 介绍

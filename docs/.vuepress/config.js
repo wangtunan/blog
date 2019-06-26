@@ -1,3 +1,5 @@
+const nav = require('./nav.js')
+var { cssSidebar,webpackSidebar } = nav
 module.exports = {
   title: '一蓑烟雨、汪汪汪',
   description: '一蓑烟雨、汪汪汪的个人站点',
@@ -22,16 +24,21 @@ module.exports = {
         ]
       },
       { text: 'JavaScript设计模式', link: '/designPattern/'},
-      { text: '数据结构和算法', link: '/algorithm/'},
+      // { text: '数据结构和算法', link: '/algorithm/'},
       { text: 'Vue.js', items: [
         { text: 'Vue基础知识', link: '/vue/' },
         { text: 'Vue原理剖析', link: '/vue/principle.md' }
       ]},
       { text: 'Webpack',link: '/webpack/'},
       { text: 'VuePress',link: '/vuepress/'},
-      { text: 'CSS奇技淫巧',link: '/css/'},
+      { text: 'CSS奇技淫巧',link: '/css/#参考博客'},
       { text: 'Git',link: '/git/'}
-  ]},
+    ],
+    sidebar: {
+      '/css/': [cssSidebar],
+      '/webpack/': [webpackSidebar]
+    }
+  },
   configureWebpack: {
     resolve: {
       alias: {

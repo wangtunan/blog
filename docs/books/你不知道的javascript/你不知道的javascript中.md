@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 # 你不知道的javascript中
 
 ## 类型和语法

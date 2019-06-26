@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 # 你不知道的javascript上
 
 好书蒙尘，现在才阅读整理，罪过罪过！
