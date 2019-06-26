@@ -29,7 +29,7 @@ module.exports = {
       ]},
       { text: 'Webpack',link: '/webpack/'},
       { text: 'VuePress',link: '/vuepress/'},
-      // { text: 'CSS奇淫技巧',link: '/css/'},
+      { text: 'CSS奇技淫巧',link: '/css/'},
       { text: 'Git',link: '/git/'}
   ]},
   configureWebpack: {
