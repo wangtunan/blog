@@ -3,6 +3,7 @@ const cssSidebar = {
   title: 'CSS奇技淫巧',
   collapsable: false,
   children: [
+    '/css/',
     '/css/word.md',
     '/css/border.md',
     '/css/background.md',

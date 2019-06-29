@@ -1,4 +1,4 @@
-const nav = require('./nav.js')
+const nav = require('./utils/nav.js')
 var { cssSidebar,webpackSidebar } = nav
 module.exports = {
   title: '一蓑烟雨、汪汪汪',
@@ -31,7 +31,7 @@ module.exports = {
       ]},
       { text: 'Webpack',link: '/webpack/'},
       { text: 'VuePress',link: '/vuepress/'},
-      { text: 'CSS奇技淫巧',link: '/css/#参考博客'},
+      { text: 'CSS奇技淫巧',link: '/css/'},
       { text: 'Git',link: '/git/'}
     ],
     sidebar: {
@@ -42,7 +42,8 @@ module.exports = {
   configureWebpack: {
     resolve: {
       alias: {
-        '@vuepress': '../images/vuepress'
+        '@vuepress': '../images/vuepress',
+        '@components': '../.vuepress/components'
       }
     }
   }
