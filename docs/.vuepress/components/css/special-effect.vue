@@ -11,6 +11,13 @@
     <div class="box-item blur" v-show="index==3">
       <p>我自横刀向天笑，去留肝胆两昆仑</p>
     </div>
+    <!-- 文字阴影 -->
+    <div class="box-item shadow" v-show="index==4">我自横刀向天笑，去留肝胆两昆仑</div>
+    <!-- 文字凸起和凹陷的效果 -->
+    <div class="box-item bump" v-show="index==5">
+      <p class="tu">我自横刀向天笑，去留肝胆两昆仑</p>
+      <p class="ao">我自横刀向天笑，去留肝胆两昆仑</p>
+    </div>
   </div>
 </template>
 <script>
@@ -58,9 +65,27 @@ export default {
         & > p
           line-height: 60px;
         &:hover
-          & > p
-            // color: #000;
-            // filter: blur(2px);
-          color:transparent;
-          text-shadow: 0 0 5px rgba(0,0,0,0.6);
+          p
+            color:transparent;
+            text-shadow: 0 0 5px rgba(0,0,0,0.6);
+      &.shadow
+        text-shadow: 1px 1px rgba(0,0,0,0.3),2px 2px rgba(0,0,0,0.3),3px 3px rgba(0,0,0,0.3),4px 4px rgba(0,0,0,0.3);
+      &.bump
+        height: 120px!important;
+        background-color: #ccc;
+        & > p
+          line-height: 25px;
+        .tu
+          font-size: 25px;
+          text-shadow: 0 1px rgba(0,0,0,0.2),
+                       0 2px rgba(0,0,0,0.3),
+                       0 3px rgba(0,0,0,0.4),
+                       0 4px rgba(0,0,0,0.5),
+                       0 5px rgba(0,0,0,0.6),
+                       0 5px 5px rgba(0,0,0,1);
+        .ao
+          line-height: 0px;
+          font-size: 45px;
+          color: #ccc;
+          text-shadow: -1px -1px 1px #000, 1px 1px 1px #fff;
 </style>

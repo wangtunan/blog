@@ -151,8 +151,22 @@ text-shadow: 0 0 5px rgba(0,0,0,0.6);
 你可以鼠标移入下面的文字，查看文字模糊效果！:point_down::point_down::point_down:
 <special-effect :index="3"/>
 
+### 文字阴影
+::: tip
+文字阴影效果可以使用多个`text-shadow`，通过偏移进行叠加
+:::
+下面是文字阴影的代码：
+```css
+/* 关键代码 */
+text-shadow: 1px 1px rgba(0,0,0,0.3),
+             2px 2px rgba(0,0,0,0.3),
+             3px 3px rgba(0,0,0,0.3),
+             4px 4px rgba(0,0,0,0.3);
+```
+文字阴影的效果：
+<special-effect :index="4"/>
 ### 文字凸起/凹陷
-
+<special-effect :index="5"/>
 ### 文字颜色渐变
 
 ## 首字母下沉
