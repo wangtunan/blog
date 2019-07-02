@@ -166,9 +166,69 @@ text-shadow: 1px 1px rgba(0,0,0,0.3),
 文字阴影的效果：
 <special-effect :index="4"/>
 ### 文字凸起/凹陷
+::: tip
+文字凸起/凹陷效果是利用多重偏移投影叠加或者相反的偏移，形成一个视觉差异实现的
+:::
+下面是文字凸起/凹陷的代码：
+```css
+.tu
+  font-size: 25px;
+  text-shadow: 0 1px rgba(0,0,0,0.2),
+                0 2px rgba(0,0,0,0.3),
+                0 3px rgba(0,0,0,0.4),
+                0 4px rgba(0,0,0,0.5),
+                0 5px rgba(0,0,0,0.6),
+                0 5px 5px rgba(0,0,0,1);
+.ao
+  line-height: 0px;
+  font-size: 45px;
+  color: #ccc;
+  text-shadow: -1px -1px 1px #000, 1px 1px 1px #fff;
+```
+文字凸起/凹陷的实时效果
 <special-effect :index="5"/>
 ### 文字颜色渐变
+::: tip
+文字颜色渐变要利用到`linear-gradient`和`-webkit-background-clip`属性
+:::
+下面是文字渐变的代码：
+```css
+font-size: 50px;
+color: transparent;
+background: linear-gradient(0, #58a 0%, #b60  100%);
+-webkit-background-clip:text;
+```
+下面是文字渐变的实时效果：
+<special-effect :index="6"/>
+
 
 ## 首字母下沉
+::: tip
+首字母下沉效果可以使用`::first-letter`伪元素来实现
+:::
+下面是首字母下沉的代码：
+```css
+p::first-letter {
+  float: left;
+  margin-right: 16px;
+  font-size: 25px;
+  color: #58a;
+}
+```
+下面是首字母下沉的实时效果：
+<first-letter/>
 
 ## 竖排文字
+::: tip
+竖排文字的实现很简单，它只需要设置`writing-mode`属性即可，下面是它属性值的介绍：
+* `horizontal-tb`：默认值，表示水平排版，从上到下。
+* `vertical-lr`：表示垂直排版，从左到右。
+* `vertical-rl`：表示垂直排版，从右到左。
+:::
+下面是竖排文字的代码：
+```css
+writing-mode: horizontal-tb
+```
+下面是竖排文字的实时效果：
+<vertical-text/>
+:point_up_2: 你可以在上面切换单选框来查看不同属性的实时效果。

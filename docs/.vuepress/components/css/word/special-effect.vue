@@ -18,6 +18,10 @@
       <p class="tu">我自横刀向天笑，去留肝胆两昆仑</p>
       <p class="ao">我自横刀向天笑，去留肝胆两昆仑</p>
     </div>
+    <!-- 文字颜色渐变 -->
+    <div class="box-item linear" v-show="index==6">
+      我自横刀向天笑，去留肝胆两昆仑
+    </div>
   </div>
 </template>
 <script>
@@ -88,4 +92,9 @@ export default {
           font-size: 45px;
           color: #ccc;
           text-shadow: -1px -1px 1px #000, 1px 1px 1px #fff;
+      &.linear
+        font-size: 50px;
+        color: transparent;
+        background: linear-gradient(0, #58a 0%, #b60  100%);
+        -webkit-background-clip:text;
 </style>
