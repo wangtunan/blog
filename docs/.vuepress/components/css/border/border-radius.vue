@@ -36,7 +36,7 @@ export default {
   watch: {
     checkbox (newVal) {
       if (newVal) {
-        this.number = 1
+        this.number = 6
       }
     }
   }

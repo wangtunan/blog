@@ -11,7 +11,6 @@ const cssSidebar = {
     '/css/filter.md',
     '/css/layout.md',
     '/css/shape.md',
-    '/css/list.md',
     '/css/practice.md',
     '/css/3d.md',
     '/css/animation.md'

@@ -52,9 +52,6 @@ box-shadow: 0 0 0 6px #fb3;
 <border-radius :index="3"/>
 :point_up_2: 你可以勾选复选框，查看实时效果，:point_up_2:你也可以更改`box-shadow`的发散宽度来查看:mag_right:一个隐藏的小问题。
 
-::: tip
+::: warning
 如果要利用上述方案实现边框内圆角的效果，那么你`outline`的宽度和`box-shaodw`的发散宽度一定要是合理设计过的，不然它会有一点没有遮盖到。
 :::
-## 动态边框
-
-## 移动端1px边框
