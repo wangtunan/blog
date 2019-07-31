@@ -223,7 +223,7 @@ setNumberTransform () {
 ```
 
 最终实现效果：
-![大屏数字滚动流程](../images/css/number-filp-process.png)
+![大屏数字滚动](../images/css/number-filp.gif)
 
 ## tooltip
 

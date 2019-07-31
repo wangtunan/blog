@@ -22,7 +22,7 @@ export default {
   },
   data () {
     return {
-      checkbox: '',
+      checkbox: true,
       number: 6
     }
   },

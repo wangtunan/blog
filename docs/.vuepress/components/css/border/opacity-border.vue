@@ -28,5 +28,5 @@ export default {
       margin-top: 10px;
       height: 100px;
       background-color: #58a;
-      border: 10px solid rgba(255,102,0,0.3);
+      border: 10px solid rgba(0,0,0,0.3);
 </style>

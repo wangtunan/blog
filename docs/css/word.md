@@ -14,11 +14,12 @@ margin: 20px 0;
 width: 100%;
 border: 1px solid #58a;
 /* 关键性代码 */
-word-wrap:break-word;
+word-wrap: break-word;
 word-break: break-all;
 ```
 <long-text/>
 :point_up_2: 你可以在上面输入框中输入任意文字，试试效果。
+
 ## 文字截断
 
 与上面长本文换行相对，文字截断适用于文字可能会较多，但又不想让其还行折叠省略的情况。
@@ -27,7 +28,10 @@ word-break: break-all;
 ::: tip 特点
 单行文本截断有：实现简单，兼容性好的优点
 :::
-单行文本截断我们可能接触的比较多，使用`text-overflow:ellipsis`来处理文本的溢出，对于单行文本截断，我们只需要下面几行代码就能实现。
+```html
+<p>单行文本截断的html结构</p>
+```
+单行文本截断我们可能接触的比较多，使用`text-overflow:ellipsis`来处理文本的溢出，对于单行文本截断，我们只需要下面几行`css`代码就能实现。
 ```css
 /* 关键性代码 */
 white-space: nowrap;
@@ -37,7 +41,7 @@ overflow: hidden;
 
 ### 多行文本截断
 ::: tip 特点
-多行文本截断有：不容易实现，常见的多行文本截断方式浏览器兼容性一般。
+多行文本截断：有不容易实现，常见的多行文本截断方式浏览器兼容性一般的缺点。
 :::
 与单行文本截断相对，多行文本截断实现起来就不那么容易了，相信你一定见过如下实现多行文本截断的方式。
 ```css
@@ -67,40 +71,59 @@ text-overflow:ellipsis; /*可选的属性*/
 ::: tip 说明
 定位方案主要是利用`::before`或者`::after`伪元素的`content属性`，它对父元素也有一定的限制
 :::
+`html`结构：
+```html
+<p class="multi-text">12345678901234567890123456789012345678901234567890123456789</p>
+```
 父元素的样式
 ```css
-width: 80%;
-position: relative;
-height: 36px;
-line-height: 18px;
-overflow: hidden;
-word-break: break-all;
+.multi-text {
+  width: 500px;
+  /* 两行折叠省略 */
+  height: 36px; 
+  line-height: 18px;
+  position: relative;
+  overflow: hidden;
+  word-break: break-all;
+}
 ```
 
 伪元素的样式
 ```css
-content: '...';
-position: absolute;
-right: 0;
-bottom: 0;
-/* 美化省略号 */
-padding: 0 20px 1px 45px;
-background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+.multi-text::before {
+  content: '...';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  /* 美化省略号 */
+  padding: 0 20px 1px 45px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+}
 ```
 ::: warning 适用场景
 仅仅适用于文字很多的情况，因为如果文字很少的话，省略号依然存在。
 :::
+
 ## 两端对齐
 ::: tip
 两端对齐可以适用`text-align:justify`属性来实现两端对齐，但这个属性只对多行有效，如果确定只有一行文字，可以使用`text-align-last:justify`来配合使用，此属性兼容性一般。
 :::
+下面是关键`html`结构
+```html
+<div class="box-item">
+  <span class="title">姓名</span>：
+  <span class="desc">这里是姓名的内容</span>
+</div>
+```
 下面是关键的`css`代码
 ```css
-width: 100px;
-/* 关键代码 */
-display: inline-block;
-text-align:justify;
-text-align-last: justify;
+.title {
+  width: 100px;
+  /* 关键代码 */
+  display: inline-block;
+  text-align:justify;
+  text-align-last: justify;
+}
 ```
 :point_down:下面是实现效果
 <align-justify/>

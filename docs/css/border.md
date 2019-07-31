@@ -4,11 +4,17 @@
 ::: tip
 默认情况下，我们设置的背景模浸染到`border`边框下面，如果这不是我们希望的话，可以通过`background-clip:padding-box`属性来更改它的默认行为
 :::
-下面是半透明边框的代码：
+下面是半透明边框的`html`结构：
+```html
+<div class="border-box"></div>
+```
+下面是半透明边框的代码`css`代码：
 ```css
-background-color: #58a;
-border: 10px solid rgba(255,102,0,0.3);
-background-clip: padding-box
+.border-box {
+  background-color: #58a;
+  border: 10px solid rgba(0,0,0,0.3);
+  background-clip: padding-box
+}
 ```
 :point_down:你可以点击下面的复选框，来查看`padding-box`属性值的实时效果：
 <opacity-border/>
@@ -17,14 +23,20 @@ background-clip: padding-box
 ::: tip
 `box-shadow`除了可以用来添加投影以外，还可以用来设计边框，多重边框可以使用`box-shadow`和`outline`来实现。
 :::
-下面是多重边框的代码：
-```css
-background-color: #58a;
-box-shadow: 0 0 0 10px #fb3;
-outline: 1px dashed #333;
-outline-offset: -10px;
+下面是多重边框的`html`代码：
+```html
+<div class="multiple-border"></div>
 ```
-下面是多重边框的实时效果：
+下面是多重边框的`css`代码：
+```css
+.multiple-border {
+  background-color: #58a;
+  box-shadow: 0 0 0 10px #fb3;
+  outline: 1px dashed #333;
+  outline-offset: -10px;
+}
+```
+下面是多重边框的实现效果：
 <multiple-border/>
 
 ## 边框内圆角
@@ -45,9 +57,15 @@ outline: 5px solid #fb3;
 <border-radius :index="2"/>
 
 那么要结合这种个CSS属性，就能实现边框内圆角的效果，像下面这样：
+```html
+<div class="combine"></div>
+```
 ```css
-outline: 8px solid #fb3;
-box-shadow: 0 0 0 6px #fb3;
+.combine {
+  /* 关键代码 */
+  outline: 8px solid #fb3;
+  box-shadow: 0 0 0 6px #fb3;
+}
 ```
 <border-radius :index="3"/>
 :point_up_2: 你可以勾选复选框，查看实时效果，:point_up_2:你也可以更改`box-shadow`的发散宽度来查看:mag_right:一个隐藏的小问题。
