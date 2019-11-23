@@ -616,7 +616,7 @@ console.log(dog2.eat()); // 输出dog2 is eatting
 ```
 
 ### ES6
-本章节只介绍ES6常考知识点，更多基础知识请直接跳转至[你不知道的JavaScript(中)](/books/你不知道的javascript/你不知道的javascript中.md)
+本章节只介绍ES6常考知识点，更多基础知识请直接跳转至[你不知道的JavaScript(中)](/books/javascript/know-down.md)
 #### var、let和const的区别
 ::: tip
 1. `var`声明的变量会提升到作用域的顶部，而`let`和`const`不会进行提升
