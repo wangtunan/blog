@@ -61,6 +61,7 @@ console.log(p2.age);  // 输出18
 2. 在函数内部，改变`person`的属性，会同步反映到对象`p1`上，`p1`对象中的`age`属性发生了改变，即值为52
 3. `testPerson`函数又返回了一个新的对象，这个对象此时和参数`person`没有任何关系，因为它分配了一个新的内存地址
 4. 以上分析可以用如下图表示
+
 ![对象当做函数参数图片](../images/interview/1.png)
 
 
@@ -115,6 +116,7 @@ console.log([]==![]); // true
 5. 即`0==0`，返回`true`
 
 类型转换规则，如下图：
+
 ![类型转换规则](../images/interview/2.png)
 
 ### == 和 ===
@@ -237,6 +239,7 @@ p1.getName();
 ```
 
 #### this解析流程图
+
 ![this解析流程图](../images/interview/3.png)
 
 ### 闭包
@@ -1109,10 +1112,12 @@ window.requestAnimationFrame(render);
 ::: tip
 可以把执行栈看成是一个存储函数调用的栈结构，遵循先进后出的原则，一个执行栈可能表现如下：
 :::
+
 ![执行栈](../images/interview/5.gif)
 
 #### EventLoop
 上面讲到函数会在执行栈中执行，那么当遇到异步代码后，该如何处理呢？其实当遇到异步代码的时候，会被挂起在Task队列中，一旦执行栈为空，就会从Task中拿出需要执行的代码执行，所以本质上讲JS中的异步还是同步行为。
+
 ![EventLoop](../images/interview/6.png)
 如上图，可以看到，不同的异步任务是有区别的，异步任务又可以划分如下：
 1. 宏任务(`script`、`setTimeout`、`setInterval`、`setImmidiate`、`I/O`、`UI Rendering`)可以有多个队列
@@ -1738,8 +1743,10 @@ jsonp('http://api.douban.com/v2/movie/in_theaters', {'count': 1}, function (data
 ```
 
 ### 手写Vue 数据响应式原理
+撰写中。。。
 
 ### 手写Vue nextTick方法
+撰写中。。。
 
 ## 浏览器相关基础面试题
 
@@ -1890,6 +1897,7 @@ window.addEventListener('message',function(e){
 3. sessionStorage
 4. indexDB
 :::
+
 ![浏览器存储四种方法](../images/interview/4.png)
 
 #### Cookie
@@ -1965,6 +1973,7 @@ if('serviceWorker' in navigator) {
 :::
 
 **强缓存：** 强缓存可以通过设置`Expires`和`Cache-Control`来实现，强缓存表示在缓存期间，不需要请求，`State Code`为200，`Cache-Control`可以组合使用多个指令，常见指令如下所示：
+
 ![缓存指令](../images/interview/7.png)
 
 **协商缓存：** 协商缓存表示如果缓存过期了，那么就需要重新发起请求验证资源是否有更新，可通过设置HTTP Header的`Last-Modified`和`ETag`来实现，如果资源没有改变，`State Code`为304
@@ -1973,16 +1982,20 @@ if('serviceWorker' in navigator) {
 
 #### DOM树
 浏览器在接受到服务器传递回来的字节流数据后，会经过转换，把`0`和`1`的字节流数据转换成DOM树结构，会经历如下图所示的过程：
+
 ![DOM树渲染结构过程](../images/interview/8.png)
 最终可能回渲染成如下的DOM树结构：
+
 ![DOM树结构](../images/interview/9.png)
 
 #### CSSDOM
 与DOM树渲染过程类似，CSSOM树渲染过程会经历如下图所示的过程：
+
 ![CSSOM渲染过程](../images/interview/10.png)
 
 #### DOM和CSSOM树合并
 当DOM树和CSSOM树渲染完毕后，就会合并在一起形成一个渲染树，渲染树并不是简单的将DOM树和CSSOM树简单的合并在一起，渲染树只包含需要显示的DOM节点。渲染树合并完毕后，然后会根据渲染树进行布局，随后调用GPU进行绘制，显示在屏幕上。
+
 ![渲染树](../images/interview/11.png)
 
 
@@ -2010,7 +2023,8 @@ ajax(url).then(data => {
 ```
 
 #### 存储型XSS
-存储型XSS也叫持久性XSS，它的主要攻击方式是将代码发送到服务器，最常见的存储型XSS攻击就是评论或者浏览攻击，一个存储型XSS可能如下图所示
+存储型XSS也叫持久性XSS，它的主要攻击方式是将代码发送到服务器，最常见的存储型XSS攻击就是评论或者浏览攻击，一个存储型XSS可能如下图所示：
+
 ![储存性XSS攻击](../images/interview/12.png)
 
 #### XSS防御
@@ -2056,6 +2070,7 @@ CSRF防御有如下几种方式：
 ::: tip
 中间人攻击是攻击方同时与服务端和客户端建立起了连接，并让对方认为连接是安全的，但是实际上整个通信过程都被攻击者控制了。攻击者不仅能获得双方的通信信息，还能修改通信信息。一般来说使用`HTTPS`协议可以有效防止中间人攻击，但并不是说`HTTPS`就可以高枕无忧，因为攻击者可以通过某种方式从`HTTPS`降级到`HTTP`进行访问。
 :::
+
 ![中间人攻击](../images/interview/13.jpg)
 
 ## 前端监控面试题

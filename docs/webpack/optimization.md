@@ -21,6 +21,7 @@ const prodConfig = {
 }
 ```
 配置完毕后，我们运行`npm run build`命令来查看打包分析结果，以下打包结果仅供参考：
+
 ![打包分析结果](../images/webpack/30.png)
 
 ## 缩小文件的搜索范围
@@ -218,6 +219,7 @@ const configs = {
 module.exports = configs;
 ```
 我们将第三方库全局暴露了一个`vendors`变量，现引入`xxx.dll.js`文件结果如下所示：
+
 ![引用结果](../images/webpack/29.png)
 
 

@@ -7,6 +7,7 @@ sidebar: auto
 
 ### MVVM模式
 `MVVM`是`Model-View-ViewModel`的缩写，其核心是提供对`View`和`ViewModel`的双向数据绑定。既`ViewModel`的状态改变可以自动传递给`View`，也就是所谓的数据双向绑定。
+
 ![MVVM](../images/vue/1.jpg) 
 
 **View层：**
@@ -97,6 +98,7 @@ app.age = 32; // 这个属性是响应式的
 * `activated`和`deactivated`这两个钩子函数，会在`keep-alive`组件激活和停用时分别调用
 * `errorCaptured`会在捕获子组件、孙组件发生错误时触发(2.5.0+版本新增)
 :::
+
 ![生命周期](../images/vue/lifecycle.png)
 
 **生命周期的使用：**
@@ -160,6 +162,7 @@ var app = new Vue({
   },
 })
 ```
+
 ![差值表达式](../images/vue/1.png)
 #### 指令
 `Mustache`语法不能作用于某些`html`特性上，这个时候，指令就派上了用处，常见的指令有:
@@ -197,6 +200,7 @@ var app = new Vue({
 })
 ```
 **运行结果：**
+
 ![指令](../images/vue/2.png)
 
 #### 缩写
@@ -277,6 +281,7 @@ var app = new Vue({
 })
 ```
 **运行结果：**
+
 ![计算属性vs方法](../images/vue/3.png)
 
 
@@ -316,6 +321,7 @@ var app = new Vue({
 })
 ```
 **运行结果：**
+
 ![运行结果](../images/vue/4.png)
 
 
@@ -352,6 +358,7 @@ var app = new Vue({
 })
 ```
 **运行结果：**
+
 ![运行结果](../images/vue/5.png)
 
 ### Class和Style绑定
@@ -396,6 +403,7 @@ var app = new Vue({
 })
 ```
 **绑定class结果：**
+
 ![绑定结果](../images/vue/6.png)
 
 #### 绑定style
@@ -432,6 +440,7 @@ var app = new Vue({
 })
 ```
 **绑定style结果：**
+
 ![绑定style结果](../images/vue/7.png)
 
 #### 处理厂商前缀
@@ -475,6 +484,7 @@ data() {
 }
 ```
 **v-if条件渲染结果：**
+
 ![v-if条件渲染](../images/vue/8.png)
 
 #### v-if渲染分组
@@ -500,6 +510,7 @@ data() {
 }
 ```
 **渲染结果：**
+
 ![分组渲染结果](../images/vue/9.png)
 
 #### v-if管理可复用的元素
@@ -523,6 +534,7 @@ data() {
 }
 ```
 **管理可复用元素结果：**
+
 ![管理可复用元素](../images/vue/10.png)
 
 **添加key值：**
@@ -536,6 +548,7 @@ data() {
 </div>
 ```
 **添加key值后结果：**
+
 ![添加key值后结果](../images/vue/11.png)
 
 #### v-show
@@ -587,6 +600,7 @@ data() {
 }
 ```
 **列表渲染结果：**
+
 ![数组列表渲染结果](../images/vue/12.png)
 
 #### 列表渲染对象
@@ -614,6 +628,7 @@ data() {
 }
 ```
 **对象列表渲染结果：**
+
 ![对象列表渲染结果](../images/vue/13.png)
 
 ### 数组、对象值更新检测
@@ -764,6 +779,7 @@ var app = new Vue({
 })
 ```
 **渲染结果：**
+
 ![渲染结果](../images/vue/14.png)
 
 **使用is属性：**
@@ -777,6 +793,7 @@ var app = new Vue({
 </table>
 ```
 **渲染结果：**
+
 ![渲染结果](../images/vue/15.png)
 
 #### ref引用
@@ -816,6 +833,7 @@ var app = new Vue({
 })
 ```
 **引用结果：**
+
 ![引用结果](../images/vue/16.png)
 
 ### 父子组件通信
@@ -859,6 +877,7 @@ var app = new Vue({
 })
 ```
 **父子组件通信结果：**
+
 ![父子组件通信结果](../images/vue/17.png)
 
 ### props组件参数校验
@@ -896,6 +915,7 @@ Vue.component('item', {
 ```
 
 **传参校验结果：**
+
 ![传参校验结果](../images/vue/18.png)
 
 #### Props特性和非Props特性
@@ -925,6 +945,7 @@ Vue.component('item', {
 })
 ```
 **Props特性和非Props特性：**
+
 ![Props特性和非Props特性](../images/vue/19.png)
 
 ### 组件绑定原生事件
@@ -949,6 +970,7 @@ var app = new Vue({
 ```
 
 **组件绑定原生事件结果：**
+
 ![组件绑定原生事件结果](../images/vue/20.png)
 
 ### 组件插槽
@@ -970,6 +992,7 @@ Vue.component('item', {
 })
 ```
 **普通插槽的结果：**
+
 ![普通插槽的结果](../images/vue/21.png)
 
 #### 具名插槽
@@ -993,6 +1016,7 @@ Vue.component('item', {
 })
 ```
 **具名插槽的结果：**
+
 ![具名插槽的结果](../images/vue/22.png)
 
 #### 作用域插槽
@@ -1021,6 +1045,7 @@ Vue.component('item', {
 })
 ```
 **作用域插槽的结果：**
+
 ![作用域插槽的结果](../images/vue/23.png)
 
 ### 动态组件
@@ -1053,6 +1078,7 @@ var app = new Vue({
 })
 ```
 **动态组件结果：**
+
 ![动态组件结果](../images/vue/24.png)
 
 #### v-once指令配合动态组件
@@ -1102,6 +1128,7 @@ Vue在插入、移除DOM时，提供了多种应用过渡和动画的方式。
 * `v-leave`：定义离开过渡的开始状态。在离开过渡被触发时立刻生效，下一帧被移除。
 * `v-leave-active`：定义离开过渡生效时的状态
 * `v-leave-to`：定义离开过渡的结束状态。在离开过渡被触发之后下一帧生效 (与此同时 v-leave 被删除)，在过渡/动画完成之后移除。
+
 ![动画原理](../images/vue/transition.png)
 
 ### Vue中使用过渡/动画
@@ -1573,6 +1600,7 @@ var vue = new Vue({
   router
 }).$mount('#app')
 ```
+
 ![嵌套路由](../images/vue/33.png)
 
 ### 编程式导航
@@ -1858,6 +1886,7 @@ Vue.use(Vuex);
 ::: tip
 Vuex 是一个专为 Vue.js 应用程序开发的**状态管理模式**。它采用**集中式存储**管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。
 :::
+
 ![Vuex](../images/vue/vuex.png)
 
 **什么情况下使用Vuex：** 由于Vuex的设计思想：采用集中式存储管理应用的所有组件的状态，所以Vuex更适合在中大型项目中大展拳脚，如何只是构建一个小型应用的话，引入Vuex则带来了更多了框架概念，这对于小型应用而言可能并不是一个好的选择。
@@ -1975,6 +2004,7 @@ export default {
   }
 }
 ```
+
 ![Getters结果](../images/vue/29.png)
 
 ### Mutations
@@ -2051,6 +2081,7 @@ export default {
   }
 }
 ```
+
 ![mutation结果](../images/vue/30.png)
 
 ### Actions
@@ -2153,6 +2184,7 @@ export default {
   }
 }
 ```
+
 ![action的结果](../images/vue/31.png)
 
 ### Modules
@@ -2309,6 +2341,7 @@ export default {
   }
 }
 ```
+
 ![Module结果](../images/vue/32.png)
 
 ### 推荐目录结构

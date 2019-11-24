@@ -86,6 +86,7 @@ footer: Copyright © 2019-present Wangtunan
 ---
 ```
 以上配置即为本博客的首页效果
+
 ![vuepress首页效果](../images/vuepress/1.png)
 
 #### 首页配置说明
@@ -136,6 +137,7 @@ module.exports = {
 }
 ```
 基本导航栏配置结果
+
 ![基本导航栏配置结果](../images/vuepress/2.png)
 
 #### 导航栏下拉列表
@@ -157,6 +159,7 @@ module.exports = {
 }
 ```
 导航栏下拉列表配置结果
+
 ![导航栏下拉列表配置结果](../images/vuepress/3.png)
 
 #### 下拉列表分组
@@ -164,6 +167,7 @@ module.exports = {
 下拉列表分组适用于下拉选项较多的情况
 :::
 相信熟悉`Vue.js`官网的你，一定看过如下的下拉框情况
+
 ![下拉列表分组](../images/vuepress/20.png)
 要实现以上的情况，可以如下进行配置
 ``` js
@@ -287,6 +291,7 @@ module.exports = {
 |   |-- README.md
 ```
 侧边栏分组的结果
+
 ![侧边栏分组结果](../images/vuepress/4.png)
 
 #### 自动生成侧边栏
@@ -354,6 +359,7 @@ next: /JavaScript/
 ```
 
 上一篇/下一篇的配置结果如下图所示
+
 ![上一篇/下一篇的结果](../images/vuepress/5.png)
 
 ### Git仓库和编辑链接
@@ -404,6 +410,7 @@ module.exports = {
 }
 ```
 配置了编辑链接后结果可能如下图所示
+
 ![编辑功能](../images/vuepress/6.png)
 
 你也可以通过设置`YAML`来单独禁止某个`.md`文件启用编辑链接功能
@@ -530,6 +537,7 @@ module.exports = {
 }
 ```
 配置后，代码块行号的结果如下图所示
+
 ![代码块行号](../images/vuepress/9.png)
 
 ### 使用Emoji表情
@@ -576,6 +584,7 @@ module.exports = {
 ### h3标题
 ```
 它的结果可能如下所示
+
 ![目录](../images/vuepress/10.png)
 
 ### 使用Vue模板语法
@@ -623,6 +632,7 @@ window.onload = function() {
 </script>
 ```
 以上代码的结果如下图所示
+
 ![使用原生JS和CSS](../images/vuepress/11.png)
 
 ### 使用CSS预处理器
@@ -649,6 +659,7 @@ window.onload = function() {
 </script>
 ```
 使用`Stylus`预处理器后的结果如下图所示:
+
 ![使用原生JS和CSS](../images/vuepress/12.png)
 
 ### 使用内置组件
@@ -719,6 +730,7 @@ export default {
 <customer-component/>
 ```
 VuePress 运行结果
+
 ![VuePress运行结果](../images/vuepress/13.png)
 
 ## 进阶配置
@@ -737,6 +749,7 @@ module.exports = {
 }
 ```
 配置后的结果如下图所示
+
 ![title配置结果](../images/vuepress/7.png)
 
 #### description(网站的描述)
@@ -752,6 +765,7 @@ module.exports = {
 }
 ```
 配置后的结果如下图所示
+
 ![description配置结果](../images/vuepress/8.png)
 
 #### base
@@ -830,6 +844,7 @@ $borderColor = red
 $codeBgColor = #58a
 ```
 以上设置的效果如下
+
 ![样式覆盖的结果](../images/vuepress/14.png)
 
 #### style.styl
@@ -841,6 +856,7 @@ $codeBgColor = #58a
     color: #ff502c;
 ```
 运用以上自定义样式后，默认主题下的单行代码块的效果如下
+
 ![自定义样式的效果](../images/vuepress/15.png)
 
 ### 引入代码片段
@@ -876,6 +892,7 @@ module.exports = {
 :::
 此小结的配置由于特殊性，并没有配置成功，如果你感兴趣，请移步这里:point_right:[Algolia搜索](https://community.algolia.com/docsearch/)<br/>
 如果你配置成功了，它们的搜索效果会是下面这样子的(**Vue官网**)
+
 ![Algolia搜索](../images/vuepress/16.png)
 
 ### 管理静态资源
@@ -938,6 +955,7 @@ pageClass: customer-page-class
 ---
 ```
 使用自定义样式它的结果
+
 ![自定义样式的结果](../images/vuepress/17.png)
 
 
@@ -979,6 +997,7 @@ layout: customerComponent
 </style>
 ```
 使用自定义布局的结果如下
+
 ![自定义布局](../images/vuepress/18.png)
 ### 使用第三方主题
 VuePress支持使用第三方主题，需要在`.vuepress/config.js`中如下进行配置即可
@@ -1069,6 +1088,7 @@ DONE  Success! Generated static files in docs\.vuepress\dist.
 
 #### 新建仓库并创建Github Pages分支
 新建一个`github`仓库和新建分支的具体步骤就不在此累述，如果你新建成功了的话，你的仓库看起来应该是这样子的
+
 ![新建仓库和分支](../images/vuepress/19.png)
 
 #### 提交到Github

@@ -104,6 +104,7 @@ module.exports = {
 $ npm run bundle
 ```
 打包后的效果如下所示：
+
 ![第一次打包后的效果](../images/webpack/5.png)
 
 打包后的项目目录如下所示，可以看到我们多出了一个叫`dist`的目录，它里面有一个`main.js`文件
@@ -116,11 +117,13 @@ $ npm run bundle
 |   |-- webpack.config.js
 |   |-- package.json
 ```
-打包成功后，我们需要在浏览器中运行`index.html`，它的运行结果如下图所示
+打包成功后，我们需要在浏览器中运行`index.html`，它的运行结果如下图所示：
+
 ![第一次打包后的效果](../images/webpack/6.png)
 
 ## 理解webpack打包输出
 在上一节中，我们第一次运行了一个打包命令，它在控制台上有一些输出内容，这一节我们详细来介绍这些输出是什么意思：
+
 ![第一次打包后的效果](../images/webpack/5.png)
 
 1. **Hash：** `hash`代表本次打包的唯一`hash`值，每一次打包此值都是不一样的

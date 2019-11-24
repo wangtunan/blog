@@ -144,6 +144,7 @@ module.exports = {
 :::
 
 以下是官方提供的`devtool`各个属性的解释以及打包速度对比图：
+
 ![devtool](../images/webpack/16.png)
 
 通过上图我们可以看出，良好的`source-map`配置不仅能帮助我们提高打包速度，同时在代码维护和调错方面也能有很大的帮助，一般来说，`source-map`的最佳实践是下面这样的：
@@ -265,6 +266,7 @@ module.exports = {
 }
 ```
 在以上代码添加和配置完毕后，我们使用`npm run dev`进行打包，我们点击按钮后，它会出现如下的情况
+
 ![打包结果](../images/webpack/17.png)
 
 **理解**： 由于`item`是动态生成的，当我们要将`yellow`颜色改变成`red`时，模块热更新能帮我们在不刷新浏览器的情况下，替换掉样式的内容。直白来说：自动生成的`item`依然存在，只是颜色变了。
@@ -337,6 +339,7 @@ if(module.hot) {
 * 修改`number.js`中的`1000`为你喜欢的一个值
 
 以下截图是我的测试结果，同时我们也可以在控制台`console`上，看到模块热更新第二次启动时，已经成功帮我们把`number.js`中的代码输出到了浏览器。
+
 ![模块热更新结果](../images/webpack/251.png)
 
 
@@ -414,6 +417,7 @@ module.exports = {
 }
 ```
 本次打包，我们需要使用`npx webpack`，打包的结果如下图所示：
+
 ![打包结果](../images/webpack/261.png)
 
 在以上的打包中，我们可以发现：
@@ -432,4 +436,5 @@ module.exports = {
 同时需要注意的时，我们使用了`useBuiltIns:"usage"`后，在`index.js`中就不用使用`import '@babel/polyfill'`这样的写法了，因为它已经帮我们自动这样做了。<br/>
 
 在以上配置完毕后，我们再次使用`npx webpack`进行打包，如下图，可以看到此次打包后，`main.js`的大小明显变小了。
+
 ![打包结果](../images/webpack/281.png)

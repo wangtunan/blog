@@ -2084,6 +2084,7 @@ startUpload('flash', [
 ])
 ```
 #### 真实案例：文件上传结果
+
 ![真实案例：文件上传结果](../images/books/fileUploadResult.png)
 
 #### 真实案例：亨元模式重构文件上传
@@ -2175,6 +2176,7 @@ startUpload('flash', [
 ])
 ```
 #### 真实案例：亨元模式重构文件上传
+
 ![亨元模式重构文件上传结果](../images/books/fileUploadResult.png)
 
 ### 职责链模式

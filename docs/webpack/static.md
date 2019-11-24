@@ -63,6 +63,7 @@ root.appendChild(img)
 |-- webpack.config.js
 ```
 #### 打包结果
+
 ![打包结果](../images/webpack/9.png)
 
 
@@ -163,6 +164,7 @@ root.appendChild(img);
 ```
 
 **打包结果**
+
 ![css打包结果](../images/webpack/10.png)
 
 
@@ -226,6 +228,7 @@ root.appendChild(img);
 ```
 
 根据上面的配置和代码改写后，再次打包，打包的结果会是下面这个样子
+
 ![打包结果](../images/webpack/11.png)
 
 #### 自动添加CSS厂商前缀
@@ -283,6 +286,7 @@ module.exports = {
 ```
 
 根据上面的配置，我们再次打包运行，在浏览器中运行`index.html`，它的结果如下图所示
+
 ![打包运行结果](../images/webpack/12.png)
 
 #### 模块化打包CSS文件
@@ -320,6 +324,7 @@ root.appendChild(img);
 ```
 
 **打包运行**
+
 ![打包运行](../images/webpack/13.png)
 
 我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.sass`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
@@ -373,4 +378,5 @@ root.appendChild(img);
 ```
 
 打包运行后，我们发现使用`createAvatar.js`创建出来的`img`没有受到样式文件的影响，证明我们的`css`模块化配置已经生效，下图是`css`模块化打包的结果：
+
 ![打包结果](../images/webpack/14.png)

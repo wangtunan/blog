@@ -412,10 +412,12 @@ function getComponent () {
 |   |-- main.js.map
 ```
 我们在浏览器中运行`dist`目录下的`index.html`，切换到`network`面板时，我们可以发现只加载了`main.js`，如下图：
+
 ![异步导入的结果](../images/webpack/32.png)
 <br/><br/>
 
 当我们点击页面时，才 **真正开始加载** 第三方模块，如下图(`1.js`)：
+
 ![异步导入的结果](../images/webpack/33.png)
 
 
@@ -562,6 +564,7 @@ async function getComponet() {
 }
 ```
 改写完毕后，我们使用`npm run dev`或者`npm run build`进行打包，在浏览器中点击页面，我们将在`network`面板看到如下图所示：
+
 ![Prefetch结果](../images/webpack/19.png)
 
 相信聪明的你一定看到了`0.js`，它是`from disk cache`，那为什么？原因在于，`Prefetching`的代码它会在`head`头部，添加像这样的一段内容：
@@ -796,6 +799,7 @@ $('#root').append(dom);
 ```
 
 接下来我们使用`npm run dev`进行打包，它的结果如下：
+
 ![打包结果](../images/webpack/20.png)
 
 **问题：** 我们发现，根本运行不起来，报错`$ is not defined`<br/>
@@ -819,6 +823,7 @@ module.exports = {
 ```
 
 **打包结果：** 使用`npm run dev`进行打包，打包结果如下，可以发现，项目已经可以正确运行了。
+
 ![打包结果](../images/webpack/21.png)
 
 ## 处理全局this指向问题
@@ -857,5 +862,6 @@ module.exports = {
 }
 ```
 配置完毕后使用`npm run dev`来进行打包，查看`console`控制台输出`true`，证明`this`这个时候已经指向了全局`window`对象，问题解决。
+
 ![打包结果](../images/webpack/22.png)
 
