@@ -25,9 +25,151 @@ JavaScript核心的语言特性是在标准`ECMA-262`中被定义，该标准中
 一直以来`JavaScript`中的变量生声明机制一直令我们感到困惑，大多数类C语言在声明变量的同时也会创建变量，而在以前的`JavaScript`中，何时创建变量要看如何声明的变量，`ES6`引入块级作用域可以让我们更好的控制作用域。
 :::
 
-## 字符串和正则表达式
+### var声明和变量提升机制
+
+问：提升机制是什么？<br/>
+答：在函数作用域或全局作用域中通过关键字`var`声明的变量，无论实际上是在哪里声明的，都会被当成在当前作用域顶部声明的变量，这就是我们常说的提升机制。<br/>
+以下实例代码说明了这种提升机制：
+```js
+function getValue (condition) {
+  if (condition) {
+    var value = 'value'
+    return value
+  } else {
+    // 这里可以访问到value，只不过值为undefined
+    console.log(value)
+    return null
+  }
+}
+getValue(false) // 输出undefined
+```
+你可以在以上代码中看到，当我们传递了`false`的值，但依然可以访问到`value`这个变量，这是因为在预编译阶段，`JavaScript`引擎会将上面函数的代码修改成如下形式：
+```js
+function getValue (condition) {
+  var value
+  if (condition) {
+    value = 'value'
+    return value
+  } else {
+    console.log(value)
+    return null
+  }
+}
+```
+
+经过以上示例，我们可以发现：变量`value`的声明被提升至函数作用域的顶部，而初始化操作依旧留在原处执行，正因为`value`变量只是声明了而没有赋值，因此以上代码才会打印出`undefined`。
+
+
+### 块级声明
+::: tip
+块级声明用于声明在指定的作用于之外无妨访问的变量，块级作用域存在于：函数内部和块中。
+:::
+
+`let`声明：
+* `let`声明和`var`声明的用法基本相同。
+* `let`声明的变量不会被提升。
+* `let`不能在同一个作用域中重复声明已经存在的变量，会报错。
+* `let`声明的变量作用域范围仅存在于当前的块中，程序进入快开始时被创建，程序退出块时被销毁。
+
+根据`let`声明的规则，改动以上代码后像下面这样：
+```js
+function getValue (condition) {
+  if (condition) {
+    // 变量value只存在于这个块中。
+    let value = 'value'
+    return value
+  } else {
+    // 访问不到value变量
+    console.log(value)
+    return null
+  }
+}
+```
+
+`const`声明：`const`声明和`let`声明大多数情况是相同的，唯一的本质区别在于，`const`是用来声明常量的，其声明后的变量值不能再被修改，即意味着：`const`声明必须进行初始化。
+```js
+const MAX_ITEMS = 30
+// 报错
+MAX_ITEMS = 50
+```
+
+::: warning 注意
+我们说的`const`变量值不可变，需要分两种类型来说：
+* 值类型：变量的值不能改变。
+* 引用类型：变量的地址不能改变，值可以改变。
+:::
+```js
+const num = 23
+const arr = [1, 2, 3, 4]
+const obj = {
+  name: 'why',
+  age: 23
+}
+
+// 报错
+num = 25
+
+// 不报错
+arr[0] = 11
+obj.age = 32
+console.log(arr) // [11, 2, 3, 4]
+console.log(obj) // { name: 'why', age: 32 }
+
+// 报错
+arr = [4, 3, 2, 1]
+```
+
+### 暂时性死区
+因为`let`和`const`声明的变量不会进行声明提升，所以在`let`和`const`变量声明之前任何访问(即使是`typeof`也不行)此变量的操作都会引发错误：
+```js
+if (condition) {
+  // 报错
+  console.log(typeof value)
+  let value = 'value'
+}
+```
+问：为什么会报错？<br/>
+答：`JavaScript`引擎在扫描代码发现变量声明时，要么将它们提升至作用域的顶部(`var`声明)，要么将声明放在`TDZ`(暂时性死区)中(`let`和`const`)。访问`TDZ`中的变量会触发错误，只有执行变量声明语句之后，变量才会从`TDZ`中移出，随后才能正常访问。
+
+### 全局块作用域绑定
+我们都知道：如果我们在全局作用域下通过`var`声明一个变量，那么这个变量会挂载到全局对象`window`上：
+```js
+var name = 'why'
+console.log(window.name) // why
+```
+但如果我们使用`let`或者`const`在全局作用域下创建一个新的变量，这个变量不会添加到`window`上。
+```js
+const name = 'why'
+console.log('name' in window) // false
+```
+
+### 块级绑定最佳实践的进化
+在`ES6`早期，人们普遍认为应该默认使用`let`来代替`var`，这是因为对于开发者而言，`let`实际上与他们想要的`var`一样，直接替换符合逻辑。但随着时代的发展，另一种做法也越来越普及：默认使用`const`，只有确定变量的值会在后续需要修改时才会使用`let`声明，因为大部分变量在初始化后不应再改变，而预料以外的变量值改变是很多`bug`的源头。
+
+## 字符串
+
+### 模块字面量
+
 
 ## 函数
+
+### 形参默认值
+
+### 无命名参数
+
+### 增强的Function构造函数
+
+### 展开运算符
+
+### 函数name属性
+
+### 函数的多种用途
+
+### 块级函数
+
+### 箭头函数
+
+### 尾调用优化
 
 ## 对象的扩展
 
