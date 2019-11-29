@@ -149,7 +149,126 @@ console.log('name' in window) // false
 ## 字符串
 
 ### 模块字面量
+::: tip
+模板字面量是扩展`ECMAScript`基础语法的语法糖，其提供了一套生成、查询并操作来自其他语言里内容的`DSL`，且可以免受`XSS`注入攻击和`SQL`注入等等。
+:::
 
+在`ES6`之前，`JavaScript`一直以来缺少许多特性：
+* **多行字符串**：一个正式的多行字符串的概念。
+* **基本的字符串格式化**：将变量的值嵌入字符串的能力。
+* **HTML转义**：向`HTML`插入经过安全转换后的字符串的能力。
+
+而在`ECMAScript 6`中，通过模板字面量的方式多以上问题进行了填补，一个最简单的模板字面量的用法如下：
+```js
+const message = `hello,world!`
+console.log(message) // hello,world!
+console.log(typeof message) // string
+```
+一个需要注意的地方就是，如果我们需要在字符串中使用反撇号，需要使用`\`来进行转义，如下：
+```js
+const message = `\`hello\`,world!`
+console.log(message) // `hello`,world!
+```
+
+#### 多行字符串
+自`JavaScript`诞生起，开发者们就一直在尝试和创建多行字符串，以下是`ES6`之前的方法：
+::: tip
+在字符串的新行最前方加上`\`可以承接上一行代码，可以利用这个小`bug`来创建多行字符串。
+:::
+```js
+const message = 'hello\
+,world!'
+console.log(message) // hello,world
+```
+
+在`ES6`之后，我们可以使用模板字面量，在里面直接还行就可以创建多行字符串，如下：
+::: tip
+在模板字面量中，即反撇号中所有空白字符都属于字符串的一部分。
+:::
+```js
+const message = `hello
+,world!`
+console.log(message) // hello
+                     // ,world!
+```
+
+#### 字符串占位符
+::: tip
+模板字面量于普通字符串最大的区别是模板字符串中的占位符功能，其中占位符中的内容，可以是任意合法的`JavaScript`表达式，例如：变量，运算式，函数调用，设置是另外一个模板字面量。
+:::
+```js
+const age = 23
+const name = 'why'
+const message = `Hello ${name}, you are ${age} years old!`
+console.log(message) // Hello why, you are 23 years old!
+```
+模板字面量嵌套：
+```js
+const name = 'why'
+const message = `Hello, ${`my name is ${name}`}.`
+console.log(message) // Hello, my name is why.
+```
+
+#### 标签模板
+::: tip
+标签指的是在模板字面量第一个反撇号前方的标注的字符串，每一个模板标签都可以执行模板字面量上的转换并返回最终的字符串值。
+:::
+```js
+// tag就是`Hello world!`模板字面量的标签模板
+const message = tag`Hello world!`
+```
+标签可以是一个函数，标签函数通常使用不定参数特性来定义占位符，从而简化数据处理的过程，就像下面这样：
+```js
+function tag(literals, ...substitutions) {
+  // 返回一个字符串
+}
+const name = 'why'
+const age = 23
+const message = tag`${name} is ${age} years old!`
+```
+其中`literals`是一个数组，它包含：
+* 第一个占位符前的空白字符串：""。
+* 第一个、第二个占位符之间的字符串：" is "。
+* 第二个占位符后的字符串：" years old!"
+
+`substitutions`也是一个数组：
+* 数组第一项为：`name`的值，即：`why`。
+* 数组第二项为：`age`的值，即：`23`。
+
+通过以上规律我们可以发现：
+* `literals[0]`始终代表字符串的开头。
+* `literals`总比`substitutions`多一个。
+
+我们可以通过以上这种模式，将`literals`和`substitutions`这两个数组交织在一起重新组成一个字符串，来模拟模板字面量的默认行为，像下面这样：
+```js
+function tag(literals, ...substitutions) {
+  let result = ''
+  for (let i = 0; i< substitutions.length; i++) {
+    result += literals[i]
+    result += substitutions[i]
+  }
+
+  // 合并最后一个
+  result += literals[literals.length - 1]
+  return result
+}
+const name = 'why'
+const age = 23
+const message = tag`${name} is ${age} years old!`
+console.log(message) // why is 23 years old!
+```
+
+#### 原生字符串信息
+::: tip
+通过模板标签可以访问到字符串转义被转换成等价字符串前的原生字符串。
+:::
+```js
+const message1 = `Hello\nworld`
+const message2 = String.raw`Hello\nworld`
+console.log(message1) // Hello
+                      // world
+console.log(message2) // Hello\nworld
+```
 
 ## 函数
 
