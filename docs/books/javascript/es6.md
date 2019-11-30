@@ -274,9 +274,191 @@ console.log(message2) // Hello\nworld
 
 ### 形参默认值
 
-### 无命名参数
+在`ES6`之前，你可以会通过以下这种模式创建函数并为参数提供默认值：
+```js
+function makeRequest (url, timeout, callback) {
+  timeout = timeout || 2000
+  callback = callback || function () {}
+}
+```
+代码分析：在以上示例中，`timeout`和`callback`是可选参数，如果不传入则会使用逻辑或操作符赋予默认值。然而这种方式也有一定的缺陷，如果我们想给`timeout`传递值为`0`，虽然这个值是合法的，但因为有或逻辑运算符的存在，最终还是为`timeout`赋值`2000`。<br/>
 
-### 增强的Function构造函数
+针对以上情况，我们应该通过一种更安全的做法(使用`typeof`)来重写一下以上示例：
+```js
+function makeRequest (url, timeout, callback) {
+  timeout = typeof timeout !== 'undefined' ? timeout : 2000
+  callback = typeof callback !== 'undefined' ? callback : function () {} 
+}
+```
+代码分析：尽管以上方法更安全一些，但我们任然需要额外的撰写更多的代码来实现这种非常基础的操作。针对以上问题，`ES6`简化了为形参提供默认值的过程，就像下面这样：
+::: tip
+对于默认参数而言，除非不传或者主动传递`undefined`才会使用参数默认值(如果传递`null`，这是一个合法的参数，不会使用默认值)。
+:::
+```js
+function makeRequest (url, timeout = 2000, callback = function () {}) {
+  // todo
+}
+// 同时使用timeout和callback默认值
+makeRequest('https://www.taobao.com')
+// 使用callback默认值
+makeRequest('https://www.taobao.com', 500)
+// 不使用默认值
+makeRequest('https://www.taobao.com', 500, function (res) => {
+  console.log(res)
+})
+```
+#### 形参默认值对arguments对象的影响
+在`ES5`非严格模式下，如果修改参数的值，这些参数的值会同步反应到`arguments`对象中，如下：
+```js
+function mixArgs(first, second) {
+  console.log(arguments[0]) // A
+  console.log(arguments[1]) // B
+  first = 'a'
+  second = 'b'
+  console.log(arguments[0]) // a
+  console.log(arguments[1]) // b
+}
+mixArgs('A', 'B')
+```
+而在`ES5`严格模式下，修改参数的值不再反应到`arguments`对象中，如下：
+```js
+function mixArgs(first, second) {
+  'use strict'
+  console.log(arguments[0]) // A
+  console.log(arguments[1]) // B
+  first = 'a'
+  second = 'b'
+  console.log(arguments[0]) // A
+  console.log(arguments[1]) // B
+}
+mixArgs('A', 'B')
+```
+
+对于使用了`ES6`的形参默认值，`arguments`对象的行为始终保持和`ES5`严格模式一样，无论当前是否为严格模式，即：`arguments`总是等于最初传递的值，不会随着参数的改变而改变，总是可以使用`arguments`对象将参数还原为最初的值，如下：
+```js
+function mixArgs(first, second = 'B') {
+  console.log(arguments.length) // 1
+  console.log(arguments[0])      // A
+  console.log(arguments[1])      // undefined
+  first = 'a'
+  second = 'b'
+  console.log(arguments[0])      // A
+  console.log(arguments[1])      // undefined
+}
+// arguments对象始终等于传递的值，形参默认值不会反映在arguments上
+mixArgs('A')
+```
+
+#### 默认参数表达式
+::: tip
+函数形参默认值，除了可以是原始值的默认值，也可以是表达式，即：变量，函数调用也是合法的。
+:::
+```js
+function getValue () {
+  return 5
+}
+function add (first, second = getValue()) {
+  return first + second
+}
+console.log(add(1, 1)) // 2
+console.log(add(1))    // 6
+```
+代码分析：当我们第一次调用`add(1,1)`函数时，由于未使用参数默认值，所以`getValue`并不会调用。只有当我们使用了`second`参数默认值的时候`add(1)`，`getValue`函数才会被调用。<br/>
+
+正因为默认参数是在函数调用时求值，所以我们可以在后定义的参数表达式中使用先定义的参数，即可以把先定义的参数当做变量或者函数调用的参数，如下：
+```js
+function getValue(value) {
+  return value + 5
+}
+function add (first, second = first + 1) {
+  return first + second
+}
+function reduce (first, second = getValue(first)) {
+  return first - second
+}
+console.log(add(1))     // 3
+console.log(reduce(1))  // -5
+```
+#### 默认参数的暂时性死区
+在前面已经提到过`let`和`const`存在暂时性死区，即：在`let`和`const`变量声明之前尝试访问该变量会触发错误。相同的道理，在函数默认参数中也存在暂时性死区，如下：
+```js
+function add (first = second, second) {
+  return first + second
+}
+add(1, 1)         // 2
+add(undefined, 1) // 抛出错误
+```
+代码分析：在第一次调用`add(1,1)`时，我们传递了两个参数，则`add`函数不会使用参数默认值；在第二次调用`add(undefined, 1)`时，我们给`first`参数传递了`undefined`，则`first`参数使用参数默认值，而此时`second`变量还没有初始化，所以被抛出错误。
+
+### 不定参数
+::: tip
+在`JavaScript`的函数语法规定：无论函数已定义的命名参数有多少个，都不限制调用时传入的实际参数的数量。在`ES6`中，当传入更少的参数时，使用参数默认值来处理；当传入更多数量的参数时，使用不定参数来处理。
+:::
+
+我们以`underscore.js`库中的`pick`方法为例：
+::: tip
+`pick`方法的用法是：给定一个对象，返回指定属性的对象的副本。
+:::
+```js
+function pick(object) {
+  let result = Object.create(null)
+  for (let i = 1, len = arguments.length; i < len; i++) {
+    let item = arguments[i]
+    result[item] = object[item]
+  }
+  return result
+}
+const book = {
+  title: '深入理解ES6',
+  author: '尼古拉斯',
+  year: 2016
+}
+console.log(pick(book, 'title', 'author')) // { title: '深入理解ES6', author: '尼古拉斯' }
+```
+代码分析：
+* 不容易发现这个函数可以接受任意数量的参数。
+* 当需要查找待拷贝的属性的时候，不得不从索引1开始。
+
+在`ES6`中提供了不定参数，我们可以使用不定参数的特性来重写`pick`函数：
+```js
+function pick(object, ...keys) {
+  let result = Object.create(null)
+  for (let i = 0, len = keys.length; i < len; i++) {
+    let item = keys[i]
+    result[item] = object[item]
+  }
+  return result
+}
+const book = {
+  title: '深入理解ES6',
+  author: '尼古拉斯',
+  year: 2016
+}
+console.log(pick(book, 'title', 'author')) // { title: '深入理解ES6', author: '尼古拉斯' }
+```
+
+#### 不定参数的限制
+不定参数在使用的过程中有几点限制：
+* 一个函数最多只能有一个不定参数。
+* 不定参数一定要放在所有参数的最后一个。
+* 不能在对象字面量`setter`之中使用不定参数。
+
+```js
+// 报错，只能有一个不定参数
+function add(first, ...rest1, ...rest2) {
+  console.log(arguments)
+}
+// 报错，不定参数只能放在最后一个参数
+function add(first, ...rest, three) {
+  console.log(arguments)
+}
+// 报错，不定参数不能用在对象字面量`setter`之中
+const object = {
+  set name (...val) {
+    console.log(val)
+  }
+}
+```
 
 ### 展开运算符
 
