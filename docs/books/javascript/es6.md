@@ -461,8 +461,65 @@ const object = {
 ```
 
 ### 展开运算符
+在`ES6`的新功能中，展开运算符和不定参数是最为相似的，不定参数可以让我们指定多个各自独立的参数，并通过整合后的数组来访问；而展开运算符可以让你指定一个数组，将它们打散后作为各自独立的参数传入函数。<br/>
+在`ES6`之前，我们如果使用`Math.max`函数比较一个数组中的最大值，则需要像下面这样使用：
+```js
+const arr = [4, 10, 5, 6, 32]
+console.log(Math.max.apply(Math, arr)) // 32
+```
+代码分析：在`ES6`之前使用这种方式是没有任何问题的，但关键的地方在于我们要借用`apply`方法，而且要特别小心的处理`this`(第一个参数)，在`ES6`中我们有更加简单的方式来达到以上的目的：
+```js
+const arr = [4, 10, 5, 6, 32]
+console.log(Math.max(...arr)) // 32
+```
 
 ### 函数name属性
+问：为什么`ES6`会引入函数的`name`属性。
+答：在`JavaScript`中有多重定义函数的方式，因而辨别函数就是一项具有挑战性的任务，此外匿名函数表达式的广泛使用也加大了调试的难度，为了解决这些问题，在`ESCAScript 6`中为所有函数新增了`name`属性。
+
+#### 常规name属性
+在函数声明和匿名函数表达式中，函数的`name`属性相对来说是固定的：
+```js
+function doSomething () {
+  console.log('do something')
+}
+let doAnotherThing = function () {
+  console.log('do another thing')
+}
+console.log(doSomething.name)    // doSomething
+console.log(doAnotherThing.name) // doAnotherThing
+```
+
+#### name属性的特殊情况
+尽管确定函数声明和函数表达式的名称很容易，但还是有一些其他情况不是特别容易识别：
+* 匿名函数表达式显示提供函数名的情况：函数名称本身比函数本身被赋值的变量的权重高。
+* 对象字面量：在不提供函数名称的情况下，取对象字面量的名称；提供函数名称的情况下就是此名称
+* 属性的`getter`和`setter`：在对象上存在`get + 属性`的`get`或者`set`方法。
+* 通过`bind`：通过`bind`函数创建的函数，`name`为会带有`bound`前缀
+* 通过构造函数：函数名称固定为`anonymous`。
+
+```js
+let doSomething = function doSomethingElse () {
+  console.log('do something else')
+}
+let person = {
+  // person对象上存在name为get firstName的方法
+  get firstName () {
+    return 'why'
+  },
+  sayName: function () {
+    console.log('why')
+  },
+  sayAge: function sayNewAge () {
+    console.log(23)
+  }
+}
+console.log(doSomething.name)         // doSomethingElse
+console.log(person.sayName.name)      // sayName
+console.log(person.sayAge.name)       // sayNewAge
+console.log(doSomething.bind().name)  // bound doSomethingElse
+console.log(new Function().name)      // anonymous
+```
 
 ### 函数的多种用途
 
