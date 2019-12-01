@@ -522,12 +522,238 @@ console.log(new Function().name)      // anonymous
 ```
 
 ### 函数的多种用途
+在`JavaScript`中函数具有多重功能，可以结合`new`使用，函数内的`this`值指向一个新对象，函数最终会返回这个新对象，如下：
+```js
+function Person (name) {
+  this.name = name
+}
+const person = new Person('why')
+console.log(person.toString()) // [object Object]
+```
+
+在`ES6`中，函数有两个不同的内部方法，分别是：
+::: tip
+具有`[[Construct]]`方法的函数被称为构造函数，但并不是所有的函数都有`[[Construct]]`方法，例如：箭头函数。
+:::
+* `[[Call]]`：当通过`new`关键字调用函数时，执行的是`[[Construct]]`函数，它负责创建一个新对象，然后再执行函数体，将`this`绑定到实例上。
+* `[[Construct]]`：如果不通过`new`关键字进行调用函数，则执行`[[Call]]`函数，从而直接执行代码中的函数体。
+
+在`ES6`之前，如果要判断一个函数是否通过`new`关键词调用，最流行的方法是使用`instanceof`来判断，例如：
+```js
+function Person (name) {
+  if (this instanceof Person) {
+    this.name = name
+  } else {
+    throw new Error('必须通过new关键词来调用Person')
+  }
+}
+const person = new Person('why')
+const notPerson = Person('why') // 抛出错误
+```
+代码分析：这段代码中，首先会判断`this`的值，看是否是`Person`的实例，如果是则继续执行，如果不是则抛出错误。通常来说这种做法是正确的，但是也不是十分靠谱，有一种方式可以不依赖`new`关键词也可以把`this`绑定到`Person`的实例上，如下：
+```js
+function Person (name) {
+  if (this instanceof Person) {
+    this.name = name
+  } else {
+    throw new Error('必须通过new关键词来调用Person')
+  }
+}
+const person = new Person('why')
+const notPerson = Person.call(person, 'why') // 不报错，有效
+```
+
+为了解决判断函数是否通过`new`关键词调用的问题，`ES6`引入了`new.target`这个元属性<br/>
+问：什么是元属性？<br/>
+答：元属性是指非对象的属性，其可以提供非对象目标的补充信息。当调用函数的`[[Construct]]`方法时，`new.target`被赋值为`new`操作符的目标，通常是新创建对象的实例，也就是函数体内`this`的构造函数；如果调用`[[Call]]`方法，则`new.target`的值为`undefined`。
+
+根据以上`new.target`的特点，我们改写一下上面的代码：
+::: warning
+在函数外使用`new.target`是一个语法错误。
+:::
+```js
+function Person (name) {
+  if (typeof new.target !== 'undefined') {
+    this.name = name
+  } else {
+    throw new Error('必须通过new关键词来调用Person')
+  }
+}
+const person = new Person('why')
+const notPerson = Person.call(person, 'why') // 抛出错误
+```
 
 ### 块级函数
+在`ECMAScript 3`和早期版本中，在代码块中声明一个块级函数严格来说是一个语法错误，但是所有的浏览器任然支持这个热性，却又因为浏览器的差异导致支撑程度稍有不同，所以**最好不要使用这个特性，如果要用可以使用匿名函数表达式**。
+```js
+// ES5严格模式下，在代码块中声明一个函数会报错
+// 在ES6下，因为有了块级作用域的概念，所以无论是否处于严格模式，都不会报错。
+// 但在ES6中，当处于严格模式时：会将函数声明提升至当前块级作用域的顶部
+// 当处于非严格模式时，提升至外层作用域
+'use strict'
+if (true) {
+  function doSomething () {
+    console.log('do something')
+  }
+}
+```
 
 ### 箭头函数
+在`ES6`中，箭头函数是其中最有趣的新增特性之一，箭头函数是一种使用箭头`=>`定义函数的新语法，但它和传统的`JavaScript`函数有些许不同：
+* **没有this、super、arguments和new.target绑定**：箭头函数中的`this`、`super`、`arguments`和`new.target`这些值又外围最近一层非箭头函数所决定。
+* **不能通过new关键词调用**：因为箭头函数没有`[[Construct]]`函数，所以不能通过`new`关键词进行调用，如果使用`new`进行调用会抛出错误。
+* **没有原型**：因为不会通过`new`关键词进行调用，所以没有构建原型的需要，也就没有了`prototype`这个属性。
+* **不可以改变this的绑定**：在箭头函数的内部，`this`的之不可改变(即不能通过`call`、`apply`或者`bind`等方法来改变)。
+* **不支持argument对象**：箭头函数没有`arguments`绑定，所以必须使用命名参数或者不定参数这两种形式访问参数。
+* **不支持重复的命名参数**：无论是否处于严格模式，箭头函数都不支持重复的命名参数。
+
+#### 箭头函数的语法
+::: tip
+箭头函数的语法多变，根据实际的使用场景有多种形式。所有变种度由函数参数、箭头和函数体组成。
+:::
+表现形式之一：
+```js
+// 表现形式之一：没有参数
+let reflect = () => 5
+// 相当于
+let reflect = function () {
+  return 5
+}
+```
+
+表现形式之二：
+```js
+// 表现形式之二：返回单一值
+let reflect = value => value
+// 相当于
+let reflect = function (value) {
+  return value
+}
+```
+
+表现形式之三：
+```js
+// 表现形式之三：多个参数
+let reflect = (val1, val2) => val1 + val2
+// 或者
+let reflect = (val, val2) => {
+  return val1 + val2
+}
+// 相当于
+let reflect = function (val1, val2) {
+  return val1 + val2
+}
+```
+
+表现形式之四：
+```js
+// 表现形式之四：返回字面量
+let reflect = (id) => ({ id: id, name: 'why' })
+// 相当于
+let reflect = function (id) {
+  return {
+    id: id,
+    name: 'why'
+  }
+}
+```
+
+#### 箭头函数和数组
+::: tip
+箭头函数的语法简洁，非常适用于处理数组。
+:::
+```js
+const arr = [1, 5, 3, 2]
+// 非箭头函数排序写法
+arr.sort(function(a, b) {
+  return a -b
+})
+// 箭头函数排序写法
+arr.sort((a, b) => a - b)
+```
+
 
 ### 尾调用优化
+::: tip
+尾调用指的是函数作为另一个函数的最后一条语句被调用。
+:::
+尾调用示例：
+```js
+function doSomethingElse () {
+  console.log('do something else')
+}
+function doSomething () {
+  return doSomethingElse()
+}
+```
+
+在`ECMAScript 5`的引擎中，尾调用的实现与其他函数调用的实现类似：创建一个新的栈帧，将其推入调用栈来表示函数调用，即意味着：在循环调用中，每一个未使用完的栈帧度会被保存在内存中，当调用栈变得过大时会造成程序问题。<br/>
+
+针对以上可能会出现的问题，`ES6`缩减了严格模式下尾调用栈的大小，当全部满足以下条件，尾调用不再创建新的栈帧，而是清除并重用当前栈帧：
+* **尾调用不访问当前栈帧的变量(函数不是一个闭包。)**
+* **尾调用不是最后一条语句**
+* **尾调用的结果作为函数返回**
+满足以上条件的一个尾调用示例：
+```js
+'use strict'
+function doSomethingElse () {
+  console.log('do something else')
+}
+function doSomething () {
+  return doSomethingElse()
+}
+```
+
+不满足以上条件的尾调用示例：
+```js
+function doSomethingElse () {
+  console.log('do something else')
+}
+function doSomething () {
+  // 无法优化，没有返回
+  doSomethingElse()
+}
+function doSomething () {
+  // 无法优化，返回值又添加了其它操作
+  return 1 + doSomethingElse()
+}
+function doSomething () {
+  // 可能无法优化
+  let result = doSomethingElse
+  return result
+}
+function doSomething () {
+  let number = 1
+  let func = () => number
+  // 无法优化，该函数是一个闭包
+  return func()
+}
+```
+
+::: tip
+递归函数是其最主要的应用场景，当递归函数的计算量足够大，尾调用优化可以大幅提升程序的性能。
+:::
+```js
+// 优化前
+function factorial (n) {
+  if (n <= 1) {
+    return 1
+  } else {
+    // 无法优化
+    return n * factorial (n - 1)
+  }
+}
+
+// 优化后
+function factorial (n, p = 1) {
+  if (n <= 1) {
+    return 1 * p
+  } else {
+    let result = n * p
+    return factorial(n -1, result)
+  }
+}
+```
 
 ## 对象的扩展
 
