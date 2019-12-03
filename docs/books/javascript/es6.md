@@ -873,10 +873,148 @@ console.log(person) // { name: 'BBB' }
 ```
 
 ### 自有属性枚举顺序
+::: tip
+`ES5`中未定义对象属性的枚举顺序，由浏览器厂商自行决定。而在`ES6`中严格规定了对象自有属性被枚举时的返回顺序。
+:::
+**规则**：
+* 所有数字键按升序排序。
+* 所有字符键按照它们被加入对象的顺序排序。
+* 所有`Symbol`键按照它们被加入对象的顺序排序。
 
+根据以上规则，以下这些方法将受到影响：
+* `Object.getOwnPropertyNames()`。
+* `Reflect.keys()`。
+* `Object.assign()`。
+
+不确定的情况：
+* `for-in`循环依旧由厂商决定枚举顺序。
+* `Object.keys()`和`JSON.stringify()`也同`for-in`循环一样由厂商决定枚举顺序。
+```js
+const obj = {
+  a: 1,
+  0: 1,
+  c: 1,
+  2: 1,
+  b: 1,
+  1: 1
+}
+obj.d = 1
+console.log(Reflect.keys(obj).join('')) // 012acbd
+```
 ### 增强对象原型
-
+::: tip
+`ES5`中，对象原型一旦实例化之后保持不变。而在`ES6`中添加了`Object.setPrototypeOf()`方法来改变这种情况。
+:::
+```js
+const person = {
+  sayHello () {
+    return 'Hello'
+  }
+}
+const dog = {
+  sayHello () {
+    return 'wang wang wang'
+  }
+}
+let friend = Object.create(person)
+console.log(friend.sayHello())                        // Hello
+console.log(Object.getPrototypeOf(friend) === person) // true
+Object.setPrototypeOf(friend, dog)
+console.log(friend.sayHello())                        // wang wang wang
+console.log(Object.getPrototypeOf(friend) === dog)    // true
+```
+#### 简化原型访问的Super引用
+在`ES5`中，如果我们想重写对象实例的方法，又需要调用与它同名的原型方法，可以像下面这样：
+```js
+const person = {
+  sayHello () {
+    return 'Hello'
+  }
+}
+const dog = {
+  sayHello () {
+    return 'wang wang wang'
+  }
+}
+const friend = {
+  sayHello () {
+    return Object.getPrototypeOf(this).sayHello.call(this) + '!!!'
+  }
+}
+Object.setPrototypeOf(friend, person)
+console.log(friend.sayHello())                        // Hello!!!
+console.log(Object.getPrototypeOf(friend) === person) // true
+Object.setPrototypeOf(friend, dog)
+console.log(friend.sayHello())                        // wang wang wang!!!
+console.log(Object.getPrototypeOf(friend) === dog)    // true
+```
+代码分析：要准确记住如何使用`Object.getPrototypeOf()`和`xx.call(this)`方法来调用原型上的方法实在是有点复杂。而且存在多继承的情况下，`Object.getPrototypeOf()`会出现问题。<br/>
+根据以上问题，`ES6`引入了`super`关键字，其中`super`相当于指向对象原型的指针，所以以上代码可以修改如下：
+::: tip
+`super`关键字只出现在对象简写方法里，普通方法中使用会报错。
+:::
+```js
+const person = {
+  sayHello () {
+    return 'Hello'
+  }
+}
+const dog = {
+  sayHello () {
+    return 'wang wang wang'
+  }
+}
+const friend = {
+  sayHello () {
+    return super.sayHello.call(this) + '!!!'
+  }
+}
+Object.setPrototypeOf(friend, person)
+console.log(friend.sayHello())                        // Hello!!!
+console.log(Object.getPrototypeOf(friend) === person) // true
+Object.setPrototypeOf(friend, dog)
+console.log(friend.sayHello())                        // wang wang wang!!!
+console.log(Object.getPrototypeOf(friend) === dog)    // true
+```
 ### 正式的方法定义
+::: tip
+在`ES6`之前从未正式定义过"方法"的概念，方法仅仅是一个具有功能而非数据的对象属性。而在`ES6`中正式将方法定义为一个函数，它会有一个内部`[[HomeObject]]`属性来容纳这个方法从属的对象。
+:::
+```js
+const person = {
+  // 是方法 [[HomeObject]] = person
+  sayHello () {
+    return 'Hello'
+  }
+}
+// 不是方法
+function sayBye () {
+  return 'goodbye'
+}
+```
+根据以上`[[HomeObject]]`的规则，我们可以得出`super`是如何工作的：
+* 在`[[HomeObject]]`属性上调用`Object.getPrototypeOf()`方法来检索原型的引用。 
+* 搜索原型找到同名函数。
+* 设置`this`绑定并且调用相应的方法。
+
+```js
+const person = {
+  sayHello () {
+    return 'Hello'
+  }
+}
+const friend = {
+  sayHello () {
+    return super.sayHello() + '!!!'
+  }
+}
+Object.setPrototypeOf(friend, person)
+console.log(friend.sayHello()) // Hello!!!
+```
+代码分析：
+* `friend.sayHello()`方法的`[[HomeObject]]`属性值为`friend`。
+* `friend`的原型是`person`。
+* `super.sayHello()`相当于`person.sayHello.call(this)`。
 
 ## 解构
 
