@@ -760,11 +760,117 @@ function factorial (n, p = 1) {
 ### 对象字面量的扩展
 对象字面量扩展包含两部分：
 * **属性初始值的简写**：当对象的属性和本地变量同名时，不必再写冒号和值，简单的只写属性即可。
-* **对象方法的简写**：
+* **对象方法的简写**： 消除了冒号和`function`关键字。
+* **可计算属性名**：在定义对象时，对象的属性值可通过变量来计算。
+::: tip
+通过对象方法简写语法创建的方法有一个`name`属性，其值为小括号前的名称。
+:::
+```js
+const name = 'why'
+const firstName = 'first name'
+const person = {
+  name,
+  [firstName]: 'ABC',
+  sayName () {
+    console.log(this.name)
+  }
+  
+}
+// 相当于
+const name = 'why'
+const person = {
+  name: name,
+  'irst name': 'ABC',
+  sayName: function () {
+    console.log(this.name)
+  }
+}
+```
 
 ### 新增方法
 
+#### Object.is
+在使用`JavaScript`比较两个值的时候，我们可能会习惯使用`==`或者`===`来进行判断，使用全等`===`在比较时可以避免触发强制类型转换，所以深受许多人的喜爱。但全等`===`也并非是完全准确的，例如：
+`+0===-0`会返回`true`，`NaN===NaN`会返回`false`。针对以上情况，`ES6`引入了`Object.is`方法来弥补。
+```js
+// ===和Object.is大多数情况下结果是相同的，只有极少数结果不同
+console.log(+0 === -0)            // true
+console.log(Object.is(+0, -0))    // false
+console.log(NaN === NaN)          // false
+console.log(Object.is(NaN, NaN))  // true
+```
+
+#### Object.assign
+::: tip 什么是Mixin？
+混合`Mixin`是`JavaScript`中实现对象组合最流行的一种模式。在一个`mixin`中，一个对象接受来自另一个对象的属性和方法(`mixin`方法为浅拷贝)。
+:::
+```js
+// mixin方法
+function mixin(receiver, supplier) {
+  Object.keys(supplier).forEach(function(key) {
+    receiver[key] = supplier[key]
+  })
+  return receiver
+}
+const person1 = {
+  age: 23,
+  name: 'why'
+}
+const person2 = mixin({}, person1)
+console.log(person2) // { age: 23, name: 'why' }
+```
+由于这种混合模式非常流行，所以`ES6`引入了`Object.assign`方法来实现相同的功能，这个方法接受一个接受对象和任意数量的源对象，最终返回接受对象。
+::: tip
+如果源对象中有同名的属性，后面的源对象会覆盖前面源对象中的同名属性。
+:::
+```js
+const person1 = {
+  age: 23,
+  name: 'why'
+}
+const person2 = {
+  age: 32,
+  address: '广东广州'
+}
+const person3 = Object.assign({}, person1, person2)
+console.log(person3) // { age: 32, name: 'why', address: '广东广州' }
+```
+::: warning
+`Object.assign`方法不能复制属性的`get`和`set`。
+:::
+```js
+let receiver = {}
+let supplier = {
+  get name () {
+    return 'why'
+  }
+}
+Object.assign(receiver, supplier)
+const descriptor = Object.getOwnPropertyDescriptor(receiver, 'name')
+console.log(descriptor.value) // why
+console.log(descriptor.get)   // undefined
+console.log(receiver)         // { name: 'why' }
+```
+
 ### 重复的对象字面量属性
+在`ECMAScript 5`严格模式下，给一个对象添加重复的属性会触发错误：
+```js
+'use strict'
+const person = {
+  name: 'AAA',
+  name: 'BBB' // ES5环境触发错误
+}
+```
+
+但在`ECMAScript 6`中，无论当前是否处于严格模式，添加重复的属性都不会报错，而是选取最后一个取值：
+```js
+'use strict'
+const person = {
+  name: 'AAA',
+  name: 'BBB' // ES6环境不报错
+}
+console.log(person) // { name: 'BBB' }
+```
 
 ### 自有属性枚举顺序
 
