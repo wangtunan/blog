@@ -588,7 +588,7 @@ const notPerson = Person.call(person, 'why') // 抛出错误
 ```js
 // ES5严格模式下，在代码块中声明一个函数会报错
 // 在ES6下，因为有了块级作用域的概念，所以无论是否处于严格模式，都不会报错。
-// 但在ES6中，当处于严格模式时：会将函数声明提升至当前块级作用域的顶部
+// 但在ES6中，当处于严格模式时，会将函数声明提升至当前块级作用域的顶部
 // 当处于非严格模式时，提升至外层作用域
 'use strict'
 if (true) {
@@ -1017,16 +1017,221 @@ console.log(friend.sayHello()) // Hello!!!
 * `super.sayHello()`相当于`person.sayHello.call(this)`。
 
 ## 解构
+::: tip
+解构是一种打破数据结构，将其拆分为更小部分的过程。
+:::
 
 ### 为何使用解构功能
+在`ECMAScript 5`及其早期版本中，为了从对象或者数组中获取特定数据并赋值给变量，编写了许多看起来同质化的代码：
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+const name = person.name
+const age = person.age
+```
+代码分析：我们必须从`person`对象中提取`name`和`age`的值，并把其值赋值给对应的同名变量，过程极其相似。假设我们要提取许多变量，这种过程会重复更多次，如果其中还包含嵌套结构，只靠遍历是找不到真实信息的。<br/>
+
+针对以上问题，`ES6`引入了解构的概念，按场景可分为：
+* 对象解构
+* 数组解构
+* 混合解构
+* 解构参数
 
 ### 对象解构
+我们使用`ES6`中的对象结构，改写以上示例：
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+const { name, age } = person
+console.log(name) // AAA
+console.log(age)  // 23
+```
+::: warning
+必须为解构赋值提供初始化程序，同时如果解构右侧为`null`或者`undefined`，解构会发生错误。
+:::
+```js
+// 以下代码为错误示例，会报错
+var { name, age }
+let { name, age }
+const { name, age }
+const { name, age } = null
+const { name, age } = undefined
+```
+
+#### 解构赋值
+我们不仅可以在解构时重新定义变量，还可以解构赋值已存在的变量：
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+let name, age
+// 必须添加()，因为如果不加，{}代表是一个代码块，而语法规定代码块不能出现在赋值语句的左侧。
+({ name, age } = person)
+console.log(name) // AAA
+console.log(age)  // 23
+```
+
+#### 解构默认值
+::: tip
+使用解构赋值表达式时，如果指定的局部变量名称在对象中不存在，那么这个局部变量会被赋值为`undefined`，此时可以随意指定一个默认值。
+:::
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+let { name, age, sex = '男' } = person
+console.log(sex) // 男
+```
+
+#### 为非同名变量赋值
+目前为止我们解构赋值时，带解构的键和带赋值的变量是同名的，但如何为非同名变量解构赋值呢？
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+let { name, age } = person
+// 相当于
+let { name: name, age: age } = person
+```
+`let { name: name, age: age } = person`含义是：在`person`对象中取键为`name`和`age`的值，并分别赋值给`name`变量和`age`变量。<br/>
+那么，我们根据以上的思路，为非同名变量赋值可以改写成如下形式：
+```js
+const person = {
+  name: 'AAA',
+  age: 23
+}
+let { name: newName, age: newAge } = person
+console.log(newName) // AAA
+console.log(newAge)  // 23
+```
+
+#### 嵌套对象结构
+::: tip
+解构嵌套对象任然与对象字面量语法相似，只是我们可以将对象拆解成我们想要的样子。
+:::
+```js
+const person = {
+  name: 'AAA',
+  age: 23,
+  job: {
+    name: 'FE',
+    salary: 1000
+  },
+  department: {
+    group: {
+      number: 1000,
+      isMain: true
+    }
+  }
+}
+let { job, department: { group } } = person
+console.log(job)    // { name: 'FE', salary: 1000 }
+console.log(group)  // { number: 1000, isMain: true }
+```
+`let { job, department: { group } } = person`含义是：在`person`中提取键为`job`、在`person`的嵌套对象`department`中提取键为`group`的值，并把其赋值给对应的变量。
+
 
 ### 数组解构
+::: tip
+数组的解构赋值与对象解构的语法相似，但简单许多，它使用的是数组字面量，且解构操作全部在数组内完成，解构的过程是按值在数组中的位置进行提取的。
+:::
+```js
+const colors = ['red', 'green', 'blue']
+let [firstColor, secondColor] = colors
+// 按需解构
+let [,,threeColor] = colors
+console.log(firstColor)   // red
+console.log(secondColor)  // green
+console.log(threeColor)   // blue
+```
 
-### 混合解构
+与对象一样，解构数组也能解构赋值给已经存在的变量，只是可以不需要像对象一样额外的添加括号：
+```js
+const colors = ['red', 'green', 'blue']
+let firstColor, secondColor
+[firstColor, secondColor] = colors
+console.log(firstColor)   // red
+console.log(secondColor)  // green
+```
+按以上原理，我们可以轻松扩展一下解构赋值的功能(快速交换两个变量的值)：
+```js
+let a = 1;
+let b = 2;
+[a, b] = [b, a];
+console.log(a); // 2
+console.log(b); // 1
+```
+与对象一样，数组解构也可以设置解构默认值：
+```js
+const colors = ['red']
+const [firstColor, secondColor = 'green'] = colors
+console.log(firstColor)   // red
+console.log(secondColor)  // green
+```
+
+当存在嵌套数组时，我们也可以使用和解构嵌套对象的思路来解决：
+```js
+const colors = ['red', ['green', 'lightgreen'], 'blue']
+const [firstColor, [secondColor]] = colors
+console.log(firstColor)   // red
+console.log(secondColor)  // green
+```
+
+#### 不定参数
+::: tip
+在解构数组时，不定元素只能放在最后一个，在后面继续添加逗号会导致报错。
+:::
+在数组解构中，有一个和函数的不定参数相似的功能：在解构数组时，可以使用`...`语法将数组中剩余元素赋值给一个特定的变量：
+```js
+let colors = ['red', 'green', 'blue']
+let [firstColor, ...restColors] = colors
+console.log(firstColor) // red
+console.log(restColors) // ['green', 'blue']
+```
+根据以上解构数组中的不定元素的原理，我们可以实现同`concat`一样的数组复制功能：
+```js
+const colors = ['red', 'green', 'blue']
+const concatColors = colors.concat()
+const [...restColors] = colors
+console.log(concatColors) // ['red', 'green', 'blue']
+console.log(restColors)   // ['red', 'green', 'blue']
+```
 
 ### 解构参数
+当我们定一个需要接受大量参数的函数时，通常我们会创建可以可选的对象，将额外的参数定义为这个对象的属性：
+```js
+function setCookie (name, value, options) {
+  options = options || {}
+  let path = options.path,
+      domain = options.domain,
+      expires = options.expires
+  // 其它代码
+}
+
+// 使用解构参数
+function setCookie (name, value, { path, domain, expires } = {}) {
+  let { path, domain, expires } = 
+  // 其它代码
+}
+```
+代码分析：`{ path, domain, expires } = {}`必须提供一个默认值，如果不提供默认值，则不传递第三个参数或报错：
+```js
+function setCookie (name, value, { path, domain, expires }) {
+  // 其它代码
+}
+// 报错
+setCookie('type', 'js')
+// 相当于解构了undefined，所以会报错
+{ path, domain, expires } = undefined
+```
+
 
 ## Symbol及其Symbol属性
 
