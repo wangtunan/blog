@@ -1234,16 +1234,144 @@ setCookie('type', 'js')
 
 
 ## Symbol及其Symbol属性
-
+::: tip
+在`ES6`之前，`JavaScript`语言只有五种原始类型：`string`、`number`、`boolean`、`null`和`undefiend`。在`ES6`中，添加了第六种原始类型：`Symbol`。
+:::
+可以使用`typeof`来检测`Symbol`类型：
+```js
+const symbol = Symbol('Symbol Test')
+console.log(typeof symbol) // symbol
+```
 ### 创建Symbol
+::: tip
+可以通过全局的`Symbol`函数来创建一个`Symbol`。
+:::
+```js
+const firstName = Symbol()
+const person = {}
+person[firstName] = 'AAA'
+console.log(person[firstName]) // AAA
+```
+
+可以在`Symbol()`种传递一个可选的参数，可以让我们添加一段文本描述我们创建的`Symbol`，其中文本是存储在内部属性`[[Description]]`中，只有当调用`Symbol`的`toString()`方法时才可以读取这个属性。
+```js
+const firstName = Symbol('Symbol Description')
+const person = {}
+person[firstName] = 'AAA'
+console.log(person[firstName]) // AAA
+console.log(firstName)         // Symbol('Symbol Description')
+```
 
 ### Symbol的使用方法
+::: tip
+所有可以使用可计算属性名的地方，都可以使用`Symbol`。
+:::
+```js
+let firstName = Symbol('first name')
+let lastName = Symbol('last name')
+const person = {
+  [firstName]: 'AAA'
+}
+Object.defineProperty(person, firstName, {
+  writable: false
+})
+Object.defineProperties(person, {
+  [lastName]: {
+    value: 'BBB',
+    writable: false
+  }
+})
+console.log(person[firstName])  // AAA
+console.log(person[lastName])   // BBB
+```
+### Symbol共享体系
+::: tip
+`ES6`提供了一个可以随时访问的全局`Symbol`注册表来让我们可以创建共享`Symbol`的能力，可以使用`Symbol.for()`方法来创建一个共享的`Symbol`。
+:::
+```js
+// Symbol.for方法的参数，也被用做Symbol的描述内容
+const uid = Symbol.for('uid')
+const object = {
+  [uid]: 12345
+}
+console.log(person[uid]) // 12345
+console.log(uid)         // Symbil(uid)
+```
+代码分析：
+* `Symbol.for()`方法首先会在全局`Symbol`注册变中搜索键为`uid`的`Symbol`是否存在。
+* 存在，直接返回已有的`Symbol`。
+* 不存在，则创建一个新的`Symbol`，并使用这个键在`Symbol`全局注册变中注册，随后返回新创建的`Symbol`。
 
+还有一个和`Symbol`共享有关的特性，可以使用`Symbol.keyFor()`方法在`Symbol`全局注册变中检索与`Symbol`有关的键，如果存在则返回，不存在则返回`undefined`：
+```js
+const uid = Symbol.for('uid')
+const uid1 = Symbol('uid1')
+console.log(Symbol.keyFor(uid))   // uid
+console.log(Symbol.keyFor(uid1))  // undefined
+```
 ### Symbol与类型强制转换
+::: tip
+其它原始类型没有与`Symbol`逻辑相等的值，尤其是不能将`Symbol`强制转换为字符串和数字。
+:::
+```js
+const uid = Symbol.for('uid')
+console.log(uid)
+console.log(String(uid))
+// 报错
+uid = uid + ''
+uid = uid / 1
+```
+代码分析：我们使用`console.log()`方法打印`Symbol`，会调用`Symbol`的`String()`方法，因此也可以直接调用`String()`方法输出`Symbol`。然而尝试将`Symbol`和一个字符串拼接，会导致程序抛出异常，`Symbol`也不能和每一个数学运算符混合使用，否则同样会抛出错误。
 
 ### Symbol属性检索
+`Object.keys()`和`Object.getOwnPropertyNames()`方法可以检索对象中所有的属性名，其中`Object.keys`返回所有可以枚举的属性，`Object.getOwnPropertyNames()`无论属性是否可以枚举都返回，但是这两个方法都无法返回`Symbol`属性。因此`ES6`引入了一个新的方法`Object.getOwnPropertySymbols()`方法。
+```js
+const uid = Symbol.for('uid')
+let object = {
+  [uid]: 123
+}
+const symbols = Object.getOwnPropertySymbols(object)
+console.log(symbols.length) // 1
+console.log(symbols[0])     // Symbol(uid)
+```
 
-### Symbol暴露内部操作
+### well-known Symbol暴露内部操作
+`ES6`通过在原型链上定义与`Symbol`相关的属性来暴露更多的语言内部逻辑，这些内部操作如下：
+* `Symbol.hasInstance`：一个在执行`instanceof`时调用的内部方法，用于检测对象的继承信息。
+* `Symbol.isConcatSpreadable`：一个布尔值，用于表示当传递一个集合作为`Array.prototype.concat()`方法的参数时，是否应该将集合内的元素规整到同一层级。
+* `Symbol.iterator`：一个返回迭代器的方法。
+* `Symbol.match`：一个在调用`String.prototype.match()`方法时调用的方法，用于比较字符串。
+* `Symbol.replace`：一个在调用`String.prototype.replace()`方法时调用的方法，用于替换字符串中的子串。
+* `Symbol.search`：一个在调用`String,prototype.search()`方法时调用的方法，用于在字符串中定位子串。
+* `Symbol.split`：一个在调用`String.prototype.split()`方法时调用的方法，用于分割字符串。
+* `Symbol.species`：用于创建派生对象的构造函数。
+* `Symbol.toPrimitive`：一个返回对象原始值的方法。
+* `Symbol.toStringTag`：一个在调用`Object.prototype.toString()`方法时使用的字符串，用于创建对象描述。
+* `Symbol.unscopables`：一个定义了一些不可被`with`语句引用的对象属性名称的对象集合。
+
+重写一个由`well-known Symbol`定义的方法，会导致对象内部的默认行为被改变，从而一个普通对象会变为一个奇异对象。
+
+#### Symbol.hasInstance
+::: tip
+每一个函数都有`Symbol.hasInstance`方法，用于确定对象是否为函数的实例，并且该方法不可被枚举、不可被写和不可被配置。
+:::
+```js
+function MyObject () {
+  // 空函数
+}
+Object.defineProperty(MyObject, Symbol.hasInstance, {
+  value: function () {
+    return false
+  }
+})
+let obj = new MyObject()
+console.log(obj instanceof MyObject) // false
+```
+代码分析：使用`Object.defineProperty`方法，在`MyObject`函数上改写`Symbol.hasInstance`，为其定义一个总是返回`false`的新函数，即使`obj`确实是`MyObject`的实例，但依然在进行`instanceof`判断时返回了`false`。
+::: warning
+注意如果要触发`Symbol.hasInstance`调用，`instanceof`的左操作符必须是一个对象，如果为非对象则会导致`instanceof`始终返回`false`。
+:::
+
 
 
 ## Set和Map集合
