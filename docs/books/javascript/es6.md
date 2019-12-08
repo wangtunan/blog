@@ -1335,7 +1335,7 @@ console.log(symbols.length) // 1
 console.log(symbols[0])     // Symbol(uid)
 ```
 
-### well-known Symbol暴露内部操作
+### Symbol暴露内部的操作
 `ES6`通过在原型链上定义与`Symbol`相关的属性来暴露更多的语言内部逻辑，这些内部操作如下：
 * `Symbol.hasInstance`：一个在执行`instanceof`时调用的内部方法，用于检测对象的继承信息。
 * `Symbol.isConcatSpreadable`：一个布尔值，用于表示当传递一个集合作为`Array.prototype.concat()`方法的参数时，是否应该将集合内的元素规整到同一层级。
