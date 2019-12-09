@@ -1372,8 +1372,127 @@ console.log(obj instanceof MyObject) // false
 注意如果要触发`Symbol.hasInstance`调用，`instanceof`的左操作符必须是一个对象，如果为非对象则会导致`instanceof`始终返回`false`。
 :::
 
+#### Symbol.isConcatSpreadable
+在`JavaScript`数组中`concat()`方法被用于拼接两个数组：
+```js
+const colors1 = ['red', 'green']
+const colors2 = ['blue']
+console.log(colors1.concat(colors2, 'brown')) // ['red', 'green', 'blue', 'brown']
+```
+在`concat()`方法中，我们传递了第二个参数，它是一个非数组元素。如果`Symbol.isConcatSpreadable`为`true`，那么表示对象有`length`属性和数字键，故它的数值型键会被独立添加到`concat`调用的结果中，它是对象的可选属性，用于增强作用于特定对象类型的`concat`方法的功能，有效简化其默认特性：
+```js
+const obj = {
+  0: 'hello',
+  1: 'world',
+  length: 2,
+  [Symbol.isConcatSpreadable]: true
+}
+const message = ['Hi'].concat(obj)
+console.log(message) // ['Hi', 'hello', 'world']
+```
 
+#### Symbol.match，Symbol.replace，Symbol.search，Symbol.split
+在`JavaScript`中，字符串与正则表达式经常一起出现，尤其是字符串类型的几个方法，可以接受正则表达式作为参数：
+* `match`：确定给定字符串是否匹配正则表示。
+* `replace`：将字符串中匹配正则表达式的部分替换为给定的字符串。
+* `search`：在字符串中定位匹配正则表示位置的索引。
+* `split`：按照匹配正则表达式的元素将字符串进行分割，并将分割结果存入数组中。
 
+在`ES6`之前，以上几个方法无法使用我们自己定义的对象来替代正则表达式进行字符串匹配，而在`ES6`之后，引入了与上述几个方法相对应`Symbol`，将语言内建的`Regex`对象的原生特性完全外包出来。
+```js
+const hasLengthOf10 = {
+  [Symbol.match] (value) {
+    return value.length === 10 ? [value] : null
+  },
+  [Symbol.replace] (value, replacement) {
+    return value.length === 10 ? replacement : value
+  },
+  [Symbol.search] (value) {
+    return value.length === 10 ? 0 : -1
+  },
+  [Symbol.split] (value) {
+    return value.length === 10 ? [,] : [value]
+  }
+}
+const message1 = 'Hello world'
+const message2 = 'Hello John'
+const match1 = message1.match(hasLengthOf10)
+const match2 = message2.match(hasLengthOf10)
+const replace1 = message1.replace(hasLengthOf10)
+const replace2 = message2.replace(hasLengthOf10, 'AAA')
+const search1 = message1.search(hasLengthOf10)
+const search2 = message2.search(hasLengthOf10)
+const split1 = message1.split(hasLengthOf10)
+const split2 = message2.split(hasLengthOf10)
+console.log(match1)     // null
+console.log(match2)     // [Hello John]
+console.log(replace1)   // Hello world
+console.log(replace2)   // AAA
+console.log(search1)    // -1
+console.log(search2)    // 0
+console.log(split1)     // [Hello John]
+console.log(split2)     // [,]
+```
+
+#### Symbol.toPrimitive
+`Symbol.toPrimitive`方法被定义在每一个标准类型的原型上，并且规定了当对象被转换为原始值时应该执行的操作，每当执行原始值转换时，总会调用`Symbol.toPrimitive`方法并传入一个值作为参数。<br/>
+对于大多数标准对象，数字模式有以下特性，根据优先级的顺序排序如下：
+* 调用`valueOf()`方法，如果结果为原始值，则返回。
+* 否则，调用`toString()`方法，如果结果为原始值，则返回。
+* 如果再无可选值，则抛出错误。
+
+同样对于大多数标准对象，字符串模式有以下有限级顺序：
+* 调用`toString()`方法，如果结果为原始值，则返回。
+* 否则，调用`valueOf()`方法，如果结果为原始值，则返回。
+* 如果再无可选值，则抛出错误。
+
+在大多数情况下，标准对象会将默认模式按数字模式处理(除`Date`对象，在这种情况下，会将默认模式按字符串模式处理)，如果自定义了`Symbol.toPrimitive`方法，则可以覆盖这些默认的强制转换行为。
+```js
+function Temperature (degress) {
+  this.degress = degress
+}
+Temperature.prototype[Symbol.toPrimitive] = function (hint) {
+  switch (hint) {
+    case 'string':
+      return this.degress + '℃'
+    case 'number':
+      return this.degress
+    case 'default':
+      return this.deress + ' degress'
+  }
+}
+const freezing = new Temperature(32)
+console.log(freezing + '')      // 32 degress
+console.log(freezing / 2)       // 16
+console.log(String(freezing))   // 32℃
+```
+
+#### Symbol.toStringTag
+在`JavaScript`中，如果我们同时存在多个全局执行环境，例如在浏览器中一个页面包含`iframe`标签，因为`iframe`和它外层的页面分别代表不同的领域，每一个领域都有自己的全局作用域，有自己的全局对象，在任何领域中创建的数组，都是一个正规的数组。然而，如果将这个数字传递到另外一个领域中，`instanceof Array`语句的检测结果会返回`false`，此时`Array`已经是另一个领域的构造函数，显然被检测的数组不是由这个构造函数创建的。<br/>
+
+针对以上问题，我们很快找到了一个相对来说比较实用的解决方案：
+```js
+function isArray(value) {
+  return Object.prototype.toString.call(value) === '[object Array]'
+}
+console.log(isArray([])) // true
+```
+与上述问题有一个类似的案例，在`ES5`之前我们可能会引入第三方库来创建全局的`JSON`对象，而在浏览器开始实现`JSON`全局对象后，就有必要区分`JSON`对象是`JavaScript`环境本身提供的还是由第三方库提供的：
+```js
+function supportsNativeJSON () {
+  return typeof JSON !== 'undefined' && Object.prototype.toString.call(JSON) === '[object JSOn]'
+}
+```
+在`ES6`中，通过`Symbol.toStringTag`这个`Symbol`改变了调用`Object.prototype.toString()`时返回的身份标识，其定义了调用对象的`Object.prototype.toString.call()`方法时返回的值：
+```js
+function Person (name) {
+  this.name = name
+}
+Person.prototype[Symbol.toStringTag] = 'Person'
+const person = new Person('AAA')
+console.log(person.toString())                        // [object Person]
+console.log(Object.prototype.toString.call(person))   // [object Person]
+```
 ## Set和Map集合
 
 ## 迭代器(Iterator)和生成器(Generator)
