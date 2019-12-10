@@ -1493,7 +1493,139 @@ const person = new Person('AAA')
 console.log(person.toString())                        // [object Person]
 console.log(Object.prototype.toString.call(person))   // [object Person]
 ```
+
 ## Set和Map集合
+`Set`集合是一种无重复元素的列表，通常用来检测给定的值是否在某个集合中；`Map`集合内含多组键值对，集合中每个元素分别存放着可访问的键名和它对应的值，`Map`集合经常被用来缓存频繁取用的数据。
+
+### ES5中的Set和Map集合
+在`ES6`还没有正式引入`Set`集合和`Map`集合之前，开发者们已经开始使用对象属性来模拟这两种集合了：
+```js
+const set = Object.create(null)
+const map = Object.create(null)
+set.foo = true
+map.bar = 'bar'
+// set检查
+if (set.foo) {
+  console.log('存在')
+}
+// map取值
+console.log(map.bar) // bar
+```
+以上程序很简单，确实可以使用对象属性来模拟`Set`集合和`Map`集合，但却在实际使用的过程中有诸多的不方便：
+* 对象属性名必须为字符串：
+```js
+const map = Object.create(null)
+map[5] = 'foo'
+// 本意是使用数字5作为键名，但被自动转换为了字符串
+console.log(map['5']) // foo
+```
+* 对象不能作为属性名：
+```js
+const map = Object.create(null)
+const key1 = {}
+const key2 = {}
+map[key1] = 'foo'
+// 本意是使用key1对象作为属性名，但却被自动转换为[object Object]
+// 因此map[key1] = map[key2] = map['[object Object]']
+console.log(map[key2]) // foo
+```
+* 不可控制的强制类型转换：
+```js
+const map = Object.create(null)
+map.count = 1
+// 本意是检查count属性是否存在，实际检查的确实map.count属性的值是否非0
+if (map.count) {
+  console.log(map.count)
+}
+```
+### ES6中的Set集合
+::: tip
+`Set`集合是一种有序列表，其中含有一些相互独立的非重复值，在`Set`集合中，不会对所存的值进行强制类型转换。
+:::
+其中`Set`集合涉及到的属性和方法有：
+* `Set`构造函数：可以使用此构造函数创建一个`Set`集合。
+* `add`方法：可以像`Set`集合中添加一个元素。
+* `delete`方法：可以移除`Set`集合中的某一个元素。
+* `clear`方法：可以移除`Set`集合中所有的元素。
+* `has`方法：判断给定的元素是否在`Set`集合中。
+* `size`属性：`Set`集合的长度。
+
+#### 创建Set集合
+::: tip
+`Set`集合的构造函数可以接受任何可迭代对象作为参数，例如：数组、`Set`集合或者`Map`集合。
+:::
+```js
+const set = new Set()
+set.add(5)
+set.add('5')
+// 重复添加的值会被忽略
+set.add(5)
+console.log(set.size) // 2
+```
+
+#### 移除元素
+::: tip
+使用`delete()`方法可以移除集合中的某一个值，使用`clear()`方法可以移除集合中所有的元素。
+:::
+```js
+const set = new Set()
+set.add(5)
+set.add('5')
+console.log(set.has(5)) // true
+set.delete(5)
+console.log(set.has(5)) // false
+console.log(set.size)   // 1
+set.clear()
+console.log(set.size)   // 0
+```
+
+#### Set集合的forEach()方法
+`Set`集合的`forEach()`方法和数组的`forEach()`方法是一样的，唯一的区别在于`Set`集合在遍历时，第一和第二个参数是一样的。
+```js
+const set = new Set([1, 2])
+set.forEach((value, key, arr) => {
+  console.log(`${value} ${key}`)
+  console.log(arr === set)
+})
+// 1 1
+// true
+// 2 2
+// true
+```
+
+#### Set集合转换为数组
+因为`Set`集合不可以像数组那样通过索引去访问数组元素，最好的做法是将`Set`集合转换为数组。
+```js
+const set = new Set([1, 2, 3, 4])
+// 展开运算符
+const arr1 = [...set]
+// Array.from方法
+const arr2 = Array.from(set)
+console.log(arr1) // [1, 2, 3, 4]
+console.log(arr2) // [1, 2, 3, 4]
+```
+
+#### Weak Set集合
+通过以上对`Set`集合的梳理，我们可以发现：只要`Set`实例中的引用存在，垃圾回收机制就不能释放该对象的内存空间，所以我们把`Set`集合看作是一个强引用的集合。<br/>
+为了更好的处理`Set`集合的垃圾回收，引入了一个叫`Weak Set`的集合：
+::: tip
+`Weak Set`集合只支出三种方法：`add`、`has`和`delete`。
+:::
+```js
+const weakSet = new WeakSet()
+const key = {}
+weakSet.add(key)
+console.log(weakSet.has(key)) // true
+weakSet.delete(key)
+console.log(weakSet.has(key)) // false
+```
+`Set`集合和`Weak Set`集合有许多共同的特性，但它们之间还是有一定的差别的：
+* `Weak Set`集合只能存储对象元素，像其添加非对象元素会导致抛出错误，同理`has()`和`delete()`传递非对象也同样会报错。
+* `Weak Set`集合不可迭代，也不暴露任何迭代器。
+* `Weak Set`集合不支持`forEach`方法。
+* `Weak Set`集合不支持`size`属性。
+
+### ES6中的Map集合
 
 ## 迭代器(Iterator)和生成器(Generator)
 
