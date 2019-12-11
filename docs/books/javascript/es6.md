@@ -1609,7 +1609,7 @@ console.log(arr2) // [1, 2, 3, 4]
 通过以上对`Set`集合的梳理，我们可以发现：只要`Set`实例中的引用存在，垃圾回收机制就不能释放该对象的内存空间，所以我们把`Set`集合看作是一个强引用的集合。<br/>
 为了更好的处理`Set`集合的垃圾回收，引入了一个叫`Weak Set`的集合：
 ::: tip
-`Weak Set`集合只支出三种方法：`add`、`has`和`delete`。
+`Weak Set`集合只支持三种方法：`add`、`has`和`delete`。
 :::
 ```js
 const weakSet = new WeakSet()
@@ -1626,17 +1626,202 @@ console.log(weakSet.has(key)) // false
 * `Weak Set`集合不支持`size`属性。
 
 ### ES6中的Map集合
+`ES6`中的`Map`类型是一种存储着许多键值对的有序列表，其中的键名和对应的值支持所有的数据类型，键名的等价性判断是通过调用`Object.is`方法来实现的。
+```js
+const map = new Map()
+const key1 = {}
+const key2 = {}
+map.set(5, 5)
+map.set('5', '5')
+map.set(key1, key2)
+console.log(map.get(5))     // 5
+console.log(map.get('5'))   // '5'
+console.log(map.get(key1))  // {}
+```
+
+#### Map集合支持的方法
+与`Set`集合类似，`Map`集合也支持一下集中方法：
+* `has`：检出指定的键名是否在`Map`集合中存在。
+* `delete`：在`Map`集合中移除指定键名及其对应的值。
+* `clear`：移除`Map`集合中所有的键值对。
+```js
+const map = new Map()
+map.set('name', 'AAA')
+map.set('age', 23)
+console.log(map.size)        // 2
+console.log(map.has('name')) // true
+console.log(map.get('name')) // AAA
+map.delete('name')
+console.log(map.has('name')) // false
+map.clear()
+console.log(map.size)        // 0
+```
+
+#### Map集合的初始化方法
+在初始化`Map`集合的时候，也可以像`Set`集合传入数组，但此时数组中的每一个元素都是一个子数组，子数组中包含一个键值对的键名和值两个元素。
+```js
+const map = new Map([['name', 'AAA'], ['age', 23]])
+console.log(map.has('name'))  // true
+console.log(map.has('age'))   // true
+console.log(map.size)         // 2
+console.log(map.get('name'))  // AAA
+console.log(map.get('age'))   // 23
+```
+
+#### Map集合的forEach()方法
+`Map`集合中的`forEach()`方法的回调参数和数字类似，每一个参数的解释如下：
+* 第一个参数是键名
+* 第二个参数是值
+* 第三个参数是`Map`集合本身
+
+```js
+const map = new Map([['name', 'AAA'], ['age', 23]])
+map.forEach((key, value, ownMap) => {
+  console.log(`${key} ${value}`)
+  console.log(ownMap === map)
+})
+// name AAA
+// true
+// age 23
+// true
+```
+
+#### Weak Map集合
+`Weak Map`它是一种存储着许多键值对的无序列表，集合中的键名必须是一个对象，如果使用非对象键名会报错。
+::: tip
+`Weak Map`集合只支持`set()`、`get()`、`has()`和`delete()`。
+:::
+```js
+const key1 = {}
+const key2 = {}
+const key3 = {}
+const weakMap = new WeakMap([[key1, 'AAA'], [key2, 23]])
+weakMap.set(key3, '广东')
+
+console.log(weakMap.has(key1)) // true
+console.log(weakMap.get(key1)) // AAA
+weakMap.delete(key1)
+console.log(weakMap.has(key)) // false
+```
+`Map`集合和`Weak Map`集合有许多共同的特性，但它们之间还是有一定的差别的：
+* `Weak Map`集合的键名必须为对象，添加非对象会报错。
+* `Weak Map`集合不可迭代。
+* `Weak Map`集合不支持`forEach`方法。
+* `Weak Map`集合不支持`clear`方法。
+* `Weak Map`集合不支持`size`属性。
 
 ## 迭代器(Iterator)和生成器(Generator)
 
+### 循环语句的问题
+
+### 什么是迭代器
+
+### 什么是生成器
+
+### 可迭代对象和for-of循环
+
+### 内建迭代器
+
+### 展开运算符和非数组可迭代对象
+
+### 高级迭代器功能
+
+### 异步任务执行
+
 ## JavaScript中的类
 
-## 数据的改进
+### ES5中的近类结构
+
+### 类的声明
+
+### 类的表达式
+
+### 访问器属性
+
+### 可计算成员名称
+
+### 生成器方法
+
+### 静态成员
+
+### 继承与派生类
+
+### 构造函数中的new.target
+
+## 改进的数组功能
+
+### 创建数组
+
+### 数组新方法
+
+### 定性数组
+
+### 定性数组和普通数组的对比
 
 ## Promise和异步编程
 
+### 异步编程的背景知识
+
+### Promise基础
+
+### 全局Promise拒绝处理
+
+### 串联Promise
+
+### 响应对个Promise
+
+### 自Promise继承
+
+### 基于Promise的异步任务执行
+
 ## 代理(Proxy)和反射(Reflect)API
 
+### 数组问题
+
+### 代理和反射
+
+### 创建一个简单的代理
+
+### 使用set陷阱
+
+### 使用get陷阱
+
+### 使用has陷阱
+
+### 使用deleteProperty陷阱
+
+### 使用原型代理陷阱
+
+### 使用对象可扩展陷阱
+
+### 使用属性描述符陷阱
+
+### 使用ownKeys陷阱
+
+### 使用apply和construce陷阱
+
+### 可撤销代理
+
+### 解决数组问题
+
+### 将代理作为原型
+
 ## 用模块封装代码
+
+### 什么是模块
+
+### 导出的基本语法
+
+### 导入的基本语法
+
+### 导出和导入时重命名
+
+### 模块的默认值
+
+### 重新导出一个绑定
+
+### 无绑定导入
+
+### 加载模块
 
 
