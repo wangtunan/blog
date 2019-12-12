@@ -1713,10 +1713,89 @@ console.log(weakMap.has(key)) // false
 ## 迭代器(Iterator)和生成器(Generator)
 
 ### 循环语句的问题
+我们在日常的开发过程中，很可能写过下面这样的代码：
+```js
+var colors = ['red', 'gree', 'blue']
+for(var i = 0, len = colors.length; i < len; i++) {
+  console.log(colors[i])
+}
+// red
+// green
+// blue
+```
+代码分析：虽然循环语句的语法简单，但是如果将多个循环嵌套则需要追踪多个变量，代码复杂度会大大增加，一不小心就会错误使用了其它`for`循环的跟踪变量，从而造成程序出错，而`ES6`引入迭代器的宗旨就是消除这种复杂性并减少循环中的错误。
 
 ### 什么是迭代器
+问：什么是迭代器？<br/>
+答：迭代器是一种特殊的对象，它具有一些专门为迭代过程设计的专有接口，所有迭代器都有一个叫`next`的方法，每次调用都返回一个结果对象。结果对象有两个属性，一个是`value`表示下一次将要返回的值；另外一个是`done`，它是一个布尔类型的值，当没有更多可返回的数据时返回`true`。迭代器还会保存一个内部指针，用来指向当前集合中值的位置，每调用一次`next`方法，都会返回下一个可用的值。<br/>
+
+在了解迭代器的概念后，我们使用`ES5`语法来创建一个迭代器：
+```js
+function createIterator (items) {
+  var i = 0
+  return {
+    next: function () {
+      var done = i >= items.length
+      var value = !done ? items[i++] : undefined
+      return {
+        done: done,
+        value: value
+      }
+    }
+  }
+}
+var iterator = createIterator([1, 2, 3])
+console.log(iterator.next())  // { value: 1, done: false }
+console.log(iterator.next())  // { value: 2, done: false }
+console.log(iterator.next())  // { value: 3, done: false }
+console.log(iterator.next())  // { value: undefined, done: true }
+```
+正如上面那样，我们使用了`ES5`语法来创建我们自己的迭代器，它的内部实现很复杂，而`ES6`除了引入了迭代器的概念还引入了一个叫生成器的概念，使用它我们可以让创建迭代器的过程更加简单一点。
 
 ### 什么是生成器
+问：什么是生成器？<br/>
+答：生成器是一种返回迭代器的函数，通过`function`关键字后的`*`号来表示，函数中会用到新的关键词`yield`。
+
+```js
+function * createIterator () {
+  yield 1
+  yield 2
+  yield 3
+}
+const iterator = createIterator()
+console.log(iterator.next().value)  // 1
+console.log(iterator.next().value)  // 2
+console.log(iterator.next().value)  // 3
+```
+正如我们上面的输出结果一样，它和我们使用`ES5`语法创建的迭代器输出结果是一致的。<br/>
+
+**生成器函数最重要的一点是：每执行完一条`yield`语句，函数就会自动终止**：我们在`ES6`之前，函数一旦开始执行，则一直会向下执行，一直到函数`return`语句都不会中断，但生成器函数却打破了这一惯例：当执行完一条`yield`语句时，函数会自动停止执行，除非代码手动调用迭代器的`next`方法。<br/>
+
+我们也可以在循环中使用生成器：
+```js
+function * createIterator (items) {
+  for(let i = 0, len = items.length; i < len; i++) {
+    yield items[i]
+  }
+}
+const it = createIterator([1, 2, 3])
+console.log(it.next())  // { done: false, value: 1 }
+console.log(it.next())  // { done: false, value: 2 }
+console.log(it.next())  // { done: false, value: 3 }
+console.log(it.next())  // { done: true, value: undefined }
+```
+
+::: warning 限制
+`yield`关键字只能在生成器内部使用，在其他地方使用会导致抛出错误，及时是在生成器内部的函数中使用也是如此。
+:::
+```js
+function * createIterator (items) {
+  items.forEach(item => {
+    // 抛出错误
+    yield item + 1
+  })
+}
+```
 
 ### 可迭代对象和for-of循环
 
