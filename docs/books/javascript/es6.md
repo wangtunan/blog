@@ -1798,10 +1798,236 @@ function * createIterator (items) {
 ```
 
 ### 可迭代对象和for-of循环
+问：可迭代对象的特点。<br/>
+答：可迭代对象具有`Symbol.iterator`属性，是一种与迭代器密切相关的对象。`Symbol.iterator`通过指定的函数可以返回一个作用于附属对象的迭代器。在`ES6`中，所有的集合对象(数组、Set集合以及Map集合)和字符串都是可迭代对象，这些对象中都有默认的迭代器。由于生成器默认会为`Symbol.iterator`属性赋值，因此所有通过生成器创建的迭代器都是可迭代对象。<br/>
+
+`ES6`新引入了`for-of`循环每执行一次都会调用可迭代对象的`next`方法，并将迭代器返回的结果对象的`value`属性存储在一个变量中，循环将持续执行这一过程直到返回对象的`done`属性的值为`true`。
+```js
+const value = [1, 2, 3]
+for (let num of value) {
+  console.log(num);
+}
+// 1
+// 2
+// 3
+```
+
+#### 访问默认的迭代器
+::: tip
+可以通过`Symbol.iterator`来访问对象的默认迭代器
+:::
+```js
+const values = [1, 2, 3]
+const it = values[Symbol.iterator]()
+console.log(it.next())  // {done:false, value:1}
+console.log(it.next())  // {done:false, value:2}
+console.log(it.next())  // {done:false, value:3}
+console.log(it.next())  // {done:true, value:undefined}
+```
+
+由于具有`Symbol.iterator`属性的对象都有默认的迭代器对象，因此可以用它来检测对象是否具有可迭代对象：
+```js
+function isIterator (object) {
+  return typeof object[Symbol.iterator] === 'function'
+}
+
+console.log(isIterator([1, 2, 3]))  // true
+console.log(isIterator('hello'))    // true
+console.log(isIterator(new Set()))  // true
+console.log(isIterator(new Map))    // true
+```
+
+#### 创建可迭代对象
+::: tip
+默认情况下，我们自己定义的对象都是不可迭代对象，但如果给`Symbol.iterator`属性添加一个生成器，则可以将其变为可迭代对象。
+:::
+```js
+let collection = {
+  items: [1, 2, 3],
+  *[Symbol.iterator] () {
+    for (let item of this.items) {
+      yield item
+    }
+  }
+}
+for (let value of collection) {
+  console.log(value)
+}
+// 1
+// 2
+// 3
+```
 
 ### 内建迭代器
 
+#### 集合对象迭代器
+在`ES6`中有三种类型的集合对象：数组、`Set`集合和`Map`集合，它们都内建了如下三种迭代器：
+* `entries`：返回一个迭代器，其值为多个键值对。
+* `values`：返回一个迭代器，其值为集合的值。
+* `keys`：返回一个迭代器，其值为集合中的所有键名。
+
+`entries()`迭代器：
+```js
+const colors = ['red', 'green', 'blue']
+const set = new Set([1, 2, 3])
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+
+for (let item of colors.entries()) {
+  console.log(item)
+  // [0, 'red']
+  // [1, 'green']
+  // [2, 'blue']
+}
+for (let item of set.entries()) {
+  console.log(item)
+  // [1, 1]
+  // [2, 2]
+  // [3, 3]
+}
+for (let item of map.entries()) {
+  console.log(item)
+  // ['name', 'AAA']
+  // ['age', 23]
+  // ['address', '广东']
+}
+```
+
+`values`迭代器：
+```js
+const colors = ['red', 'green', 'blue']
+const set = new Set([1, 2, 3])
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+
+for (let item of colors.values()) {
+  console.log(item)
+  // red
+  // green
+  // blue
+}
+for (let item of set.values()) {
+  console.log(item)
+  // 1
+  // 2
+  // 3
+}
+for (let item of map.values()) {
+  console.log(item)
+  // AAA
+  // 23
+  // 广东
+}
+```
+
+
+`keys`迭代器：
+```js
+const colors = ['red', 'green', 'blue']
+const set = new Set([1, 2, 3])
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+
+for (let item of colors.keys()) {
+  console.log(item)
+  // 0
+  // 1
+  // 2
+}
+for (let item of set.keys()) {
+  console.log(item)
+  // 1
+  // 2
+  // 3
+}
+for (let item of map.keys()) {
+  console.log(item)
+  // name
+  // age
+  // address
+}
+```
+
+`不同集合类型的默认迭代器`：每一个集合类型都有一个默认的迭代器，在`for-of`循环中，如果没有显示的指定则使用默认的迭代器：
+* 数组和`Set`集合：默认迭代器为`values`。
+* `Map`集合：默认为`entries`。
+
+```js
+const colors = ['red', 'green', 'blue']
+const set = new Set([1, 2, 3])
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+for (let item of colors) {
+  console.log(item)
+  // red
+  // green
+  // blue
+}
+for (let item of set) {
+  console.log(item)
+  // 1
+  // 2
+  // 3
+}
+for (let item of map) {
+  console.log(item)
+  // ['name', 'AAA']
+  // ['age', 23]
+  // ['address', '广东']
+}
+```
+
+`解构和for-of循环`：如果要在`for-of`循环中使用解构语法，则可以简化编码过程：
+```js
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+for (let [key, value] of map.entries()) {
+  console.log(key, value)
+  // name AAA
+  // age 23
+  // address 广东
+}
+```
+#### 字符串迭代器
+自`ES6`发布以来，`JavaScript`字符串的行为慢慢变得更像数组了：
+```js
+let message = 'Hello'
+for(let i = 0, len = message.length; i < len; i++) {
+  console.log(message[i])
+  // H
+  // e
+  // l
+  // l
+  // o
+}
+```
+
+#### NodeList迭代器
+`DOM`标准中有一个`NodeList`类型，代表页面文档中所有元素的集合。`ES6`为其添加了默认的迭代器，其行为和数组的默认迭代器一致：
+```js
+let divs = document.getElementByTagNames('div')
+for (let div of divs) {
+  console.log(div)
+}
+```
+
 ### 展开运算符和非数组可迭代对象
+我们在前面的知识中已经知道，我们可以使用展开运算符把一个`Set`集合转换成一个数组，像下面这样：
+```js
+let set = new Set([1, 2, 3, 4])
+let array = [...set]
+console.log(array) // [1, 2, 3, 4]
+```
+**代码分析**：在我们所用`...`展开运算符的过程中，它操作的是`Set`集合的默认可迭代对象(`values`)，从迭代器中读取所有值，然后按照返回顺序将他们依次插入到数组中。
+```js
+const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
+const array = [...map]
+console.log(array) // [['name', 'AAA'], ['age', 23], ['address', '广东']]
+```
+**代码分析**：在我们使用`...`展开运算符的过程中，它操作的是`Map`集合的默认可迭代对象(`entries`)，从迭代器中读取多组键值对，依次插入数组中。
+
+```js
+const arr1 = ['red', 'green', 'blue']
+const arr2 = ['yellow', 'white', 'black']
+const array = [...arr1, ...arr2]
+console.log(array) // ['red', 'green', 'blue', 'yellow', 'white', 'black']
+```
+**代码分析**：在使用`...`展开运算符的过程中，同`Set`集合一样使用的都是其默认迭代器(`values`)，然后按照返回顺序依次将他们插入到数组中。
 
 ### 高级迭代器功能
 
