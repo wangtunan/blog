@@ -2031,7 +2031,124 @@ console.log(array) // ['red', 'green', 'blue', 'yellow', 'white', 'black']
 
 ### 高级迭代器功能
 
-### 异步任务执行
+#### 给迭代器传递参数
+::: tip
+如果给迭代器`next()`方法传递参数，则这个参数的值就会替代生成器内部上一条`yield`语句的返回值。
+:::
+```js
+function * createIterator () {
+  let first = yield 1
+  let second = yield first + 2
+  yield second + 3
+}
+let it = createIterator()
+console.log(it.next(11)) // {done: false, value: 1}
+console.log(it.next(4))  // {done: false, value: 6}
+console.log(it.next(5))  // {done: false, value: 8}
+console.log(it.next())   // {done: true, value: undefined}
+```
+代码分析：除了第一个迭代器，其它几个迭代器我们能很快计算出结果，但为什么第一个`next()`方法的参数无效呢？这是因为传给`next()`方法的参数是替代上一次`yield`的返回值，而在第一次调用`next()`方法之前不会执行任何`yield`语句，因此给第一次调用的`next()`方法传递参数，无论传递任何值都将被舍弃。
+
+
+#### 在迭代器中抛出错误
+::: tip
+除了给迭代器传递数据外，还可以给他传递错误条件，让其恢复执行时抛出一个错误。
+:::
+```js
+function * createIterator () {
+  let first = yield 1
+  let second = yield first + 2
+  // 不会被执行
+  yield second + 3
+}
+let it = createIterator()
+console.log(it.next())                    // {done: false, value: 1}
+console.log(it.next(4))                   // {done: false, value: 6}
+console.log(it.throw(new Error('break'))) // 抛出错误
+```
+正如我们上面看到的那样，我们想生成器内部传递了一个错误对象，迭代器恢复执行时会抛出一个错误，我们可以使用`try-catch`语句来捕获这种错误：
+```js
+function * createIterator () {
+  let first = yield 1
+  let second
+  try {
+    second = yield first + 2
+  } catch(ex) {
+    second = 6
+  }
+  yield second + 3
+}
+let it = createIterator()
+console.log(it.next())                    // {done: false, value: 1}
+console.log(it.next(4))                   // {done: false, value: 6}
+console.log(it.throw(new Error('break'))) // {done: false, value: 9}
+console.log(it.next())                    // {done: true, value: undefined}
+```
+
+#### 生成器返回语句
+::: tip
+由于生成器也是函数，因此可以通过`return`语句提前退出函数执行，对于最后一次`next()`方法调用，可以主动为其指定一个返回值。
+:::
+```js
+function * createIterator () {
+  yield 1
+  return 2
+  // 不会被执行
+  yield 3
+  yield 4
+}
+let it = createIterator()
+console.log(it.next())  // {done: false, value: 1}
+console.log(it.next())  // {done: false, value: 2}
+console.log(it.next())  // {done: true, value: undefined}
+```
+代码分析：在生成器中，`return`语句表示所有的操作都已经完成，属性值`done`会被设置成`true`，如果同时提供了响应的值，则属性`value`会被设置为这个值，并且`return`语句之后的`yield`不会被执行。
+
+::: warning
+展开运算符和`for-of`循环会直接忽略通过`return`语句指定的任何返回值，因为只要`done`被设置为`true`，就立即停止读取其他的值。
+:::
+```js
+const obj = {
+  items: [1, 2, 3, 4, 5],
+  *[Symbol.iterator] () {
+    for (let i = 0, len = this.items.length; i < len; i++) {
+      if (i === 3) {
+        return 300
+      } else {
+        yield this.items[i]
+      }
+    } 
+  }
+}
+for (let value of obj) {
+  console.log(value)
+  // 1
+  // 2
+  // 3
+}
+console.log([...obj]) // [1, 2, 3]
+```
+
+#### 委托生成器
+::: tip
+我们可以将两个迭代器合二为一，这样就可以创建一个生成器，再给`yield`语句添加一个星号，以达到将生成数据的过程委托给其他迭代器。
+:::
+```js
+function * createColorIterator () {
+  yield ['red', 'green', 'blue']
+}
+function * createNumberIterator () {
+  yield [1, 2, 3, 4]
+}
+function * createCombineIterator () {
+  yield * createColorIterator();
+  yield * createNumberIterator();
+}
+let it = createCombineIterator()
+console.log(it.next().value)  // ['red', 'green', 'blue']
+console.log(it.next().value)  // [1, 2, 3, 4]
+console.log(it.next().value)  // undefined
+```
 
 ## JavaScript中的类
 
