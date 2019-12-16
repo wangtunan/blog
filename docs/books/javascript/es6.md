@@ -2153,10 +2153,144 @@ console.log(it.next().value)  // undefined
 ## JavaScript中的类
 
 ### ES5中的近类结构
+在`ES5`及早期版本中没有类的概念，最相近的思路创建一个自定义类型：首先创建一个构造函数，然后定义另一个方法并赋值给构造函数的原型，例如：
+```js
+function Person (name) {
+  this.name = name
+}
+Person.prototype.sayName = function () {
+  console.log(this.name)
+}
+let person = new Person('AAA')
+person.sayName() // AAA
+console.log(person instanceof Person) // true
+console.log(person instanceof Object) // true
+```
+通过以上一个在`ES5`中近似类的结构的特性，许多`JavaScript`类库都基于这个模式进行开发，而且`ES6`中的类也借鉴了类似的方法。
 
 ### 类的声明
+::: tip
+要声明一个类，需要使用`class`关键来声明，类声明仅仅只是对已有自定义类型声明的语法糖而已。
+:::
+```js
+class Person {
+  // 相当于Person构造函数
+  constructor (name) {
+    this.name = name
+  }
+  // 相当于Person.prototype.sayName
+  sayName () {
+    console.log(this.name)
+  }
+}
+const person = new Person('AAA')
+person.sayName() // AAA
+console.log(person instanceof Person) // true
+console.log(person instanceof Object) // true
+```
+代码分析：
+* `constructor()`：我们可以看到`constructor()`方法相当于我们上面写到的`Person`构造函数，在`constructor()`方法中我们定义了一个`name`的自有属性。所谓自有属性，就是类实例的属性，其不会出现在原型上，且只能在类的构造函数或方法中被创建。
+* `sayName()`：`sayName()`方法就相当于我们上面写到的`Person.prototype.sayName`。有一个特别需要注意的地方就是：与函数有所不同，类属性不可被赋予新值，例如：`Person.prototype`就是这样一个只读的类属性。
+
+#### 类和自定义类型的差异：
+* 函数声明可以被提升，而类声明与`let`声明类似，不能被提升；真正执行声明语句之前，它们一直存在暂时性死区。
+* 类声明中的所有代码将自动运行在严格模式下，而且无法强行让代码脱离严格模式执行。
+* 在自定义方法中，需要通过`Object.defineProperty()`方法手工指定某个方法不可枚举；而在类中，所有方法都是不可枚举的。
+* 每一个类都有一个名叫`[[Construct]]`的内部方法，通过关键字`new`调用那些不含`[[Construct]]`的方法会导致程序抛出错误。
+* 使用除关键字`new`以外的方式调用类的构造函数会导致程序抛出错误。
+* 在类中修改类名会导致程序报错。
+在了解了类和自定义类型的差异以后，我们可以使用除了类之外的语法来编写等价的代码：
+```js
+// ES5等价类
+let Person = (function() {
+  'use strict'
+  const Person = function(name) {
+    if (typeof new.target === 'undefined') {
+      throw new Error('必须通过关键字new调用此构造函数')
+    }
+    this.name = name
+  }
+  Object.defineProperty(Person.prototype, 'sayName', {
+    value: function () {
+      if (typeof new.target !== 'undefined') {
+        throw new Error('不可通过关键字new来调用此方法')
+      }
+      console.log(this.name)
+    },
+    enumerable: false,
+    writable: false,
+    configurable: true
+  })
+  return Person
+}())
+
+const person = new Person('AAA')
+person.sayName() // AAA
+console.log(person instanceof Person) // true
+```
 
 ### 类的表达式
+::: tip
+类和函数都有两种存在形式：声明形式和表达式形式
+:::
+```js
+// 类的表达式形式
+let Person = class {
+  constructor (name) {
+    this.name
+  }
+  sayName () {
+    console.log(this.name)
+  }
+}
+```
+从以上代码可以看出：类声明和类表达式的功能极为相似，只是编写的方式略有差异，二者均不会像函数声明和函数表达式一样被提升。<br/>
+在我们最上面，我们的类声明是一个匿名的类表达式，其实类和函数一样，都可以定义为命名表达式：
+```js
+let PersonClass = class Person{
+  constructor (name) {
+    this.name
+  }
+  sayName () {
+    console.log(this.name)
+  }
+}
+const person = new PersonClass('AAA')
+person.sayName() // AAA
+console.log(typeof PersonClass) // function
+console.log(typeof Person)      // undefined
+```
+
+#### 类和单例
+类表达式还有一种用法：通过立即调用类构造函数可以创建单例，用`new`调用类表达式，紧接着通过一对小括号调用这个表达式：
+```js
+let Person = new class {
+  constructor (name) {
+    this.name = name
+  }
+  sayName () {
+    console.log(this.name)
+  }
+}('AAA')
+Person.sayName() // AAA
+```
+
+### 一等公民的类
+::: tip
+一等公民是指一个可以传入函数，可以从函数中返回，并且可以赋值给变量的至。
+:::
+```js
+function createObject (classDef) {
+  return new classDef()
+}
+const obj = createObject (class {
+  sayHi () {
+    console.log('Hello!')
+  }
+})
+obj.sayHi() // Hello!
+```
+
 
 ### 访问器属性
 
