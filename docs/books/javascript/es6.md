@@ -2293,13 +2293,142 @@ obj.sayHi() // Hello!
 
 
 ### 访问器属性
+::: tip
+除了可以在构造函数中创建自己的属性，还可以在类的原型上直接定义访问器属性。
+:::
+```js
+class Person {
+  constructor (message) {
+    this.animal.message = message
+  }
+  get message () {
+    return this.animal.message
+  }
+  set message (message) {
+    this.animal.message = message
+  }
+}
+const desc = Object.getOwnPropertyDescriptor(Person.prototype, 'message')
+console.log('get' in desc)  // true
+console.log('set' in desc)  // true
+```
+为了更好的理解类的访问器属性，我们使用`ES5`代码来改写有关访问器部分的代码：
+```js
+// 省略其它部分
+Object.defineProperty(Person.prototype, 'message', {
+  enumerable: false,
+  configurable: true,
+  get: function () {
+    return this.animal.message
+  },
+  set: function (val) {
+    this.animal.message = val
+  }
+})
+```
+我们经过对比可以发现，比起`ES5`等价代码而言，使用`ES6`类的语法要简洁得多。
 
 ### 可计算成员名称
+::: tip
+类和对象字面量还有很多相似之处，类方法和访问器属性也支持使用可计算名称。
+:::
+```js
+const methodName= 'sayName'
+const propertyName = 'newName'
+class Person {
+  constructor (name) {
+    this.name = name
+  }
+  [methodName] () {
+    console.log(this.name)
+  }
+  get [propertyName] () {
+    return this.name
+  }
+  set [propertyName] (val) {
+    this.name = val
+  }
+}
+let person = new Person('AAA')
+person.sayName()            // AAA
+person.name = 'BBB'
+console.log(person.newName) // BBB
+```
 
 ### 生成器方法
+::: tip
+在类中，同样可以像对象字面量一样，在方法名前面加一个星号(*)的方式来定义生成器。
+:::
+```js
+class MyClass {
+  * createIterator () {
+    yield 1
+    yield 2
+    yield 3
+  }
+}
+let instance = new MyClass()
+let it = instance.createIterator()
+console.log(it.next().value)  // 1
+console.log(it.next().value)  // 2
+console.log(it.next().value)  // 3
+console.log(it.next().value)  // undefined
+```
+尽管生成器方法很使用，但如果类仅仅只是用来表示值的集合，那么为它定义一个默认的迭代器会更加有用。
+```js
+class Collection {
+  constructor () {
+    this.items = [1, 2, 3]
+  }
+  *[Symbol.iterator]() {
+    yield *this.items.values()
+  }
+}
+const collection = new Collection()
+for (let value of collection) {
+  console.log(value)
+  // 1
+  // 2
+  // 3
+}
+```
 
 ### 静态成员
-
+在`ES5`及其早期版本中，直接将方法添加到构造函数中来模拟静态成员是一种常见的模式：
+```js
+function PersonType (name) {
+  this.name = name
+}
+// 静态方法
+PersonType.create = function (name) {
+  return new PersonType(name)
+}
+// 实例方法
+PersonType.prototype.sayName = function () {
+  console.log(this.name)
+}
+const person = PersonType.create('AAa')
+person.sayName() // AAA
+```
+在`ES6`中，类语法简化了创建静态成员的过程，在方法或者访问器属性名前面使用正式的静态注释即可。
+::: tip
+静态成员只能在类中访问，不能在实例中访问
+:::
+```js
+class Person {
+  constructor (name) {
+    this.name = name
+  }
+  sayName () {
+    console.log(this.name)
+  }
+  static create (name) {
+    return new Person(name)
+  }
+}
+const person = Person.create('AAA')
+person.sayName() // AAA
+```
 ### 继承与派生类
 
 ### 构造函数中的new.target
