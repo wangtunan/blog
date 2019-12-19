@@ -2687,7 +2687,75 @@ colors.length = 0
 console.log(colors[0])      // undefined
 ```
 
+#### Symbol.species属性
+内建对象继承的一个实用之处是：原本在内建对象中返回的实例自身的方法将自动返回派生类的实例。例如：如果我们有一个继承自`Array`的派生类`MyArray`，那么像`slice()`这样的方法也会返回一个`MyArray`的实例。
+```js
+class MyArray extends Array {}
+const items1 = new MyArray(1, 2, 3, 4)
+const items2 = items1.slice(1, 3)
+console.log(items1 instanceof MyArray) // true
+console.log(items2 instanceof MyArray) // true
+```
+`Symbol.species`属性是诸多内部`Symbol`中的一个，它被用于定义返回函数的静态访问器属性。被返回的函数是一个构造函数，每当要在实例的方法中创建类的实例时必须使用这个构造函数，以下内建类型都已定义了`Symbol.species`属性：
+* `Array`
+* `ArrayBuffer`
+* `Map`
+* `Promise`
+* `RegExp`
+* `Set`
+* `Typed arrays`
+
 ### 构造函数中的new.target
+我们在之前曾经了解过`new.target`及其值会根据函数被调用的方式而改变的原理，在类的构造函数中也可以通过`new.target`来确定类是如何被调用的，一般而言`new.target`等于类的构造函数。
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+    console.log(new.target === Rectangle)
+  }
+}
+const rect = new Rectangle(3, 4)  // 输出true 
+```
+然而当类被继承的时候，`new.target`是等于派生类的：
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+    console.log(new.target === Rectangle)
+    console.log(new.target === Square)
+  }
+}
+class Square extends Rectangle {
+  constructor (length) {
+    super(length, length)
+  }
+}
+const square = new Square(3)
+// 输出false
+// 输出true
+```
+
+根据`new.target`的特性，我们可以定义一种抽象基类：即不能被直接实例化，必须通过继承的方式来使用。
+```js
+class Shape {
+  constructor () {
+    if (new.target === Shape) {
+      throw new Error('不能被直接实例化')
+    }
+  }
+}
+class Rectangle extends Shape {
+  constructor (width, height) {
+    super()
+    this.width = width
+    this.height = height
+  }
+}
+const rect = new Rectangle(3, 4)
+console.log(rect instanceof Shape) // true
+```
 
 ## 改进的数组功能
 
