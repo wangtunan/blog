@@ -2429,7 +2429,170 @@ class Person {
 const person = Person.create('AAA')
 person.sayName() // AAA
 ```
+
 ### 继承与派生类
+在`ES6`之前，实现继承与自定义类型是一个不小的工作，严格意义上的继承需要多个步骤实现。
+```js
+function Rectangle (width, height) {
+  this.width = width
+  this.height = height
+}
+Rectangle.prototype.getArea = function () {
+  return this.width * this.height
+}
+function Square(length) {
+  Rectangle.call(this, length, length)
+}
+Square.prototype = Object.create(Rectangle.prototype, {
+  constructor: {
+    value: Square,
+    enumerable: true,
+    configurable: true,
+    writabel: true
+  }
+})
+const square = new Square(3)
+console.log(square.getArea())             // 9
+console.log(square instanceof Square)     // true
+console.log(Square instanceof Rectangle)  // false
+```
+代码分析：为了使用`ES6`之前的语法实现继承，我们必须用一个创建自`Rectangle.prototype`的新对象来重写`Square.prototype`并调用`Rectangle.call()`方法。在`ES6`中由于类的出现我们可以轻松的实现继承，需要使用我们熟悉的关键词`extends`来指定类继承的函数。原型会自动调用，通过调用`super()`方法即可访问基类的构造函数，因此我们使用`ES6`类的语法来重写以上示例：
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+  }
+  getArea () {
+    return this.width * this.height
+  }
+}
+class Square extends Rectangle {
+  constructor (length) {
+    // 等价于 Rectangle.call(this, length, length)
+    super(length, length)
+  }
+}
+const square = new Square(3)
+console.log(square.getArea())             // 9
+console.log(square instanceof Square)     // true
+console.log(Square instanceof Rectangle)  // false
+```
+**注意**：继承自其它类的类被称作派生类，如果在派生类中指定了构造函数则必须要调用`super()`，否则会抛出错误。如果不选择使用构造函数，则当创建新的实例时会自动调用`super()`并传入所有参数，如下：
+```js
+// 省略其它代码
+class Square extends Rectangle {
+  // 没有构造函数
+}
+// 等价于
+class Square extends Rectangle {
+  constructor (...args) {
+    super(...args)
+  }
+}
+```
+
+#### 类方法遮蔽
+::: tip
+派生类中的方法总是会覆盖基类中的同名方法。
+:::
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+  }
+  getArea () {
+    return this.width * this.height
+  }
+}
+class Square extends Rectangle {
+  constructor (length) {
+    super(length, length)
+    this.length = length
+  }
+  getArea () {
+    return this.length * this.length
+  }
+}
+const square = new Square(3)
+console.log(square.getArea()) // 9
+```
+代码分析：由于`Square`类以及定义了`getArea()`方法，便不能在`Square`的实例中调用`Rectangle.prototype.getArea()`方法。如果我们想调用基类中的同名方法，可以使用`super.getArea()`。
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+  }
+  getArea () {
+    return this.width * this.height
+  }
+}
+class Square extends Rectangle {
+  constructor (length) {
+    super(length, length)
+    this.length = length
+  }
+  getArea () {
+    return super.getArea()
+  }
+}
+const square = new Square(3)
+console.log(square.getArea()) // 9
+```
+#### 静态成员继承
+::: tip
+如果基类中有静态成员，那么这些静态成员在派生类中也可以使用。
+:::
+```js
+class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+  }
+  getArea () {
+    return this.width * this.height
+  }
+  static create (width, length) {
+    return new Rectangle(width, length)
+  }
+}
+class Square extends Rectangle {
+  constructor (length) {
+    super(length, length)
+  }
+}
+const square1 = new Square(3)
+const square2 = Square.create(4, 4)
+console.log(square1.getArea())             // 9
+console.log(square2.getArea())             // 16
+console.log(square1 instanceof Square)     // true
+console.log(square2 instanceof Rectangle)  // true，因为square2是Rectangle的实例
+```
+
+#### 派生自表达式的类
+::: tip
+`ES6`最强大的一面或许是表达式导出类的功能了，只要表达式可以被解析成为一个函数并且具有`[[Construct]]`属性和原型，那么就可以用`extends`进行派生。
+:::
+```js
+function Rectangle (width, height) {
+  this.width = width
+  this.height = height
+}
+Rectangle.prototype.getArea = function () {
+  return this.width * this.height
+}
+class Square extends Rectangle {
+  constructor (length) {
+    super(length, length)
+  }
+}
+var square = new Square(3)
+console.log(square.getArea())             // 9
+console.log(square instanceof Rectangle)  // true
+```
+代码分析：`Rectangle`是一个典型的`ES5`风格的构造函数，`Square`是一个类，由于`Rectangle`具有`[[Constructor]]`属性和原型，因此`Square`类可以直接继承它。
 
 ### 构造函数中的new.target
 
