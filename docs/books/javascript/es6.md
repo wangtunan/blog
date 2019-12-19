@@ -2594,6 +2594,99 @@ console.log(square instanceof Rectangle)  // true
 ```
 代码分析：`Rectangle`是一个典型的`ES5`风格的构造函数，`Square`是一个类，由于`Rectangle`具有`[[Constructor]]`属性和原型，因此`Square`类可以直接继承它。
 
+#### extends动态继承
+::: tip
+`extends`强大的功能使得类可以继承自任意类型的表达式，从而创造更多的可能性，例如动态确定类的继承目标。
+:::
+```js
+function Rectangle (width, height) {
+  this.width = width
+  this.height = height
+}
+Rectangle.prototype.getArea = function () {
+  return this.width * this.height
+}
+function getBaseClass () {
+  return Rectangle
+}
+class Square extends getBaseClass() {
+  constructor (length) {
+    super(length, length)
+  }
+}
+var square = new Square(3)
+console.log(square.getArea())             // 9
+console.log(square instanceof Rectangle)  // true
+```
+我们已经可以从上面的例子中看到，可以用过一个函数调用的形式，动态的返回需要继承的类，那么扩展开来，我们可以创建不同的继承`mixin`方法：
+```js
+const NormalizeMixin = {
+  normalize () {
+    return JSON.stringify(this)
+  }
+}
+const AreaMixin = {
+  getArea () {
+    return this.width * this.height
+  }
+}
+function mixin(...mixins) {
+  const base = function () {}
+  Object.assign(base.prototype, ...mixins)
+  return base
+}
+class Square extends mixin(AreaMixin, NormalizeMixin) {
+  constructor (length) {
+    super()
+    this.width = length
+    this.height = length
+  }
+}
+const square = new Square(3)
+console.log(square.getArea())     // 9
+console.log(square.normalize())   // {width:3, height: 3}
+```
+代码分析：同`getBaseClass()`方法直接返回单一对象不同的是，我们定义了一个`mixin()`方法，作用是把多个对象的属性合并在一起并返回，然后使用`extends`来继承这个对象，从而达到继承`NormalizeMixin`对象的`normalize()`方法和`AreaMixin`对象的`getArea()`方法。
+
+#### 内建对象的继承
+自`ES5`及其早期版本中，如果我们想要通过继承的方式来创建属于我们自己的特殊数组几乎是不可能的，例如：
+```js
+// 内建数组的行为
+const colors = []
+colors[0] = 'red'
+console.log(colors.length)  // 1
+colors.length = 0
+console.log(colors[0])      // undefined
+// 尝试ES5语法继承数组
+function MyArray () {
+  Array.apply(this, arguments)
+}
+MyArray.prototype = Object.create(Array.prototype, {
+  constructor: {
+    value: MyArray,
+    enumerable: true,
+    writable: true,
+    configurable: true
+  }
+})
+const colors1 = new MyArray()
+colors1[0] = 'red'
+console.log(colors1.length)  // 0
+colors1.length = 0
+console.log(colors1[0])      // 'red'
+```
+代码分析：我们可以看到我们自己的特殊数组的两条打印结果都不符合我们的预期，这是因为通过传统的`JavaScript`继承形式实现的数组继承没有从`Array.apply()`或原型赋值中继承相关的功能。
+
+因为`ES6`引入了类的语法，因此使用`ES6`类的语法我们可以轻松的实现自己的特殊数组：
+```js
+class MyArray extends Array {}
+const colors = new MyArray()
+colors['0'] = 'red'
+console.log(colors.length)  // 1
+colors.length = 0
+console.log(colors[0])      // undefined
+```
+
 ### 构造函数中的new.target
 
 ## 改进的数组功能
