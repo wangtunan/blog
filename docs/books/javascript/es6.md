@@ -2761,6 +2761,140 @@ console.log(rect instanceof Shape) // true
 
 ### 创建数组
 
+#### 背景
+在`ES6`之前，创建数组只有两种形式，一种是使用`Array`构造函数，另外一种是使用数组字面量。如果我们想将一个类数组对象(具有数值型索引和`length`属性的对象)转换为数组，可选的方法十分有限，经常需要编写额外的代码。在此背景下，`ES6`新增了`Array.of`和`Array.from`这两个方法。
+
+#### Array.of
+在`ES6`之前，使用`Array`构造函数创建数组有许多怪异的地方容易让人感到迷惑，例如：
+```js
+let items = new Array(2)
+console.log(items.length) // 2
+console.log(items[0])     // undefined
+console.log(items[1])     // undefined
+
+items = new Array('2')
+console.log(items.length) // 1
+console.log(items[0])     // '2'
+
+items = new Array(1, 2)
+console.log(items.length) // 2
+console.log(items[0])     // 1
+console.log(items[1])     // 2
+
+items = new Array(3, '2')
+console.log(items.length) // 2
+console.log(items[0])     // 3
+console.log(items[1])     // '2'
+```
+迷惑行为：
+* 如果给`Array`构造函数传入一个数值型的值，那么数组的`length`属性会被设置为该值。
+* 如果传入一个非数值类型的值，那么这个值会成为目标数据的唯一项。
+* 如果传入多个值，此时无论这些值是不是数值类型，都会变成数组的元素。
+
+为了解决以上的问题，`ES6`引入了`Array.of()`方法来解决这个问题。
+::: tip
+`Array.of()`总会创建一个包含所有参数的数组，无论有多少个参数，无论参数是什么类型。
+:::
+```js
+let items = Array.of(1, 2)
+console.log(items.length) // 2
+console.log(items[0])     // 1
+console.log(items[1])     // 2
+
+items = Array.of(2)
+console.log(items.length) // 1
+console.log(items[0])     // 2
+
+items = Array.of('2')
+console.log(items.length) // 1
+console.log(items[0])     // '2'
+```
+
+
+#### Array.from
+`JavaScript`不支持直接将非数组对象转换为真实的数组，`arguments`就是一种类数组对象，在`ES5`中将类数组对象转换为数组的代码可以这样下：
+```js
+function makeArray(arrayLike) {
+  let result = []
+  for (let i = 0; i < arrayLike.length; i++) {
+    result.push(arrayLike[i])
+  }
+  return result
+}
+function doSomething () {
+  let args = makeArray(arguments)
+  console.log(args)
+}
+doSomething(1, 2, 3, 4) // 输出[1, 2, 3, 4]
+```
+以上方法是使用`for`循环的方式来创建一个新数组，然后遍历`arguments`参数并将它们一个一个的`push`到数组中，最终返回。除了以上代码，我们还可以使用另外一种方式来达到相同的目的：
+```js
+function makeArray (arrayLike) {
+  return Array.prototype.slice.call(arrayLike)
+}
+function doSomething () {
+  let args = makeArray(arguments)
+  console.log(args)
+}
+doSomething(1, 2, 3, 4) // 输出[1, 2, 3, 4]
+```
+尽管我们提供了`ES5`两种不同的方案来将类数组转换为数组，但`ES6`还是给我们提供了一种语义清晰、语法简介的新方法`Array.from()`：
+::: tip
+`Array.from()`方法接受可迭代对象或者类数组对象作为第一个参数。
+:::
+```js
+function doSomething () {
+  let args = Array.from(arguments)
+  console.log(args)
+}
+doSomething(1, 2, 3, 4) // 输出[1, 2, 3, 4]
+```
+
+##### Array.from映射转换
+::: tip
+可以提供一个映射函数作为`Array.from()`方法的第二个参数，这个函数用来将类数组对象的每一个值转换成其他形式，最后按这些结果存储在结果数组相应的索引中。
+:::
+```js
+function translate() {
+  return Array.from(arguments, (value) => value + 1)
+}
+let numbers = translate(1, 2, 3)
+console.log(numbers) // [2, 3, 4]
+```
+正如我们上面看到的那样，我们使用一个`(value) => value + 1`的映射函数，分别为我们的参数`+1`，最终结果然后`[2, 3, 4]`。另外一种情况是，如果我们的映射函数处理的是对象的话，可以给`Array.from()`方法的第三个参数传递一个对象，来处理映射函数中相关`this`指向问题。
+```js
+let helper = {
+  diff: 1,
+  add (value) {
+    return value + this.diff
+  }
+}
+function translate () {
+  return Array.from(arguments, helper.add, helper)
+}
+let numbers = translate(1, 2, 3)
+console.log(numbers) // [2, 3, 4]
+```
+
+##### Array.from转换可迭代对象
+::: tip
+`Array.from()`可以将所有含有`Symbol.iterator`属性的对象转换为数组。
+:::
+```js
+let iteratorObj = {
+  * [Symbol.iterator]() {
+    yield 1
+    yield 2
+    yield 3
+  }
+}
+let numbers = Array.from(iteratorObj)
+console.log(numbers) // [1, 2, 3]
+```
+::: tip
+如果一个对象即是类数组对象又是可迭代对象，那么`Array.from`会优先根据迭代器来决定转换哪个值。
+:::
+
 ### 数组新方法
 
 ### 定性数组
