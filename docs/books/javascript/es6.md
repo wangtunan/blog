@@ -2951,8 +2951,111 @@ console.log(numbers.toString()) // 1, 2, 1, 4
 ## Promise和异步编程
 
 ### 异步编程的背景知识
+`JavaScript`引擎是基于单线程事件循环的概念创建的，同一时间只允许一个代码块在执行，所以需要跟踪即将运行的代码。那些代码被放在一个叫做任务队列中，每当一段代码准备执行时，都会被添加到任务队列中。每当`JavaScript`引擎中的一段代码结束执行，事件循环会执行队列中的下一个任务，它是`JavaScript`引擎中的一段程序，负责监控代码执行并管理任务队列。
+
+#### 事件模型
+当用户点击按钮或者按下键盘上的按键时会触发类似`onClick`这样的事件，它会向任务队列添加一个新任务来响应用户的操作，这是`JavaScript`中最基础的异步编程模式，直到事件触发时才执行事件处理程序，且执行上下文与定义时的相同。
+```js
+let button = document.getElemenetById('myBtn')
+button.onClick = function () {
+  console.log('click!')
+}
+```
+事件模型适用于处理简单的交互，然而将多个独立的异步调用连接在一起会使程序更加复杂，因为我们必须跟踪每个事件的事件目标。
+
+#### 回调模式
+`Node.js`通过普及回调函数来改进异步编程模型，回调函数与事件模型类似，异步代码都会在未来的某个时间点执行，二者的区别是回调模式中被调用的函数是作为参数传入的，如下：
+```js
+readFile('example.pdf', function(err, contents) {
+  if (err) {
+    throw err
+  }
+  console.log(contents)
+})
+```
+我们可以发现回调模式比事件模型更灵活，因此通过回调模式链接多个调用更容易：
+```js
+readFile('example.pdf', function(err, contents) {
+  if (err) {
+    throw err
+  }
+  writeFile('example.pdf', function(err, contents) {
+    if (err) {
+      throw err
+    }
+    console.log('file was written!')
+  })
+})
+```
+我们可以发现，通过回调嵌套的形似，可以帮助我们解决许多问题，然而随着模块越来越负责，回调模式需要嵌套的函数也越来越多，就形成了回调地狱，如下：
+```js
+method1(function(err, result) {
+  if (err) {
+    throw err
+  }
+  method2(function(err, result) {
+    if (err) {
+      throw err
+    }
+    method3(function(err, result) {
+      if (err) {
+        throw err
+      }
+      method4(function(err, result) {
+        if (err) {
+          throw err
+        }
+        method5(result)
+      })
+    })
+  })
+})
+```
 
 ### Promise基础
+`Promise`相当于异步操作结果的占位符，它不会去订阅一个事件，也不会传递一个回调函数给目标函数，而是让函数返回一个`Promise`。
+
+#### Promise的生命周期
+每个`Promise`都会经历一个短暂的生命周期： 先是处于`pending`进行中的状态，此时操作尚未完成，所以它也是未处理状态的，一旦操作执行结束，`Promise`则变为已处理。操作结束后，`Promise`可能会进入到以下两个状态中的其中一个：
+* `Fulfilled`：异步操作成功完成。
+* `Rejected`：由于程序错误或者一些其他原因，异步操作未能成功完成。
+
+根据以上介绍的状态，`Promise`的内部属性`[[PromiseState]]`被用来表示这三种状态：`pending`、`fulfilled`和`rejected`。这个属性不会暴露在`Promise`对象上，所以不能通过编码的方式检测`Promise`的状态。
+
+#### Promise.then()方法
+我们已经知道，`Promise`会在操作完成之后进入`Fulfilled`和`Rejected`其中一个，而`Promise`提供了`Promise.then()`方法。它有两个参数，第一个是`Promise`的状态变为`fulfilled`时要调用的函数，第二个是当`Promise`状态变为`rejected`时调用的函数，其中这两个参数都是可选的。
+::: tip
+如果一个对象实现了上述`.then()`方法，那么这个对象我们称之为`thenable`对象。
+:::
+```js
+let Promise = readFile('example.pdf')
+// 同时提供执行完成和执行被拒的回调
+Promise.then(function(content) {
+  console.log('complete')
+}, function(err) {
+  console.log(err.message)
+})
+// 仅提供完成的回调
+Promise.then(function(content) {
+  console.log('complete')
+})
+// 仅提供被拒的回调
+Promise.then(null, function(err) {
+  console.log(err.message)
+})
+```
+#### Promise.catch()方法
+`Promise`还有一个`catch()`方法，相当于只给其传入拒绝处理程序的`then()`方法，所以和以上最后一个例子等价的`catch()`代码如下：
+```js
+promise.catch(function(err) {
+  console.log(err.message)
+})
+// 等价于
+Promise.then(null, function(err) {
+  console.log(err.message)
+})
+```
+`then()`方法和`catch()`方法一起使用才能更好的处理异步操作结果。这套体系能够清楚的指明操作结果是成功还是失败，比事件和回调函数更好用。如果使用事件，在遇到错误时不会主动触发；如果使用回调函数，则必须要记得每次都检查错误参数。如果不给`Promise`添加拒绝处理程序，那所有失败就自动被忽略。
 
 ### 全局Promise拒绝处理
 
