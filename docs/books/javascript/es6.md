@@ -2895,11 +2895,58 @@ console.log(numbers) // [1, 2, 3]
 如果一个对象即是类数组对象又是可迭代对象，那么`Array.from`会优先根据迭代器来决定转换哪个值。
 :::
 
-### 数组新方法
+### ES6数组新增方法
+`ES6`为数组新增了几个方法：
+* `find()`和`findIndex()`方法可以帮助我们在数组中查找任意值。
+* `fill()`方法可以用指定的值填充数组。
+* `copyWithin()`方法可以帮助我们在数组中复制元素，它和`fill()`方法是有许多相似之处的。
 
-### 定性数组
+#### find()方法和findIndex()方法
+::: tip
+`find()`和`findIndex()`都接受两个参数：一个是回调函数，另一个是可选参数，用于指定回调函数中的`this`值。
+:::
+函数介绍：`find()`和`findIndex()`方法都是根据传入的回调函数来查找，区别是`find()`方法返回查找到的值，`findIndex()`方法返回查找到的索引，而一旦查找到，即回调函数返回`true`，那么`find()`和`findIndex()`方法会立即停止搜索剩余的部分。
+```js
+let numbers = [25, 30, 35, 40, 45]
+console.log(numbers.find(item => item >= 35))       // 35
+console.log(numbers.findIndex(item => item === 35)) // 2
+```
 
-### 定性数组和普通数组的对比
+#### fill()方法
+::: tip
+`find()`方法可以用指定的值填充一个至多个数组元素，当传入一个值时，`fill()`方法会用这个值重写数组中的所有值。
+:::
+```js
+let numbers = [1, 2, 3, 4]
+numbers.fill(1)
+console.log(numbers.toString()) // [1, 1, 1, 1]
+```
+如果只想改变数组中的某一部分值，可以传入开始索引(第二个参数)和不包含结束索引(第三个参数)这两个可选参数，像下面这样：
+```js
+let numbers = [1, 2, 3, 4]
+numbers.fill(1, 2)
+console.log(numbers)  // [1, 2, 1, 1]
+numbers.fill(0, 1, 3)
+console.log(numbers)  // [1, 0, 0, 1]
+```
+
+#### copyWithin()方法
+::: tip
+`copyWithin()`方法需要传入两个参数：一个是方法开始填充值的索引位置，另一个是开始复制值的索引位置。
+:::
+```js
+let numbers = [1, 2, 3, 4]
+numbers.copyWithin(2, 0)
+console.log(numbers.toString()) // 1, 2, 1, 2
+```
+代码分析：根据`copyWithin()`方法的特性，`numbers.copyWithin(2, 0)`可以解读为：使用索引`0-1`处对应的值，在索引`2-3`除开始复制粘贴值，默认情况下，如果不提供`copyWithin()`的第三个参数，则默认一直复制到数组的末尾，`3`和`4`的值会被重写，即结果为`[1, 2, 1, 2]`。
+
+```js
+let numbers = [1, 2, 3, 4]
+numbers.copyWithin(2, 0, 1)
+console.log(numbers.toString()) // 1, 2, 1, 4
+```
+代码分析：根据`copyWithin()`方法的特性，我们传递了第三个参数，结束复制的位置为`1`，即数组中只有`3`的值被替换为了`1`，其它值不变，即结果为：`[1, 2, 1, 4]`
 
 ## Promise和异步编程
 
