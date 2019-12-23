@@ -3057,9 +3057,100 @@ Promise.then(null, function(err) {
 ```
 `then()`方法和`catch()`方法一起使用才能更好的处理异步操作结果。这套体系能够清楚的指明操作结果是成功还是失败，比事件和回调函数更好用。如果使用事件，在遇到错误时不会主动触发；如果使用回调函数，则必须要记得每次都检查错误参数。如果不给`Promise`添加拒绝处理程序，那所有失败就自动被忽略。
 
-### 全局Promise拒绝处理
+#### 创建未完成的Promise
+用`Promise`构造函数可以创建新的`Promise`，构造函数只接受一个参数：包含初始化`Promise`代码的执行器函数。执行器函数接受两个参数，分别是`resolve`函数和`reject`函数。执行器成功完成时调用`resolve`函数，失败时则调用`reject`函数。
+
+```js
+let fs = require('fs')
+function readFile(filename) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filename, function (err, contents) {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(contents)
+    })
+  })
+}
+let promise = readFile('example.pdf')
+promise.then((contents) => {
+  console.log(contents)
+}, (err) => {
+  console.log(err.message)
+})
+```
+
+#### 创建已处理的Promise
+`Promise.resolve()`方法只接受一个参数并返回一个完成态的`Promise`，该方法永远不会存在拒绝状态，因而该`Promise`的拒绝处理程序永远不会被调用。
+```js
+let promise = Promise.resolve(123)
+promise.then(res => {
+  console.log(res) // 123
+})
+```
+可以使用`Promise.reject()`方法来创建已拒绝`Promise`，它与`Promise.resolve()`方法很像，唯一的区别是创建出来的是拒绝态的`Promise`。
+```js
+let promise = Promise.reject(123)
+promise.catch((err) => {
+  console.log(err) // 123
+})
+```
+
+##### 非Promise的Thenable对象
+`Promise.resolve()`方法和`Promise.reject()`方法都可以接受非`Promise`的`thenable`对象作为参数。如果传入一个非`Promise`的`thenable`对象，则这些方法会创建一个新的`Promise`，并在`then()`函数中被调用。<br/>
+拥有`then()`方法并且接受`resolve`和`reject`这两个参数的普通对象就是非`Promise`的`Thenable`对象。
+```js
+let thenable = {
+  then (resolve, reject) {
+    resolve(123)
+  }
+}
+let promise1 = Promise.resolve(thenable)
+promise1.then((res) => {
+  console.log(res) // 123
+})
+```
+#### 执行器错误
+::: tip
+如果执行器内部抛出一个错误，则`Promise`的拒绝处理程序就会被调用。
+:::
+```js
+let promise = new Promise((resolve, reject) => {
+  throw new Error('promise err')
+})
+promise.catch((err) => {
+  console.log(err.message) // promise err
+})
+```
+代码分析：在上面这段代码中，执行器故意抛出了一个错误，每个执行器中都隐含一个`try-catch`块，所以错误会被捕获并传入拒绝处理程序，以上代码等价于：
+```js
+let promise = new Promise((resolve, reject) => {
+  try {
+    throw new Error('promise err')
+  } catch (ex) {
+    reject(ex)
+  }
+})
+promise.catch((err) => {
+  console.log(err.message) // promise err
+})
+```
 
 ### 串联Promise
+::: tip
+每当我们调用`then()`或者`catch()`方法时实际上创建并返回了另一个`Promise`，只有当第一个`Promise`完成或被拒绝后，第二个才会被解决。这给了我们可以将`Promise`串联起来实现更复杂的异步特性的方法。
+:::
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(123)
+})
+p1.then(res => {
+  console.log(res)      // 123
+}).then(res => {
+  console.log('finish') // undefined
+})
+```
 
 ### 响应对个Promise
 
