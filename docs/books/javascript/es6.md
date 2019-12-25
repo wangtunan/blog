@@ -3192,11 +3192,125 @@ p1.then(res => {
 })
 ```
 
+#### Promise链返回值
+::: tip
+`Promise`链的一个重要特性就是可以给下游的`Promise`传递值。
+:::
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(1)
+})
+p1.then(res => {
+  console.log(res)  // 1
+  return res + 1
+}).then(res => {
+  console.log(res)  // 2
+  return res + 2
+}).then(res => {
+  console.log(res)  // 4
+})
+```
+
+#### 在Promise链中返回Promise
+我们在上面的例子中已经知道了，可以给下游的`Promise`传递值，但如果我们`return`的是另外一个`Promise`对象又该如何去走呢？实际上，这取决于这个`Promise`是完成还是拒绝，完成则会调用`then()`，拒绝则会调用`catch()`
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(1)
+})
+let p2 = new Promise((resolve, reject) => {
+  resolve(2)
+})
+let p3 = new Promise((resolve, reject) => {
+  reject(new Error('error p3'))
+})
+p1.then(res => {
+  console.log(res)            // 1
+  return p2
+}).then(res => {
+  // p2完成，会调用then()
+  console.log(res)            // 2
+})
+
+p1.then(res => {
+  console.log(res)            // 1
+  return p3
+}).catch((error) => {
+  // p3拒绝，会调用catch()
+  console.log(error.message)  // error p3
+})
+```
+
+
 ### 响应对个Promise
 
-### 自Promise继承
+#### Promise.all()方法
+特点：`Promise.all()`方法只接受一个参数并返回一个`Promise`，且这个参数必须为一个或者多个`Promise`的可迭代对象(例如数组)，只有当这个参数中的所有`Promise`对象全部被解决后才返回这个`Promise`。另外一个地方值得注意的是：`Promise`返回值，是按照参数数组中的`Promise`顺序存储的，所以可以根据`Promise`所在参数中的位置的索引去最终结果的`Promise`数组中进行访问。
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(1)
+})
+let p2 = new Promise((resolve, reject) => {
+  resolve(2)
+})
+let p3 = new Promise((resolve, reject) => {
+  resolve(3)
+})
+let pAll = Promise.all([p1, p2, p3])
+pAll.then(res => {
+  console.log(res[0]) // 1：对应p1的结果
+  console.log(res[1]) // 2：对应p2的结果
+  console.log(res[2]) // 3：对应p3的结果
+})
+```
 
-### 基于Promise的异步任务执行
+#### Promise.race()方法
+特点：`Promise.race()`方法和`Promise.all()`方法对于参数是一致的，但是在行为和结果上有一点差别：`Promise.race()`方法接受参数数组，只要数组中的任意一个`Promise`被完成，那么`Promise.race()`方法就返回，所以`Promise.race()`方法的结果只有一个，也就是最先被解决的`Promise`的结果。
+```js
+let p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(1)
+  }, 100)
+})
+let p2 = new Promise((resolve, reject) => {
+  resolve(2)
+})
+let p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(3)
+  }, 100)
+})
+let pRace = Promise.race([p1, p2, p3])
+pRace.then(res => {
+  console.log(res) // 2 对应p2的结果
+})
+```
+
+### 自Promise继承
+::: tip
+`Promise`与其他内建类型一样，也是可以当做基类派生其他类的。
+:::
+```js
+class MyPromise extends Promise {
+  success(resolve, reject) {
+    return this.then(resolve, reject)
+  }
+  failure(reject) {
+    return this.catch(reject)
+  }
+}
+let p1 = new MyPromise((resolve, reject) => {
+  resolve(1)
+})
+let p2 = new MyPromise((resolve, reject) => {
+  reject(new Error('mypromise error'))
+})
+p1.success(res => {
+  console.log(res)            // 1
+})
+p2.failure(error => {
+  console.log(error.message)  // mypromise error
+})
+```
 
 ## 代理(Proxy)和反射(Reflect)API
 
