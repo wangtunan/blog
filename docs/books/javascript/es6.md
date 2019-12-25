@@ -3148,7 +3148,47 @@ let p1 = new Promise((resolve, reject) => {
 p1.then(res => {
   console.log(res)      // 123
 }).then(res => {
-  console.log('finish') // undefined
+  console.log('finish') // finish
+})
+```
+如果我们将以上例子拆解开来，那么会是如下的情况：
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(123)
+})
+let p2 = p1.then(res => {
+  console.log(res)      // 123
+})
+p2.then(res => {
+  console.log('finish') // finish
+})
+```
+
+#### 串联Promise中捕获错误
+我们已经知道，一个`Promise`的完成处理程序或者拒绝处理程序都有可能发生错误，而在`Promise`链中是可以捕获这些错误的：
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(123)
+})
+p1.then(res => {
+  throw new Error('error')
+}).catch(error => {
+  console.log(error.message)  // error
+})
+```
+不仅可以捕获到`then()`方法中的错误，还可以捕获到`catch()`方法中的错误：
+```js
+let p1 = new Promise((resolve, reject) => {
+  resolve(123)
+})
+
+p1.then(res => {
+  throw new Error('error then')
+}).catch(error => {
+  console.log(error.message)  // error then
+  throw new Error('error catch')
+}).catch(error => {
+  console.log(error.message)  // error catch
 })
 ```
 
