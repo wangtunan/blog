@@ -3397,8 +3397,61 @@ proxy.anotherName = 'BBB' // 属性值非数字，抛出错误
 ```
 
 ### 使用get陷阱
+::: tip
+`get`陷阱接受三个参数：
+* `trapTarget`：被读取属性的源对象(代理的目标)。
+* `key`：要读取的属性键(字符串或者`Symbol`)。
+* `receiver`：操作发生的对象。
+:::
+`JavaScript`有一个我们很常见的特性，当我们试图访问某个对象不存在的属性的时候，不会报错而是返回`undefined`。如果这不是你想要的结果，那么可以通过`get`陷阱来验证对象结构。
+```js
+let proxy = new Proxy({}, {
+  get (trapTarget, key, receiver) {
+    if (!(key in trapTarget)) {
+      throw new Error(`属性${key}不存在`)
+    }
+    return Reflect.get(trapTarget, key, receiver)
+  }
+})
+proxy.name = 'proxy'
+console.log(proxy.name)  // proxy
+console.log(proxy.nme)   // 属性值不存在，抛出错误
+```
 
 ### 使用has陷阱
+::: tip
+`has`陷阱接受两个参数：
+* `trapTarget`：读取属性的对象(代理的目标)
+* `key`：要检查的属性键(字符串或者`Symbol`)
+:::
+`in`操作符特点：`in`操作符可以用来检测对象中是否含有某个属性，如果自有属性或原型属性匹配这个名称或者`Symbol`就返回`true`。
+```js
+let target = {
+  value: 123
+}
+console.log('value' in target)    // 自有属性返回true
+console.log('toString' in target) // 原型属性，继承自Object，也返回true
+```
+以上展示了`in`操作符的特性，可以使用`has`陷阱来改变这一特性：
+```js
+let target = {
+  value: 123,
+  name: 'AAA'
+}
+let proxy = new Proxy(target, {
+  has (trapTarget, key) {
+    // 屏蔽value属性
+    if (key === 'value') {
+      return false
+    } else {
+      return Reflect.has(trapTarget, key)
+    }
+  }
+})
+console.log('value' in proxy)     // false
+console.log('name' in proxy)      // true
+console.log('toString' in proxy)  // true
+```
 
 ### 使用deleteProperty陷阱
 
