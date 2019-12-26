@@ -3347,8 +3347,54 @@ console.log(colors)        // ['red', 'blue']
 
 
 ### 创建一个简单的代理
-
+::: tip
+用`Proxy`构造函数创建代理需要传入两个参数：目标`target`和处理程序`handler`。
+:::
+处理程序`handler`是定义了一个或者多个陷阱的对象，在代理中，除了专门为操作定义的陷阱外，其余操作均使用默认特性，即意味着：不适用任何陷阱的处理程序等价于简单的转发代理。
+```js
+let target = {}
+let proxy = new Proxy(target, {})
+proxy.name = 'AAA'
+console.log(proxy.name)   // AAA
+console.log(target.name)  // AAA
+target.name = 'BBB'
+console.log(proxy.name)   // BBB
+console.log(target.name)  // BBB
+```
 ### 使用set陷阱
+::: tip
+`set`陷阱接受4个参数：
+* `trapTarget`：用于接受属性(代理的目标)的对象。
+* `key`：要写入的属性键(字符串或者`Symbol`类型)。
+* `value`：被写入属性的值。
+* `receiver`：操作发生的对象。
+:::
+特点：`Reflect.set()`是`set`陷阱对应的反射方法和默认特性，它和`set`代理陷阱一样也接受相同的四个参数，以方便在陷阱中使用。如果属性已设置陷阱应该返回`true`，否则返回`false`。
+
+案例：如果我们想创建一个属性值是数字的对象，对象中每新增一个属性都要加以验证，如果不是数字必须抛出错误。
+```js
+let target = {
+  name: 'target'
+}
+let proxy = new Proxy(target, {
+  // 已有属性不检测
+  set (trapTarget, key, value, receiver) {
+    if (!trapTarget.hasOwnProperty(key)) {
+      if (isNaN(value)) {
+        throw new TypeError('属性值必须为数字')
+      }
+    }
+    return Reflect.set(trapTarget, key, value, receiver)
+  }
+})
+proxy.count = 1
+console.log(proxy.count)  // 1
+console.log(target.count) // 1
+proxy.name = 'AAA'
+console.log(proxy.name)   // AAA
+console.log(target.name)  // AAA
+proxy.anotherName = 'BBB' // 属性值非数字，抛出错误
+```
 
 ### 使用get陷阱
 
