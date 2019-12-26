@@ -3315,8 +3315,36 @@ p2.failure(error => {
 ## 代理(Proxy)和反射(Reflect)API
 
 ### 数组问题
+在`ES6`出现之前，我们不能通过自己定义的对象模仿`JavaScript`数组对象的行为方式：当给数组的特定元素赋值时，会影响到数组的`length`属性；也可以通过`length`属性修改数组元素。
+```js
+let colors = ['red', 'blue', 'green']
+colors[3] = 'black'
+console.log(colors.length) // 4
+colors.length = 2
+console.log(colors.length) // 2
+console.log(colors)        // ['red', 'blue']
+```
 
 ### 代理和反射
+代理：代理可以拦截`JavaScript`引擎内部目标的底层对象操作，这些底层操作被拦截后会触发响应特定操作的陷阱函数。<br/>
+反射：反射`API`以`Reflect`对象的形式出现，对象中方法的默认特性与相同的底层操作一致，而代理可以覆写这些操作，每个代理陷阱对应一个命名和参数都相同的`Reflect`方法。<br/>
+
+| 代理陷阱 | 覆写特性 | 默认特性 |
+|------|------------|------------|
+| get  | 读取一个属性值 | Reflect.get |
+| set  | 写入一个属性   | Reflect.set |
+| has  | in操作符      | Reflect.has |
+| appply  | 调用一个函数  | Reflect.ownKeys() |
+| deleteProperty  | delete操作符  | Reflect.deleteProperty() |
+| construct  | 用new调用一个函数  | Reflect.construct() |
+| getPrototypeOf  | Object.getPrototypeOf() | Reflect.getPrototypeOf() |
+| setPrototypeOf  | Object.setPrototypeOf() | Reflect.setPrototypeOf() |
+| isExtensible  | Object.isExtensible()     | Reflect.isExtensible() |
+| preventExtensions  | Object.preventExtensions()     | Reflect.preventExtensions() |
+| getOwnPropertyDescriptor  | Object.getOwnPropertyDescriptor()     | Reflect.getOwnPropertyDescriptor() |
+| defineProperty  | Object.defineProperty()     | Reflect.defineProperty() |
+| ownKeys  | Object.keys()、Object.getOwnPropertyNames()和Object.getOwnPropertySymbols()  | Reflect.ownKeys() |
+
 
 ### 创建一个简单的代理
 
@@ -3336,7 +3364,7 @@ p2.failure(error => {
 
 ### 使用ownKeys陷阱
 
-### 使用apply和construce陷阱
+### 使用apply和construct陷阱
 
 ### 可撤销代理
 
