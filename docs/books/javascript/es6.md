@@ -3454,14 +3454,138 @@ console.log('toString' in proxy)  // true
 ```
 
 ### 使用deleteProperty陷阱
+::: tip
+`deleteProperty`陷阱接受两个参数：
+* `trapTarget`：要删除属性的对象(代理的目标)。
+* `key`：要删除的属性键(字符串或者`Symbol`)。
+:::
+我们都知道，`delete`操作符可以删除对象中的某个属性，删除成功则返回`true`，删除失败则返回`false`。如果有一个对象属性是不可以被删除的，我们可以通过`deleteProperty`陷阱方法来处理：
+```js
+let target = {
+  name: 'AAA',
+  value: 123
+}
+let proxy = new Proxy(target, {
+  deleteProperty(trapTarget, key) {
+    if (key === 'value') {
+      return false
+    } else {
+      return Reflect.deleteProperty(trapTarget, key)
+    }
+  }
+})
+console.log('value' in proxy)   // true
+let result1 = delete proxy.value
+console.log(result1)            // false
+console.log('value' in proxy)   // true
+let result2 = delete proxy.name
+console.log(result2)            // true
+console.log('name' in proxy)    // false
+```
 
 ### 使用原型代理陷阱
+::: tip
+`setPrototypeOf`陷阱接受两个参数：
+* `trapTarget`：接受原型设置的对象(代理的目标)。
+* `proto`：作为原型使用的对象。
+`getPrototypeOf`陷阱接受一个参数：
+* `trapTarget`：接受获取原型的对象(代理的目标)。
+:::
+我们在之前已经了解过，`ES6`新增了`Object.setPrototypeOf()`方法，它是`ES5`中`Object.getPrototypeOf()`方法的补充。当我们想要在一个对象被设置原型或者读取原型的时候做一点什么，可以使用`setPrototypeOf()`陷阱和`getPrototypeOf()`陷阱。
+```js
+let target = {}
+let proxy = new Proxy(target, {
+  getPrototypeOf(trapTarget) {
+    // 必须返回对象或者null
+    return null
+  },
+  setPrototypeOf(trapTarget, proto) {
+    // 只要返回的不是false的值，就代表设置原型成功。
+    return false
+  }
+})
+let targetProto = Object.getPrototypeOf(target)
+let proxyProto = Object.getPrototypeOf(proxy)
+console.log(targetProto === Object.prototype) // true
+console.log(proxyProto === Object.prototype)  // false
+console.log(proxyProto)                       // null
+Object.setPrototypeOf(target, {})             // 设置成功
+Object.setPrototypeOf(proxy, {})              // 抛出错误
+```
+代码分析：以上代码重点强调了`target`和`proxy`的行为差异：
+* `Object.getPrototypeOf()`方法给`target`返回的是值，而给`proxy`返回的是`null`，这是因为`proxy`我们使用了`getPrototypeOf()`陷阱。
+* `Object.setPrototypeOf()`方法成功为`target`设置了原型，而在`proxy`中，因为我们使用了`setPrototypeOf()`陷阱，手动返回了`false`，所以设置原型不成功。
+
+根据以上的分析，我们可以得到`Object.getPrototypeOf()`和`Object.setPrototypeOf()`的默认行为：
+```js
+let target = {}
+let proxy = new Proxy(target, {
+  getPrototypeOf(trapTarget) {
+    // 必须返回对象或者null
+    return Reflect.getPrototypeOf(trapTarget)
+  },
+  setPrototypeOf(trapTarget, proto) {
+    // 只要返回的不是false的值，就代表设置原型成功。
+    return Reflect.setPrototypeOf(trapTarget, proto)
+  }
+})
+let targetProto = Object.getPrototypeOf(target)
+let proxyProto = Object.getPrototypeOf(proxy)
+console.log(targetProto === Object.prototype) // true
+console.log(proxyProto === Object.prototype)  // true
+Object.setPrototypeOf(target, {})             // 设置成功
+Object.setPrototypeOf(proxy, {})              // 设置成功
+```
+
+#### 两组方法的区别
+`Reflect.getPrototypeOf()`方法和`Reflect.setPrototypeOf()`方法看起来和`Object.getPrototypeOf()`和`Object.setPrototypeOf()`看起来执行相似的操作，但它们还是有一些不同之处的：
+1. `Reflect.getPrototypeOf()`方法和`Reflect.setPrototypeOf()`方法底层操作，其赋予开发者可以访问之前只在内部操作的`[[GetPrototypeOf]]`和`[[SetPrototypeOf]]`权限。而 `Object.getPrototypeOf()`和`Object.setPrototypeOf()`方法是高级操作，创建伊始就是方便开发者使用的。
+2. 如果传入的参数不是对象，则`Reflect.getPrototypeOf()`会抛出错误，而`Object.getPrototypeOf()`方法则会在操作前先将参数强制转换为一个对象。
+```js
+let result = Object.getPrototypeOf(1)
+console.log(result === Number.prototype)  // true
+Reflect.getPrototypeOf(1)                 // 抛出错误
+```
+3. `Object.setPrototypeOf()`方法会通过一个布尔值来表示操作是否成功，成功时返回`true`，失败时返回`false`。而`Reflect.setPrototypeOf()`设置失败时会抛出错误。
+
 
 ### 使用对象可扩展陷阱
 
 ### 使用属性描述符陷阱
 
 ### 使用ownKeys陷阱
+::: tip
+`ownKeys`代理陷阱可以拦截内部方法`[[OwnPropertyKeys]]`，我们通过返回一个数组的值来覆写其行为。这个数组被用于`Object.keys()`、`Object.getOwnPropertyNames()`、`Object.getOwnPropertySymbols()`和`Object.assign()`四个方法，其中`Object.assign()`方法用数组来确定需要复制的属性。`ownKeys`陷阱唯一接受的参数是操作的目标，返回值是一个数组或者类数组对象，否则就会抛出错误。
+:::
+
+几种方法的区别：
+* `Reflect.ownKeys()`：返回的数组中包含所有对象的自由属性的键名，包括字符串类型和`Symbol`类型。
+* `Object.getOwnPropertyNames()`和`Object.keys()`：返回的数组中排出了`Symbol`类型。
+* `Object.getOwnPropertySymbols()`：返回的数组中排出了字符串类型。
+* `Object.assign()`：字符串和`Symbol`类型都支持。
+
+假设我们在使用以上几种方法的时候，不想要指定规则的属性键，那么可以使用`Reflect.ownKeys()`陷阱来实现：
+```js
+let proxy = new Proxy({}, {
+  ownKeys (trapTarget) {
+    return Reflect.ownKeys(trapTarget).filter(key => {
+      // 排出属性开头带有_的键
+      return typeof key !== 'string' || key[0] !== '_'
+    })
+  }
+})
+let nameSymbol = Symbol('name')
+proxy.name = 'AAA'
+proxy._name = '_AAA'
+proxy[nameSymbol] = 'Symbol'
+let names = Object.getOwnPropertyNames(proxy)
+let keys = Object.keys(proxy)
+let symbols = Object.getOwnPropertySymbols(proxy)
+console.log(names)    // ['name']
+console.log(keys)     // ['name']
+console.log(symbols)  // ['Symbol(name)']
+```
+
 
 ### 使用apply和construct陷阱
 
