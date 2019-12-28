@@ -3596,6 +3596,117 @@ console.log(Object.isExtensible(proxy))   // true
 * `Object.isExtensible()`当传入一个非对象值时，返回`false`，而`Reflect.isExtensible()`则会抛出一个错误。
 
 ### 使用属性描述符陷阱
+::: tip
+`Object.defineProperty`陷阱接受三个参数：
+* `trapTarget`：要定义属性的对象(代理的目标)
+* `key`：属性的键。
+* `descriptor`：属性的描述符对象。
+<br/>
+
+`Object.getOwoPropertyDescriptor`陷阱接受两个参数：
+* `trapTarget`：要获取属性的对象(代理的目标)。
+* `key`：属性的键。
+:::
+在代理中可以使用`defineProperty`和`getOwoPropertyDescriptor`陷阱函数分别拦截`Object.defineProperty()`和`Object.getOwoPropertyDescriptor()`方法的调用。以下示例展示了`defineProperty`和`getOwoPropertyDescriptor`陷阱的默认行为。
+```js
+let proxy = new Proxy({}, {
+  defineProperty(trapTarget, key, descriptor) {
+    return Reflect.defineProperty(trapTarget, key, descriptor)
+  },
+  getOwnPropertyDescriptor(trapTarget, key) {
+    return Reflect.getOwnPropertyDescriptor(trapTarget, key)
+  }
+})
+Object.defineProperty(proxy, 'name', {
+  value: 'AAA'
+})
+console.log(proxy.name)         // AAA
+const descriptor = Object.getOwnPropertyDescriptor(proxy, 'name')
+console.log(descriptor.value)   // AAA
+```
+
+#### Object.defineProperty()添加限制
+假设我们现在有这样一个需求：一个对象的属性键不能设置为`Symbol`属性的，我们可以使用`defineProperty`陷阱来实现：
+::: tip
+`defineProperty`陷阱返回布尔值来表示操作是否成功，返回`true`时，表示`Object.defineProperty()`执行成功；返回`false`时，`Object.defineProperty()`抛出错误。
+:::
+```js
+let proxy = new Proxy({}, {
+  defineProperty(trapTarget, key, descriptor) {
+    if (typeof key === 'symbol') {
+      return false
+    }
+    return Reflect.defineProperty(trapTarget, key, descriptor)
+  }
+})
+Object.defineProperty(proxy, 'name', {
+  value: 'AAA'
+})
+console.log(proxy.name) // AAA
+const nameSymbol = Symbol('name')
+// 抛出错误
+Object.defineProperty(proxy, nameSymbol, {
+  value: 'BBB'
+})
+```
+
+#### Object.getOwnPropertyDescriptor()添加限制
+无论将什么对象作为第三个参数传递给`Object.defineProperty()`方法，都只有属性`enumerable`、`configurable`、`value`、`writable`、`get`和`set`将出现在传递给`defineProperty`陷阱的描述符对象中，也意味着`Object.getOwnPropertyDescriptor()`方法总是返回以上几种属性。
+```js
+let proxy = new Proxy({}, {
+  defineProperty(trapTarget, key, descriptor) {
+    console.log(descriptor.value) // AAA
+    console.log(descriptor.name)  // undeinfed
+    return Reflect.defineProperty(trapTarget, key, descriptor)
+  },
+  getOwnPropertyDescriptor(trapTarget, key) {
+    return Reflect.getOwnPropertyDescriptor(trapTarget, key)
+  }
+})
+Object.defineProperty(proxy, 'name', {
+  value: 'AAA',
+  name: 'custom'
+})
+const descriptor = Object.getOwnPropertyDescriptor(proxy, 'name')
+console.log(descriptor.value) // AAA
+console.log(descriptor.name)  // undeinfed
+```
+::: tip
+`getOwnPropertyDescriptor()`陷阱的返回值必须是一个`null`、`undefined`或者一个对象。如果返回的是一个对象，则对象的属性只能是`enumerable`、`configurable`、`value`、`writable`、`get`和`set`，使用不被允许的属性会抛出一个错误。
+:::
+```js
+let proxy = new Proxy({}, {
+  getOwnPropertyDescriptor(trapTarget, key) {
+    return {
+      name: 'proxy'
+    }
+  }
+})
+// 抛出错误
+let descriptor = Object.getOwnPropertyDescriptor(proxy, 'name')
+```
+
+两组方法对比：
+* `Object.defineProperty()`方法和`Reflect.defineProperty()`方法只有返回值不同，前者只返回第一个参数；而后者返回值与操作有关，成功则返回`true`，失败则返回`false`。
+```js
+let target = {}
+let result1 = Object.defineProperty(target, 'name', {
+  value: 'AAA'
+})
+let result2 = Reflect.defineProperty(target, 'name', {
+  value: 'AAA'
+})
+console.log(result1 === target) // true
+console.log(result2)            // true
+```
+* `Object.getOwnPropertyDescriptor()`方法传入一个原始值作为参数，内部会把这个值强制转换为一个对象；而`Reflect.getOwnPropertyDescriptor()`方法传入一个原始值，则会抛出错误。
+```js
+let descriptor1 = Object.getOwnPropertyDescriptor(2, 'name')
+console.log(descriptor1)  // undefined
+// 抛出错误
+let descriptor2 = Reflect.getOwnPropertyDescriptor(2, 'name')
+```
+
 
 ### 使用ownKeys陷阱
 ::: tip
