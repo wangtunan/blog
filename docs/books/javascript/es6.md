@@ -3361,6 +3361,7 @@ target.name = 'BBB'
 console.log(proxy.name)   // BBB
 console.log(target.name)  // BBB
 ```
+
 ### 使用set陷阱
 ::: tip
 `set`陷阱接受4个参数：
@@ -3550,6 +3551,49 @@ Reflect.getPrototypeOf(1)                 // 抛出错误
 
 
 ### 使用对象可扩展陷阱
+在`ES6`之前对象已经有两个方法来修正对象的可扩展性：`Object.isExtensible()`和`Object.preventExtensions()`，在`ES6`中可以通过代理中的`isExtensible()`和`preventExtensions()`陷阱拦截这两个方法并调用底层对象。
+::: tip
+* `isExtensible()`陷阱返回一个布尔值，表示对象是否可扩展，接受唯一参数`trapTarget`
+* `preventExtensions()`陷阱返回一个布尔值，表示操作是否成功，接受唯一参数`trapTarget`
+:::
+以下示例是`isExtensible()`和`preventExtensions()`的默认行为：
+```js
+let target = {}
+let proxy = new Proxy(target, {
+  isExtensible (trapTarget) {
+    return Reflect.isExtensible(trapTarget)
+  },
+  preventExtensions (trapTarget) {
+    return Reflect.preventExtensions(trapTarget)
+  }
+})
+console.log(Object.isExtensible(target))  // true
+console.log(Object.isExtensible(proxy))   // true
+Object.preventExtensions(proxy)
+console.log(Object.isExtensible(target))  // false
+console.log(Object.isExtensible(proxy))   // false
+```
+现在如果有这样一种情况，我们想让`Object.preventExtensions()`对于`proxy`失效，那么可以把以上示例修改成如下的形式：
+```js
+let target = {}
+let proxy = new Proxy(target, {
+  isExtensible(trapTarget) {
+    return Reflect.isExtensible(trapTarget)
+  },
+  preventExtensions(trapTarget) {
+    return false
+  }
+})
+console.log(Object.isExtensible(target))  // true
+console.log(Object.isExtensible(proxy))   // true
+Object.preventExtensions(proxy)
+console.log(Object.isExtensible(target))  // true
+console.log(Object.isExtensible(proxy))   // true
+```
+
+两组方法的对比：
+* `Object.preventExtensions()`无论传入的是否为一个对象，它总是返回该参数，而`Reflect.isExtensible()`方法如果传入一个非对象，则会抛出一个错误。
+* `Object.isExtensible()`当传入一个非对象值时，返回`false`，而`Reflect.isExtensible()`则会抛出一个错误。
 
 ### 使用属性描述符陷阱
 
