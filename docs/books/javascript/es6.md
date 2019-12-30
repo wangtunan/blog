@@ -3743,8 +3743,151 @@ console.log(symbols)  // ['Symbol(name)']
 
 
 ### 使用apply和construct陷阱
+::: tip
+`apply`陷阱接受以下几个参数：
+* `trapTarget`：被执行的函数(代理的目标)。
+* `thisArg`：函数被调用时内部`this`的值。
+* `argumentsList`：传递给函数的参数数组。
+
+`construct`陷阱函数接受以下几个参数：
+* `trapTarget`：被执行的函数(代理的目标)。
+* `argumentsList`：传递给函数的参数数组。
+:::
+`apply`和`construct`陷阱函数是所有代理陷阱中，代理目标是一个函数的仅有的两个陷阱函数。我们在之前已经了解过，函数有两个内部方法`[[Call]]`和`[[Construct]]`，当使用`new`调用时，执行`[[Construct]]`方法，不用`new`调用时，执行`[[Call]]`方法。
+<br/>
+以下实例为`apply`陷阱和`construct`陷阱的默认行为：
+```js
+let target = function () {
+  return 123
+}
+let proxy = new Proxy(target, {
+  apply (trapTarget, thisArg, argumentsList) {
+    return Reflect.apply(trapTarget, thisArg, argumentsList)
+  },
+  construct (trapTarget, argumentsList) {
+    return Reflect.construct(trapTarget, argumentsList)
+  }
+})
+console.log(typeof proxy)               // function
+console.log(proxy())                    // 123
+let instance = new proxy()
+console.log(instance instanceof proxy)  // true
+console.log(instance instanceof target) // true
+```
+
+#### 验证函数参数
+假设我们有这样一个需求：一个函数，其参数只能为数字类型。可以使用`apply`陷阱或者`construct`陷阱来实现：
+```js
+function sum(...values) {
+  return values.reduce((prev, current) => prev + current, 0) 
+}
+let sumProxy = new Proxy(sum, {
+  apply(trapTarget, thisArg, argumentsList) {
+    argumentsList.forEach(item => {
+      if (typeof item !== 'number') {
+        throw new TypeError('所有参数必须是数字类型')
+      }
+    })
+    return Reflect.apply(trapTarget, thisArg, argumentsList)
+  },
+  construct (trapTarget, argumentsList) {
+    throw new TypeError('该函数不能通过new来调用')
+  }
+})
+console.log(sumProxy(1, 2, 3, 4, 5))    // 15
+let proxy = new sumProxy(1, 2, 3, 4, 5) // 抛出错误
+```
+#### 不用new调用构造函数
+在前面的章节中，我们已经了解到`new.target`元属性，它是用`new`调用函数时对该函数的引用，可以使用`new.target`的值来确定函数是否是通过`new`来调用：
+```js
+function Numbers(...values) {
+  if (typeof new.target === 'undefined') {
+    throw new TypeError('该函数必须通过new来调用。')
+  }
+  this.values = values
+}
+let instance = new Numbers(1, 2, 3, 4, 5)
+console.log(instance.values) // [1, 2, 3, 4, 5]
+Numbers(1, 2, 3, 4)          // 报错
+```
+假设我们有以上的一个函数，其必须通过`new`来调用，但我们依然想让其能够使用非`new`调用的形式来使用，这个时候我们可以使用`apply`陷阱来实现：
+```js
+function Numbers(...values) {
+  if (typeof new.target === 'undefined') {
+    throw new TypeError('该函数必须通过new来调用。')
+  }
+  this.values = values
+}
+let NumbersProxy = new Proxy(Numbers, {
+  construct (trapTarget, argumentsList) {
+    return Reflect.construct(trapTarget, argumentsList)
+  },
+  apply (trapTarget, thisArg, argumentsList) {
+    return Reflect.construct(trapTarget, argumentsList)
+  }
+})
+let instance1 = new NumbersProxy(1, 2, 3, 4, 5)
+let instance2 = NumbersProxy(1, 2, 3, 4, 5)
+console.log(instance1.values) // [1, 2, 3, 4, 5]
+console.log(instance2.values) // [1, 2, 3, 4, 5]
+```
+
+#### 覆写抽象基类构造函数
+::: tip
+`construct`陷阱还接受第三个可选参数函数，其作用是被用作构造函数内部的`new.target`的值。
+:::
+假设我们现在有这样一个场景：有一个抽象基类，其必须被继承，但我们依然想这个做，这个时候可以使用`construct`陷阱还是来实现：
+```js
+class AbstractNumbers {
+  constructor (...values) {
+    if (new.target === AbstractNumbers) {
+      throw new TypeError('此函数必须被继承')
+    }
+    this.values = values
+  }
+}
+let AbstractNumbersProxy = new Proxy(AbstractNumbers, {
+  construct (trapTarget, argumentsList) {
+    return Reflect.construct(trapTarget, argumentsList, function () {})
+  }
+})
+let instance = new AbstractNumbersProxy(1, 2, 3, 4, 5)
+console.log(instance.values)  // 1, 2, 3, 4, 5
+```
+
+#### 可调用的类构造函数
+我们都知道必须使用`new`来调用类的构造函数，因为类构造函数的内部方法`[[Call]]`被指定来抛出一个错误，但我们依然可以使用`apply`代理陷阱实现不用`new`就能调用构造函数：
+```js
+class Person {
+  constructor(name) {
+    this.name = name
+  }
+}
+let PersonProxy = new Proxy(Person, {
+  apply (trapTarget, thisArg, argumentsList) {
+    return new trapTarget(...argumentsList)
+  }
+})
+let person = PersonProxy('AAA')
+console.log(person.name)                    // AAA
+console.log(person instanceof PersonProxy)  // true
+console.log(person instanceof Person)       // true
+```
 
 ### 可撤销代理
+在我们之前的所有代理例子中，全部都是不可取消的代理。但有时候我们希望能够对代理进行控制，让他能在需要的时候撤销代理，这个时候可以使用`Proxy.revocable()`函数来创建可撤销的代理，该方法采用与`Proxy`构造函数相同的参数，其返回值是具有以下属性的对象：
+* `proxy`：可撤销的代理对象。
+* `revoke`：撤销代理要调用的函数。
+当调用`revoke()`函数的时候，不能通过`proxy`执行进一步的操作，任何与代理对象交互的尝试都会触发代理陷阱抛出错误。
+```js
+let target = {
+  name: 'AAA'
+}
+let { proxy, revoke } = Proxy.revocable(target, {})
+console.log(proxy.name) // AAA
+revoke()
+console.log(proxy.name) // 抛出错误
+```
 
 ### 解决数组问题
 
