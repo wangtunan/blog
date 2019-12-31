@@ -4161,19 +4161,223 @@ let area2 = shape.length * shape.height // 抛出错误
 ## 用模块封装代码
 
 ### 什么是模块
+**模块**是自动运行在严格模式下并且没有办法退出运行的`JavaScript`代码，与共享一切架构相反，它有如下几个特点：
+* 在模块顶部创建的变量不会自动被添加到全局共享作用域，而是仅在模块的顶级作用域中存在。
+* 模块必须导出一些外部代码可以访问的元素，例如：变量或者函数。
+* 模块也可以从其他模块导入绑定。
+* 在模块的顶部，`this`的值是`undefined`。
 
 ### 导出的基本语法
+::: tip 
+可以用`export`关键字将一部分已发布的代码暴露给其他模块。
+:::
+```js
+// example.js
+export let color = 'red'
+export const PI = 3.1415
+export function sum (num1, num2) {
+  return num1 + num2
+}
+export class Rectangle {
+  constructor (width, height) {
+    this.width = width
+    this.height = height
+  }
+}
+// 模块私有的，外部无法访问
+function privateFunc (num1, num2) {
+  return num1 + num2
+}
+```
 
 ### 导入的基本语法
+::: tip
+从模块中导入的功能可以通过`import`关键字在另一个模块中访问，`import`语句的两个部分分别是：要导入的标识符和标识符从哪个模块导入。
+:::
+以下示例是导入语句的基本形式：
+```js
+import { identifier1, indentifier2 } from './example.js'
+```
+注意：当从模块中导入一个绑定时，它就好像使用了`const`定义的一样。结果是我们不能定义另一个同名的变量，也无法在`import`语句前使用标识符或改变绑定的值。
+
+#### 导入单个绑定和导入多个绑定
+```js
+// 只导入一个
+import { sum } from './math.js'
+sum(1, 2)
+
+// 导入多个
+import { sum, minus } from './math.js'
+sum(1, 2)
+minus(1, 2)
+```
+#### 导入整个模块
+特殊情况下，可以导入整个模块作为一个单一的对象，然后所有的导出都可以作为对象的属性使用：
+```js
+import * as Math from './math.js'
+Math.sum(1, 2)
+Math.minus(1, 2)
+```
+
+注意：
+* 不管在`import`语句中把一个模块写多少次，该模块始终只执行一次，因为导入模块执行后，实例化过的模块被保存在内存中，只要另一个`import`语句引用它就可以重复使用。
+```js
+// math.js中的代码只执行了一次
+import { sum } from './math.js'
+import { minus } from './math.js'
+```
+* `export`和`import`语句必须在其他语句和函数之外使用，在其中使用会报错。
+```js
+if (flag) {
+  // 报错
+  export flag 
+}
+function tryImport() {
+  // 报错
+  import * as Math from './math.js'
+}
+```
 
 ### 导出和导入时重命名
+正如上面我们所看到的那样，导出的绑定就像`const`定义的变量一样，我们无法更改，如果多个模块之间存在同名绑定，这种情况下我们可以使用`as`来给绑定取一个别名，进而可以避免重名。
+```js
+// math.js 导出时别名
+function sum(num1, num2) {
+  return num1 + num2
+}
+export {
+  sum as SUM
+}
+
+// math.js 导入时别名
+import { SUM as sum  } from './math.js'
+console.log(typeof SUM) // undefined
+sum(1, 2)
+```
 
 ### 模块的默认值
+::: tip
+模块的默认值指的是通过`default`关键字指定的单个变量、函数或者类，只能为每个模块设置一个默认的导出值，导出时多次使用`default`关键字会报错。
+:::
+```js
+// example.js 导出默认值
+export default function (num1, num2) {
+  return num1 + num2
+}
+// example.js 导入默认值
+import sum from './example.js'
+sum(1, 2)
+```
+注意：导入默认值和导入非默认值是可以混用的，例如：
+导出`example.js`：
+```js
+export const colors = ['red', 'green', 'blue']
+export default function (num1, num2) {
+  return num1 + num2
+}
+```
+导入`example.js`:
+```js
+import sum, { colors } from './example.js'
+```
 
 ### 重新导出一个绑定
+有时候我们可能会重新导出我们已经导入的内容，就像下面这样：
+```js
+import { sum } from './example.js'
+export { sum }
+// 可以简写成
+export { sum } from './example.js'
+// 简写+别名
+export { sum as SUM } from './example.js'
+// 全部重新导出
+export * from './example.js'
+```
 
 ### 无绑定导入
-
+::: tip
+无绑定导入最有可能被应用于创建`polyfill`和`shim`。
+:::
+尽管我们已经知道模块中的顶层管理、函数和类不会自动出现在全局作用域中，但这并不意味这模块无法访问全局作用域。<br/>
+例如：如果我们想向所有数组添加`pushAll()`方法，可以像下面这样：
+无绑定导出`array.js`：
+```js
+Array.prototype.pushAll = function (items) {
+  if (!Array.isArray(items)) {
+    throw new TypeError('参数必须是一个数组。')
+  }
+  return this.push(...items)
+}
+```
+无绑定导入`array.js`：
+```js
+import './array.js'
+let colors = ['red', 'green', 'blue']
+let items = []
+items.pushAll(colors)
+```
 ### 加载模块
+我们都知道，在`Web`浏览器中使用一个脚本文件，可以通过如下三种方式来实现：
+* 在`script`元素中通过`src`属性指定一个加载代码的地址来加载`js`脚本。
+* 将`js`代码内嵌到没有`src`属性的`script`元素中。
+* 通过`Web Worker`或者`Service Worker`的方式加载并执行`js`代码。
 
+为了完全支持模块的功能，`JavaScript`扩展了`script`元素的功能，使其能够通过设置`type/module`的形式来加载模块：
+```js
+// 外联一个模块文件
+<script type="module" src="./math.js"></script>
+// 内联模块代码
+<script type="module">
+  import { sum } from './example.js'
+  sum(1, 2)
+</script>
+```
 
+#### Web浏览器中模块加载顺序
+模块和脚本不同，它是独一无二的，可以通过`import`关键字来指明其所依赖的其他文件，并且这些文件必须加载进该模块才能正确执行，因此为了支持该功能，`<script type="module"></script>`执行时自动应用`defer`属性。
+```js
+// 最先执行
+<script type="module" src="./math.js"></script>
+// 其次执行
+<script type="module">
+  import { sum } from './math.js'
+</script>
+// 最后执行
+<script type="module" src="./math1.js"></script>
+```
+
+#### Web浏览器中的异步模块加载
+`async`属性也可以应用在模块上，在`<script type="module"></script>`元素上应用`async`属性会让模块以类似于脚本的方式执行，唯一的区别在于：在模块执行前，模块中的所有导入资源必须全部下载下来。
+```js
+// 无法保证哪个模块先执行
+<script type="module" src="./module1.js" async></script>
+<script type="module" src="./module2.js" async></script>
+```
+
+#### 将模块作为Worker加载
+为了支持加载模块，`HTML`标准的开发者向`Worker`这些构造函数添加了第二个参数，第二个参数是一个对象，其`type`属性的默认值是`script`，可以将`type`设置为`module`来加载模块文件。
+```js
+let worker = new Worker('math.js', {
+  type: 'module'
+})
+```
+
+#### 浏览器模块说明符解析
+我们可以发现，我们之前的所有示例中，模块说明符使用的都是相对路径，浏览器要求模块说明符具有以下几种格式之一：
+* 以`/`开头的解析为根目录开始。
+* 以`./`开头的解析为当前目录开始。
+* 以`../`开头的解析为父目录开始。
+* `URL`格式。
+
+```js
+import { first } from '/example1.js'
+import { second } from './example2.js'
+import { three } from '../example3.js'
+import { four } from 'https://www.baidu.com/example4.js'
+```
+
+下面这些看起来正常的模块说明符在浏览器中实际上是无效的：
+```js
+import { first } from 'example1.js'
+import { second } from 'example/example2.js'
+```
