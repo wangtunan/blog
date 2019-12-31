@@ -3890,8 +3890,273 @@ console.log(proxy.name) // 抛出错误
 ```
 
 ### 解决数组问题
+我们在之前已经了解过，在`ES6`之前我们无法完全模拟数组的行为，就像下面的示例一样：
+```js
+let colors = ['red', 'green', 'blue']
+console.log(colors.length)  // 3
+colors[3] = 'black'
+console.log(colors.length)  // 4
+console.log(colors[3])      // black
+colors.length = 2
+console.log(colors.length)  // 2
+console.log(colors)         // ['red', 'green']
+```
+无法模拟的两个重要行为：
+* 添加新元素时增加`length`的值
+* 减少`length`的值可以删除元素
+
+#### 检测数组索引
+::: tip
+判断一个属性是否为数组索引，需要满足规范条件：当且仅当`ToString(ToUnit32(P))`等于`P`，并且`ToUnit32(P)`不等于`2³²-1`。
+:::
+```js
+function toUnit32(value) {
+  return Math.floor(Math.abs(Number(value))) % Math.pow(2, 32)
+}
+function isArrayIndex(key) {
+  let numbericKey = toUnit32(key)
+  return String(numbericKey) === key && numbericKey < (Math.pow(2, 32) - 1)
+}
+```
+代码分析：`toUnit32()`函数通过规范中描述的算法将给定的值转换为无符号32位整数；`isArrayIndex()`函数先将键转换为`uint32`结构，然后进行一次比较以确定这个键是否是数组索引。
+ 
+#### 添加新元素时增加length的值
+```js
+function toUnit32(value) {
+  return Math.floor(Math.abs(Number(value))) % Math.pow(2, 32)
+}
+function isArrayIndex(key) {
+  let numbericKey = toUnit32(key)
+  return String(numbericKey) === key && numbericKey < (Math.pow(2, 32) - 1)
+}
+function createMyArray (length = 0) {
+  return new Proxy({ length }, {
+    set (trapTarget, key, value) {
+      let currentLength = Reflect.get(trapTarget, 'length')
+      if (isArrayIndex(key)) {
+        let numbericKey = Number(key)
+        if (numbericKey >= currentLength) {
+          Reflect.set(trapTarget, 'length', numbericKey + 1)
+        }
+      }
+      return Reflect.set(trapTarget, key, value)
+    }
+  })
+}
+let colors = createMyArray(3)
+console.log(colors.length)  // 3
+colors[0] = 'red'
+colors[1] = 'green'
+colors[2] = 'blue'
+console.log(colors.length)  // 3
+colors[3] = 'black'
+console.log(colors.length)  // 4
+console.log(colors[3])      // black 
+```
+
+#### 减少length的值可以删除元素
+```js
+function toUnit32(value) {
+  return Math.floor(Math.abs(Number(value))) % Math.pow(2, 32)
+}
+function isArrayIndex(key) {
+  let numbericKey = toUnit32(key)
+  return String(numbericKey) === key && numbericKey < (Math.pow(2, 32) - 1)
+}
+function createMyArray (length = 0) {
+  return new Proxy({ length }, {
+    set (trapTarget, key, value) {
+      let currentLength = Reflect.get(trapTarget, 'length')
+      if (isArrayIndex(key)) {
+        let numbericKey = Number(key)
+        if (numbericKey >= currentLength) {
+          Reflect.set(trapTarget, 'length', numbericKey + 1)
+        }
+      } else if(key === 'length') {
+        if (value < currentLength) {
+          for(let index = currentLength - 1; index >= value; index--) {
+            Reflect.deleteProperty(trapTarget, index)
+          }
+        }
+      }
+      return Reflect.set(trapTarget, key, value)
+    }
+  })
+}
+let colors = createMyArray(3)
+console.log(colors.length)  // 3
+colors[0] = 'red'
+colors[1] = 'green'
+colors[2] = 'blue'
+colors[3] = 'black'
+console.log(colors.length)  // 4
+colors.length = 2
+console.log(colors.length)  // 2
+console.log(colors[3])      // undefined
+console.log(colors[2])      // undefined
+console.log(colors[1])      // green
+console.log(colors[0])      // red
+```
+
+#### 实现MyArray类
+如果我们想要创建使用代理的类，最简单的方法是像往常一样定义类，然后在构造函数中返回一个代理，像下面这样：
+```js
+class Thing {
+  constructor () {
+    return new Proxy(this, {})
+  }
+}
+let myThing = new Thing()
+console.log(myThing instanceof Thing) // true
+```
+在理解了以上概念后，我们可以使用代理创建一个自定义的数组类：
+```js
+function toUnit32(value) {
+  return Math.floor(Math.abs(Number(value))) % Math.pow(2, 32)
+}
+function isArrayIndex(key) {
+  let numbericKey = toUnit32(key)
+  return String(numbericKey) === key && numbericKey < (Math.pow(2, 32) - 1)
+}
+class MyArray {
+  constructor(length = 0) {
+    this.length = length
+    return new Proxy(this, {
+      set (trapTarget, key, value) {
+        let currentLength = Reflect.get(trapTarget, 'length')
+        if (isArrayIndex(key)) {
+          let numbericKey = Number(key)
+          if (numbericKey >= currentLength) {
+            Reflect.set(trapTarget, 'length', numbericKey + 1)
+          }
+        } else if(key === 'length') {
+          if (value < currentLength) {
+            for(let index = currentLength - 1; index >= value; index--) {
+              Reflect.deleteProperty(trapTarget, index)
+            }
+          }
+        }
+        return Reflect.set(trapTarget, key, value)
+      }
+    })
+  }
+}
+let colors = new MyArray(3)
+console.log(colors instanceof MyArray)  // true
+console.log(colors.length)              // 3
+colors[0] = 'red'
+colors[1] = 'green'
+colors[2] = 'blue'
+colors[3] = 'black'
+console.log(colors.length)              // 4
+colors.length = 2
+console.log(colors.length)              // 2
+console.log(colors[3])                  // undefined
+console.log(colors[2])                  // undefined
+console.log(colors[1])                  // green
+console.log(colors[0])                  // red
+```
+代码总结：虽然从类构造函数返回代理很容易，但这也意味着每创建一个实例都要创建一个新代理。
 
 ### 将代理作为原型
+针对上节所提到的：可以从类构造函数返回代理，但每创建一个实例都要创建一个新代理，这个问题可以使用将代理用作原型，让所有实例共享一个代理。
+```js
+let target = {}
+let newTarget = Object.create(new Proxy(target, {
+  defineProperty(trapTarget, name, descriptor) {
+    return false
+  }
+}))
+Object.defineProperty(newTarget, 'name', {
+  value: 'newTarget'
+})
+console.log(newTarget.name)                   // newTarget
+console.log(newTarget.hasOwnProperty('name')) // true
+```
+代码分析：调用`Object.defineProperty()`方法并传入`newTarget`来创建一个名为`name`的自有属性，在对象上定义属性的操作不需要操作对象的原型，所以代理中的`defineProperty`陷阱永远不会被调用。正如你所看到的那样，这种方式限制了代理作为原型的能力，但依然有几个陷阱是十分有用的。
+
+#### 在原型上使用get陷阱
+调用内部方法`[[Get]]`读取属性的操作现查找自有属性，如果未找到指定名称的自有属性，则继续到原型中查找，直到没有更多可以查找的原型过程结束，如果设置一个`get`陷阱，就能捕获到在原型上查找属性的陷阱。
+```js
+let target = {}
+let newTarget = Object.create(new Proxy(target, {
+  get (trapTarget, key, receiver) {
+    throw new ReferenceError(`${key}不存在。`)
+  }
+}))
+newTarget.name = 'AAA'
+console.log(newTarget.name) // AAA
+console.log(newTarget.nme)  // 抛出错误
+```
+代码分析：我们使用一个代理作为原型创建了一个新对象，当调用它时，如果其上不存在给定的键，那么`get`陷阱会抛出错误；而`name`属性存在，所以读取它的时候不会调用原型上的`get`陷阱。
+
+#### 在原型上使用set陷阱
+内部方法`[[Set]]`同样会检查目标对象中是否含有某个自有属性，如果不存在则继续在原型上查找。但现在最棘手的问题是：无论原型上是否存在同名属性，给该属性赋值时都将默认在实例中创建该属性：
+```js
+let target = {}
+let thing = Object.create(new Proxy(target, {
+  set(trapTarget, key, value, receiver) {
+    return Reflect.set(trapTarget, key, value, receiver)
+  }
+}))
+console.log(thing.hasOwnProperty('name')) // false
+thing.name = 'AAA'                        // 触发set陷阱
+console.log(thing.name)                   // AAA
+console.log(thing.hasOwnProperty('name')) // true
+thing.name = 'BBB'                        // 不触发set陷阱
+console.log(thing.name)                   // BBB
+```
+#### 在原型上使用has陷阱
+只有在搜索原型链上的代理对象时才会调用`has`陷阱，而当你用代理作为原型时，只有当指定名称没有对应的自有属性时才会调用`has`陷阱。
+```js
+let target = {}
+let thing = Object.create(new Proxy(target, {
+  has (trapTarget, key) {
+    return Reflect.has(trapTarget, key)
+  }
+}))
+console.log('name' in thing)  // false，触发了原型上的has陷阱
+thing.name = 'AAA'
+console.log('name' in thing)  // true，没有触发原型上的has陷阱
+```
+
+#### 将代理用作类的原型
+由于类的`prototype`属性是不可写的，因此不能直接修改类来使用代理作为类的原型，但是可以通过继承的方法来让类误认为自己可以将代理用作自己的原型。
+```js
+function NoSuchProperty () {
+
+}
+NoSuchProperty.prototype = new Proxy({}, {
+  get(trapTarget, key, receiver) {
+    throw new ReferenceError(`${key}不存在`)
+  }
+})
+let thing = new NoSuchProperty()
+console.log(thing.name) // 抛出错误
+```
+以上代码是一个使用`ES5`风格的类型定义，那么接下来，我们需要使用`ES6`的`extends`语法，来让类实现继承：
+```js
+function NoSuchProperty () {
+
+}
+NoSuchProperty.prototype = new Proxy({}, {
+  get(trapTarget, key, receiver) {
+    throw new ReferenceError(`${key}不存在`)
+  }
+})
+class Square extends NoSuchProperty {
+  constructor (width, height) {
+    super()
+    this.width = width
+    this.height = height
+  }
+}
+let shape = new Square(2, 5)
+let area1 = shape.width * shape.height
+console.log(area1)                      // 10
+let area2 = shape.length * shape.height // 抛出错误
+```
+代码分析：`Square`类继承`NoSuchProperty`，所以它的原型链中包含代理，之后创建的`shape`对象是`Square`的新实例，它有两个自有属性：`width`和`height`。当我们访问`shape`实例上不存在的`length`属性时，会在原型链中查找，进而触发`get`陷阱，抛出一个错误。
 
 ## 用模块封装代码
 
