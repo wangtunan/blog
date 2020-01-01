@@ -40,6 +40,10 @@ module.exports = {
                 link: '/books/javascript/red-book'
               },
               {
+                text: 'JavaScript数据结构和算法',
+                link: '/books/javascript/algorithm'
+              },
+              {
                 text: '深入理解ES6',
                 link: '/books/javascript/es6'
               },
