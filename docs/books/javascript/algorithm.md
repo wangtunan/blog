@@ -243,16 +243,268 @@ for(let i = 0; i < numbers.length; i++) {
 | includes  | 如果数组中存在某个元素，则返回`true`，否则返回`false` |
 
 ## 栈
+::: tip
+栈是一种遵从后进先出(`LIFO`)原则的邮箱有序集合，新添加或待删除的元素都保存在栈的同一端，称之为栈顶，另一端叫栈底。
+:::
+### 创建一个基于数组的栈结构
+我们将创建一个类来表示栈：
+```js
+class Stack {
+  constructor () {
+    this.items = []
+  }
+}
+```
+接下来我们需要为栈声明一些方法：
+* `push()`：在栈顶添加一个或者多个元素。
+* `pop()`：移除栈顶的第一个元素，同时返回被移除的元素。
+* `peek()`：返回栈顶的元素。
+* `isEmpty()`：判断栈是否为空，是则返回`true`，否则返回`false`
+* `clear()`：移除栈中的所有元素。
+* `size()`：返回栈中元素的个数。
 
-### 创建一个JavaScript数据结构和算法库
+在梳理完以上方法后，我们需要撰写代码来完善它：
+```js
+class Stack {
+  constructor () {
+    this.items = []
+  }
+  push (element) {
+    this.items.push(elememt)
+  }
+  pop () {
+    return this.items.pop()
+  }
+  peek () {
+    return this.items[this.size - 1]
+  }
+  isEmpty () {
+    return this.size === 0
+  }
+  clear () {
+    return this.items = []
+  }
+  size () {
+    return this.items.length
+  }
+}
+```
 
-### 栈数据结构
+#### 使用Stack类
+在完善完`Stack`类以后，我们需要写一点代码来测试一下：
+```js
+const stack = new Stack()
+console.log(stack.isEmpty())  // true
+stack.push(1)
+stack.push(2)
+console.log(stack.peek())     // 2
+stack.push(4)
+console.log(stack.size())     // 3
+console.log(stack.pop())      // 4
+console.log(stack.size())     // 2
+stack.clear()
+console.log(stack.isEmpty())  // true
+```
 
-### 创建一个基于JavaScript对象的栈结构
 
-### 保护数据结构内部元素
+### 创建一个基于对象的栈结构
+::: tip
+创建一个`Stack`类最简单的方式就是使用一个数组来存储其元素，但在处理大量数据的时候，我们需要评估如何操作数据是最高效的，在使用数组的时候，大部分方法的时间复杂度为`O(n)`，另外数组是元素的一个有序集合，为了保证元素排列有序，它会占用更多的内存空间。
+:::
+接下来我们需要使用基于对象来创建一个栈结构：
+```js
+class Stack {
+  constructor () {
+    this.count = 0
+    this.items = []
+  }
+}
+```
+与基于数组的栈结构拥有相同的方法，唯一区别是多了一个`toString()`方法：
+* `push()`：在栈顶添加一个或者多个元素。
+* `pop()`：移除栈顶的第一个元素，同时返回被移除的元素。
+* `peek()`：返回栈顶的元素。
+* `isEmpty()`：判断栈是否为空，是则返回`true`，否则返回`false`
+* `clear()`：移除栈中的所有元素。
+* `size()`：返回栈中元素的个数。
+* `toString()`：将栈结构转换为字符串。
+
+现在我们需要使用代码来完善：
+```js
+class Stack {
+  constructor () {
+    this.count = 0
+    this.items = {}
+  }
+  push (element) {
+    this.items[this.count] = element
+    this.count++
+  }
+  size () {
+    return this.count
+  }
+  isEmpty () {
+    return this.size() === 0
+  }
+  pop () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    this.count--
+    const result = this.items[this.count]
+    delete this.items[this.count]
+    return result
+  }
+  peek () {
+    return this.items[this.count - 1]
+  }
+  clear () {
+    this.count = 0
+    this.items = {}
+  }
+  toString () {
+    if (this.isEmpty()) {
+      return ''
+    }
+    let str = this.items['0']
+    for(let i = 1; i < this.count; i++) {
+      str = `${str},${this.items[i]}`
+    }
+    return str
+  }
+}
+```
+
+代码分析：
+* `push()`：我们知道`JavaScript`对象是键值对的集合，当我们使用如下例子后，它的结果如下：
+```js
+let stack = new Stack()
+stack.push(1)
+stack.push(2)
+
+// 此时的stack相当于
+const stack = {
+  0: 1,
+  1: 2
+}
+```
+
+* `pop()`：首选我们需要判断当前对象的长度`count`是否为0，如果为0则直接返回`undefined`，如果不为0，我们需要把`count`减去1得到栈顶元素所属的键，随后使用`delete`删除这个对象的属性。
+```js
+let stack = new Stack()
+stack.push(1)
+stack.push(2)
+
+// 此时的stack相当于
+const stack = {
+  0: 1,
+  1: 2
+}
+// 此时count--后等于1，得到栈顶元素的键和其键对应的值
+this.count--
+const result = 2
+
+// 随后删除这个键，返回result
+delete this.items[1]
+return 2
+```
+
+* `toString()`：我们在数组版本的`Stack`中并不需要关心`toString()`方法的实现，因为数组已经有`toString()`方法了，但对于对象版本的`Stack`，我们需要自己写一个`toString()`方法。其实现步骤第一步先拿到对象键为0的值，随后通过`count`的长度来从1开始遍历对象，并进行字符串拼接。
+
+#### 使用Stack类
+同样的，我们在撰写完这个版本`Stack`类以后，需要写一点代码测试一下：
+```js
+let stack = new Stack()
+console.log(stack.isEmpty())  // true
+stack.push(1)
+stack.push(3)
+stack.push(5)
+console.log(stack.size())     // 3
+console.log(stack.peek())     // 5
+console.log(stack.pop())      // 5
+console.log(stack.toString()) // 1,3
+stack.clear()
+console.log(stack.size())     // 0
+console.log(stack.isEmpty())  // true
+```
 
 ### 用栈解决实际问题
+::: tip
+栈的实际应用非常广泛，在回溯问题中，它可以用来存储访问过的任务或路径、撤销的操作。
+:::
+
+#### 十进制到二进制
+::: tip
+要把十进制转换成二进制，我们可以将该十进制除以2并对商取整，直到结果为0。
+:::
+
+使用`JavaScript`对象版的`Stack`：
+```js
+function decimalToBinary (decNumber) {
+  const stack = new Stack()
+  let number = decNumber
+  let rem 
+  let binaryString = ''
+  while (number > 0) {
+    rem = Math.floor(number % 2)
+    stack.push(rem)
+    number = Math.floor(number / 2)
+  }
+  while (!stack.isEmpty()) {
+    binaryString += stack.pop().toString()
+  }
+  return binaryString
+}
+console.log(decimalToBinary(233))   // 11101001
+console.log(decimalToBinary(10))    // 1010
+console.log(decimalToBinary(1000))  // 1111101000
+```
+
+代码分析：当我们将十进制的`10`转换为二进制时，步骤如下：
+1. `rem = Math.floor(10 % 2)`，此时`rem`结果为`0`。
+2. 随后把`rem`的结果放置在栈中，此时如果使用数组来表示栈的话，结果为`[0]`。
+3. 然后`number = Math.floor(10 / 2)`，此时`number`结果为`5`，第一轮循环完毕。
+4. 第二轮循环开始，`rem = Math.floor(5 % 2)`，此时`rem`结果为`1`。
+5. 随后把`rem`的结果放置在栈中，此时如果使用数组来表示栈的话，结果为`[0, 1]`。
+6. 然后`number = Math.floor(5 / 2)`，此时`number`结果为`2`，第二轮循环完毕。
+7. 第三轮循环开始，`rem = Math.floor(2 % 2)`，此时`rem`结果为`0`。
+8. 随后把`rem`的结果放置在栈中，此时如果使用数组来表示栈的话，结果为`[0, 1, 0]`。
+9. 然后`number = Math.floor(2 / 2)`，此时`number`结果为`1`，第三轮循环完毕。
+7. 第四轮循环开始，`rem = Math.floor(1 % 2)`，此时`rem`结果为`1`。
+8. 随后把`rem`的结果放置在栈中，此时如果使用数组来表示栈的话，结果为`[0, 1, 0, 1]`。
+9. 然后`number = Math.floor(1 / 2)`，此时`number`结果为`0`，第四轮循环完毕。
+10. `0 > 0`，循环条件不满足，循环终止。此时栈结构数组表示为`[0, 1, 0, 1]`。
+
+随后根据栈结构后进先出的原则，我们将栈结构拼接在一起，就得到了十进制`10`转换为二进制后的结果，即：`1010`。
+
+#### 通用进制转换算法
+根据以上的思路，我们可以不仅可以把十进制转换为二进制，还可以把十进制转换成基数为`2~36`的任意进制。
+```js
+function baseConverter (decNumber, base) {
+  const stack = new Stack()
+  const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let number = decNumber
+  let rem
+  let baseString = ''
+  if (!(base >= 2 && base <= 36)) {
+    return ''
+  }
+  while (number > 0) {
+    rem = Math.floor(number % base)
+    stack.push(rem)
+    number = Math.floor(number / base)
+  }
+  while (!stack.isEmpty()) {
+    baseString += digits[stack.pop()]
+  }
+  return baseString
+}
+console.log(baseConverter(100, 2))  // 1100100
+console.log(baseConverter(100, 8))  // 144
+console.log(baseConverter(100, 16)) // 64
+console.log(baseConverter(100, 32)) // 34
+```
+代码分析：在将十进制转换为二进制时，余数为0或1；在将十进制转换八进制时，余数为`0~7`；在将十进制转换为十六进制时，余数为`0~9`+ `A、B、C、D、E、F`(分别对应10、11、12、13、14、15)。
 
 ## 队列和双端队列
 
