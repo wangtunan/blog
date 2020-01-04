@@ -776,7 +776,7 @@ const person = {
 const name = 'why'
 const person = {
   name: name,
-  'irst name': 'ABC',
+  'first name': 'ABC',
   sayName: function () {
     console.log(this.name)
   }
@@ -897,10 +897,10 @@ const obj = {
 obj.d = 1
 console.log(Reflect.keys(obj).join('')) // 012acbd
 ```
+
 ### 增强对象原型
-::: tip
 `ES5`中，对象原型一旦实例化之后保持不变。而在`ES6`中添加了`Object.setPrototypeOf()`方法来改变这种情况。
-:::
+
 ```js
 const person = {
   sayHello () {
@@ -972,10 +972,10 @@ Object.setPrototypeOf(friend, dog)
 console.log(friend.sayHello())                        // wang wang wang!!!
 console.log(Object.getPrototypeOf(friend) === dog)    // true
 ```
+
 ### 正式的方法定义
-::: tip
 在`ES6`之前从未正式定义过"方法"的概念，方法仅仅是一个具有功能而非数据的对象属性。而在`ES6`中正式将方法定义为一个函数，它会有一个内部`[[HomeObject]]`属性来容纳这个方法从属的对象。
-:::
+
 ```js
 const person = {
   // 是方法 [[HomeObject]] = person
@@ -1013,9 +1013,8 @@ console.log(friend.sayHello()) // Hello!!!
 * `super.sayHello()`相当于`person.sayHello.call(this)`。
 
 ## 解构
-::: tip
 解构是一种打破数据结构，将其拆分为更小部分的过程。
-:::
+
 
 ### 为何使用解构功能
 在`ECMAScript 5`及其早期版本中，为了从对象或者数组中获取特定数据并赋值给变量，编写了许多看起来同质化的代码：
@@ -1073,9 +1072,8 @@ console.log(age)  // 23
 ```
 
 #### 解构默认值
-::: tip
 使用解构赋值表达式时，如果指定的局部变量名称在对象中不存在，那么这个局部变量会被赋值为`undefined`，此时可以随意指定一个默认值。
-:::
+
 ```js
 const person = {
   name: 'AAA',
@@ -1086,7 +1084,7 @@ console.log(sex) // 男
 ```
 
 #### 为非同名变量赋值
-目前为止我们解构赋值时，带解构的键和带赋值的变量是同名的，但如何为非同名变量解构赋值呢？
+目前为止我们解构赋值时，待解构的键和待赋值的变量是同名的，但如何为非同名变量解构赋值呢？
 ```js
 const person = {
   name: 'AAA',
@@ -1109,9 +1107,8 @@ console.log(newAge)  // 23
 ```
 
 #### 嵌套对象结构
-::: tip
 解构嵌套对象任然与对象字面量语法相似，只是我们可以将对象拆解成我们想要的样子。
-:::
+
 ```js
 const person = {
   name: 'AAA',
@@ -1135,9 +1132,8 @@ console.log(group)  // { number: 1000, isMain: true }
 
 
 ### 数组解构
-::: tip
 数组的解构赋值与对象解构的语法相似，但简单许多，它使用的是数组字面量，且解构操作全部在数组内完成，解构的过程是按值在数组中的位置进行提取的。
-:::
+
 ```js
 const colors = ['red', 'green', 'blue']
 let [firstColor, secondColor] = colors
@@ -1181,9 +1177,8 @@ console.log(secondColor)  // green
 ```
 
 #### 不定参数
-::: tip
-在解构数组时，不定元素只能放在最后一个，在后面继续添加逗号会导致报错。
-:::
+在解构数组时，不定元素只能放在最后一个，在后面继续添加逗号会导致报错。<br/>
+
 在数组解构中，有一个和函数的不定参数相似的功能：在解构数组时，可以使用`...`语法将数组中剩余元素赋值给一个特定的变量：
 ```js
 let colors = ['red', 'green', 'blue']
@@ -1213,11 +1208,10 @@ function setCookie (name, value, options) {
 
 // 使用解构参数
 function setCookie (name, value, { path, domain, expires } = {}) {
-  let { path, domain, expires } = 
   // 其它代码
 }
 ```
-代码分析：`{ path, domain, expires } = {}`必须提供一个默认值，如果不提供默认值，则不传递第三个参数或报错：
+代码分析：`{ path, domain, expires } = {}`必须提供一个默认值，如果不提供默认值，则不传递第三个参数会报错：
 ```js
 function setCookie (name, value, { path, domain, expires }) {
   // 其它代码
@@ -1230,18 +1224,16 @@ setCookie('type', 'js')
 
 
 ## Symbol及其Symbol属性
-::: tip
 在`ES6`之前，`JavaScript`语言只有五种原始类型：`string`、`number`、`boolean`、`null`和`undefiend`。在`ES6`中，添加了第六种原始类型：`Symbol`。
-:::
+
 可以使用`typeof`来检测`Symbol`类型：
 ```js
 const symbol = Symbol('Symbol Test')
 console.log(typeof symbol) // symbol
 ```
 ### 创建Symbol
-::: tip
 可以通过全局的`Symbol`函数来创建一个`Symbol`。
-:::
+
 ```js
 const firstName = Symbol()
 const person = {}
@@ -1249,7 +1241,7 @@ person[firstName] = 'AAA'
 console.log(person[firstName]) // AAA
 ```
 
-可以在`Symbol()`种传递一个可选的参数，可以让我们添加一段文本描述我们创建的`Symbol`，其中文本是存储在内部属性`[[Description]]`中，只有当调用`Symbol`的`toString()`方法时才可以读取这个属性。
+可以在`Symbol()`中传递一个可选的参数，可以让我们添加一段文本描述我们创建的`Symbol`，其中文本是存储在内部属性`[[Description]]`中，只有当调用`Symbol`的`toString()`方法时才可以读取这个属性。
 ```js
 const firstName = Symbol('Symbol Description')
 const person = {}
@@ -1259,9 +1251,8 @@ console.log(firstName)         // Symbol('Symbol Description')
 ```
 
 ### Symbol的使用方法
-::: tip
 所有可以使用可计算属性名的地方，都可以使用`Symbol`。
-:::
+
 ```js
 let firstName = Symbol('first name')
 let lastName = Symbol('last name')
@@ -1281,9 +1272,8 @@ console.log(person[firstName])  // AAA
 console.log(person[lastName])   // BBB
 ```
 ### Symbol共享体系
-::: tip
 `ES6`提供了一个可以随时访问的全局`Symbol`注册表来让我们可以创建共享`Symbol`的能力，可以使用`Symbol.for()`方法来创建一个共享的`Symbol`。
-:::
+
 ```js
 // Symbol.for方法的参数，也被用做Symbol的描述内容
 const uid = Symbol.for('uid')
@@ -1291,14 +1281,14 @@ const object = {
   [uid]: 12345
 }
 console.log(person[uid]) // 12345
-console.log(uid)         // Symbil(uid)
+console.log(uid)         // Symbol(uid)
 ```
 代码分析：
 * `Symbol.for()`方法首先会在全局`Symbol`注册变中搜索键为`uid`的`Symbol`是否存在。
 * 存在，直接返回已有的`Symbol`。
 * 不存在，则创建一个新的`Symbol`，并使用这个键在`Symbol`全局注册变中注册，随后返回新创建的`Symbol`。
 
-还有一个和`Symbol`共享有关的特性，可以使用`Symbol.keyFor()`方法在`Symbol`全局注册变中检索与`Symbol`有关的键，如果存在则返回，不存在则返回`undefined`：
+还有一个和`Symbol`共享有关的特性，可以使用`Symbol.keyFor()`方法在`Symbol`全局注册表中检索与`Symbol`有关的键，如果存在则返回，不存在则返回`undefined`：
 ```js
 const uid = Symbol.for('uid')
 const uid1 = Symbol('uid1')
@@ -1306,9 +1296,8 @@ console.log(Symbol.keyFor(uid))   // uid
 console.log(Symbol.keyFor(uid1))  // undefined
 ```
 ### Symbol与类型强制转换
-::: tip
 其它原始类型没有与`Symbol`逻辑相等的值，尤其是不能将`Symbol`强制转换为字符串和数字。
-:::
+
 ```js
 const uid = Symbol.for('uid')
 console.log(uid)
@@ -1348,9 +1337,8 @@ console.log(symbols[0])     // Symbol(uid)
 重写一个由`well-known Symbol`定义的方法，会导致对象内部的默认行为被改变，从而一个普通对象会变为一个奇异对象。
 
 #### Symbol.hasInstance
-::: tip
 每一个函数都有`Symbol.hasInstance`方法，用于确定对象是否为函数的实例，并且该方法不可被枚举、不可被写和不可被配置。
-:::
+
 ```js
 function MyObject () {
   // 空函数
@@ -1389,7 +1377,7 @@ console.log(message) // ['Hi', 'hello', 'world']
 
 #### Symbol.match，Symbol.replace，Symbol.search，Symbol.split
 在`JavaScript`中，字符串与正则表达式经常一起出现，尤其是字符串类型的几个方法，可以接受正则表达式作为参数：
-* `match`：确定给定字符串是否匹配正则表示。
+* `match`：确定给定字符串是否匹配正则表达式。
 * `replace`：将字符串中匹配正则表达式的部分替换为给定的字符串。
 * `search`：在字符串中定位匹配正则表示位置的索引。
 * `split`：按照匹配正则表达式的元素将字符串进行分割，并将分割结果存入数组中。
@@ -1463,6 +1451,8 @@ console.log(freezing / 2)       // 16
 console.log(String(freezing))   // 32℃
 ```
 
+代码分析：我们在对象`Temperature`原型上重写了`Symbol.toPrimitive`，新方法根据参数`hint`指定的模式返回不同的值，其中`hint`参数由`JavaScript`引擎传入。其中`+`运算符触发默认模式，`hint`被设置为`default`;`/`运算符触发数字模式，`hint`被设置为`number`;`String()`函数触发字符串模式，`hint`被设置为`string`。
+
 #### Symbol.toStringTag
 在`JavaScript`中，如果我们同时存在多个全局执行环境，例如在浏览器中一个页面包含`iframe`标签，因为`iframe`和它外层的页面分别代表不同的领域，每一个领域都有自己的全局作用域，有自己的全局对象，在任何领域中创建的数组，都是一个正规的数组。然而，如果将这个数字传递到另外一个领域中，`instanceof Array`语句的检测结果会返回`false`，此时`Array`已经是另一个领域的构造函数，显然被检测的数组不是由这个构造函数创建的。<br/>
 
@@ -1476,7 +1466,7 @@ console.log(isArray([])) // true
 与上述问题有一个类似的案例，在`ES5`之前我们可能会引入第三方库来创建全局的`JSON`对象，而在浏览器开始实现`JSON`全局对象后，就有必要区分`JSON`对象是`JavaScript`环境本身提供的还是由第三方库提供的：
 ```js
 function supportsNativeJSON () {
-  return typeof JSON !== 'undefined' && Object.prototype.toString.call(JSON) === '[object JSOn]'
+  return typeof JSON !== 'undefined' && Object.prototype.toString.call(JSON) === '[object JSON]'
 }
 ```
 在`ES6`中，通过`Symbol.toStringTag`这个`Symbol`改变了调用`Object.prototype.toString()`时返回的身份标识，其定义了调用对象的`Object.prototype.toString.call()`方法时返回的值：
