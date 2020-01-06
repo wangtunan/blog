@@ -507,11 +507,187 @@ console.log(baseConverter(100, 32)) // 34
 代码分析：在将十进制转换为二进制时，余数为0或1；在将十进制转换八进制时，余数为`0~7`；在将十进制转换为十六进制时，余数为`0~9`+ `A、B、C、D、E、F`(分别对应10、11、12、13、14、15)。
 
 ## 队列和双端队列
+队列是一种遵循先进先出(`FIFO`)原则的一组有序的项，队列在尾部添加新元素，并从顶部移除元素，而双端队列是一种将栈的原则和队列的原则混合在一起的数据结构。
 
 ### 队列数据结构
+首先我们需要使用类来表示一个队列：
+```js
+class Queue {
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+}
+```
+代码分析：我们仿照栈数据结构，为了写出一个在获取元素时更高效的数据结构，我们使用一个对象来存储我们的元素，其中需要声明一个`count`变量来控制队列的大小，声明一个`lowestCount`变量来帮我们追踪第一个元素。
+
+在撰写完队列的类以后，我们还需要为队列声明一下可调用的方法：
+* `enqueue()`：向队列的尾部添加元素。
+* `dequeue()`：在队列的开头移除第一个元素，并返回被移除的元素。
+* `peek()`：返回队列的第一个元素。
+* `isEmpty()`：判断队列是否为空。
+* `size()`：返回队列包含元素的个数。
+* `clear()`：清空队列。
+* `toString()`：将队列转换成字符串格式。
+
+```js
+class Queue {
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+  size () {
+    return this.count
+  },
+  isEmpty () {
+    return this.count === 0
+  }
+  enqueue (element) {
+    this.items[this.count] = element
+    this.count++
+  },
+  dequeue () {
+    if (this.isEmpty()) {
+      return ''
+    }
+    const result = this.items[this.lowestCount]
+    delete this.items[this.lowestCount]
+    this.lowestCount++
+    return result
+  },
+  peek () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    return this.items[this.lowestCount]
+  },
+  clear () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  },
+  toString () {
+    if (this.isEmpty()) {
+      return ''
+    }
+    let objStr = this.items[this.lowestCount]
+    for(let i = this.lowestCount + 1; i < this.count; i++) {
+      objStr = `${objStr},${this.items[i]}`
+    }
+    return objStr
+  }
+}
+```
+在撰写完队列的基本方法后，我们需要撰写一点代码来测试我们的队列：
+```js
+const queue = new Queue()
+console.log(queue.isEmpty())  // true
+queue.enqueue('AAA')
+queue.enqueue('BBB')
+queue.enqueue('CCC')
+console.log(queue.isEmpty())  // false
+console.log(queue.size())     // 3
+console.log(queue.toString()) // AAA,BBB,CCC
+console.log(queue.peek())     // AAA
+queue.dequeue()
+queue.clear()
+console.log(queue.isEmpty())  // true
+```
 
 ### 双端队列数据结构
+双端队列是一种允许我们同时从前端和后端添加和移除元素的特殊队列，在计算机科学中，双端队列是一个常见应用是存储一系列撤销操作，每当用户在软件中进行了一个操作，该操作被毁存在一个双端队列中，当用户点击撤销按钮时，该操作会被从双端队列中弹出，表示它被从后面移除了。在进行预先定义的一定数量的操作后，最新进行的操作被会从双端队列的前端移除。<br/>
 
+和之前一样，我们先声明一个`Deque`类：
+```js
+class Deque {
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+}
+```
+既然双端队列是一种特殊的队列，我们可以看到其构造函数中的部分代码和队列相同，同时也拥有一些相同的方法：`isEmpty()`、`clear()`、`size()`和`toString()`。除了这些相同的方法，双端队列还拥有一些特殊的方法方便我们去调用：
+* `addFront()`：在双端队列的前端添加新元素。
+* `addBack()`：在双端队列的后端添加新元素。
+* `removeFront()`：在双端队列的前端移除新元素。
+* `removeBack()`：在双端队列的后端移除新元素。
+* `peekFront()`：返回双端队列前端的第一个元素。
+* `peekBack()`：返回双端队列后端的第一个元素。
+
+```js
+class Deque {
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+  size () {
+    return this.count
+  }
+  isEmpty () {
+    return this.count === 0
+  }
+  clear () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+  toString () {
+    if (this.isEmpty()) {
+      return ''
+    }
+    let strObj = this.items[this.lowestCount]
+    for (let i = this.lowestCount + 1; i < this.count; i++) {
+      strObj = `${strObj},${this.items[i]}`
+    }
+    return strObj
+  }
+  addFront (element) {
+    // 1.添加之前没有数据
+    // 2.lowestCount为0
+    // 3.lowestCount不为0
+    this.items[this.count] = element
+    this.count++
+  }
+  addBack (element) {
+    this.items[this.count] = element
+    this.count++
+  }
+  removeFront () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    const result = this.items[this.lowestCount]
+    delete this.items[this.lowestCount]
+    this.lowestCount++
+    return result
+  }
+  removeBack () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    this.count--
+    const result = this.items[this.count]
+    delete this.items[this.count]
+    return result
+  }
+  peekFront () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    return this.items[this.lowestCount]
+  }
+  peekBack () {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    return this.items[this.count - 1]
+  }
+}
+```
 ### 使用队列和双端队列解决实际问题
 
 ## 链表
