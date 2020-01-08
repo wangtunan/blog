@@ -540,14 +540,14 @@ class Queue {
   }
   size () {
     return this.count
-  },
+  }
   isEmpty () {
     return this.count === 0
   }
   enqueue (element) {
     this.items[this.count] = element
     this.count++
-  },
+  }
   dequeue () {
     if (this.isEmpty()) {
       return ''
@@ -556,18 +556,18 @@ class Queue {
     delete this.items[this.lowestCount]
     this.lowestCount++
     return result
-  },
+  }
   peek () {
     if (this.isEmpty()) {
       return undefined
     }
     return this.items[this.lowestCount]
-  },
+  }
   clear () {
     this.count = 0
     this.lowestCount = 0
     this.items = {}
-  },
+  }
   toString () {
     if (this.isEmpty()) {
       return ''
@@ -647,10 +647,21 @@ class Deque {
   }
   addFront (element) {
     // 1.添加之前没有数据
-    // 2.lowestCount为0
-    // 3.lowestCount不为0
-    this.items[this.count] = element
-    this.count++
+    // 2.lowestCount不为0
+    // 3.lowestCount为0
+    if (this.isEmpty()) {
+      this.addBack(element)
+    } else if (this.lowestCount > 0) {
+      this.lowestCount--
+      this.items[this.lowestCount] = element
+    } else {
+      for (let i = this.count; i > 0; i--) {
+        this.items[i] = this.items[i - 1]
+      }
+      this.count++
+      this.lowestCount = 0
+      this.items[0] = element
+    }
   }
   addBack (element) {
     this.items[this.count] = element
@@ -688,8 +699,73 @@ class Deque {
   }
 }
 ```
-### 使用队列和双端队列解决实际问题
 
+将一个元素添加到双端队列的前端，存在以下三种场景：
+* 双端队里为空：这个时候只需要执行`addBack()`方法，在双端队列的后端添加元素即可。
+* 已经从双端队列前端移除了元素：这种情况只需要把新元素放置到在`lowestCount-1`的位置即可。
+* 双端队列前端未移除任何元素：我们可以设置一个负值的键，同时更新双端队列的长度。
+
+在撰写完双端队里的实现代码后，我们需要写一点代码来测试:
+```js
+const deque = new Deque()
+console.log(deque.isEmpty())  // true
+deque.addBack('AAA')
+deque.addBack('BBB')
+console.log(deque.toString()) // AAA,BBB
+deque.addBack('CCC')
+console.log(deque.toString()) // AAA,BBB,CCC
+console.log(deque.size())     // 3
+deque.removeFront() 
+console.log(deque.toString()) // BBB,CCC
+deque.removeBack()
+console.log(deque.toString()) // BBB
+deque.addFront('DDD')
+console.log(deque.peekFront())// DDD
+console.log(deque.peekBack()) // BBB
+console.log(deque.toString()) // DDD,BBB
+```
+
+### 使用队列和双端队列解决实际问题
+由于队列经常被应用于计算机领域和我们的现实生活中，就出现了一些队列的修改版本，其中之一就叫做循环队列。在本章节，将讲述使用队列来模拟击鼓传花游戏和使用双端队列来检查一个短语是否为回文。
+
+#### 击鼓传花
+游戏规则：需要游戏参与者围成一个圈，并按固定的顺序传递给旁边的人，某一时刻传花结束，此时花在谁手里，谁就退出圆圈，结束游戏，重复这个过程，直到只剩最后一个孩子即为胜利者。
+```js
+function hotPotato (elementList, num) {
+  const queue = new Queue()
+  const elimitatedList = []
+  for (let i = 0; i < elementList.length; i++) {
+    queue.enqueue(elementList[i])
+  }
+  while (queue.size() > 1) {
+    for (let i = 0; i < num; i++) {
+      queue.enqueue(queue.dequeue())
+    }
+    elimitatedList.push(queue.dequeue())
+  }
+  return {
+    elimitated: elimitatedList,
+    winner: queue.dequeue()
+  }
+}
+```
+
+代码分析：
+1. 首先我们使用到了最开始我们创建的队列`Queue`类。
+2. 随后我们会得到一份游戏参与者的名单和给定的数字。
+3. 开始迭代队列，从队列开头移除一下，并同时往队里的末尾添加，来模拟循环游戏的概念。
+4. 当传递次数等于我们给定的数字时，拿着花的那个人就被淘汰，移除队列并同时添加到淘汰数组中。
+5. 一直进行以上的操作，直到队列中只有一个人时，结束循环。
+
+在撰写完以上的代码后，我们实际写一个例子来验证：
+```js
+const names = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
+const result = hotPotato(names, 7)
+for (let i = 0; i < result.elimitated.length; i++) {
+  console.log(`${result.elimitated[i]}在击鼓传花游戏中被淘汰。`)
+}
+console.log(`胜利者：${result.winner}`)
+```
 ## 链表
 
 ### 链表数据结构
