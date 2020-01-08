@@ -539,7 +539,7 @@ class Queue {
     this.items = {}
   }
   size () {
-    return this.count
+    return this.count - this.lowestCount
   }
   isEmpty () {
     return this.count === 0
@@ -625,7 +625,7 @@ class Deque {
     this.items = {}
   }
   size () {
-    return this.count
+    return this.count - this.lowestCount
   }
   isEmpty () {
     return this.count === 0
@@ -765,7 +765,56 @@ for (let i = 0; i < result.elimitated.length; i++) {
   console.log(`${result.elimitated[i]}在击鼓传花游戏中被淘汰。`)
 }
 console.log(`胜利者：${result.winner}`)
+// CCC在击鼓传花游戏中被淘汰。
+// BBB在击鼓传花游戏中被淘汰。
+// EEE在击鼓传花游戏中被淘汰。
+// DDD在击鼓传花游戏中被淘汰。
+// 胜利者：AAA
 ```
+
+#### 回文检查器
+问：什么是回文？<br/>
+答：回文是正反都能读通的单词、词组、数或一系列字符的序列，例如`madam`和`racecar`。<br>
+
+有不用的算法可以检查一个词组或字符串是否为回文，最简单的方式是将字符串反向排列并检查它和原始字符串是否相同，如果相同，则它就是一个回文，在这个案例中我们使用双端队列来实现：
+```js
+function palindromeChecker (str) {
+  if (str === undefined || str === null || (str !== null && str.length === 0)) {
+    return false
+  }
+  const deque = new Deque()
+  const lowerStr = str.toLowerCase().split('').join('')
+  let isEqual = true
+  let firstChar, lastChar
+  for (let i = 0; i < lowerStr.length; i++) {
+    deque.addBack(lowerStr.charAt(i))
+  }
+  while (deque.size() > 1 && isEqual) {
+    firstChar = deque.removeFront()
+    lastChar = deque.removeBack()
+    if (firstChar !== lastChar) {
+      isEqual = false
+    }
+  }
+  return isEqual
+}
+```
+代码分析：
+1. 在我们检查是否回文之前，需要先对传入的字符串做一些校验，如果传递的是`undefined`，`null`或者空字符串直接返回`false`。
+2. 随后我们实例化了一个我们在之前写好的双端队列`Deque`类。
+3. 为了避免字符串大小写的问题，我们统一把传入的字符串转换成小写的形式。
+4. 遍历字符串，并把字符串中的每一个字符依次添加到双端队列的末尾。
+5. 循环在双端队列的前端和后端移除一个元素，并比较这两个元素，如果相等则进行下一次循环，如果不相等则结束循环。
+
+在撰写问回文检查器代码后，我们写一点代码来测试一下：
+```js
+console.log(palindromeChecker('a'))      // true
+console.log(palindromeChecker('aa'))     // true
+console.log(palindromeChecker('kayak'))  // true
+console.log(palindromeChecker('level'))  // true
+console.log( palindromeChecker('ABBC'))  // false
+```
+
 ## 链表
 
 ### 链表数据结构
