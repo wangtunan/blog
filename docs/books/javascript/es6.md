@@ -1519,7 +1519,7 @@ console.log(map[key2]) // foo
 ```js
 const map = Object.create(null)
 map.count = 1
-// 本意是检查count属性是否存在，实际检查的确实map.count属性的值是否非0
+// 本意是检查count属性是否存在，实际检查的确是map.count属性的值是否为真
 if (map.count) {
   console.log(map.count)
 }
@@ -1530,16 +1530,15 @@ if (map.count) {
 :::
 其中`Set`集合涉及到的属性和方法有：
 * `Set`构造函数：可以使用此构造函数创建一个`Set`集合。
-* `add`方法：可以像`Set`集合中添加一个元素。
+* `add`方法：可以向`Set`集合中添加一个元素。
 * `delete`方法：可以移除`Set`集合中的某一个元素。
 * `clear`方法：可以移除`Set`集合中所有的元素。
 * `has`方法：判断给定的元素是否在`Set`集合中。
 * `size`属性：`Set`集合的长度。
 
 #### 创建Set集合
-::: tip
 `Set`集合的构造函数可以接受任何可迭代对象作为参数，例如：数组、`Set`集合或者`Map`集合。
-:::
+
 ```js
 const set = new Set()
 set.add(5)
@@ -1550,9 +1549,8 @@ console.log(set.size) // 2
 ```
 
 #### 移除元素
-::: tip
 使用`delete()`方法可以移除集合中的某一个值，使用`clear()`方法可以移除集合中所有的元素。
-:::
+
 ```js
 const set = new Set()
 set.add(5)
@@ -1580,20 +1578,19 @@ set.forEach((value, key, arr) => {
 ```
 
 #### Set集合转换为数组
-因为`Set`集合不可以像数组那样通过索引去访问数组元素，最好的做法是将`Set`集合转换为数组。
+因为`Set`集合不可以像数组那样通过索引去访问元素，最好的做法是将`Set`集合转换为数组。
 ```js
 const set = new Set([1, 2, 3, 4])
-// 展开运算符
+// 方法一：展开运算符
 const arr1 = [...set]
-// Array.from方法
+// 方法二：Array.from方法
 const arr2 = Array.from(set)
 console.log(arr1) // [1, 2, 3, 4]
 console.log(arr2) // [1, 2, 3, 4]
 ```
 
 #### Weak Set集合
-通过以上对`Set`集合的梳理，我们可以发现：只要`Set`实例中的引用存在，垃圾回收机制就不能释放该对象的内存空间，所以我们把`Set`集合看作是一个强引用的集合。<br/>
-为了更好的处理`Set`集合的垃圾回收，引入了一个叫`Weak Set`的集合：
+通过以上对`Set`集合的梳理，我们可以发现：只要`Set`实例中的引用存在，垃圾回收机制就不能释放该对象的内存空间，所以我们把`Set`集合看作是一个强引用的集合。为了更好的处理`Set`集合的垃圾回收，引入了一个叫`Weak Set`的集合：
 ::: tip
 `Weak Set`集合只支持三种方法：`add`、`has`和`delete`。
 :::
@@ -1606,28 +1603,31 @@ weakSet.delete(key)
 console.log(weakSet.has(key)) // false
 ```
 `Set`集合和`Weak Set`集合有许多共同的特性，但它们之间还是有一定的差别的：
-* `Weak Set`集合只能存储对象元素，像其添加非对象元素会导致抛出错误，同理`has()`和`delete()`传递非对象也同样会报错。
-* `Weak Set`集合不可迭代，也不暴露任何迭代器。
-* `Weak Set`集合不支持`forEach`方法。
+* `Weak Set`集合只能存储对象元素，向其添加非对象元素会导致抛出错误，同理`has()`和`delete()`传递非对象也同样会报错。
+* `Weak Set`集合不可迭代，也不暴露任何迭代器，因此也不支持`forEach()`方法。
 * `Weak Set`集合不支持`size`属性。
 
 ### ES6中的Map集合
 `ES6`中的`Map`类型是一种存储着许多键值对的有序列表，其中的键名和对应的值支持所有的数据类型，键名的等价性判断是通过调用`Object.is`方法来实现的。
 ```js
 const map = new Map()
-const key1 = {}
-const key2 = {}
+const key1 = {
+  name: 'key1'
+}
+const key2 = {
+  name: 'key2'
+}
 map.set(5, 5)
 map.set('5', '5')
 map.set(key1, key2)
 console.log(map.get(5))     // 5
 console.log(map.get('5'))   // '5'
-console.log(map.get(key1))  // {}
+console.log(map.get(key1))  // {name:'key2'}
 ```
 
 #### Map集合支持的方法
-与`Set`集合类似，`Map`集合也支持一下集中方法：
-* `has`：检出指定的键名是否在`Map`集合中存在。
+与`Set`集合类似，`Map`集合也支持以下几种方法：
+* `has`：判断指定的键名是否在`Map`集合中存在。
 * `delete`：在`Map`集合中移除指定键名及其对应的值。
 * `clear`：移除`Map`集合中所有的键值对。
 ```js
@@ -1655,7 +1655,7 @@ console.log(map.get('age'))   // 23
 ```
 
 #### Map集合的forEach()方法
-`Map`集合中的`forEach()`方法的回调参数和数字类似，每一个参数的解释如下：
+`Map`集合中的`forEach()`方法的回调参数和数组类似，每一个参数的解释如下：
 * 第一个参数是键名
 * 第二个参数是值
 * 第三个参数是`Map`集合本身
@@ -1691,8 +1691,7 @@ console.log(weakMap.has(key)) // false
 ```
 `Map`集合和`Weak Map`集合有许多共同的特性，但它们之间还是有一定的差别的：
 * `Weak Map`集合的键名必须为对象，添加非对象会报错。
-* `Weak Map`集合不可迭代。
-* `Weak Map`集合不支持`forEach`方法。
+* `Weak Map`集合不可迭代，因此不支持`forEach()`方法。
 * `Weak Map`集合不支持`clear`方法。
 * `Weak Map`集合不支持`size`属性。
 
@@ -1772,7 +1771,7 @@ console.log(it.next())  // { done: true, value: undefined }
 ```
 
 ::: warning 限制
-`yield`关键字只能在生成器内部使用，在其他地方使用会导致抛出错误，及时是在生成器内部的函数中使用也是如此。
+`yield`关键字只能在生成器内部使用，在其他地方使用会导致抛出错误，即使是在生成器内部的函数中使用也是如此。
 :::
 ```js
 function * createIterator (items) {
@@ -1784,8 +1783,8 @@ function * createIterator (items) {
 ```
 
 ### 可迭代对象和for-of循环
-问：可迭代对象的特点。<br/>
-答：可迭代对象具有`Symbol.iterator`属性，是一种与迭代器密切相关的对象。`Symbol.iterator`通过指定的函数可以返回一个作用于附属对象的迭代器。在`ES6`中，所有的集合对象(数组、Set集合以及Map集合)和字符串都是可迭代对象，这些对象中都有默认的迭代器。由于生成器默认会为`Symbol.iterator`属性赋值，因此所有通过生成器创建的迭代器都是可迭代对象。<br/>
+问：可迭代对象有什么特点？<br/>
+答：可迭代对象具有`Symbol.iterator`属性，是一种与迭代器密切相关的对象。`Symbol.iterator`通过指定的函数可以返回一个作用于附属对象的迭代器。在`ES6`中，所有的集合对象(数组、`Set`集合以及`Map`集合)和字符串都是可迭代对象，这些对象中都有默认的迭代器。由于生成器默认会为`Symbol.iterator`属性赋值，因此所有通过生成器创建的迭代器都是可迭代对象。<br/>
 
 `ES6`新引入了`for-of`循环每执行一次都会调用可迭代对象的`next`方法，并将迭代器返回的结果对象的`value`属性存储在一个变量中，循环将持续执行这一过程直到返回对象的`done`属性的值为`true`。
 ```js
@@ -1799,9 +1798,8 @@ for (let num of value) {
 ```
 
 #### 访问默认的迭代器
-::: tip
 可以通过`Symbol.iterator`来访问对象的默认迭代器
-:::
+
 ```js
 const values = [1, 2, 3]
 const it = values[Symbol.iterator]()
@@ -1811,22 +1809,21 @@ console.log(it.next())  // {done:false, value:3}
 console.log(it.next())  // {done:true, value:undefined}
 ```
 
-由于具有`Symbol.iterator`属性的对象都有默认的迭代器对象，因此可以用它来检测对象是否具有可迭代对象：
+由于具有`Symbol.iterator`属性的对象都有默认的迭代器对象，因此可以用它来检测对象是否为可迭代对象：
 ```js
 function isIterator (object) {
   return typeof object[Symbol.iterator] === 'function'
 }
 
 console.log(isIterator([1, 2, 3]))  // true
-console.log(isIterator('hello'))    // true
+console.log(isIterator('hello'))    // true，字符串也可以迭代，原理等同于数组
 console.log(isIterator(new Set()))  // true
 console.log(isIterator(new Map))    // true
 ```
 
 #### 创建可迭代对象
-::: tip
 默认情况下，我们自己定义的对象都是不可迭代对象，但如果给`Symbol.iterator`属性添加一个生成器，则可以将其变为可迭代对象。
-:::
+
 ```js
 let collection = {
   items: [1, 2, 3],
@@ -1931,7 +1928,7 @@ for (let item of map.keys()) {
 }
 ```
 
-`不同集合类型的默认迭代器`：每一个集合类型都有一个默认的迭代器，在`for-of`循环中，如果没有显示的指定则使用默认的迭代器：
+**不同集合类型的默认迭代器**：每一个集合类型都有一个默认的迭代器，在`for-of`循环中，如果没有显示的指定则使用默认的迭代器：
 * 数组和`Set`集合：默认迭代器为`values`。
 * `Map`集合：默认为`entries`。
 
@@ -1959,7 +1956,7 @@ for (let item of map) {
 }
 ```
 
-`解构和for-of循环`：如果要在`for-of`循环中使用解构语法，则可以简化编码过程：
+**解构和for-of循环**：如果要在`for-of`循环中使用解构语法，则可以简化编码过程：
 ```js
 const map = new Map([['name', 'AAA'], ['age', 23], ['address', '广东']])
 for (let [key, value] of map.entries()) {
@@ -2018,9 +2015,8 @@ console.log(array) // ['red', 'green', 'blue', 'yellow', 'white', 'black']
 ### 高级迭代器功能
 
 #### 给迭代器传递参数
-::: tip
 如果给迭代器`next()`方法传递参数，则这个参数的值就会替代生成器内部上一条`yield`语句的返回值。
-:::
+
 ```js
 function * createIterator () {
   let first = yield 1
@@ -2037,9 +2033,8 @@ console.log(it.next())   // {done: true, value: undefined}
 
 
 #### 在迭代器中抛出错误
-::: tip
 除了给迭代器传递数据外，还可以给他传递错误条件，让其恢复执行时抛出一个错误。
-:::
+
 ```js
 function * createIterator () {
   let first = yield 1
@@ -2072,9 +2067,8 @@ console.log(it.next())                    // {done: true, value: undefined}
 ```
 
 #### 生成器返回语句
-::: tip
 由于生成器也是函数，因此可以通过`return`语句提前退出函数执行，对于最后一次`next()`方法调用，可以主动为其指定一个返回值。
-:::
+
 ```js
 function * createIterator () {
   yield 1
@@ -2116,9 +2110,8 @@ console.log([...obj]) // [1, 2, 3]
 ```
 
 #### 委托生成器
-::: tip
 我们可以将两个迭代器合二为一，这样就可以创建一个生成器，再给`yield`语句添加一个星号，以达到将生成数据的过程委托给其他迭代器。
-:::
+
 ```js
 function * createColorIterator () {
   yield ['red', 'green', 'blue']
