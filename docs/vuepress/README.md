@@ -36,7 +36,7 @@ $ npm install vuepress webpack-dev-middleware --save-dev
 :::
 
 ### 脚本命令
-我们需要至少两个脚本命令，分别用于本地开发和打包上线，脚本命令需要配置在`docs/package.json`文件中，它的配置如下
+我们需要至少两个脚本命令，分别用于本地开发和打包上线，脚本命令需要配置在根目录`package.json`文件中，它的配置如下
 ``` json
 {
   "scripts": {

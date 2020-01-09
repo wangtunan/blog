@@ -16,6 +16,9 @@ git init
 git add -A
 git commit -m 'depoly脚本更新'
 
+git config user.name wangtunan
+git config user.email why583440138@gmail.com
+
 # 如果发布到 https://<USERNAME>.github.io
 # git push -f git@github.com:<USERNAME>/<USERNAME>.github.io.git master
 

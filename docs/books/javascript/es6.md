@@ -21,9 +21,7 @@ JavaScript核心的语言特性是在标准`ECMA-262`中被定义，该标准中
 * `ECMAScript6`：在`ECMAScript5`发布后，`TC-39`委员会于2013年冻结了`ECMAScript6`的草案，不再添加新的功能。2013年`ECMAScript6`草案发布，在进过12个月各方讨论和反馈后。2015年`ECMAScript6`正式发布，并命名为`ECMAScript 2015`。
 
 ## 块级作用域绑定
-::: tip 引入的目的
 过去`JavaScript`中的变量声明机制一直令我们感到困惑，大多数类C语言在声明变量的同时也会创建变量，而在以前的`JavaScript`中，何时创建变量要看如何声明的变量，`ES6`引入块级作用域可以让我们更好的控制作用域。
-:::
 
 ### var声明和变量提升机制
 
@@ -2141,16 +2139,15 @@ Person.prototype.sayName = function () {
   console.log(this.name)
 }
 let person = new Person('AAA')
-person.sayName() // AAA
+person.sayName()                      // AAA
 console.log(person instanceof Person) // true
 console.log(person instanceof Object) // true
 ```
 通过以上一个在`ES5`中近似类的结构的特性，许多`JavaScript`类库都基于这个模式进行开发，而且`ES6`中的类也借鉴了类似的方法。
 
 ### 类的声明
-::: tip
-要声明一个类，需要使用`class`关键来声明，类声明仅仅只是对已有自定义类型声明的语法糖而已。
-:::
+要声明一个类，需要使用`class`关键来声明，**注意**：类声明仅仅只是对已有自定义类型声明的语法糖而已。
+
 ```js
 class Person {
   // 相当于Person构造函数
@@ -2163,7 +2160,7 @@ class Person {
   }
 }
 const person = new Person('AAA')
-person.sayName() // AAA
+person.sayName()                      // AAA
 console.log(person instanceof Person) // true
 console.log(person instanceof Object) // true
 ```
@@ -2174,10 +2171,11 @@ console.log(person instanceof Object) // true
 #### 类和自定义类型的差异：
 * 函数声明可以被提升，而类声明与`let`声明类似，不能被提升；真正执行声明语句之前，它们一直存在暂时性死区。
 * 类声明中的所有代码将自动运行在严格模式下，而且无法强行让代码脱离严格模式执行。
-* 在自定义方法中，需要通过`Object.defineProperty()`方法手工指定某个方法不可枚举；而在类中，所有方法都是不可枚举的。
+* 在自定义方法中，需要通过`Object.defineProperty()`方法手动指定某个方法不可枚举；而在类中，所有方法都是不可枚举的。
 * 每一个类都有一个名叫`[[Construct]]`的内部方法，通过关键字`new`调用那些不含`[[Construct]]`的方法会导致程序抛出错误。
 * 使用除关键字`new`以外的方式调用类的构造函数会导致程序抛出错误。
-* 在类中修改类名会导致程序报错。
+* 在类中修改类名会导致程序报错。<br/>
+
 在了解了类和自定义类型的差异以后，我们可以使用除了类之外的语法来编写等价的代码：
 ```js
 // ES5等价类
@@ -2204,14 +2202,13 @@ let Person = (function() {
 }())
 
 const person = new Person('AAA')
-person.sayName() // AAA
+person.sayName()                      // AAA
 console.log(person instanceof Person) // true
 ```
 
 ### 类的表达式
-::: tip
 类和函数都有两种存在形式：声明形式和表达式形式
-:::
+
 ```js
 // 类的表达式形式
 let Person = class {
@@ -2235,7 +2232,7 @@ let PersonClass = class Person{
   }
 }
 const person = new PersonClass('AAA')
-person.sayName() // AAA
+person.sayName()                // AAA
 console.log(typeof PersonClass) // function
 console.log(typeof Person)      // undefined
 ```
@@ -2243,7 +2240,7 @@ console.log(typeof Person)      // undefined
 #### 类和单例
 类表达式还有一种用法：通过立即调用类构造函数可以创建单例，用`new`调用类表达式，紧接着通过一对小括号调用这个表达式：
 ```js
-let Person = new class {
+let person = new class {
   constructor (name) {
     this.name = name
   }
@@ -2251,13 +2248,12 @@ let Person = new class {
     console.log(this.name)
   }
 }('AAA')
-Person.sayName() // AAA
+person.sayName() // AAA
 ```
 
 ### 一等公民的类
-::: tip
-一等公民是指一个可以传入函数，可以从函数中返回，并且可以赋值给变量的至。
-:::
+一等公民是指一个可以传入函数，也可以从函数中返回，并且可以赋值给变量的值。
+
 ```js
 function createObject (classDef) {
   return new classDef()
@@ -2272,9 +2268,8 @@ obj.sayHi() // Hello!
 
 
 ### 访问器属性
-::: tip
 除了可以在构造函数中创建自己的属性，还可以在类的原型上直接定义访问器属性。
-:::
+
 ```js
 class Person {
   constructor (message) {
@@ -2308,9 +2303,8 @@ Object.defineProperty(Person.prototype, 'message', {
 我们经过对比可以发现，比起`ES5`等价代码而言，使用`ES6`类的语法要简洁得多。
 
 ### 可计算成员名称
-::: tip
 类和对象字面量还有很多相似之处，类方法和访问器属性也支持使用可计算名称。
-:::
+
 ```js
 const methodName= 'sayName'
 const propertyName = 'newName'
@@ -2335,9 +2329,7 @@ console.log(person.newName) // BBB
 ```
 
 ### 生成器方法
-::: tip
 在类中，同样可以像对象字面量一样，在方法名前面加一个星号(*)的方式来定义生成器。
-:::
 ```js
 class MyClass {
   * createIterator () {
@@ -2353,7 +2345,7 @@ console.log(it.next().value)  // 2
 console.log(it.next().value)  // 3
 console.log(it.next().value)  // undefined
 ```
-尽管生成器方法很使用，但如果类仅仅只是用来表示值的集合，那么为它定义一个默认的迭代器会更加有用。
+尽管生成器方法很有用，但如果类仅仅只是用来表示值的集合，那么为它定义一个默认的迭代器会更加有用。
 ```js
 class Collection {
   constructor () {
@@ -2386,13 +2378,12 @@ PersonType.create = function (name) {
 PersonType.prototype.sayName = function () {
   console.log(this.name)
 }
-const person = PersonType.create('AAa')
+const person = PersonType.create('AAA')
 person.sayName() // AAA
 ```
-在`ES6`中，类语法简化了创建静态成员的过程，在方法或者访问器属性名前面使用正式的静态注释即可。
-::: tip
-静态成员只能在类中访问，不能在实例中访问
-:::
+在`ES6`中，类语法简化了创建静态成员的过程，在方法或者访问器属性名前面使用正式的静态注释`static`即可。<br/>
+**注意**：静态成员只能在类中访问，不能在实例中访问
+
 ```js
 class Person {
   constructor (name) {
@@ -2472,9 +2463,8 @@ class Square extends Rectangle {
 ```
 
 #### 类方法遮蔽
-::: tip
-派生类中的方法总是会覆盖基类中的同名方法。
-:::
+**注意**：派生类中的方法总是会覆盖基类中的同名方法。
+
 ```js
 class Rectangle {
   constructor (width, height) {
@@ -2497,7 +2487,7 @@ class Square extends Rectangle {
 const square = new Square(3)
 console.log(square.getArea()) // 9
 ```
-代码分析：由于`Square`类以及定义了`getArea()`方法，便不能在`Square`的实例中调用`Rectangle.prototype.getArea()`方法。如果我们想调用基类中的同名方法，可以使用`super.getArea()`。
+代码分析：由于`Square`类已经定义了`getArea()`方法，便不能在`Square`的实例中调用`Rectangle.prototype.getArea()`方法。如果我们想调用基类中的同名方法，可以使用`super.getArea()`。
 ```js
 class Rectangle {
   constructor (width, height) {
@@ -2521,9 +2511,8 @@ const square = new Square(3)
 console.log(square.getArea()) // 9
 ```
 #### 静态成员继承
-::: tip
 如果基类中有静态成员，那么这些静态成员在派生类中也可以使用。
-:::
+
 ```js
 class Rectangle {
   constructor (width, height) {
@@ -2547,13 +2536,12 @@ const square2 = Square.create(4, 4)
 console.log(square1.getArea())             // 9
 console.log(square2.getArea())             // 16
 console.log(square1 instanceof Square)     // true
-console.log(square2 instanceof Rectangle)  // true，因为square2是Rectangle的实例
+console.log(square2 instanceof Rectangle)  // true，因为square2是Rectangle的实例，而不是Square的实例
 ```
 
 #### 派生自表达式的类
-::: tip
 `ES6`最强大的一面或许是表达式导出类的功能了，只要表达式可以被解析成为一个函数并且具有`[[Construct]]`属性和原型，那么就可以用`extends`进行派生。
-:::
+
 ```js
 function Rectangle (width, height) {
   this.width = width
@@ -2574,9 +2562,8 @@ console.log(square instanceof Rectangle)  // true
 代码分析：`Rectangle`是一个典型的`ES5`风格的构造函数，`Square`是一个类，由于`Rectangle`具有`[[Constructor]]`属性和原型，因此`Square`类可以直接继承它。
 
 #### extends动态继承
-::: tip
 `extends`强大的功能使得类可以继承自任意类型的表达式，从而创造更多的可能性，例如动态确定类的继承目标。
-:::
+
 ```js
 function Rectangle (width, height) {
   this.width = width
@@ -2625,10 +2612,10 @@ const square = new Square(3)
 console.log(square.getArea())     // 9
 console.log(square.normalize())   // {width:3, height: 3}
 ```
-代码分析：同`getBaseClass()`方法直接返回单一对象不同的是，我们定义了一个`mixin()`方法，作用是把多个对象的属性合并在一起并返回，然后使用`extends`来继承这个对象，从而达到继承`NormalizeMixin`对象的`normalize()`方法和`AreaMixin`对象的`getArea()`方法。
+代码分析：与`getBaseClass()`方法直接返回单一对象不同的是，我们定义了一个`mixin()`方法，作用是把多个对象的属性合并在一起并返回，然后使用`extends`来继承这个对象，从而达到继承`NormalizeMixin`对象的`normalize()`方法和`AreaMixin`对象的`getArea()`方法。
 
 #### 内建对象的继承
-自`ES5`及其早期版本中，如果我们想要通过继承的方式来创建属于我们自己的特殊数组几乎是不可能的，例如：
+在`ES5`及其早期版本中，如果我们想要通过继承的方式来创建属于我们自己的特殊数组几乎是不可能的，例如：
 ```js
 // 内建数组的行为
 const colors = []
@@ -2737,6 +2724,7 @@ console.log(rect instanceof Shape) // true
 ```
 
 ## 改进的数组功能
+此章节关于定型数组的部分暂未整理。
 
 ### 创建数组
 
@@ -2817,7 +2805,7 @@ function doSomething () {
 }
 doSomething(1, 2, 3, 4) // 输出[1, 2, 3, 4]
 ```
-尽管我们提供了`ES5`两种不同的方案来将类数组转换为数组，但`ES6`还是给我们提供了一种语义清晰、语法简介的新方法`Array.from()`：
+尽管我们提供了`ES5`两种不同的方案来将类数组转换为数组，但`ES6`还是给我们提供了一种语义清晰、语法简洁的新方法`Array.from()`
 ::: tip
 `Array.from()`方法接受可迭代对象或者类数组对象作为第一个参数。
 :::
@@ -2830,9 +2818,8 @@ doSomething(1, 2, 3, 4) // 输出[1, 2, 3, 4]
 ```
 
 ##### Array.from映射转换
-::: tip
-可以提供一个映射函数作为`Array.from()`方法的第二个参数，这个函数用来将类数组对象的每一个值转换成其他形式，最后按这些结果存储在结果数组相应的索引中。
-:::
+可以提供一个映射函数作为`Array.from()`方法的第二个参数，这个函数用来将类数组对象的每一个值转换成其他形式，最后将这些结果按顺序存储在结果数组相应的索引中。
+
 ```js
 function translate() {
   return Array.from(arguments, (value) => value + 1)
@@ -2856,9 +2843,8 @@ console.log(numbers) // [2, 3, 4]
 ```
 
 ##### Array.from转换可迭代对象
-::: tip
 `Array.from()`可以将所有含有`Symbol.iterator`属性的对象转换为数组。
-:::
+
 ```js
 let iteratorObj = {
   * [Symbol.iterator]() {
@@ -2870,9 +2856,8 @@ let iteratorObj = {
 let numbers = Array.from(iteratorObj)
 console.log(numbers) // [1, 2, 3]
 ```
-::: tip
-如果一个对象即是类数组对象又是可迭代对象，那么`Array.from`会优先根据迭代器来决定转换哪个值。
-:::
+**注意**：如果一个对象即是类数组对象又是可迭代对象，那么`Array.from`会优先根据迭代器来决定转换哪个值。
+
 
 ### ES6数组新增方法
 `ES6`为数组新增了几个方法：
@@ -2892,9 +2877,8 @@ console.log(numbers.findIndex(item => item === 35)) // 2
 ```
 
 #### fill()方法
-::: tip
 `find()`方法可以用指定的值填充一个至多个数组元素，当传入一个值时，`fill()`方法会用这个值重写数组中的所有值。
-:::
+
 ```js
 let numbers = [1, 2, 3, 4]
 numbers.fill(1)
@@ -2910,9 +2894,8 @@ console.log(numbers)  // [1, 0, 0, 1]
 ```
 
 #### copyWithin()方法
-::: tip
 `copyWithin()`方法需要传入两个参数：一个是方法开始填充值的索引位置，另一个是开始复制值的索引位置。
-:::
+
 ```js
 let numbers = [1, 2, 3, 4]
 numbers.copyWithin(2, 0)
@@ -2966,7 +2949,7 @@ readFile('example.pdf', function(err, contents) {
   })
 })
 ```
-我们可以发现，通过回调嵌套的形似，可以帮助我们解决许多问题，然而随着模块越来越负责，回调模式需要嵌套的函数也越来越多，就形成了回调地狱，如下：
+我们可以发现，通过回调嵌套的形式，可以帮助我们解决许多问题，然而随着模块越来越复杂，回调模式需要嵌套的函数也越来越多，就形成了回调地狱，如下：
 ```js
 method1(function(err, result) {
   if (err) {
@@ -3076,7 +3059,7 @@ promise.catch((err) => {
 })
 ```
 
-##### 非Promise的Thenable对象
+#### 非Promise的Thenable对象
 `Promise.resolve()`方法和`Promise.reject()`方法都可以接受非`Promise`的`thenable`对象作为参数。如果传入一个非`Promise`的`thenable`对象，则这些方法会创建一个新的`Promise`，并在`then()`函数中被调用。<br/>
 拥有`then()`方法并且接受`resolve`和`reject`这两个参数的普通对象就是非`Promise`的`Thenable`对象。
 ```js
@@ -3091,9 +3074,8 @@ promise1.then((res) => {
 })
 ```
 #### 执行器错误
-::: tip
 如果执行器内部抛出一个错误，则`Promise`的拒绝处理程序就会被调用。
-:::
+
 ```js
 let promise = new Promise((resolve, reject) => {
   throw new Error('promise err')
@@ -3117,9 +3099,8 @@ promise.catch((err) => {
 ```
 
 ### 串联Promise
-::: tip
 每当我们调用`then()`或者`catch()`方法时实际上创建并返回了另一个`Promise`，只有当第一个`Promise`完成或被拒绝后，第二个才会被解决。这给了我们可以将`Promise`串联起来实现更复杂的异步特性的方法。
-:::
+
 ```js
 let p1 = new Promise((resolve, reject) => {
   resolve(123)
@@ -3172,9 +3153,8 @@ p1.then(res => {
 ```
 
 #### Promise链返回值
-::: tip
 `Promise`链的一个重要特性就是可以给下游的`Promise`传递值。
-:::
+
 ```js
 let p1 = new Promise((resolve, reject) => {
   resolve(1)
@@ -3265,11 +3245,11 @@ pRace.then(res => {
 ```
 
 ### 自Promise继承
-::: tip
 `Promise`与其他内建类型一样，也是可以当做基类派生其他类的。
-:::
+
 ```js
 class MyPromise extends Promise {
+  // 派生Promise，并添加success方法和failure方法
   success(resolve, reject) {
     return this.then(resolve, reject)
   }
@@ -3294,7 +3274,7 @@ p2.failure(error => {
 ## 代理(Proxy)和反射(Reflect)API
 
 ### 数组问题
-在`ES6`出现之前，我们不能通过自己定义的对象模仿`JavaScript`数组对象的行为方式：当给数组的特定元素赋值时，会影响到数组的`length`属性；也可以通过`length`属性修改数组元素。
+在`ES6`出现之前，我们不能通过自己定义的对象模仿`JavaScript`数组对象的行为方式：当给数组的特定元素赋值时，会影响到数组的`length`属性，也可以通过`length`属性修改数组元素。
 ```js
 let colors = ['red', 'blue', 'green']
 colors[3] = 'black'
@@ -3313,7 +3293,7 @@ console.log(colors)        // ['red', 'blue']
 | get  | 读取一个属性值 | Reflect.get |
 | set  | 写入一个属性   | Reflect.set |
 | has  | in操作符      | Reflect.has |
-| appply  | 调用一个函数  | Reflect.ownKeys() |
+| apply  | 调用一个函数  | Reflect.apply() |
 | deleteProperty  | delete操作符  | Reflect.deleteProperty() |
 | construct  | 用new调用一个函数  | Reflect.construct() |
 | getPrototypeOf  | Object.getPrototypeOf() | Reflect.getPrototypeOf() |
@@ -3326,10 +3306,9 @@ console.log(colors)        // ['red', 'blue']
 
 
 ### 创建一个简单的代理
-::: tip
 用`Proxy`构造函数创建代理需要传入两个参数：目标`target`和处理程序`handler`。
-:::
-处理程序`handler`是定义了一个或者多个陷阱的对象，在代理中，除了专门为操作定义的陷阱外，其余操作均使用默认特性，即意味着：不适用任何陷阱的处理程序等价于简单的转发代理。
+
+处理程序`handler`是定义了一个或者多个陷阱的对象，在代理中，除了专门为操作定义的陷阱外，其余操作均使用默认特性，即意味着：不使用任何陷阱的处理程序等价于简单的转发代理。
 ```js
 let target = {}
 let proxy = new Proxy(target, {})
@@ -3342,13 +3321,13 @@ console.log(target.name)  // BBB
 ```
 
 ### 使用set陷阱
-::: tip
+
 `set`陷阱接受4个参数：
 * `trapTarget`：用于接受属性(代理的目标)的对象。
 * `key`：要写入的属性键(字符串或者`Symbol`类型)。
 * `value`：被写入属性的值。
 * `receiver`：操作发生的对象。
-:::
+
 特点：`Reflect.set()`是`set`陷阱对应的反射方法和默认特性，它和`set`代理陷阱一样也接受相同的四个参数，以方便在陷阱中使用。如果属性已设置陷阱应该返回`true`，否则返回`false`。
 
 案例：如果我们想创建一个属性值是数字的对象，对象中每新增一个属性都要加以验证，如果不是数字必须抛出错误。
@@ -3377,12 +3356,12 @@ proxy.anotherName = 'BBB' // 属性值非数字，抛出错误
 ```
 
 ### 使用get陷阱
-::: tip
+
 `get`陷阱接受三个参数：
 * `trapTarget`：被读取属性的源对象(代理的目标)。
 * `key`：要读取的属性键(字符串或者`Symbol`)。
 * `receiver`：操作发生的对象。
-:::
+
 `JavaScript`有一个我们很常见的特性，当我们试图访问某个对象不存在的属性的时候，不会报错而是返回`undefined`。如果这不是你想要的结果，那么可以通过`get`陷阱来验证对象结构。
 ```js
 let proxy = new Proxy({}, {
@@ -3399,12 +3378,12 @@ console.log(proxy.nme)   // 属性值不存在，抛出错误
 ```
 
 ### 使用has陷阱
-::: tip
+
 `has`陷阱接受两个参数：
 * `trapTarget`：读取属性的对象(代理的目标)
 * `key`：要检查的属性键(字符串或者`Symbol`)
-:::
-`in`操作符特点：`in`操作符可以用来检测对象中是否含有某个属性，如果自有属性或原型属性匹配这个名称或者`Symbol`就返回`true`。
+
+`in`操作符特点：`in`操作符可以用来检测对象中是否含有某个属性，如果自有属性或原型属性匹配这个名称或者`Symbol`就返回`true`，否则返回`false`。
 ```js
 let target = {
   value: 123
@@ -3434,11 +3413,10 @@ console.log('toString' in proxy)  // true
 ```
 
 ### 使用deleteProperty陷阱
-::: tip
 `deleteProperty`陷阱接受两个参数：
 * `trapTarget`：要删除属性的对象(代理的目标)。
 * `key`：要删除的属性键(字符串或者`Symbol`)。
-:::
+
 我们都知道，`delete`操作符可以删除对象中的某个属性，删除成功则返回`true`，删除失败则返回`false`。如果有一个对象属性是不可以被删除的，我们可以通过`deleteProperty`陷阱方法来处理：
 ```js
 let target = {
@@ -3464,13 +3442,13 @@ console.log('name' in proxy)    // false
 ```
 
 ### 使用原型代理陷阱
-::: tip
+
 `setPrototypeOf`陷阱接受两个参数：
 * `trapTarget`：接受原型设置的对象(代理的目标)。
 * `proto`：作为原型使用的对象。
 `getPrototypeOf`陷阱接受一个参数：
 * `trapTarget`：接受获取原型的对象(代理的目标)。
-:::
+
 我们在之前已经了解过，`ES6`新增了`Object.setPrototypeOf()`方法，它是`ES5`中`Object.getPrototypeOf()`方法的补充。当我们想要在一个对象被设置原型或者读取原型的时候做一点什么，可以使用`setPrototypeOf()`陷阱和`getPrototypeOf()`陷阱。
 ```js
 let target = {}
@@ -3531,10 +3509,10 @@ Reflect.getPrototypeOf(1)                 // 抛出错误
 
 ### 使用对象可扩展陷阱
 在`ES6`之前对象已经有两个方法来修正对象的可扩展性：`Object.isExtensible()`和`Object.preventExtensions()`，在`ES6`中可以通过代理中的`isExtensible()`和`preventExtensions()`陷阱拦截这两个方法并调用底层对象。
-::: tip
+
 * `isExtensible()`陷阱返回一个布尔值，表示对象是否可扩展，接受唯一参数`trapTarget`
 * `preventExtensions()`陷阱返回一个布尔值，表示操作是否成功，接受唯一参数`trapTarget`
-:::
+
 以下示例是`isExtensible()`和`preventExtensions()`的默认行为：
 ```js
 let target = {}
@@ -3575,18 +3553,18 @@ console.log(Object.isExtensible(proxy))   // true
 * `Object.isExtensible()`当传入一个非对象值时，返回`false`，而`Reflect.isExtensible()`则会抛出一个错误。
 
 ### 使用属性描述符陷阱
-::: tip
+
 `Object.defineProperty`陷阱接受三个参数：
 * `trapTarget`：要定义属性的对象(代理的目标)
 * `key`：属性的键。
 * `descriptor`：属性的描述符对象。
 <br/>
 
-`Object.getOwoPropertyDescriptor`陷阱接受两个参数：
+`Object.getOwnPropertyDescriptor`陷阱接受两个参数：
 * `trapTarget`：要获取属性的对象(代理的目标)。
 * `key`：属性的键。
-:::
-在代理中可以使用`defineProperty`和`getOwoPropertyDescriptor`陷阱函数分别拦截`Object.defineProperty()`和`Object.getOwoPropertyDescriptor()`方法的调用。以下示例展示了`defineProperty`和`getOwoPropertyDescriptor`陷阱的默认行为。
+
+在代理中可以使用`defineProperty`和`getOwnPropertyDescriptor`陷阱函数分别拦截`Object.defineProperty()`和`Object.getOwnPropertyDescriptor()`方法的调用。以下示例展示了`defineProperty`和`getOwnPropertyDescriptor`陷阱的默认行为。
 ```js
 let proxy = new Proxy({}, {
   defineProperty(trapTarget, key, descriptor) {
@@ -3605,10 +3583,8 @@ console.log(descriptor.value)   // AAA
 ```
 
 #### Object.defineProperty()添加限制
+`defineProperty`陷阱返回布尔值来表示操作是否成功，返回`true`时，表示`Object.defineProperty()`执行成功；返回`false`时，`Object.defineProperty()`抛出错误。<br/>
 假设我们现在有这样一个需求：一个对象的属性键不能设置为`Symbol`属性的，我们可以使用`defineProperty`陷阱来实现：
-::: tip
-`defineProperty`陷阱返回布尔值来表示操作是否成功，返回`true`时，表示`Object.defineProperty()`执行成功；返回`false`时，`Object.defineProperty()`抛出错误。
-:::
 ```js
 let proxy = new Proxy({}, {
   defineProperty(trapTarget, key, descriptor) {
@@ -3650,9 +3626,9 @@ const descriptor = Object.getOwnPropertyDescriptor(proxy, 'name')
 console.log(descriptor.value) // AAA
 console.log(descriptor.name)  // undeinfed
 ```
-::: tip
-`getOwnPropertyDescriptor()`陷阱的返回值必须是一个`null`、`undefined`或者一个对象。如果返回的是一个对象，则对象的属性只能是`enumerable`、`configurable`、`value`、`writable`、`get`和`set`，使用不被允许的属性会抛出一个错误。
-:::
+
+**注意**：`getOwnPropertyDescriptor()`陷阱的返回值必须是一个`null`、`undefined`或者一个对象。如果返回的是一个对象，则对象的属性只能是`enumerable`、`configurable`、`value`、`writable`、`get`和`set`，使用不被允许的属性会抛出一个错误。
+
 ```js
 let proxy = new Proxy({}, {
   getOwnPropertyDescriptor(trapTarget, key) {
@@ -3688,13 +3664,12 @@ let descriptor2 = Reflect.getOwnPropertyDescriptor(2, 'name')
 
 
 ### 使用ownKeys陷阱
-::: tip
 `ownKeys`代理陷阱可以拦截内部方法`[[OwnPropertyKeys]]`，我们通过返回一个数组的值来覆写其行为。这个数组被用于`Object.keys()`、`Object.getOwnPropertyNames()`、`Object.getOwnPropertySymbols()`和`Object.assign()`四个方法，其中`Object.assign()`方法用数组来确定需要复制的属性。`ownKeys`陷阱唯一接受的参数是操作的目标，返回值是一个数组或者类数组对象，否则就会抛出错误。
-:::
+
 
 几种方法的区别：
-* `Reflect.ownKeys()`：返回的数组中包含所有对象的自由属性的键名，包括字符串类型和`Symbol`类型。
-* `Object.getOwnPropertyNames()`和`Object.keys()`：返回的数组中排出了`Symbol`类型。
+* `Reflect.ownKeys()`：返回的数组中包含所有对象的自有属性的键名，包括字符串类型和`Symbol`类型。
+* `Object.getOwnPropertyNames()`和`Object.keys()`：返回的数组中排除了`Symbol`类型。
 * `Object.getOwnPropertySymbols()`：返回的数组中排出了字符串类型。
 * `Object.assign()`：字符串和`Symbol`类型都支持。
 
@@ -3703,7 +3678,7 @@ let descriptor2 = Reflect.getOwnPropertyDescriptor(2, 'name')
 let proxy = new Proxy({}, {
   ownKeys (trapTarget) {
     return Reflect.ownKeys(trapTarget).filter(key => {
-      // 排出属性开头带有_的键
+      // 排除属性开头带有_的键
       return typeof key !== 'string' || key[0] !== '_'
     })
   }
@@ -3722,7 +3697,7 @@ console.log(symbols)  // ['Symbol(name)']
 
 
 ### 使用apply和construct陷阱
-::: tip
+
 `apply`陷阱接受以下几个参数：
 * `trapTarget`：被执行的函数(代理的目标)。
 * `thisArg`：函数被调用时内部`this`的值。
@@ -3731,7 +3706,7 @@ console.log(symbols)  // ['Symbol(name)']
 `construct`陷阱函数接受以下几个参数：
 * `trapTarget`：被执行的函数(代理的目标)。
 * `argumentsList`：传递给函数的参数数组。
-:::
+
 `apply`和`construct`陷阱函数是所有代理陷阱中，代理目标是一个函数的仅有的两个陷阱函数。我们在之前已经了解过，函数有两个内部方法`[[Call]]`和`[[Construct]]`，当使用`new`调用时，执行`[[Construct]]`方法，不用`new`调用时，执行`[[Call]]`方法。
 <br/>
 以下实例为`apply`陷阱和`construct`陷阱的默认行为：
@@ -3812,10 +3787,9 @@ console.log(instance2.values) // [1, 2, 3, 4, 5]
 ```
 
 #### 覆写抽象基类构造函数
-::: tip
 `construct`陷阱还接受第三个可选参数函数，其作用是被用作构造函数内部的`new.target`的值。
-:::
-假设我们现在有这样一个场景：有一个抽象基类，其必须被继承，但我们依然想这个做，这个时候可以使用`construct`陷阱还是来实现：
+
+假设我们现在有这样一个场景：有一个抽象基类，其必须被继承，但我们依然想不这么做，这个时候可以使用`construct`陷阱还是来实现：
 ```js
 class AbstractNumbers {
   constructor (...values) {
@@ -3885,9 +3859,8 @@ console.log(colors)         // ['red', 'green']
 * 减少`length`的值可以删除元素
 
 #### 检测数组索引
-::: tip
 判断一个属性是否为数组索引，需要满足规范条件：当且仅当`ToString(ToUnit32(P))`等于`P`，并且`ToUnit32(P)`不等于`2³²-1`。
-:::
+
 ```js
 function toUnit32(value) {
   return Math.floor(Math.abs(Number(value))) % Math.pow(2, 32)
@@ -4147,9 +4120,8 @@ let area2 = shape.length * shape.height // 抛出错误
 * 在模块的顶部，`this`的值是`undefined`。
 
 ### 导出的基本语法
-::: tip 
 可以用`export`关键字将一部分已发布的代码暴露给其他模块。
-:::
+
 ```js
 // example.js
 export let color = 'red'
@@ -4170,9 +4142,7 @@ function privateFunc (num1, num2) {
 ```
 
 ### 导入的基本语法
-::: tip
-从模块中导入的功能可以通过`import`关键字在另一个模块中访问，`import`语句的两个部分分别是：要导入的标识符和标识符从哪个模块导入。
-:::
+从模块中导入的功能可以通过`import`关键字在另一个模块中访问，`import`语句的两个部分分别是：要导入的标识符和标识符从哪个模块导入。<br/>
 以下示例是导入语句的基本形式：
 ```js
 import { identifier1, indentifier2 } from './example.js'
@@ -4235,9 +4205,8 @@ sum(1, 2)
 ```
 
 ### 模块的默认值
-::: tip
 模块的默认值指的是通过`default`关键字指定的单个变量、函数或者类，只能为每个模块设置一个默认的导出值，导出时多次使用`default`关键字会报错。
-:::
+
 ```js
 // example.js 导出默认值
 export default function (num1, num2) {
@@ -4274,9 +4243,8 @@ export * from './example.js'
 ```
 
 ### 无绑定导入
-::: tip
-无绑定导入最有可能被应用于创建`polyfill`和`shim`。
-:::
+无绑定导入最有可能被应用于创建`polyfill`和`shim`。<br/>
+
 尽管我们已经知道模块中的顶层管理、函数和类不会自动出现在全局作用域中，但这并不意味这模块无法访问全局作用域。<br/>
 例如：如果我们想向所有数组添加`pushAll()`方法，可以像下面这样：
 无绑定导出`array.js`：
