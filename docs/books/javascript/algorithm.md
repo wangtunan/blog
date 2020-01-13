@@ -29,11 +29,8 @@ averageTemp[4] = 60.8
 ```
 
 ### 创建和初始化数组
-::: tip
-创建和初始化数组有两种方式：构造函数和字面量
-:::
 
-使用构造函数创建和初始化数组像下面这样：
+创建和初始化数组有两种方式：构造函数和字面量，使用构造函数创建和初始化数组像下面这样：
 ```js
 let arr = new Array()           // 创建一个空数组
 let arr1 = new Array(7)         // 创建一个长度为7的数组
@@ -243,11 +240,10 @@ for(let i = 0; i < numbers.length; i++) {
 | includes  | 如果数组中存在某个元素，则返回`true`，否则返回`false` |
 
 ## 栈
-::: tip
 栈是一种遵从后进先出(`LIFO`)原则的邮箱有序集合，新添加或待删除的元素都保存在栈的同一端，称之为栈顶，另一端叫栈底。
-:::
+
 ### 创建一个基于数组的栈结构
-我们将创建一个类来表示栈：
+在前面我们已经发现，数组因为有了`push()`和`pop()`方法，非常适合用来表示栈结构，因此我们将创建一个基于数组的类来表示栈：
 ```js
 class Stack {
   constructor () {
@@ -308,10 +304,9 @@ console.log(stack.isEmpty())  // true
 
 
 ### 创建一个基于对象的栈结构
-::: tip
-创建一个`Stack`类最简单的方式就是使用一个数组来存储其元素，但在处理大量数据的时候，我们需要评估如何操作数据是最高效的，在使用数组的时候，大部分方法的时间复杂度为`O(n)`，另外数组是元素的一个有序集合，为了保证元素排列有序，它会占用更多的内存空间。
-:::
-接下来我们需要使用基于对象来创建一个栈结构：
+创建一个`Stack`类最简单的方式就是使用一个数组来存储其元素，但在处理大量数据的时候，我们需要评估如何操作数据是最高效的，在使用数组的时候，大部分方法的时间复杂度为`O(n)`，另外数组是元素的一个有序集合，为了保证元素排列有序，它会占用更多的内存空间。<br/>
+
+因此，接下来我们需要使用基于对象来创建一个栈结构：
 ```js
 class Stack {
   constructor () {
@@ -429,14 +424,10 @@ console.log(stack.isEmpty())  // true
 ```
 
 ### 用栈解决实际问题
-::: tip
-栈的实际应用非常广泛，在回溯问题中，它可以用来存储访问过的任务或路径、撤销的操作。
-:::
+栈的实际应用非常广泛，在回溯问题中，它可以用来存储访问过的任务或路径、撤销等操作。
 
 #### 十进制到二进制
-::: tip
-要把十进制转换成二进制，我们可以将该十进制除以2并对商取整，直到结果为0。
-:::
+**技巧**：要把十进制转换成二进制，我们可以将该十进制除以2并对商取整，直到结果为0。<br/>
 
 使用`JavaScript`对象版的`Stack`：
 ```js
@@ -542,7 +533,7 @@ class Queue {
     return this.count - this.lowestCount
   }
   isEmpty () {
-    return this.count === 0
+    return this.size() === 0
   }
   enqueue (element) {
     this.items[this.count] = element
@@ -550,7 +541,7 @@ class Queue {
   }
   dequeue () {
     if (this.isEmpty()) {
-      return ''
+      return undefined
     }
     const result = this.items[this.lowestCount]
     delete this.items[this.lowestCount]
@@ -628,7 +619,7 @@ class Deque {
     return this.count - this.lowestCount
   }
   isEmpty () {
-    return this.count === 0
+    return this.size() === 0
   }
   clear () {
     this.count = 0
