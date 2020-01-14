@@ -44,6 +44,10 @@ module.exports = {
                 link: '/books/javascript/algorithm'
               },
               {
+                text: 'JavaScript设计模式与开发实践',
+                link: '/designPattern/'
+              },
+              {
                 text: '深入理解ES6',
                 link: '/books/javascript/es6'
               },
@@ -67,10 +71,6 @@ module.exports = {
             ]
           }
         ]
-      },
-      {
-        text: 'JavaScript设计模式',
-        link: '/designPattern/'
       },
       {
         text: 'Vue.js',

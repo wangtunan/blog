@@ -2118,7 +2118,7 @@ CDN的原理是尽可能的在各地部署机房缓存数据，这样即使主�
 强烈建议阅读[JavaScript设计模式与开发实践](/designPattern/)
 
 ## 常见数据结构和算法面试题
-推荐阅读[常见数据结构和算法](/algorithm/)
+推荐阅读[常见数据结构和算法](/books/javascript/algorithm.md)
 
 ## CSS面试题
 本部分只列举CSS概念部分，实战部分请点击[CSS奇淫技巧](/css/)

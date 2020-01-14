@@ -638,8 +638,8 @@ class Deque {
   }
   addFront (element) {
     // 1.添加之前没有数据
-    // 2.lowestCount不为0
-    // 3.lowestCount为0
+    // 2.lowestCount > 0
+    // 3.lowestCount = 0
     if (this.isEmpty()) {
       this.addBack(element)
     } else if (this.lowestCount > 0) {
@@ -744,7 +744,7 @@ function hotPotato (elementList, num) {
 代码分析：
 1. 首先我们使用到了最开始我们创建的队列`Queue`类。
 2. 随后我们会得到一份游戏参与者的名单和给定的数字。
-3. 开始迭代队列，从队列开头移除一下，并同时往队里的末尾添加，来模拟循环游戏的概念。
+3. 开始迭代队列，从队列开头移除一个，并同时往队里的末尾添加，来模拟循环游戏的概念。
 4. 当传递次数等于我们给定的数字时，拿着花的那个人就被淘汰，移除队列并同时添加到淘汰数组中。
 5. 一直进行以上的操作，直到队列中只有一个人时，结束循环。
 
@@ -767,7 +767,7 @@ console.log(`胜利者：${result.winner}`)
 问：什么是回文？<br/>
 答：回文是正反都能读通的单词、词组、数或一系列字符的序列，例如`madam`和`racecar`。<br>
 
-有不用的算法可以检查一个词组或字符串是否为回文，最简单的方式是将字符串反向排列并检查它和原始字符串是否相同，如果相同，则它就是一个回文，在这个案例中我们使用双端队列来实现：
+有不同的算法可以检查一个词组或字符串是否为回文，最简单的方式是将字符串反向排列并检查它和原始字符串是否相同，如果相同，则它就是一个回文，在这个案例中我们使用双端队列来实现：
 ```js
 function palindromeChecker (str) {
   if (str === undefined || str === null || (str !== null && str.length === 0)) {
