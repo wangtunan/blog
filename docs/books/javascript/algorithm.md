@@ -807,9 +807,119 @@ console.log( palindromeChecker('ABBC'))  // false
 ```
 
 ## 链表
+问：为什么在有了数组这种数据结构以后，还需要引入链表？<br/>
+答：因为在大多数语言中数组的大小是固定的，在数组的起点或者中间插入或移除项的成本很高。
 
 ### 链表数据结构
+**特点：** 链表存储有序的元素集合，但不同于数组，链表中的元素在内存中并不是连续放置的。每个与元素由一个存储自身的节点和一个指向下一个元素的引用组成，所以链表的一个好处在于：添加和移除元素的时候不需要移动其它元素。然而，链表需要使用指针，因此不像在数组中可以直接访问任何位置的任何元素，链表需要我们从起点或者头开始迭代链表直到找到所需的元素。<br/>
 
+在理解了什么是链表以后，我们开始实现`LinkedList`类：
+```js
+class LinkedList {
+  constructor (equalsFn = defaultEquals) {
+    this.count = 0
+    this.head = null
+    this.equalsFn = equalsFn
+  }
+}
+```
+代码分析：
+* `count`：我们使用`count`来记录链表中的总数。
+* `head`：由于链表数据结构是动态的，因此我们需要将第一个元素的引用保存下来。
+* `equalsFn()`：如果我们要在链表中遍历，判断当前节点是否是我们需要的节点，而链表中的节点不仅仅是值类型还可能是引用类型，因此需要我们提供一个比较方法，当没有这个方法的时候我们则使用默认的`defaultEquals()`方法，因为它可能会在其它数据结构中也使用到，因此我们把它提取到`utils.js`文件中：
+```js
+// utils.js
+function defaultEquals (a, b) {
+  return a === b
+}
+```
+
+要表示链表中的节点，我们需要另外一个助手`Node`类，它表示我们想要添加到链表中的项，它包含：
+* `element`：表示要加入链表元素的值。
+* `next`：指向链表下一个元素的指针。
+
+```js
+class Node {
+  constructor (element) {
+    this.element = element
+    this.next = null
+  }
+}
+```
+
+在搭建好`LinkedList`类的骨架后，我们需要实现一些方法，如下：
+* `push(element)`：向链表尾部添加一个新元素。
+* `insert(element,position)`：在链表指定位置插入一个新元素。
+* `getElementAt(index)`：返回链表中特定位置的元素，如果没有则返回`undefined`。
+* `remove(element)`：从链表中移除一个元素。
+* `indexOf(element)`：返回元素在链表中的索引，如果没有则返回`-1`。
+* `removeAt(position)`：从链表指定位置移除一个元素。
+* `isEmpty()`：如果链表中不包含任何元素，则返回`true`，否则返回`false`。
+* `size()`：返回链表包含的元素个数。
+* `toString()`：返回表示整个链表的字符串。
+
+#### 向链表尾部添加元素
+向链表尾部添加元素时，有两种可能性：链表为空，添加的就是第一个元素；链表不为空，向其追加元素。
+```js
+push (element) {
+  let current = null
+  const node = new Node(element)
+  if (this.head === null) {
+    this.head = node
+  } else {
+    current = this.head
+    while (current.next !== null) {
+      current = current.next
+    }
+    current.next = node
+  }
+  this.count++
+}
+```
+代码分析：
+* 当`head`为`null`时，代表整个链表为空，因此我们要插入的元素就是第一个元素，直接赋值给`head`即可。
+* 当`head`不为`null`时，代表链表有数据，即我们需要迭代链表一直到最后一个元素(`current.next=null`)，此时直接把要插入的元素赋值给`current.next`即可。
+* 最后需要更新`count`的数量。
+
+#### 迭代链表直到目标位置
+```js
+getElementAt (index) {
+  if (index >= 0 && index <= this.count) {
+    let current = this.head
+    for (let i = 0; i < index && current !== null; i++) {
+      current = current.next
+    }
+    return current
+  }
+  return undefined
+}
+```
+代码分析：为了保证我们能够迭代链表直到找到一个合法的位置，因此我们需要对传入的`index`参数进行合法性验证，然后迭代整个链表直到我们需要的位置位置。
+
+#### 从链表中移除元素
+从链表中移除元素由两种场景：第一种是移除第一个元素，第二种是移除第一个元素之外的其它元素。
+```js
+removeAt (index) {
+  if (index >= 0 && index < this.count) {
+    let current = this.head
+    if (index === 0) {
+      this.head = current.next
+    } else {
+      const previous = this.getElementAt(index - 1)
+      current = previous.next
+      previous.next = current.next
+    }
+    this.count--
+    return current.element
+  }
+  return undefined
+}
+```
+代码分析：和`getElementAt()`方法相同的道理，我们需要对传入的`index`进行合法性校验，然后判断要移除的`index`是否为0，为0则表示移除第一个元素；不为0，则表示移除第一个元素之外其它元素，这个时候我们需要迭代整个列表找到目标位置之前的元素，我们可以借助已经实现的`getElementAt()`方法来简化我们的代码。随后，只需要`previous.next = current.next`跳过`current`，进而达到移除的目的。
+
+
+#### 在任意位置插入元素
+在链表中插入一个元素，也存在两种情况：在第一个位置插入元素，在第一个位置之外的位置插入元素。
 ### 双向链表
 
 ### 循环链表
