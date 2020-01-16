@@ -856,6 +856,7 @@ class Node {
 * `removeAt(position)`：从链表指定位置移除一个元素。
 * `isEmpty()`：如果链表中不包含任何元素，则返回`true`，否则返回`false`。
 * `size()`：返回链表包含的元素个数。
+* `getHead()`：返回链表的第一个元素。
 * `toString()`：返回表示整个链表的字符串。
 
 #### 向链表尾部添加元素
@@ -896,7 +897,7 @@ getElementAt (index) {
 ```
 代码分析：为了保证我们能够迭代链表直到找到一个合法的位置，因此我们需要对传入的`index`参数进行合法性验证，然后迭代整个链表直到我们需要的位置位置。
 
-#### 从链表中移除元素
+#### 从链表中移除指定位置元素
 从链表中移除元素由两种场景：第一种是移除第一个元素，第二种是移除第一个元素之外的其它元素。
 ```js
 removeAt (index) {
@@ -920,6 +921,89 @@ removeAt (index) {
 
 #### 在任意位置插入元素
 在链表中插入一个元素，也存在两种情况：在第一个位置插入元素，在第一个位置之外的位置插入元素。
+```js
+insert (element, index) {
+  if (index >= 0 && index <= this.count) {
+    const node = new Node(element)
+    if (index === 0) {
+      const current = this.head
+      node.next = current
+      this.head = node
+    } else {
+      const previous = this.getElementAt(index - 1)
+      const current = previous.next
+      node.next = current
+      previous.next = node
+    }
+    this.count++
+    return true
+  }
+  return false
+}
+```
+代码分析：
+* 与`removeAt()`方法类似，我们需要判断参数`index`是否合法，不合法则直接返回`false`。
+* 与`removeAt()`直接跳过`current`不同的时，`insert`时需要我们先将`previous`和`node`链接起来，既：`node.next = current`，随后再将`previous`和`node`链接起来，既：`previous.next=node`。
+
+
+#### 返回一个元素的位置
+`indexOf()`方法接受一个元素的值，如果我们在链表中找到了它，就返回元素的位置，否则返回`-1`。
+```js
+indexOf (element) {
+  let current = this.head
+  for (let index = 0; index < this.count && current !== null; index++) {
+    if (this.equalsFn(element, current.element)) {
+      return index
+    }
+    current = current.next
+  }
+  return -1
+}
+```
+
+#### 从链表中移除元素
+`remove()`方法区别于`removeAt()`方法，对于前者而言我们并不知道改在什么地方移除，因此需要遍历一次链表以得到具体的索引位置，而对于后者而言由于接受的参数就是`index`，所以比`remove()`方法要简单一些，由于我们在上面已经实现了`indexOf()`方法和`removeAt()`方法，因此我们可以直接借用它们：
+```js
+remove (element) {
+  let index = this.indexOf(element)
+  return this.removeAt(index)
+}
+```
+注意：我们并不关心`index`是否为-1，因为在`removeAt()`方法中已经检查了`index`参数的合法性，因此这里并不需要额外判断`index`等于-1的情况。
+
+
+#### 链表剩余方法
+在实现以上那些方法后，我们还有`size()`、`isEmpty()`、`getHead()`和`toString()`方法未实现，他们的代码如下：
+```js
+size () {
+  return this.count
+}
+isEmpty() {
+  return this.size() === 0
+}
+getHead () {
+  return this.head === null ? undefined : this.head.element
+}
+toString () {
+  if (this.count === 0) {
+    return ''
+  }
+  let str = `${this.head.element}`
+  let current = this.head.next
+  for (let index = 0; index < this.count && current != null; index++) {
+    str = `${str},${current.element}`
+    current = current.next
+  }
+  return str
+}
+```
+
+#### 使用链表
+在完成所有的链表方法后，我们需要编写一段代码来测试我们的链表：
+```js
+const linkedList = new LinkedList()
+```
+
 ### 双向链表
 
 ### 循环链表
