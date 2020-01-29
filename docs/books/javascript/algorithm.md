@@ -1307,11 +1307,107 @@ console.log(linkedList.toString())        // 1,9,5
 
 
 ## 集合
-
-
-### 构建数据集合
+集合是由一组无序且唯一的项组成的，我们也可以把集合想象成一个既没有重复元素，也没有顺序概念的数组。
 
 ### 创建集合类
+尽管`ES6`已经新增了一个`Set`结构，但我们依然会先使用`ES5`来封装我们自己的`Set`类：
+```js
+class Set {
+  constructor () {
+    this.items = {}
+  }
+}
+```
+接下来，我们需要声明一些集合可用的方法：
+* `add(element)`：向集合中添加新元素。
+* `delete(element)`：从集合移除一个元素。
+* `has(element)`：判断元素是否在集合中，如果是则返回`true`，否则返回`false`。
+* `clear()`：清空集合。
+* `size()`：返回集合所包含元素的数量。
+* `values()`：返回一个包含集合中所有值的数组。
+
+```js
+class Set {
+  constructor () {
+    this.items = {}
+  }
+  has (element) {
+    return element in this.items
+  }
+  add (element) {
+    if (!this.has(element)) {
+      this.items[element] = element
+      return true
+    }
+    return false
+  }
+  delete (element) {
+    if (this.has(element)) {
+      delete this.items[element]
+      return true
+    }
+    return false
+  }
+  clear () {
+    this.items = {}
+  }
+  size () {
+    return Object.keys(this.items).length
+  }
+  values () {
+    return Object.values(this.items)
+  }
+}
+```
+代码分析：
+* `has()`方法：要判断一个对象是否有某个属性，我们可以使用`in`操作符来判断，但并不是所有的对象都继承了`Object.prototype`，所以更好的做法是：
+```js
+has (element) {
+  return Object.prototype.hasOwnProperty.call(this.items, element)
+}
+```
+* `size()`：对于此方法我们有几种方式来实现，第一种是新增一个变量，当`add`或者`delete`时，来维护这个变量；第二种方发生直接使用内置的`Object.keys()`方法；第三种是手动提取`this.items`对象中的属性合计：
+```js
+size () {
+  let count = 0
+  for(let key in this.items) {
+    if (this.items.hasOwnProperty(key)) {
+      count++
+    }
+  }
+  return count
+}
+```
+* `values()`：对于此方法我们可以直接使用内置的`Object.values()`，但这种在某些浏览器中可能无法使用，所以我们可以写如下的方法来替换：
+```js
+values () {
+  let values = []
+  for (let key in this.items) {
+    if (this.items.hasOwnProperty(key)) {
+      values.push(key)
+    }
+  }
+  return values
+}
+```
+
+#### 使用Set类
+在撰写完以上的所有方法后，我们需要编写一些测试代码来验证我们的`Set`类：
+```js
+const set = new Set()
+set.add(1)
+console.log(set.values()) // [1]
+console.log(set.has(1))   // true
+console.log(set.size())   // 1
+set.add(2)
+console.log(set.values()) // [1, 2]
+console.log(set.has(2))   // true
+console.log(set.size())   // 2
+set.delete(1)
+console.log(set.values()) // [2]
+set.delete(2)
+console.log(set.values()) // []
+```
 
 ### 集合运算
 
