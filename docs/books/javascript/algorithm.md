@@ -1002,10 +1002,45 @@ toString () {
 在完成所有的链表方法后，我们需要编写一段代码来测试我们的链表：
 ```js
 const linkedList = new LinkedList()
+console.log(linkedList.size())          // 0 
+console.log(linkedList.isEmpty())       // true
+linkedList.push(1)
+console.log(linkedList.getHead())       // 1
+linkedList.push(3)
+linkedList.push(2)
+linkedList.push(5)
+console.log(linkedList.size())          // 4
+let node = linkedList.getElementAt(2)
+console.log(node.element)               // 2
+console.log(linkedList.indexOf(5))      // 3
+console.log(linkedList.indexOf(8))      // -1
+console.log(linkedList.insert(9, 1))    // true
+console.log(linkedList.toString())      // 1,9,3,2,5
+console.log(linkedList.remove(2))       // true
+console.log(linkedList.toString())      // 1,9,3,5
+console.log(linkedList.removeAt(2))     // 3
+console.log(linkedList.toString())      // 1,9,5
 ```
 
 ### 双向链表
+双向链表和普通链表的区别在于：在链表中，一个节点只有链向下一个节点的链接，而在双向链表中，链表是双向的，一个链向下一个元素，另一个链向前一个元素。<br/>
+在了解了双向链表的概念后，我们可以实现如下代码：
+```js
+class DoublyLinkedList extends LinkedList {
+  constructor (equalsFn = defaultEquals) {
+    super(equalsFn)
+    this.tail = null
+  }
+}
 
+class DoublyNode extends Node {
+  constructor (element, next, prev) {
+    super(element, next)
+    this.prev = prev
+  }
+} 
+```
+代码分析：我们知道双向链表是一种特殊的链表，所以我们让其继承`LinkedList`类，在`DoublyLinkedList`双向链表的构造函数中，我们还需要定义一个变量`tail`，用来表示指向双向链表的最后一个元素。同时，我们还扩展了`DoublyNode`双线链表节点，它继承自`LinkedList`链表的`Node`节点，其还新增了一个指向上一个元素的指针`prev`。
 ### 循环链表
 
 ### 有序链表
