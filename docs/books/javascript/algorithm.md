@@ -990,7 +990,7 @@ toString () {
   }
   let str = `${this.head.element}`
   let current = this.head.next
-  for (let index = 0; index < this.count && current != null; index++) {
+  for (let index = 1; index < this.count && current != null; index++) {
     str = `${str},${current.element}`
     current = current.next
   }
@@ -1041,13 +1041,273 @@ class DoublyNode extends Node {
 } 
 ```
 代码分析：我们知道双向链表是一种特殊的链表，所以我们让其继承`LinkedList`类，在`DoublyLinkedList`双向链表的构造函数中，我们还需要定义一个变量`tail`，用来表示指向双向链表的最后一个元素。同时，我们还扩展了`DoublyNode`双线链表节点，它继承自`LinkedList`链表的`Node`节点，其还新增了一个指向上一个元素的指针`prev`。
+
+#### 在任意位置插入元素
+在双向链表中插入一个新元素跟普通(单向)链表非常相似，区别在于：普通(单向)链表只需要控制一个`next`指针，而双向链表同时需要控制`next`和`prev`两个指针。所以我们需要重写`insert()`方法。
+```js
+insert (element, index) {
+  if (index >= 0 && index <= this.count) {
+    const node = new DoublyNode(element)
+    let current = this.head
+    if (index === 0) {
+      if (this.head === null) {
+        this.head = node
+        this.tail = node
+      } else {
+        node.next = this.head
+        current.prev = node
+        this.head = node
+      }
+    } else if (index === this.count) {
+      current = this.tail
+      current.next = node
+      node.prev = current
+      this.tail = node
+    } else {
+      const previous = this.getElementAt(index - 1)
+      current = previous.next
+      node.next = current
+      previous.next = node
+      current.prev = node
+      node.prev = previous
+    }
+    this.count++
+    return true
+  }
+  return false
+}
+```
+代码分析：
+* 场景一：假设我们在双向链表的第一个位置插入一个新元素，如果此时双向链表为空`this.head === null`，则我们只需要把`head`和`tail`都指向这个新节点。如果不为空`this.head !== null`，`current`变量将是双向链表中第一个元素的引用。
+* 场景二：假设我们在双向链表的最后一个位置插入一个新元素，我们除了需要维护`current`和`node`的两个指针`next`和`prev`以外，我们还需要设置双向链表的最后一个元素`tail`的指针。
+* 场景三：在双向链表的中间插入一个新元素，就像在普通(单向)链表中类似的做法，我们需要找到要插入位置的上一个元素：
+```js
+const previous = this.getElementAt(index - 1)
+```
+获取到以后，我们需要在`current`和`previous`中间插入一个新元素，此时我们需要维护`current`，`previous`和`node`的两个指针`next`和`prev`。
+
+**注意**：如果我们在双向链表`insert()`插入新元素的时候，我们可以判断当`index`大于`length / 2`的时候，可以从双向链表的尾部开始迭代，而不是从头开始迭代，这样可在一定程度上提升性能。
+
+#### 在任意位置移除元素
+在双向链表中移除元素跟普通(单向)链表非常类似，唯一的区别就是：需要设置前一个元素`prev`位置的指针。
+```js
+removeAt (index) {
+  if (index >= 0 && index < this.count) {
+    let current = this.head
+    if (index === 0) {
+      this.head = current.next
+      if (this.count === 1) {
+        this.tail = null
+      } else {
+        this.head.prev = null
+      }
+    } else if (index === this.count - 1) {
+      current = this.tail
+      this.tail = current.prev
+      this.tail.next = null
+    } else {
+      current = this.getElementAt(index - 1)
+      const previous = current.prev
+      previous.next = current.next
+      current.next.prev = previous
+    }
+    this.count--
+    return current.element
+  }
+  return undefined
+}
+```
+代码分析：
+* 场景一：假设我们移除双向链表的第一个元素，当双向链表只有一项的时候，我们只需要把最后一个元素指针`tail`设置为`null`即可，如果双向链表大于1个元素，只需要把新的`head`的`prev`指针设置为`null`。
+* 场景二：假设我们移除双向链表的最后一个元素，只需要维护最后一个元素`tail`的`next`和`prev`指针。
+* 场景三：假设我们在双向链表中间移除元素，需要找到当前移除元素的上一个元素的位置，然后更新`previous.next`和`current.next.prev`的引用，在双向链表中跳过它。
+
+
+#### 在双向链表尾部添加新元素
+在双向链表的尾部添加新元素同样和普通(单向)链表非常相似，却别任然是我们需要多维护一个`tail`指针。
+```js
+push (element) {
+  const node = new DoublyNode(element)
+  if (this.head === null) {
+    this.tail = node
+    this.head = node
+  } else {
+    this.tail.next = node
+    node.prev = this.tail
+    this.tail = node
+  }
+  this.count++
+}
+```
+
+#### 其它方法
+除了以上几种方法，我们还需要为双线链表重写一下几种方法：
+```js
+clear () {
+  super.clear()
+  this.tail = null
+}
+getTail () {
+  return this.tail === null ? undefined : this.tail.element
+}
+inverseToString () {
+  if (this.tail === null) {
+    return ''
+  }
+  let str = `${this.tail.element}`
+  let current = this.tail.prev
+  for (let index = 0; index < this.count && current != null; index++) {
+    str = `${str},${current.element}`
+    current = current.prev
+  }
+  return str
+}
+```
+
+#### 使用双向链表
+双向链表撰写完毕后，我们需要撰写一些代码来测试：
+```js
+const linkedList = new DoublyLinkedList()
+console.log(linkedList.size())            // 0 
+console.log(linkedList.isEmpty())         // true
+linkedList.push(1)
+console.log(linkedList.getHead())         // 1
+linkedList.push(3)
+linkedList.push(2)
+linkedList.push(5)
+console.log(linkedList.size())            // 4
+let node = linkedList.getElementAt(2)
+console.log(node.element)                 // 2
+console.log(linkedList.indexOf(5))        // 3
+console.log(linkedList.indexOf(8))        // -1
+console.log(linkedList.insert(9, 1))      // true
+console.log(linkedList.toString())        // 1,9,3,2,5
+console.log(linkedList.inverseToString()) // 5,2,3,9,1
+console.log(linkedList.getTail())         // 5
+console.log(linkedList.remove(2))         // 2
+console.log(linkedList.toString())        // 1,9,3,5
+console.log(linkedList.inverseToString()) // 5,3,9,1
+console.log(linkedList.removeAt(2))       // 3
+console.log(linkedList.toString())        // 1,9,5
+```
+
 ### 循环链表
+循环链表可以像普通(单向)链表一样只有单向引用，也可以像双向链表一样有双向引用。循环链表和普通(单向)链表的唯一区别在于：最后一个元素的指针不是`null`或者`undefined`，而是指向第一个元素`head`。
 
-### 有序链表
+在了解了循环链表的概念后，我们可以撰写如下代码：
+```js
+class CircularLinkedList extends LinkedList {
+  constructor (equalsFn = defaultEquals) {
+    super(equalsFn)
+  }
+}
+```
 
-### 创建StackLinkedList类
+#### 在任意位置插入新元素
+循环链表中插入新元素的逻辑和普通(单向)链表的逻辑是一样的，唯一的区别是我们需要维护最后有一个元素的指针，需要将它设置为指向第一个元素。
+```js
+insert (element, index) {
+  if (index >= 0 && index <= this.count) {
+    const node = new Node(element)
+    let current = this.head
+    if (index === 0) {
+      if (this.head === null) {
+        this.head = node
+        node.next = this.head
+      } else {
+        node.next = current
+        current = this.getElementAt(this.count)
+        current.next = node
+        this.head = node
+      }
+    } else {
+      const previous = this.getElementAt(index - 1)
+      node.next = previous.next
+      previous.next = node 
+    }
+    this.count++
+    return true
+  }
+  return false
+}
+```
+代码分析：
+* 场景一：我们在循环链表中的第一个位置插入新元素，当循环链表为空时，我们只需要在普通(单向)链表的基础上维护最后一个元素的指针指向`head`即可；当循环链表不为空的时候，我们首先需要迭代获取到最后一个元素，然后把最后一个元素的指针指向我们新插入元素即可。
+* 场景二：在循环链表的中间插入新元素的逻辑和普通(单向)链表的逻辑是一直的，没有变动。
+
+#### 在任意位置移除元素
+在循环链表的任意位置移除元素的逻辑和普通(单向)链表的逻辑也十分相似，不过我们任然需要修改一些我们的代码：
+```js
+removeAt (index) {
+  if (index >= 0 && index < this.count) {
+    let current = this.head
+    if (index === 0) {
+      if (this.count === 0) {
+        this.head = null
+      } else {
+        const removed = this.head
+        current = this.getElementAt(this.count - 1)
+        this.head = this.head.next
+        current.next = this.head
+        current = removed
+      }
+    } else {
+      const previous = this.getElementAt(index - 1)
+      current = previous.next
+      previous.next = previous.next
+    }
+    this.count--
+    return current.element
+  }
+  return undefined
+}
+```
+代码分析：对于在循环链表任意位置移除元素，我们只需要考虑修改`head`的值即可：和`insert()`方法有点类似的道理，我们需要迭代获取到循环链表的最后一个元素，然后开始调整`head`元素的，让他等于`this.head.next`，随后需要把获取到的最后一个元素的指针指向`head`。
+
+#### 在循环链表尾部添加元素
+在循环链表的尾部添加元素的逻辑和普通(单向)链表的逻辑依然是相似的，唯一的区别依然是我们需要维护最后一个元素的指针。
+```js
+push (element) {
+  const node = new Node(element)
+  if (this.head === null) {
+    this.head = node
+  } else {
+    const current = this.getElementAt(this.count - 1)
+    current.next = node
+  }
+  node.next = this.head
+  this.count++
+}
+```
+
+#### 循环链表的使用
+在撰写完循环链表的代码后，我们需要写一点代码来测试：
+```js
+const linkedList = new CircularLinkedList()
+console.log(linkedList.size())            // 0 
+console.log(linkedList.isEmpty())         // true
+linkedList.push(1)
+console.log(linkedList.getHead())         // 1
+linkedList.push(3)
+linkedList.push(2)
+linkedList.push(5)
+console.log(linkedList.size())            // 4
+let node = linkedList.getElementAt(2)
+console.log(node.element)                 // 2
+console.log(linkedList.indexOf(5))        // 3
+console.log(linkedList.indexOf(8))        // -1
+console.log(linkedList.insert(9, 1))      // true
+console.log(linkedList.toString())        // 1,9,3,2,5
+console.log(linkedList.remove(2))         // 2
+console.log(linkedList.toString())        // 1,9,3,5
+console.log(linkedList.removeAt(2))       // 3
+console.log(linkedList.toString())        // 1,9,5
+```
+
+
 
 ## 集合
+
 
 ### 构建数据集合
 
