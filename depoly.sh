@@ -23,6 +23,6 @@ git config user.email why583440138@gmail.com
 # git push -f git@github.com:<USERNAME>/<USERNAME>.github.io.git master
 
 # 如果发布到 https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:wangtunan/blog.git master:gh-pages
-
+# git push -f git@github.com:wangtunan/blog.git master:gh-pages
+git push -f https://github.com/wangtunan/blog.git master:gh-pages
 cd -

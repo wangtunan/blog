@@ -1410,10 +1410,175 @@ console.log(set.values()) // []
 ```
 
 ### 集合运算
+集合是数学中基础的概念，在计算机领域也非常重要，它在计算机科学中的主要应用之一是数据库，而数据库是大多数应用程序的根基。
+
+集合被用于查询的设计和处理，当我们创建一条从关系型数据库中获取一个数据集合的查询语句时，使用的就是集合运算，并且数据库也会返回一个数据集合。当我们创建一条SQL语句查询命令时，可以指定是从表中获取全部数据还是获取其中的子集；也可以获取两张表共有的数据，只存在于一张表中的数据，或是存在于两张表内的数据，这些SQL领域的运算叫做联接，而SQL链接的基础就是集合运算。
+
+在学习集合运算之前，我们需要先明白几个关于集合的概念：
+* **并集**：对于给定的两个集合，返回一个包含两个集合中所有元素的新集合。
+* **交集**：对于给定的两个集合，返回一个包含两个集合中共有元素的新集合。
+* **差集**：对于给定的两个集合，返回一个包含所有存在于第一个集合且不存在于第二个集合的元素的新集合。
+* **子集**：验证一个给定的集合是否是另一个集合的子集。
+
+#### 并集
+```js
+union (otherSet) {
+  const unionSet = new Set()
+  this.values().forEach(item => {
+    unionSet.add(item)
+  })
+  otherSet.values().forEach(item => {
+    unionSet.add(item)
+  })
+  return unionSet
+}
+```
+在转写完并集的方法后，我们需要写一点代码来测试：
+```js
+const setA = new Set()
+setA.add(1)
+setA.add(2)
+setA.add(3)
+const setB = new Set()
+setB.add(4)
+setB.add(5)
+setB.add(6)
+const result = setA.union(setB)
+console.log(result.values()) // [1, 2, 3, 4, 5, 6]
+```
+#### 交集
+```js
+intersection (otherSet) {
+  const intersectionSet = new Set()
+  this.values().forEach(item => {
+    if (otherSet.has(item)) {
+      intersectionSet.add(item)
+    }
+  })
+  return intersectionSet
+}
+```
+在撰写完交集的方法后，我们需要写一点代码来测试：
+```js
+const setA = new Set()
+setA.add(1)
+setA.add(2)
+setA.add(3)
+const setB = new Set()
+setB.add(2)
+setB.add(3)
+setB.add(4)
+const result = setA.intersection(setB)
+console.log(result.values()) // [2, 3]
+```
+**注意**：假设我们有如下两个集合，`setA = [1, 2, 3, 4, 5, 6, 7]`, `setB = [4, 6]`，我们创建的`intersection()`方法需要迭代七次`setA`，如果我们只需要迭代两次`setB`就好了，更少的迭代次数意味着更少的过程消耗。
+
+优化后的代码：
+```js
+intersection (otherSet) {
+  const intersectionSet = new Set()
+  const values = this.values()
+  const otherValues = otherSet.values()
+  let biggerSet = values
+  let smallerSet = otherValues
+  if (biggerSet.length - smallerSet.length > 0) {
+    biggerSet = otherValues
+    smallerSet = values
+  }
+  smallerSet.forEach(item => {
+    if (biggerSet.includes(item)) {
+      intersectionSet.add(item)
+    }
+  })
+  return intersectionSet
+}
+```
+#### 差集
+```js
+difference (otherSet) {
+  const differenceSet = new Set()
+  this.values.forEach(item => {
+    if (!otherSet.has(item)) {
+      differenceSet.add(item)
+    }
+  })
+  return differenceSet
+}
+```
+在撰写完差集的方法后，我们需要写一点代码来测试：
+```js
+const setA = new Set()
+setA.add(1)
+setA.add(2)
+setA.add(3)
+const setB = new Set()
+setB.add(2)
+setB.add(3)
+setB.add(4)
+const result = setA.difference(setB)
+console.log(result.values()) // [1]
+```
+
+**注意**：我们不能像优化交集`intersection`一样优化差集`difference`，因为`setA`和`setB`之间的差集可能和`setB`和`setA`之间的差集不同。
+
+#### 子集
+```js
+isSubSetOf (otherSet) {
+  if (this.size() > otherSet.size()) {
+    return false
+  }
+  let isSubSet = this.values().every(item => {
+    return otherSet.has(item)
+  })
+  return isSubSet
+}
+```
+在撰写完子集的方法后，我们需要写一点代码来测试：
+```js
+const setA = new Set()
+setA.add(1)
+setA.add(2)
+const setB = new Set()
+setB.add(1)
+setB.add(2)
+setB.add(3)
+const setC = new Set()
+setB.add(2)
+setB.add(3)
+setB.add(4)
+const result1 = setA.isSubSetOf(setB)
+const result2 = setA.isSubSetOf(setC)
+console.log(result1) // true
+console.log(result2) // false
+```
 
 ### ES6中的Set类
+因为`ES6`已经提供了`Set`结构，所以我们为了更好的理解集合的概念，我们尝试使用`ES6`中的`Set`结构来改写我们的`Set`类：
+```js
+const set = new Set()
+set.add(1)
+console.log(set.values()) // @Iterator
+console.log(set.has(1))   // true
+console.log(set.size())   // 1
+set.delete(1)
+```
 
-### 多重集或袋
+#### ES6中使用扩展运算符进行集合运算
+```js
+const setA = new Set()
+setA.add(1)
+setA.add(2)
+const setB = new Set()
+setB.add(2)
+setB.add(3)
+setB.add(4)
+// 并集
+console.log(new Set([...setA, ...setB]))  // [1, 2, 3, 4]
+// 交集
+console.log(new Set([...setA].filter(value => setB.has(value))))  // [2]
+// 差集
+console.log(new Set([...setA].filter(value => !setB.has(value))))  // [1]
+```
 
 ## 字典和散列表
 
