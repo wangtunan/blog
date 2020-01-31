@@ -1583,12 +1583,178 @@ console.log(new Set([...setA].filter(value => !setB.has(value))))  // [1]
 ## 字典和散列表
 
 ### 字典
+字典也成映射、符号表或关联数组。在计算机科学中，字典经常用来保存对象的引用地址。
+
+#### 创建字段
+我们将要实现的`Map`类是以`ES5`为基础来实现的，你会发现我们实现的`Map`类和`Set`类非常相似，不同于存储`[值, 值]`对的形式，我们将要存储的是`[键， 值]`对。
+
+```js
+class Dictionary {
+  constructor (toStrFn = defaultToString) {
+    this.toStrFn = toStrFn
+    this.table = {}
+  }
+}
+```
+除了定义我们的`Map`字典类，还需要定义一个将字典键转成字符串的方法，因为`ES5`中的对象的键只能是字符串：
+```js
+function defaultToString (item) {
+  if (item === null) {
+    return `NULL`
+  } else if (item === undefined) {
+    return 'UNDEFINED'
+  } else if (typeof item === 'string' || item instanceof String) {
+    return `${item}`
+  }
+  return item.toString()
+}
+```
+然后，我们还需要声明一些映射/字典所能使用的方法：
+* `set(key, value)`：向字典中添加新元素，如果`key`已经存在，那么已存在的`value`会被覆盖。
+* `remove(key)`：在字典中移除指定键的元素。
+* `hasKey(key)`：在字典中判断是否存在指定键的元素。
+* `get(key)`：在字典中获取指定键的元素。
+* `clear()`：清空字典。
+* `size()`：返回字典所包含元素的数量。
+* `isEmpty()`：判断字典是否为空。
+* `keys()`：将字典中所有的键以数组的形式返回。
+* `values()`：将字典中所有的值以数组的形式返回。
+* `keyValues()`：将字典中所有的`[键， 值]`对返回。
+* `forEach(callback)`：字典迭代方法。
+
+#### hasKey()方法
+```js
+hasKey (key) {
+  let value = this.table[this.toStrFn(key)]
+  return value !== null && value != undefined
+}
+```
+代码分析：正如我们前面提到过的，`ES5`只允许我们使用字符串作为对象的键名或者属性名，如果传入一个复杂对象作为键，我们需要将它转换为字符串。
+
+#### set()方法
+```js
+set (key, value) {
+  if (key != null && value != null) {
+    const tableKey = this.toStrFn(key)
+    this.table[tableKey] = new ValuePair(key, value)
+    return true
+  }
+  return false
+}
+```
+代码分析：我们接受`key`和`value`，首先需要判断`key`和`value`不能为`null`或者`undefined`，其次我们需要把传入的`key`转换为一个字符串，在存储在字典中。同时，为了方便存储`key`和`value`，也同时为了方便转换为字符串格式，我们定义了`ValuePair`类，并为其自定义了`toString()`方法：
+```js
+class ValuePair {
+  constructor (key, value) {
+    this.key = key
+    this.value = value
+  }
+  toString () {
+    return `{#${this.key}}: ${this.value}`
+  }
+}
+```
+
+#### remove()方法
+```js
+remove (key) {
+  if (this.hasKey(key)) {
+    delete this.table[this.toStrFn(key)]
+    return true
+  }
+  return false
+}
+```
+代码分析：在移除元素之前，我们首先需要判断给定的键是否在字典中存在，可以使用前面已经定义好的`hasKey()`方法，如果存在则使用`delete`操作符在字典中删除。
+
+
+#### get()方法
+```js
+get (key) {
+  const valuePair = this.table[this.toStrFn(key)]
+  return valuePair == null ? undefined : valuePair.value
+}
+```
+代码分析：我们首先根据传入的`key`获取到我们存储键值对元素，随后需要判断当前获取到的键值对元素是否为`null`或`undefined`，如果不是则返回`value`即可。
+
+#### keys()、values()和keyValues()方法
+```js
+keyValues () {
+  return Object.values(this.table)
+}
+keys () {
+  return this.keyValues().map(valuePair => valuePair.key)
+}
+values () {
+  return this.keyValues().map(valuePair => valuePair.value)
+}
+```
+代码分析：因为我们字典中存储的是`valuePair`类的实例，所以对于`keyValues()`方法的实现，可以直接使用内置函数`Object.values()`，处理完`keyValues()`方法，对于剩下的`keys()`和`values()`方法的实现只需要再次调用`keyValues()`方法，然后再对其结果进行`map`函数映射。
+
+#### forEach()方法
+```js
+forEach (callback) {
+  const valuePairs = this.keyValues()
+  for (let index = 0; index < valuePairs.length; index++) {
+    const result = callback(valuePair.key, valuePair.value)
+    if (result === false) {
+      break
+    }
+  }
+}
+```
+代码分析：我们首先获取到由`valuePair`类实例构成的数组，然后进行遍历调用`callback()`函数，如果`callback()`函数的返回结果为`false`，则终止`for`循环遍历。
+
+#### 其它方法
+在实现了以上的方法后，我们还剩下`clear()`、`size()`、`isEmpty()`和`toString()`没有实现，接下来我们来实现它们：
+```js
+size () {
+  return this.keyValues(this.table).length
+}
+isEmpty () {
+  return this.size() === 0
+}
+clear () {
+  this.table = {}
+}
+toString () {
+  if (this.isEmpty()) {
+    return ''
+  }
+  const valuePairs = this.keyValues()
+  let objStr = valuePairs[0].toString()
+  for (let index = 1; index < valuePairs.length; index++) {
+    objStr = `${objStr}, ${valuePairs[index].toString()}`
+  }
+  return objStr
+}
+```
+
+#### 使用Dictionary类
+在撰写完`Dictionary`类的所有方法后，我们需要撰写一点代码来测试一下：
+```js
+const dic = new Dictionary()
+dic.set('AAA', 'AAA@qq.com')
+dic.set('BBB', 'BBB@163.com')
+dic.set('CCC', 'CCC@gmail.com')
+console.log(dic.hasKey('AAA'))  // true
+console.log(dic.size())         // 3
+console.log(dic.get('AAA'))     // AAA@qq.com
+console.log(dic.keys())         // ['AAA', 'BBB', 'CCC']
+console.log(dic.values())       // ['AAA@qq.com', 'BBB@163.com', 'CCC@gmail.com']
+console.log(dic.keyValues())    // [{key: 'AAA', value: 'AAA@qq.com'}， {key: 'BBB', value: 'BBB@qq.com'}， {key: 'CCC', value: 'CCC@qq.com'}]
+dic.remove('BBB')
+console.log(dic.keys())         // ['AAA', 'CCC']
+console.log(dic.values())       // ['AAA@qq.com',  'CCC@gmail.com']
+console.log(dic.keyValues())    // [{key: 'AAA', value: 'AAA@qq.com'}， {key: 'CCC', value: 'CCC@qq.com'}]
+dic.forEach((key, value) => {
+  console.log('forEach: ', `key: ${key}, value: ${value}`)
+  // forEach: key: AAA, value: AAA@qq.com
+  // forEach: key: CCC, value: CCC@gmail.com
+})
+```
 
 ### 散列表
-
-### ES6中的Map类
-
-### ES6中的WeakMap类和WeakSet类
 
 ## 递归
 
