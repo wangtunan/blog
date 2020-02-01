@@ -1755,6 +1755,114 @@ dic.forEach((key, value) => {
 ```
 
 ### 散列表
+**描述**：散列表也叫`HashTable`类或者`HashMap`类，它是`Dictionary`类的一种散列实现方式。
+
+**散列算法**：散列算法的作用是尽可能的快的在数据结构中找到一个值，因为它是字典的一种实现，所以可以用作关联数组，它也可以用来对数据库进行索引。当我们使用关系型数据库的时候，创建一个新的表时，一个不错的做法是同时创建一个索引来更快的查询到记录的`key`，在这种情况下，散列表可以用来保存键和对表中记录的引用。
+
+#### 创建散列表
+我们使用一个关联对象来表示我们的数据结构，以下是我们创建的散列表的基础代码：
+```js
+class HashTable {
+  constructor (toStrFn = defaultToString) {
+    this.toStrFn = toStrFn
+    this.table = {}
+  }
+}
+```
+其中我们依然沿用了`defaultToString()`方法：
+```js
+function defaultToString (item) {
+  if (item === null) {
+    return `NULL`
+  } else if (item === undefined) {
+    return 'UNDEFINED'
+  } else if (typeof item === 'string' || item instanceof String) {
+    return `${item}`
+  }
+  return item.toString()
+}
+```
+在撰写完以上代码后，我们需要为散列表添加一些方法：
+* `put(key, value)`：向散列表中添加一个新的项
+* `remove(key)`：根据键值从散列表中移除值
+* `get(key)`：返回根据键值检索到的特定的值。
+
+#### 散列函数
+在实现以上三个方法之前，我们需要先来实现一个散列函数：
+```js
+loseloseHashCode (key) {
+  if (typeof key === 'number') {
+    return key
+  }
+  const tableKey = this.toStrFn(key)
+  let hash = 0
+  for (let index = 0; index < tableKey.length; index++) {
+    hash += tableKey.charCodeAt(index)
+  }
+  return hash % 37
+}
+hashCode (key) {
+  return this.loseloseHashCode(key)
+}
+```
+代码分析：我们首先需要检测传递的`key`是否为数字类型，如果是，则直接返回；如果不是则将其转换为字符串形式。随后需要把转换后的字符串的`ASCII`值进行求和。同时为了得到比较小的数值，我们会使用`hash`值和任意数做除法的余数，这可以规避操作数超过数值的表示范围。
+
+#### put()方法
+现在我们有了自己的`hashCode`函数，那么`put()`方法的实现如下：
+```js
+put (key, value) {
+  if (key != null && value != null) {
+    const hashCode = this.hashCode(key)
+    this.table[hashCode] = new ValuePair(key, value)
+    return true
+  }
+  return false
+}
+```
+代码分析：我们首先需要检查传递的`key`和`value`是否为`null`或者`undefined`，其次还需要根据传递的`key`获取起`hashCode`，最后把这个`hashCode`当做键存储在`table`对象中。
+
+#### get()方法
+与`Dictionary`字段类的`get()`方法非常类似，我们的`get()`方法实现如下：
+```js
+get (key) {
+  const valuePair = this.table[this.hashCode(key)]
+  return valuePair == null ? undefined : valuePair.value
+}
+```
+
+#### remove()方法
+接下来是散列表的最后一个函数`remove()`方法的 实现：
+```js
+remove (key) {
+  const hashCode = this.hashCode(key)
+  const valuePair = this.table[hashCode]
+  if (valuePair != null) {
+    delete this.table[hashCode]
+    return true
+  }
+  return false
+}
+```
+代码分析：要移除一个值，首先我们需要得到传递的`key`对应的`hashCode`，随后我们需要判断根据当前的`hashCode`得到的值是否为`null`或者`undefined`，如果不是，则直接是否`delete`操作符删除并返回`true`，表示移除成功；如果是，则直接返回`false`，表示移除失败。
+
+#### 使用HashTable
+在撰写完`HashTable`以后，我们需要书写一点测试代码：
+```js
+const hash = new HashTable()
+hash.put('AAA', 'AAA@qq.com')
+hash.put('BBB', 'BBB@163.com')
+hash.put('CCC', 'CCC@gmail.com')
+console.log(hash.hashCode('AAA') + '- AAA') // 10
+console.log(hash.hashCode('BBB') + '- BBB') // 13
+console.log(hash.hashCode('CCC') + '- CCC') // 16
+console.log(hash.get('AAA'))                // AAA@qq.com
+console.log(hash.get('BBB'))                // BBB@163.com
+console.log(hash.get('CCC'))                // CCC@gmail.com
+hash.remove('BBB')
+console.log(hash.get('AAA'))                // AAA@qq.com
+console.log(hash.get('BBB'))                // undefined
+console.log(hash.get('CCC'))                // CCC@gmail.com
+```
 
 ## 递归
 
