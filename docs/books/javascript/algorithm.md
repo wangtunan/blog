@@ -1867,12 +1867,61 @@ console.log(hash.get('CCC'))                // CCC@gmail.com
 ## 递归
 
 ### 理解递归
+**递归：** 递归是一种解决问题的方法，它从解决问题的各个小部分开始，直到解决最初的大问题，递归函数通常涉及函数调用自身。
+```js
+function recursiveFunction (params) {
+  recursiveFunction (params)
+}
+```
+**注意：** 每个递归函数都必须有一个基线条件，即一个不再递归调用的条件，以防止无线递归。
 
 ### 计算一个数的阶乘
+一个数的阶乘非常适合用来当做递归的例子，一个数的阶乘公式为：`n * (n - 1) * (n - 2) * ... * 1`。
+
+因此我们可以根据以上的公式撰写一下代码：
+```js
+function factorial (number) {
+  if (number < 0) {
+    return undefined
+  }
+  let total = 1
+  for(let n = number; n > 1; n--) {
+    total = total * n
+  }
+  return total
+}
+console.log(factorial(5)) // 120
+```
+以上是一个使用循环计算阶乘的代码，接下来我们使用递归来实现：
+```js
+function factorial (n) {
+  if (n === 1 || n === 0) {
+    return 1
+  }
+  return n * factorial(n  - 1)
+}
+console.log(factorial(5)) // 120
+```
 
 ### 斐波那契数列
+斐波那契数列是另一个可以用解决的问题，它是由一个：`0、1、1、2、3、5、8、13、21....`等数组成的序列。它的规律是：
+* 位置0的斐波那契数为0
+* 位置1 和 位置2的斐波那契为1
+* 位置`n`处的斐波那契数为位置`n - 1`的斐波那契数加上位置`n - 2`的斐波那契数
 
-### 为什么要用递归？
+因此根据以上规律，我们使用递归可以撰写如下代码：
+```js
+function fibonacci (n) {
+  if (n < 1) {
+    return 0
+  } else if (n === 1 || n === 2) {
+    return 1
+  } else {
+    return fibonacci(n - 1) + fibonacci(n - 2)
+  }
+}
+console.log(fibonacci(6)) // 8
+```
 
 
 ## 树
