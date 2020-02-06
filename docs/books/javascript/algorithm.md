@@ -1927,12 +1927,132 @@ console.log(fibonacci(6)) // 8
 ## 树
 
 ### 树数据结构
+数是一种分层数据的抽象模型，现实生活中最常见的树的例子就是家谱或者公司的组织架构。
+![树](../../images/books/tree0.png)
 
 ### 树的相关术语
+**特点：** 一个树结构包含一系列存在父子关系的节点，每个节点都有一个父节点(除顶部的第一个节点)以及零个或多个子节点。
+
+树的相关术语：
+* **根节点**：位于树顶部的节点。
+* **内部节点**：至少有一个子节点的节点称为内部节点。
+* **外部节点**：没有子元素的节点称为外部节点或叶节点。
+* **子树**：由节点和它的后代构成。
+* **深度**：节点的深度取决于它的祖先节点的数量。
+* **高度**：节点的高度取决于所有节点深度的最大值。
+
+![树](../../images/books/tree1.png)
 
 ### 二叉树和二叉搜索树
+**二叉树**：二叉树中的节点最多只能有两个子节点：一个是左侧子节点，另一个是右侧子节点，这个定义有助于我们写出更高效地在树中插入、查找和删除节点的算法。
+
+**二叉搜索树(BST)**：是二叉树中的一种，但是只允许我们在左侧节点存储比父节点更小的值，在右侧节点存储比父节点大的值。
+根据我们对于`BST`的理解，我们可以撰写以下基础代码：
+```js
+class BinarySearchTree {
+  constructor (compareFn = defaultCompare) {
+    this.compareFn = compareFn
+    this.root = null
+  }
+}
+class Node {
+  constructor (key) {
+    this.key = key
+    this.left = null
+    this.right = null
+  }
+}
+```
+代码分析：和链表类似，我们通过指针来表示节点之间的关系，在二叉搜索树中，`left`代表左侧节点，`right`代码右侧节点。在`BinarySearchTree`二叉搜索树的构造函数中，使用我们之前实现过的方法来比较节点：
+```js
+function defaultCompare (a, b) {
+  if (a === b) {
+    return 0
+  }
+  return a < b ? -1 : 1
+}
+```
+
+下图展示了二叉搜索树数据结构的组织方式：
+
+![树](../../images/books/tree2.png)
+
+在实现了`BinarySearchTree`基础代码后，我们需要为其撰写一些方法：
+* `insert(key)`：向树中插入一个新的键。
+* `search(key)`：在树中查找一个键，如果节点存在，则返回`true`；如果不存在，则返回`false`。
+* `inOrderTraverse()`：通过中序遍历方式遍历所有节点。
+* `preOrderTraverse()`：通过先序遍历方式遍历所有节点。
+* `postOrderTraverse()`：通过后序遍历方式遍历所有节点。
+* `min()`：返回树中最小的值/键。
+* `max()`：返回树中最大的值/键。
+* `remove(key)`：从树中移除某个键。
+
+#### insert()方法
+向`BST`树中插入一个节点，我们需要使用到递归算法：
+```js
+insert (key) {
+  if (this.root === null) {
+    this.root = new Node(key)
+  } else {
+    this.insertNode(this.root, key)
+  }
+}
+insertNode (node, key) {
+  if (this.compareFn(key, node.key) === -1) {
+    if (node.left === null) {
+      node.left = new Node(key)
+    } else {
+      this.insertNode(node.left, key)
+    }
+  } else {
+    if (node.right === null) {
+      node.right = new Node(key)
+    } else {
+      this.insertNode(node.right, key)
+    }
+  }
+}
+```
+代码分析：首先我们判断要插入的是否为树的顶部节点，如果是则插入，如果不是则需要再调用`insertNode()`方法，在这个方法里面，我们需要判断，当前要插入的`key`和当前比较的节点进行比较，如果小于，则插入在左侧；如果大于则插入在右侧。其中判断一个节点左侧或者右侧是否插入，只需要通过判断是否为`null`即可。
+
+**实例分析**：如果我们有以下代码场景
+```js
+const tree = new BinarySearchTree()
+tree.insert(11)
+tree.insert(7)
+tree.insert(15)
+tree.insert(5)
+tree.insert(3)
+tree.insert(9)
+tree.insert(8)
+tree.insert(10)
+tree.insert(13)
+tree.insert(12)
+tree.insert(14)
+tree.insert(20)
+tree.insert(18)
+tree.insert(25)
+```
+上述代码撰写完毕后，我们将会得到如下图所示的二叉搜索树：
+
+![树](../../images/books/tree3.png)
+
+现在假设我们需要插入值为6的键，即执行如下代码：
+```js
+tree.insert(6)
+```
+其插入步骤分析如下：
+* 树非空，执行`this.insertNode(this.root, key)`代码。
+* 首先检测`6 < 11`，在左侧继续查找，随后检测`6 < 7`继续在左侧查找，然后判断`6 > 5`。
+* 在值为`5`的节点右侧搜索，判断其右侧节点没有节点，则要插入的键就是此节点右节点。
+* 最后递归方法会依次出栈，代码执行过程结束。
+
+以上步骤的分析图以及插入效果如下：
+
+![树](../../images/books/tree4.png)
 
 ### 树的遍历
+遍历一个树是指访问树的每个节点并对它们进行某种操作的过程，访问树的所有节点有三种方式：中序、先序和后序。
 
 ### 搜索树中的值
 
