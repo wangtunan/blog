@@ -2054,6 +2054,45 @@ tree.insert(6)
 ### 树的遍历
 遍历一个树是指访问树的每个节点并对它们进行某种操作的过程，访问树的所有节点有三种方式：中序、先序和后序。
 
+**中序遍历**：中序遍历是一种以上行顺序访问`BST`所有节点的遍历方式，也就是从最小到最大的顺序访问所以节点。
+```js
+inOrderTraverse (callback) {
+  this.inOrderTraverseNode(this.root, callback)
+}
+inOrderTraverseNode (node, callback) {
+  if (node !== null) {
+    this.inOrderTraverseNode(node.left, callback)
+    callback(node.key)
+    this.inOrderTraverseNode(node.right, callback)
+  }
+}
+```
+代码分析：首先我们需要检查以参数形式传入的节点是否为`null`，因为这就是停止递归函数的判断条件。然后通过递归的形式先对左侧子节点进行访问，接着对根节点进行访问，最后再访问右侧子节点。
+
+代码撰写完毕后，我们使用如下代码来测试中序遍历方法：
+```js
+const tree = new BinarySearchTree()
+tree.insert(11)
+tree.insert(7)
+tree.insert(15)
+tree.insert(5)
+tree.insert(3)
+tree.insert(9)
+tree.insert(8)
+tree.insert(10)
+tree.insert(13)
+tree.insert(12)
+tree.insert(14)
+tree.insert(20)
+tree.insert(18)
+tree.insert(25)
+tree.insert(6)
+const printNode = (value) => console.log(value)
+tree.inOrderTraverse(printNode) // 依次输出：3 5 6 7 8 9 10 11 12 13 14 15 18 20 25
+```
+其遍历过程如下图所示：
+
+![树](../../images/books/tree5.png)
 ### 搜索树中的值
 
 ### 自平衡树
