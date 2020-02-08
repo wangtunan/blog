@@ -2054,7 +2054,9 @@ tree.insert(6)
 ### 树的遍历
 遍历一个树是指访问树的每个节点并对它们进行某种操作的过程，访问树的所有节点有三种方式：中序、先序和后序。
 
-**中序遍历**：中序遍历是一种以上行顺序访问`BST`所有节点的遍历方式，也就是从最小到最大的顺序访问所以节点。
+
+#### 中序遍历
+中序遍历是一种以上行顺序访问`BST`所有节点的遍历方式，也就是从最小到最大的顺序访问所以节点。
 ```js
 inOrderTraverse (callback) {
   this.inOrderTraverseNode(this.root, callback)
@@ -2093,7 +2095,136 @@ tree.inOrderTraverse(printNode) // 依次输出：3 5 6 7 8 9 10 11 12 13 14 15 
 其遍历过程如下图所示：
 
 ![树](../../images/books/tree5.png)
+
+#### 先序遍历
+先序遍历是以优先后代节点的顺序访问每个节点的，先序遍历的一种应用是打印一个结构化的文档。
+```js
+preOrderTraverse (callback) {
+  this.preOrderTraverseNode(this.root, callback)
+}
+preOrderTraverseNode (node, callback) {
+  if (node !== null) {
+    callback (node.key)
+    this.preOrderTraverseNode(node.left, callback)
+    this.preOrderTraverseNode(node.right, callback)
+  }
+}
+```
+代码分析：先序遍历和中序遍历的不同点是：先序遍历会先访问节点本身，然后再访问 它的左侧节点，最后访问右侧节点。
+
+撰写以上代码后，我们撰写测试代码：
+```js
+const tree = new BinarySearchTree()
+tree.insert(11)
+tree.insert(7)
+tree.insert(15)
+tree.insert(5)
+tree.insert(3)
+tree.insert(9)
+tree.insert(8)
+tree.insert(10)
+tree.insert(13)
+tree.insert(12)
+tree.insert(14)
+tree.insert(20)
+tree.insert(18)
+tree.insert(25)
+tree.insert(6)
+
+const printNode = (value) => console.log(value)
+tree.preOrderTraverse(printNode) // 依次输出：11 7 5 3 6 9 8 10 15 13 12 14 20 18 25
+```
+其遍历过程如下图所示：
+
+![树](../../images/books/tree6.png)
+
+#### 后序遍历
+后续遍历则是先访问节点的后代节点，再访问节点本身。后续遍历的一种应用是计算一个目录及其子目录中所有文件所占空间的大小。
+```js
+postOrderTraverse (callback) {
+  this.postOrderTraverseNode(this.root, callback)
+}
+postOrderTraverseNode (node, callback) {
+  if (node !== null) {
+    this.postOrderTraverseNode(node.left, callback)
+    this.postOrderTraverseNode(node.right, callback)
+    callback(node.key)
+  }
+}
+```
+代码分析：我们会发现中序、先序和后续遍历的实现方式是十分相似的，唯一的不同是访问根节点的顺序不一样。
+
+撰写以上代码后，我们撰写测试代码：
+```js
+const tree = new BinarySearchTree()
+tree.insert(11)
+tree.insert(7)
+tree.insert(15)
+tree.insert(5)
+tree.insert(3)
+tree.insert(9)
+tree.insert(8)
+tree.insert(10)
+tree.insert(13)
+tree.insert(12)
+tree.insert(14)
+tree.insert(20)
+tree.insert(18)
+tree.insert(25)
+tree.insert(6)
+
+const printNode = (value) => console.log(value)
+tree.postOrderTraverse(printNode) // 依次输出：3 6 5 8 10 9 7 12 14 13 18 25 20 15 11
+```
+其遍历过程如下图所示：
+
+![树](../../images/books/tree7.png)
+
 ### 搜索树中的值
+在一个树中，有三种经常执行的搜索类型：
+* 搜索最小值
+* 搜索最大值
+* 搜索特定的值
+
+#### 搜索最小值和最大值
+如果我们看一眼我们现在已有的树，我们就会发现最左边是最小值，最右边是最大值，这种特定的树为我们搜索最大值和最小值提供了极大的方便。
+
+首先我们来看寻找最小值的方法：
+```js
+min () {
+  return this.minNode(this.root)
+}
+minNode (node) {
+  let current = node
+  while (current !== null && current.left !== null) {
+    current = current.left
+  }
+  return current
+}
+```
+和搜索最小值相似的逻辑，我们来看搜素最大值的方法：
+```js
+max () {
+  return this.maxNode(this.root)
+}
+maxNode (node) {
+  let current = node
+  while (current !== null && current.right !== null) {
+    current = current.right
+  }
+  return current
+}
+```
+在撰写完以上代码后，我们使用以下代码来测试：
+```js
+const minNode = tree.min()
+const maxNode = tree.max()
+console.log(minNode.key)  // 3
+console.log(maxNode.key)  // 25
+```
+![树](../../images/books/tree8.png)
+
+#### 搜索特定的值
 
 ### 自平衡树
 
