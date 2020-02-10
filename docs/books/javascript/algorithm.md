@@ -2250,10 +2250,115 @@ console.log(maxNode.key)  // 25
 
 
 ## 排序和搜索算法
+常用到的**排序算法**有：冒泡排序、选择排序、插入排序、希尔排序、归并排序、快速排序、计数排序以及桶排序。
+
+常用到的**搜索算法**有：顺序搜索、内插搜索和二分搜索算法。
 
 ### 排序算法
 
+#### 冒泡排序
+冒泡排序是比较相邻的两个项，如果第一个比第二个大，则交换它们。元素项向上移动至正确的顺序，就好像气泡升至表面一样，冒泡排序因此而得名。冒泡排序可能是所有排序算法中最简单的，但从运行时间的角度而言，冒泡排序是最差的一个。
+```js
+function bubbleSort (array) {
+  const { length } = array
+  for (let i = 0; i < length; i++) {
+    for (let j = 0; j < length - 1 - i; j++) {
+      if (array[j] > array[j + 1]) {
+        const temp = array[j]
+        array[j] = array[j + 1]
+        array[j + 1] = temp
+      }
+    }
+  }
+  return array
+}
+const arr = bubbleSort([5, 4, 3, 2, 1])
+console.log(arr) // [1, 2, 3, 4, 5]
+```
+下图展示冒泡排序的算法是如何执行的：
+
+![排序](../../images/books/tree9.png)
+
+#### 选择排序
+选择排序算法是一种原址比较排序算法。选择排序大致的思路是找到数据结构中的最小值并将其放置在第二位，接着找到第二小的值将其放在第二位，以此类推。
+```js
+function selectSort (array) {
+  const { length } = array
+  let indexMin = 0
+  for (let i = 0; i < length - 1; i++) {
+    indexMin = i
+    for (let j = i; j < length; j++) {
+      if (array[indexMin] > array[j]) {
+        indexMin = j
+      }
+    }
+    if (i != indexMin) {
+      const temp = array[i]
+      array[i] = array[indexMin]
+      array[indexMin] = temp
+    }
+  }
+  return array
+}
+const arr = selectSort([5, 4, 3, 2, 1])
+console.log(arr) // [1, 2, 3, 4, 5]
+```
+下图展示了选择排序的算法是如何执行的：
+
+![排序](../../images/books/tree10.png)
+
+#### 插入排序
+插入排序每次排一个数组项，以此方式构建最后的排序数组。
+
+```js
+function insertSort (array) {
+  const { length } = array
+  for (let i = 1, temp = 0; i < length; i++) {
+    let j = i
+    temp = array[i]
+    while (j > 0 && (array[j - 1] > temp)) {
+      array[j] = array[j - 1]
+      j--
+    }
+    array[j] = temp
+  }
+  return array
+}
+const arr = insertSort([3, 5, 1, 4, 2])
+console.log(arr) // [1, 2, 3, 4, 5]
+```
+代码分析：
+* 数组第一项3默认已被排序，所以我们从数组第二项(`i = 1`)值为5开始，因为3比5小，所以5待在原位，此时3和5已被排序。
+* 下一个待排序的值为1，因为1比5小，所以5应该被移动到第三个位置，又因为1比3小，所以3被移动到第二个位置。
+* 下一个待排序的值为4，因为4比5小，所以5应该被移动到第四个位置，又因为3比4小，所以4待在原位置不动。
+* 下一个待排序的值为2，因为2比5小，所以5应该被移动到第五个位置，又因为2比4小，所以4被移动到第四个位置，又因为2比3小，所以3被移动到第三个位置，1比2小，所以2的位置不动。至此，数组已排序完毕。
+
+下图展示了插入排序算法是如何执行的：
+
+![排序](../../images/books/tree11.png)
+
+**注意**：在排序小型数组时，此算法比选择排序和冒泡排序性能要好。
+
+#### 归并排序
+
+
+
+
+#### 快速排序
+
+#### 计数排序
+
+#### 桶排序
+
+#### 基数排序
+
 ### 搜索算法
+
+#### 顺序搜索
+
+#### 二分搜索
+
+### 内插搜索
 
 ### 随机算法
 
