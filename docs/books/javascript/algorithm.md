@@ -2340,13 +2340,79 @@ console.log(arr) // [1, 2, 3, 4, 5]
 **注意**：在排序小型数组时，此算法比选择排序和冒泡排序性能要好。
 
 #### 归并排序
+归并排序是第一个可以实际使用的排序算法，我们之前的三种算法性能不是特别的好，但归并排序性能不错，在`JavaScript`中，`Array.prototype.sort()`方法，`ECMAScript`并没有定义使用哪种排序算法，而是交给浏览器厂商自己去实现，而对于谷歌`V8引擎`，其使用了快速排序的变体；在`Firefox`浏览器中，则是使用了归并排序。
 
+归并排序是一种分而治之的算法，其思想是将原始数组切分为较小的数组，直到每个小数组只有一个位置，接着将小数组归并成较大的数组，直到最后只有一个排序完毕的大数组。
+```js
+function mergeSort(array) {
+  if (array.length > 1) {
+    const { length } = array
+    const middle = Math.floor(length / 2)
+    const left = mergeSort(array.slice(0, middle))
+    const right = mergeSort(array.slice(middle, length))
+    array = merge(left, right)
+  }
+  return array
+}
+function merge(left, right) {
+  let i = 0
+  let j = 0
+  const result = []
+  while (i < left.length && j < right.length) {
+    const item = left[i] < right[j] ? left[i++] : right[j++]
+    result.push(item)
+  }
+  return result.concat(i < left.length ? left.slice(i) : right.slice(j))
+}
+const result = mergeSort([8, 7, 6, 5, 4, 3, 2, 1])
+console.log(result) // [1, 2, 3, 4, 5, 6, 7, 8]
+```
+下图展示了该排序的算法是如何执行的：
 
-
+![排序](../../images/books/tree12.png)
 
 #### 快速排序
 
 #### 计数排序
+计数排序是我们学到的第一个分布式排序，分布式排序使用已组织好的辅助数据结构，然后进行合并，得到排好序的数组。计数排序使用一个用来存储每个元素在原始数组中出现次数的临时数组，在所有元素都计数完完成后，临时数组已排好序并可迭代已构建排序后的结果数组。
+
+计数排序是一种用来排序整数优秀的算法，它的时间复杂度非常简单，但其额外引入了辅助数据结构从而需要更多的内存空间。
+
+```js
+function countingSort(array) {
+  if (array.length < 2) {
+    return array
+  }
+  const maxValue = findMaxValue(array)
+  const counts = new Array(maxValue + 1)
+  array.forEach(item => {
+    if (!counts[item]) {
+      counts[item] = 0
+    }
+    counts[item]++
+  })
+  let sortIndex = 0
+  counts.forEach((item, index) => {
+    while (item > 0) {
+      array[sortIndex++] = index
+      item--
+    }
+  })
+  return array
+}
+function findMaxValue(array) {
+  let max = array[0]
+  for (let index = 1; index < array.length; index++) {
+    if (array[index] > max) {
+      max = array[index]
+    }
+  }
+  return max
+}
+
+const result = countingSort([5, 4, 3, 2, 1])
+console.log(result) // [1, 2, 3, 4, 5]
+```
 
 #### 桶排序
 
@@ -2358,7 +2424,7 @@ console.log(arr) // [1, 2, 3, 4, 5]
 
 #### 二分搜索
 
-### 内插搜索
+#### 内插搜索
 
 ### 随机算法
 
