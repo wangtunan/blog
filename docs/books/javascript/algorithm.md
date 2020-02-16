@@ -2414,19 +2414,63 @@ const result = countingSort([5, 4, 3, 2, 1])
 console.log(result) // [1, 2, 3, 4, 5]
 ```
 
-#### 桶排序
-
-#### 基数排序
-
 ### 搜索算法
 
 #### 顺序搜索
+顺序搜索(线性搜索)是最基本的搜索算法，它的机制是，将每一个数据结构中的元素和我们要找的元素做比较，一直到找到位置。顺序搜索是最低效的一种搜索算法。
+
+```js
+function sequentSearch (array, value) {
+  let result = -1
+  for(let index = 0; index < array.length; index++) {
+    if (array[index] === value) {
+      result = index
+      return
+    }
+  }
+}
+```
+假定有如下数组，其搜索示意图如下：
+
+![搜索算法](../../images/books/tree13.png)
 
 #### 二分搜索
+二分搜索算法的原理和猜数字游戏类似，假设有1-100的数，一个人猜，另一个人只需要回答高了还是低了，一直到找到这个数位置。
+
+二分搜索算法对数据结构有一定的要求，它首先要求数据结构已经是排好序的，其次它还要遵守如下的规则：
+* 首先选择数组的中间值。
+* 如果选中的值是待搜索的值，那么停止搜索。
+* 如果待搜索的值比选中的值要小，则返回步骤1并在选中值左边的子数组中查找。
+* 如果待搜索的值比选中的值要大，则返回步骤1并在选中值的右边的子数组中查找。
+
+```js
+function binarySearch (array, value) {
+  array.sort()
+  let low = 0
+  let high = array.length - 1
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2)
+    const element = array[mid]
+    if (value === element) {
+      return true
+    } else if (value < element) {
+      high = mid - 1
+    } else {
+      low = mid + 1
+    }
+  }
+  return false
+}
+console.log(binarySearch([8, 7, 6, 5, 4, 3, 2, 1], 2))  // true
+```
+代码分析：为了进一步简单化，我们使用了内置的`Array.prototype.sort()`方法来进行排序，也可以使用我们之前学到的任何排序算法来替换。
+
+以下是二分搜索算法的搜索示意图：
+
+![搜索算法](../../images/books/tree14.png)
 
 #### 内插搜索
 
-### 随机算法
 
 ## 算法设计与技巧
 
