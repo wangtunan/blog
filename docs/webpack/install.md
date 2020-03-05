@@ -30,7 +30,7 @@ $ npm install webpack webpack-cli -D 或者 npm install webpack webpack-cli --sa
 
 ## 版本号安装
 ::: tip 参数说明
-如果你对`Webpack`的具体版本有严格要求，那么可以先去github的`Webpack`仓库查看历史版本记录或者使用`npm view webpack versions`查看`Webpack`的`npm`历史版本记录
+如果你对`Webpack`的具体版本有严格要求，那么可以先去Github的`Webpack`仓库查看历史版本记录或者使用`npm view webpack versions`查看`Webpack`的`npm`历史版本记录
 :::
 ```sh
 // 查看webpack的历史版本记录
