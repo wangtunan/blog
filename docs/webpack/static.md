@@ -168,7 +168,7 @@ root.appendChild(img);
 ![css打包结果](../images/webpack/10.png)
 
 
-#### 打包Sass文件
+#### 打包Scss文件
 ::: tip 安装依赖
 需要安装`sass-loader`和`node-sass`
 :::
@@ -203,7 +203,7 @@ module.exports = {
   }
 }
 ```
-根目录下添加`index-sass.sass`文件
+根目录下添加`index-scss.scss`文件
 ```scss
 body{
   .avatar-sass{
@@ -217,7 +217,7 @@ body{
 ```js
 import avatar from './avatar.jpg';
 import './index.css';
-import './index-sass.sass';
+import './index-scss.scss';
 
 var img = new Image();
 img.src = avatar;
@@ -239,7 +239,7 @@ root.appendChild(img);
 ```sh
 npm install postcss-loader autoprefixer -D
 ```
-修改`index-sass.sass`
+修改`index-sass.scss`
 ```css
 .avatar-sass {
   width: 150px;
@@ -289,6 +289,19 @@ module.exports = {
 
 ![打包运行结果](../images/webpack/12.png)
 
+**注意**：如果`autoprefixer`没有生效，可以在`package.json`中配置目标浏览器，如下：
+```js
+"browserslist": [
+  "defaults",
+  "last 2 versions"
+]
+```
+或者在根目录新建`.browserslistrc`并填写：
+```
+defaults
+last 2 versions
+```
+
 #### 模块化打包CSS文件
 ::: tip 概念
 `CSS`的模块化打包的理解是：除非我主动引用你的样式，否则你打包的样式不能影响到我。
@@ -311,7 +324,7 @@ export default function CreateAvatar() {
 import avatar from './avatar.jpg';
 import createAvatar from './createAvatar';
 import './index.css';
-import './index-sass.sass';
+import './index-sass.scss';
 
 createAvatar();
 
@@ -327,7 +340,7 @@ root.appendChild(img);
 
 ![打包运行](../images/webpack/13.png)
 
-我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.sass`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
+我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.scss`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
 
 进一步改写`webpack.config.js`
 ```js {22}
@@ -365,7 +378,7 @@ module.exports = {
 import avatar from './avatar.jpg';
 import createAvatar from './createAvatar';
 import './index.css';
-import style from  './index-sass.sass';
+import style from  './index-sass.scss';
 
 createAvatar();
 

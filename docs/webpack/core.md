@@ -115,15 +115,15 @@ $ npm install clean-webpack-plugin -D
 安装完毕以后，我们同样需要在`webpack.config.js`中进行配置(改动部分参考高亮代码块)
 ```js {3,13}
 const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
     main: './src/index.js'
   },
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),
     new cleanWebpackPlugin()
@@ -136,7 +136,74 @@ module.exports = {
 ```
 在完成以上配置后，我们使用`npm run bundle`打包命令进行打包，它的打包结果请自行在你的项目下观看自动清理`dist`目录的实时效果。<br>
 
-在使用`WebpackPlugin`小节，我们只介绍了两种常用的`plugin`，更多`plugin`的用法我们将在后续进行讲解，你也可以点击[Webpack Plugins](https://webpack.js.org/plugins)来学习更多官网推荐的`plugin`用法。
+在使用`WebpackPlugin`小节，我们只介绍了两种常用的`plugin`，更多`plugin`的用法我们将在后续进行学习，你也可以点击[Webpack Plugins](https://webpack.js.org/plugins)来学习更多官网推荐的`plugin`用法。
+
+## Entry和Output的基础配置
+
+### 多个入口文件
+在我们之前的所有`entry`配置中，仅仅只有一个入口文件，假设现在我们有这样一个需求：需要把`index.js`打包两遍，一个是`main.js`，另外一个是`sub.js`，那么我们应该在`entry`进行如下的配置：
+```js {6}
+const path = require('path');
+module.exports = {
+  mode: 'development',
+  entry: {
+    main: './src/index.js',
+    sub: './src/index.js'
+  },
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname,'dist')
+  }
+}
+```
+**注意**：如果我们仅仅只是调整了`entry`配置，没有进行`output`配置修改的话，则会打包错误。原因是`output`打包后的文件都叫`main.js`，但我们`entry`却有两个入口文件，因此会造成错误，所以我们同样需要对`output`配置进行修改：
+```js {10}
+const path = require('path');
+module.exports = {
+  mode: 'development',
+  entry: {
+    main: './src/index.js',
+    sub: './src/index.js'
+  },
+  output: {
+    // 使用[name]占位符，打包结果为main.js，sub.js
+    filename: '[name].js',
+    path: path.resolve(__dirname,'dist')
+  }
+}
+```
+
+进行如上配置后，`dist/index.html`文件中`js`的引用如下：
+```html
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="sub.js"></script>
+```
+
+### CDN引用
+在打包后，把静态资源发布到`CDN`是一种常见的提高网页性能的手段，正如你在上面所看到的的那样，我们现在的打包方式并不能实现`CDN`引用，需要我们进行如下的配置：
+```js
+const path = require('path');
+module.exports = {
+  mode: 'development',
+  entry: {
+    main: './src/index.js',
+    sub: './src/index.js'
+  },
+  output: {
+    // 假设一个CDN地址
+    publicPath: 'www.cdn.com/wangtunan',
+    // 使用[name]占位符，打包结果为main.js，sub.js
+    filename: '[name].js',
+    path: path.resolve(__dirname,'dist')
+  }
+}
+```
+
+在上面的配置生效后，我们打包后`dist/index.html`的`js`引用效果如下：
+```html
+<script type="text/javascript" src="www.cdn.com/wangtunan/main.js"></script>
+<script type="text/javascript" src="www.cdn.com/wangtunan/sub.js"></script>
+```
 
 ## 配置SourceMap
 ::: tip 理解
