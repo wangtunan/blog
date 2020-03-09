@@ -215,8 +215,8 @@ module.exports = {
 ![devtool](../images/webpack/16.png)
 
 通过上图我们可以看出，良好的`source-map`配置不仅能帮助我们提高打包速度，同时在代码维护和调错方面也能有很大的帮助，一般来说，`source-map`的最佳实践是下面这样的：
-* 开发环境下(`development`)：推荐将`devtool`设置成`cheap-module-eval-source-map`
-* 生产环境下(`production`)：推荐将`devtool`设置成`cheap-module-source-map`
+* 开发环境下`development`：推荐将`devtool`设置成`cheap-module-eval-source-map`
+* 生产环境下`production`：推荐将`devtool`设置成`cheap-module-source-map`
 
 
 ## 使用WebpackDevServer
@@ -226,7 +226,7 @@ module.exports = {
 
 自动打包的方案，通常来说有如下几种：
 * `watch`参数自动打包：它是在打包命令后面跟了一个`--watch`参数，它虽然能帮我们自动打包，但我们任然需要手动刷新浏览器，同时它不能帮我们在本地启动一个小型服务器，一些`http`请求不能通过。
-* `webpack-dev-server`插件打包(推荐)：它是我们推荐的一种自动打包方案，在开发环境下使用尤其能帮我们高效的开发，它能解决`watch`参数打包中的问题，如果我们与热更新(`HMR`)一起使用，我们将拥有非常良好的开发体验。
+* `webpack-dev-server`插件打包(推荐)：它是我们推荐的一种自动打包方案，在开发环境下使用尤其能帮我们高效的开发，它能解决`watch`参数打包中的问题，如果我们与热更新`HMR`一起使用，我们将拥有非常良好的开发体验。
 
 #### watch参数自动打包
 使用`watch`参数进行打包，我们需要在`package.json`中新增一个`watch`打包命令，它的配置如下
@@ -253,7 +253,7 @@ $ npm install webpack-dev-server -D
   "scripts": {
     "bundle": "webpack",
     "watch": "webpack --watch",
-    "dev": "webpack-dev-server'
+    "dev": "webpack-dev-server"
   }
 ```
 配置完打包命令后，我们最后需要对`webpack.config.js`做一下处理：
@@ -270,7 +270,7 @@ module.exports = {
 ```
 在以上都配置完毕后，我们使用`npm run dev`命令进行打包，它会自动帮我们打开浏览器，现在你可以在`src/index.js`修改代码，再在浏览器中查看效果，它会有惊喜的哦，ღ( ´･ᴗ･` )比心<br/>
 
-这一小节主要介绍了如何让工具自动帮我们打包，下一节我们将讲解模块热更新(HMR)。
+这一小节主要介绍了如何让工具自动帮我们打包，下一节我们将学习模块热更新(HMR)。
 
 ## 模块热更新(HMR)
 ::: tip 理解
@@ -287,7 +287,7 @@ module.exports = {
     open: true,
     port: 3000,
     hot: true, // 启用模块热更新
-    hotOnly: true // 模块热更新启动失败时，重新刷新浏览器
+    hotOnly: true // 模块热更新启动失败时，不重新刷新浏览器
   },
   plugins: [
     // 其它插件

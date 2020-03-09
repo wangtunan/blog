@@ -703,7 +703,7 @@ module.exports = {
       chunks: 'all'
     },
     minimizer: [
-      new optimizaCssAssetsWebpackPlugin()
+      new optimizaCssAssetsWebpackPlugin({})
     ]
   }
 }
