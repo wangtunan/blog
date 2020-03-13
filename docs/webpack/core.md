@@ -68,14 +68,14 @@ $ npm install html-webpack-plugin -D
 因为我们要使用`html-webpack-plugin`插件，所以我们需要再次改写`webpack.config.js`文件(具体改动部分见高亮部分)
 ```js {2,8,9,10,11,12}
 const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
     main: './src/index.js'
   },
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html'
     })
   ],
@@ -126,7 +126,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),
-    new cleanWebpackPlugin()
+    new CleanWebpackPlugin()
   ],
   output: {
     filename: 'main.js',
@@ -141,7 +141,7 @@ module.exports = {
 ## Entry和Output的基础配置
 
 ### 多个入口文件
-在我们之前的所有`entry`配置中，仅仅只有一个入口文件，假设现在我们有这样一个需求：需要把`index.js`打包两遍，一个是`main.js`，另外一个是`sub.js`，那么我们应该在`entry`进行如下的配置：
+在我们之前的所有`entry`配置中，仅仅只有一个入口文件，假设现在我们有这样一个需求：需要把`index.js`打包两遍，一个叫`main.js`，另外一个叫`sub.js`，那么我们应该在`entry`进行如下的配置：
 ```js {6}
 const path = require('path');
 module.exports = {
@@ -199,7 +199,7 @@ module.exports = {
 }
 ```
 
-在上面的配置生效后，我们打包后`dist/index.html`的`js`引用效果如下：
+在上面的配置完毕，我们打包后`dist/index.html`的`js`引用效果如下：
 ```html
 <script type="text/javascript" src="www.cdn.com/wangtunan/main.js"></script>
 <script type="text/javascript" src="www.cdn.com/wangtunan/sub.js"></script>

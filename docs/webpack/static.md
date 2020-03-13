@@ -68,12 +68,12 @@ root.appendChild(img)
 
 
 #### 运用占位符
-在以上打包图片的过程中，我们发现打包生成的图片好像名字是一串乱码，如果我们要原样输出原图片的名字的话，又该如何进行配置呢？这个问题，可以使用 **占位符** 进行解决。
+在以上打包图片的过程中，我们发现打包生成的图片名字好像是一串乱码，如果我们要原样输出原图片的名字的话，又该如何进行配置呢？这个问题，可以使用 **占位符** 进行解决。
 ::: tip 占位符说明
 文件占位符它有一些固定的规则，像下面这样：
-* `[name]`代表原本文件的名字
-* `[ext]`代表原本文件的后缀
-* `[hash]`代表一个`md5`的唯一编码
+* `[name]`代表原本文件的名字。
+* `[ext]`代表原本文件的后缀。
+* `[hash]`代表一个`md5`的唯一编码。
 :::
 根据占位符的规则再次改写`webpack.config.js`文件，
 ```js
@@ -362,12 +362,17 @@ module.exports = {
       },
       {
         test: /\.(sass|scss)$/,
-        use: ['style-loader', {
-          loader: 'css-loader',
-          options: {
-            modules: true
-          }
-        }, 'sass-loader', 'postcss-loader']
+        use: [
+          'style-loader', 
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true
+            }
+          },
+          'sass-loader', 
+          'postcss-loader'
+        ]
       }
     ]
   }
