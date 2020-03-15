@@ -111,7 +111,7 @@ module.exports = {
 ],
 ```
 
-**小结**：对于`Tree Shaking`的争议比较多，推荐看:point_right:[你的Tree Shaking并没有什么卵用](https://zhuanlan.zhihu.com/p/32831172)，看完你会发现我们对`Tree Shaking`的了解太浅薄了:sob:
+**小结**：对于`Tree Shaking`的争议比较多，推荐看:point_right:[你的Tree Shaking并没有什么卵用](https://zhuanlan.zhihu.com/p/32831172)，看完你会发现我们对`Tree Shaking`的了解还需要进一步加深。
 
 ## 区分开发模式和生产模式
 像上一节那样，如果我们要区分`Tree Shaking`的开发环境和生产环境，那么我们每次打包的都要去更改`webpack.config.js`文件，有没有什么办法能让我们少改一点代码呢？ 答案是有的！
@@ -128,8 +128,8 @@ module.exports = {
 新建完`webpack.common.js`文件后，我们需要把公用配置提取出来，它的代码看起来应该是下面这样子的：
 ```js
 const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   entry: {
     main: './src/index.js'
@@ -148,10 +148,10 @@ module.exports = {
     ]
   },
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),
-    new cleanWebpackPlugin()
+    new CleanWebpackPlugin()
   ],
   output: {
     filename: '[name].js',
@@ -523,9 +523,42 @@ import b from 'b.js';
 console.log('c.js');
 ```
 
+
+#### 自定义文件名
+我们如果不对代码分隔后的文件进行配置的话，那么在`vendors`组里面的文件名，默认会按`vendors`+`main`(入口)的形式命名，例如：`vendors~main.js`，如果我们想要自定义配置文件名的话，则需要分情况：
+* 同步代码分隔：使用`filename`命名。
+* 非同步代码分隔：使用`name`来命令。
+```js
+// 同步代码分隔
+module.exports = {
+  // 其它配置略
+  splitChunks: {
+    chunks: 'initial',
+    vendors: {
+      test: /[\\/]node_modules[\\/]/,
+      priority: -10,
+      filename: 'vendors.js'
+    }
+  }
+}
+
+// 非同步代码分隔
+module.exports = {
+  // 其它配置略
+  splitChunks: {
+    chunks: 'async',
+    vendors: {
+      test: /[\\/]node_modules[\\/]/,
+      priority: -10,
+      name: 'vendors'
+    }
+  }
+}
+```
+
 ## Lazy Loading懒加载
 ::: tip 理解
-`Lazy Loading`懒加载的理解是：通过异步引入代码，它说的异步，并不是在页面一开始就加载，而是在合适的时机进行加载。
+`Lazy Loading`懒加载的理解是：通过异步引入代码，这里说的异步，并不是在页面一开始就加载，而是在合适的时机进行加载。
 :::
 `Lazy Loading`懒加载的实际案例我们已经在上一小节书写了一个例子，不过我们依然可以做一下小小的改动，让它使用`async/await`进行异步加载，它的代码如下：
 ```js
@@ -546,7 +579,7 @@ async function getComponet() {
 
 ## PreLoading 和Prefetching
 ::: tip 理解
-在以上`Lazy Loading`的例子中，只有当我们在页面点击时才会加载`lodash`，也有一些模块虽然是异步导入的，但我们希望能提前进行加载，`PreLoading`和`Prefetching`可以帮助我们实现这一点，它们的用法类似，但它们还是有区别的：`Prefetching`不会跟随主进程一些下载，而是等到主进程加载完毕，带宽释放后才进行加载，`PreLoading`会随主进程一起加载。
+在以上`Lazy Loading`的例子中，只有当我们在页面点击时才会加载`lodash`，也有一些模块虽然是异步导入的，但我们希望能提前进行加载，`PreLoading`和`Prefetching`可以帮助我们实现这一点，它们的用法类似，但它们还是有区别的：`Prefetching`不会跟随主进程一起下载，而是等到主进程加载完毕，带宽释放后才进行加载，`PreLoading`会随主进程一起加载。
 :::
 实现`PreLoading`或者`Prefetching`非常简单，我们只需要在上一节的例子中加一点点代码即可(参考高亮部分)：
 ``` js {8}
@@ -588,9 +621,9 @@ $ npm install mini-css-extract-plugin -D
 安装完毕后，由于此插件已支持`HMR`，那我们可以把配置写在`webpack.common.js`中(以下配置为完整配置，改动参考高亮代码块)：
 ```js {4,15,16,17,18,19,36,37,38}
 const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
-const miniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
   entry: {
     main: './src/index.js'
@@ -601,7 +634,7 @@ module.exports = {
         test: /\.css$/,
         use: [
           { 
-            loader: miniCssExtractPlugin.loader,
+            loader: MiniCssExtractPlugin.loader,
             options: {
               hmr: true,
               reloadAll: true
@@ -618,11 +651,11 @@ module.exports = {
     ]
   },
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),
-    new cleanWebpackPlugin(),
-    new miniCssExtractPlugin({
+    new CleanWebpackPlugin(),
+    new MiniCssExtractPlugin({
       filename: '[name].css'
     })
   ],

@@ -286,7 +286,7 @@ module.exports = {
     contentBase: 'dist',
     open: true,
     port: 3000,
-    hot: true, // 启用模块热更新
+    hot: true,    // 启用模块热更新
     hotOnly: true // 模块热更新启动失败时，不重新刷新浏览器
   },
   plugins: [
@@ -429,13 +429,13 @@ if(module.hot) {
 ```
 要处理`ES6`代码，需要我们安装几个`npm`包，可以使用如下的命令去安装
 ``` sh
-// 安装 babel-loader @babel/core
+# 安装 babel-loader @babel/core
 $ npm install babel-loader @babel/core --save-dev
 
-// 安装 @babel/preset-env
+# 安装 @babel/preset-env
 $ npm install @babel/preset-env --save-dev
 
-// 安装 @babel/polyfill进行ES5代码补丁
+# 安装 @babel/polyfill进行ES5代码补丁
 $ npm install @babel/polyfill --save-dev
 ```
 安装完毕后，我们需要改写`src/index.js`中的代码，可以是下面这个样子：
