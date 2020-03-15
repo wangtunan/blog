@@ -202,22 +202,22 @@ module.exports = {
     detail: './src/detail.js',
   },
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: 'index.html',
       chunks: ['index']
     }),
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: 'list.html',
       chunks: ['list']
     }),
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: 'detail.html',
       chunks: ['detail']
     }),
-    new cleanWebpackPlugin()
+    new CleanWebpackPlugin()
   ]
 }
 ```
@@ -266,7 +266,7 @@ const makeHtmlPlugins = function (configs) {
   const htmlPlugins = []
   Object.keys(configs.entry).forEach(key => {
     htmlPlugins.push(
-      new htmlWebpackPlugin({
+      new HtmlWebpackPlugin({
         template: 'src/index.html',
         filename: `${key}.html`,
         chunks: [key]
@@ -286,8 +286,8 @@ module.exports = configs;
 ```js
 const path = require('path');
 const webpack = require('webpack');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const miniCssExtractPlugin = require('mini-css-extract-plugin');
 const optimizaCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 const configs = {
@@ -326,7 +326,7 @@ const configs = {
     ]
   },
   plugins: [
-    new cleanWebpackPlugin(),
+    new CleanWebpackPlugin(),
     new miniCssExtractPlugin({
       filename: '[name].css'
     }),
@@ -352,7 +352,7 @@ const makeHtmlPlugins = function (configs) {
   const htmlPlugins = []
   Object.keys(configs.entry).forEach(key => {
     htmlPlugins.push(
-      new htmlWebpackPlugin({
+      new HtmlWebpackPlugin({
         template: 'src/index.html',
         filename: `${key}.html`,
         chunks: [key]
