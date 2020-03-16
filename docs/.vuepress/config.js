@@ -81,7 +81,12 @@ module.exports = {
       },
       {
         text: 'Webpack',
-        link: '/webpack/'},
+        link: '/webpack/'
+      },
+      {
+        text: 'TypeScript',
+        link: '/typescript/'
+      },
       {
         text: 'VuePress',
         link: '/vuepress/'
