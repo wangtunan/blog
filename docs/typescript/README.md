@@ -24,8 +24,10 @@ $ npm install -g typescript
 # 安装完毕后，查看版本号
 $ tsc -v
 ```
-
-**注意**：如果你对具体版本有严格的要求，你同样可以按照指定版本号进行安装，如下：
+::: warning
+如果你对具体版本有严格的要求，你同样可以按照指定版本号进行安装。
+:::
+如下：
 ```sh
 # 按指定版本号进行安装
 $ npm install -g typescript@3.6.4
@@ -170,6 +172,38 @@ function add (num1: number, num2: number) {
 **建议**：始终为函数返回值提供一个确定的类型是有一个比较推荐的好习惯。
 
 ### 联合类型
+**联合类型**：表示取值可以为多种类型中的一种，多种类型使用`|`分隔开。
+```ts
+let value: string | number
+value = 123
+value = '123'
+```
+
+::: warning
+当我们使用联合类型的时候，因为`TypeScript`不确定到底是哪一个类型，所以我们只能访问此联合类型的所有类型公用的属性和方法。
+:::
+```ts
+// 会编译报错
+function getLength (value: string | number): number {
+  return value.length
+}
+
+// 以下代码不会编译报错
+function valueToStr (value: string | number): string {
+  return value.toString()
+}
+```
+
+::: warning
+另外一个值得注意的地方就是，当联合类型被赋值后，`TypeScript`会根据类型推断来确定变量的类型，一旦确定后，则此变量只能使用这种类型的属性和方法。
+:::
+```ts
+let tsValue: string | number
+tsValue = '123'
+console.log(tsValue.length) // 编译正确
+tsValue = 123
+console.log(tsValue.length) // 编译报错
+```
 
 ### 接口
 
@@ -189,7 +223,7 @@ function add (num1: number, num2: number) {
 
 ### 字符串字面量类型
 
-### 元组
+### 数组和元组
 
 ### 枚举
 
