@@ -209,6 +209,83 @@ console.log(tsValue.length) // 编译报错
 ```
 
 ### 接口
+在`TypeScript`中，接口`interface`是一个比较重要的概念，它是对行为的抽象，而具体如何行动需要由类去实现，接口`interface`中的任何代码都不会被最后编译到`JavaScript`中。
+
+```ts
+interface Person {
+  name: string,
+  age: number
+}
+let person: Person = {
+  name: 'why',
+  age: 23
+}
+```
+在以上代码中，`person`变量它是`Person`类型的，那么此变量只能接受接口规定的属性且属性值的类型也必须和接口中规定的一直，多一个属性或者少一个属性在`TypeScript`中都不是被允许的。
+```ts
+interface Person {
+  name: string,
+  age: number
+}
+// 编译报错
+let person1: Person = {
+  name: 'why'
+}
+// 编译报错
+let person2: Person = {
+  name: 'why',
+  age: 23,
+  sex: 'man'
+}
+```
+#### 接口中的任意属性
+以上一个例子为基础，假设我们接口只对`name`和`age`做规定，其它任何属性都是可以的，那么我们可以如下方式进行定义：
+```ts
+interface Person {
+  name: string,
+  age: number,
+  // 任意属性
+  [propName: string]: any
+}
+let person: Person = {
+  name: 'why',
+  age: 23,
+  sex: 'man'
+}
+```
+
+#### 接口中的可选属性
+现在假设，我们有一个接口，它只对`name`做规定，但是对于是否包含`age`不做要求，那么可以如下方式进行处理：
+```ts
+interface Person {
+  name: string,
+  // age属性是可选的
+  age?: number
+}
+// 编译成功
+let person1: Person = {
+  name: 'why'
+}
+let person2: Person = {
+  name: 'why',
+  age: 23
+}
+```
+
+#### 接口中的只读属性
+最后我们要介绍的在接口中的一个知识是只读属性，一旦在接口中标记了属性为只读的， 那么其不能被赋值。
+```ts
+interface Person {
+  name: string,
+  readonly age: number
+}
+let person: Person = {
+  name: 'why',
+  age: 23
+}
+// 编译报错
+person.age = 32
+```
 
 ### 函数的类型
 在`JavaScript`中，定义函数有三种表现形式：
@@ -326,16 +403,68 @@ console.log(add('1', '2'))  // 12
 :::
 
 ### 类型断言
+在上面联合类型中，我们知道可以变量可以是多个类型的，这可能会在代码编写的过程中带给我们一些困惑：
+```ts
+class Student {
+  name: string = 'student'
+  sayHi () {
+    console.log(this.name)
+  }
+}
+class Teacher {
+  name: string = 'teacher'
+  sayHello () {
+    console.log(this.name)
+  }
+}
+function print(person: Student | Teacher) {
+  if (person instanceof Student) {
+    // 强制断言为Student类型
+    (person as Student).sayHi()
+  } else {
+    // 强制断言为Teacher类型
+    (person as Teacher).sayHello()
+  }
+}
 
-### 声明文件
+let stu = new Student()
+let teacher = new Teacher()
+print(stu)      // student
+print(teacher)  // teacher
+```
+代码分析：在`print`函数中，我们接受的参数可以是`Student`或者`Teacher`，在此函数内部我们希望能够根据不同的类型来调用不同的方法。我们首先使用`instanceof`来判断参数是否为`Student`类的实例，是我们将`person`参数强制断言成`Student`类型，此时就可以安全的调用`sayHi`方法了，`Teacher`同理。
 
-### 内置对象
 
-## 进阶
 
 ### 类型别名
+类型别名用`type`关键字来给一个类型起一个新的名字，类型别名常用与联合类型。
+```ts
+type combineType = number | string
+type typeObj = {
+  age: number,
+  name: string
+}
+const value1: combineType = 123
+const obj: typeObj = {
+  age: 123,
+  name: 'why'
+}
+
+```
 
 ### 字符串字面量类型
+字符串字面量类型用来表示一个变量只能取某几个字符串值中的一个。
+```ts
+type eventName = 'click' | 'scroll' | 'mousemove'
+function handleEvent (event: eventName) {
+  console.log(event)
+}
+handleEvent('click')    // click
+handleEvent('scroll')   // scroll
+handleEvent('dbclick')  // 编译报错
+```
+
+## 进阶
 
 ### 数组和元组
 
@@ -396,6 +525,41 @@ console.log(tuple[2]) // 报
 ```
 
 ### 枚举
+枚举`Enum`类型用来表示取值限定在指定的范围，例如一周只能有七天，颜色只能有红、绿、蓝等。
+
+```ts
+enum colors  {
+  red,
+  green,
+  blue
+}
+console.log(colors.red)   // 0
+console.log(colors.green) // 1
+console.log(colors.blue)  // 2
+```
+代码分析：我们定义一个`colors`的枚举类型，其取值只能是`red`、`green`、`blue`。我们可以在打印的内容发现，其输出值从0开始，依次累加1。这是枚举类型的默认行为，我们可以手动设置一个起始值：
+```ts
+enum colors  {
+  red = 10,
+  green,
+  blue
+}
+console.log(colors.red)   // 10
+console.log(colors.green) // 11
+console.log(colors.blue)  // 12
+```
+
+在枚举类型中，我们不仅可以正向的获取值，还可以通过值反向获取枚举：
+```ts
+enum colors  {
+  red = 10,
+  green,
+  blue
+}
+console.log(colors[10]) // red
+console.log(colors[11]) // green
+console.log(colors[12]) // blue
+```
 
 ### 类
 
@@ -630,6 +794,8 @@ console.log(point3d)  // { x: 10, y: 10, z: 10 }
 ### 泛型
 
 ### 声明合并
+
+### 声明文件
 
 ## 工程
 
