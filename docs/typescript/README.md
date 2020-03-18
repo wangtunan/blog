@@ -399,7 +399,233 @@ console.log(tuple[2]) // 报
 
 ### 类
 
+#### 类的继承
+在`JavaScript`中，通过`extends`关键字来实现子类继承父类，子类也可以通过`super`关键字来访问父类的属性或者方法。
+```ts
+class Person {
+  name: string
+  constructor (name: string) {
+    this.name = name
+  }
+  sayHello () {
+    console.log(`hello, ${this.name}`)
+  }
+}
+class Teacher extends Person {
+  constructor (name: string) {
+    // 调用父类的构造函数
+    super(name)
+  }
+  sayTeacherHello () {
+    // 调用父类的方法
+    return super.sayHello()
+  }
+}
+let teacher = new Teacher('why')
+teacher.sayHello()        // hello, why
+teacher.sayTeacherHello() // hello, why
+```
+::: tip
+有一种关于类属性的简写方式，就是在类的构造函数中指明访问修饰符。
+:::
+```ts
+// 简写形式
+class Person {
+  constructor (public name: string) {}
+}
+// 等价于
+class Person {
+  name: string
+  constructor (name: string) {
+    this.name = name
+  }
+}
+```
+
+#### 存取器
+在`class`中，可以通过`getter`和`setter`来改变属性的读取和赋值行为。
+```ts
+class Person {
+  // 私有属性，只能在类中进行访问
+  private _name: string
+  constructor (_name: string) {
+    this._name = _name
+  }
+  get name () {
+    return this._name
+  }
+  set name(name) {
+    this._name = name
+  }
+}
+let person = new Person('why')
+console.log(person.name)  // why
+person.name = 'AAA'
+console.log(person.name)  // AAA
+```
+
+#### 静态属性和静态方法
+所谓静态属性和静态方法，就是只能通过类来进行访问，不能通过类的实例来进行访问。在众多设计模式中，有一种设计模式叫做单例设计模式，可以使用`static`静态方法来辅助我们完成单例设计模式。
+```ts
+class Person {
+  private static _instance: Person
+  private constructor () {}
+  public static getInstance () {
+    if (!this._instance) {
+      this._instance = new Person()
+    }
+  }
+}
+const person1 = Person.getInstance()
+const person2 = Person.getInstance()
+console.log(person1 === person2) // true
+```
+
+#### TypeScript类的访问修饰符
+在以上的实例中，我们使用到了`TypeScript`中关于类的几种访问修饰符，它有三种：
+* `public`：公有的，在任何地方都可以访问到。
+* `protected`：受保护的，只能在类的内部及其类的子类内部使用。
+* `private`：私有的，只能在类的内部进行使用。
+
+```ts
+class Person {
+  private age: number
+  protected address: string
+  public name: string
+  constructor (age: number, address: string, name: string) {
+    this.age = age
+    this.address = address
+    this.name = name
+  }
+}
+class Teacher extends Person {
+  sayHello () {
+    console.log(`my addresss is ${this.address}`) // my address is 广东广州
+    console.log(`my name is ${this.name}`)        // my name is why
+    console.log(`my age is ${this.age}`)          // 编译报错
+  }
+}
+const person = new Person(21, '广东广州', 'why')
+console.log(person.name)    // why
+console.log(person.age)     // 编译报错
+console.log(person.address) // 编译报错
+```
+
+
+#### 只读属性
+可以使用`readonly`关键字来表示属性是只读的。
+```ts
+class Person {
+  constructor (public readonly name: string) {}
+}
+let person = new Person('AAA')
+console.log(person.name)  // AAA
+person.name = 'BBB'       // 编译报错 
+```
+
+#### 抽象类
+在`TypeScript`中，可以使用`abstract`关键字来定义抽象类以及抽象类中的抽象方法，在使用抽象类的过程中，有几点需要注意：
+* 抽象类不能被实例化，只能被继承。
+* 抽象类中的抽象方法必须被子类实现。
+
+抽象类不能被实例化：
+```ts
+abstract class Animal {
+  name: string
+  constructor (name: string) {
+    this.name = name
+  }
+}
+class Person extends Animal{}
+const person = new Person('why')
+console.log(person.name)    // why
+const animal = new Animal() // 编译报错
+```
+
+抽象类中的抽象方法必须被子类实现：
+```ts
+abstract class Animal {
+  name: string
+  constructor (name: string) {
+    this.name = name
+  }
+  abstract eat (): void
+}
+class Person extends Animal{
+  // 子类必须实现抽象类中的抽象方法
+  eat () {
+    console.log('person is eating')
+  }
+}
+const person = new Person('why')
+console.log(person.name)    // why
+person.eat()                // person is eating
+```
+
+
+
 ### 类和接口
+
+#### 类实现接口
+::: tip
+一个类可以实现一个或者多个接口，用逗号分隔。
+:::
+如果我们定义了一个接口，然后类去实现它，那么这个接口中的属性和方法，在类中必须全部都要存在，否则会编译报错。
+```ts
+interface Animal {
+  age: number
+  sayHello (): void
+}
+
+class Person implements Animal {
+  age: number
+  sayHello () {
+    console.log(this.age)
+  }
+}
+```
+
+#### 接口继承接口
+在上面的案例中，我们使用到了类实现接口，其实一个接口还可以继承自另外一个接口。
+```ts
+interface Animal {
+  age: number
+  sayHello (): void
+}
+interface Person extends Animal {
+  // Person接口继承了Animal，就拥有了Animal种所有的属性和方法
+  name: string
+}
+
+class Person implements Person {
+  age: number
+  sayHello () {
+    console.log(this.age)
+  }
+}
+```
+
+#### 接口继承类
+在有些语言中，接口一般而言是不能继承类的，但在`TypeScript`中是可以继承的，接口继承类以后，就拥有类中所有的属性和方法。
+```ts
+class Point {
+  x: number
+  y: number
+  constructor (x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
+interface Point3d extends Point {
+  z: number
+}
+let point3d: Point3d = {
+  x: 10,
+  y: 10,
+  z: 10
+}
+console.log(point3d)  // { x: 10, y: 10, z: 10 }
+```
 
 ### 泛型
 
