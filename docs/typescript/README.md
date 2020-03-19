@@ -792,10 +792,274 @@ console.log(point3d)  // { x: 10, y: 10, z: 10 }
 ```
 
 ### 泛型
+泛型`generics`是指在定义函数、接口和类的时候，不预先指定其具体类型，而在使用的时候再去指定的一种特性。
+
+#### 函数中的泛型
+假设我们有如下一个函数，其中参数`a`和`b`接受的类型必须为相同的类型。
+```js
+function join (a, b) {
+  return `${a}${b}`
+}
+```
+我们在没有了解到泛型之前，我们可以用联合类型来定义：
+```ts
+function join (a: number | string, b: number | string) {
+  return `${a}${b}`
+}
+```
+代码分析：在以上的例子中，我们仅仅只是规定了`a`和`b`参数必须是`number`类型或者`string`类型，但并没有办法来限制`a`和`b`必须是同一个类型。这个时候我们可以使用泛型来表示：
+```ts
+function join<T> (a: T, b: T): string {
+  return `${a}${b}`
+}
+console.log(join(1, 2))     // 12    
+console.log(join('1', '2')) // 12
+console.log(join(1, '2'))   // 编译报错
+```
+**注意**：我们在调用`join()`函数并进行传参的时候，`TypeScript`会自动帮我们推断参数的类型，以上三行代码也可以向如下方式进行撰写：
+```ts
+console.log(join<number, number>(1, 2))     // 12    
+console.log(join<string, string>('1', '2')) // 12
+console.log(join<number, string>(1, '2'))   // 编译报错
+```
+
+::: tip
+泛型可以是多个的。
+:::
+```ts
+function join<T, P> (a: T, b: P): string {
+  return `${a}${b}`
+}
+console.log(join(1, 2))     // 12    
+console.log(join('1', '2')) // 12
+console.log(join(1, '2'))   // 12
+```
+代码分析：在以上的案例中，`join`方法接受2个泛型类型，其中参数`a:T`，参数`b:p`，因此`console.log(join(1, '2'))`会正确被编译并输出12。
+
+#### 类中的泛型
+泛型同样可以使用在类中。
+```ts
+class CreateClass<T> {
+  zeroValue: T
+  add: (x: T, y: T) => T
+}
+let createNumber = new CreateClass<number>()
+createNumber.add = function (x, y) {
+  return x + y
+}
+let createString = new CreateClass<string>()
+createString.add = function (x, y) {
+  return `${x}${y}`
+}
+console.log(createNumber.add(1, 2))     // 3
+console.log(createString.add('1', '2')) // 12
+```
+
+::: tip
+在`TypeScript@2.3+`以后的版本，我们可以为泛型提供一个默认值。
+:::
+```ts
+class CreateClass<T = number> {
+  zeroValue: T
+  add: (x: T, y: T) => T
+}
+let createNumber = new CreateClass()
+createNumber.add = function (x, y) {
+  return x + y
+}
+let createString = new CreateClass<string>()
+createString.add = function (x, y) {
+  return `${x}${y}`
+}
+console.log(createNumber.add(1, 2))     // 3
+console.log(createString.add('1', '2')) // 12
+```
+代码分析：在`CreateClass`类的定义部分，我们为泛型提供了一个默认值`number`，因此我们在实例`createNumber`初始化的时候就可以不用传递`number`了。
+
+#### 接口中的泛型
+像在类中一样，泛型可以存在于接口中。
+```ts
+interface CreateArray {
+  <T>(length: number, value: T): T[]
+}
+let createArrayFunc: CreateArray = function (length, value) {
+  let result = []
+  for (let index = 0; index < length; index++) {
+    result[index] = value
+  }
+  return result
+}
+console.log(createArrayFunc(3, 'AAA'))  // ['AAA', 'AAA', 'AAA']
+console.log(createArrayFunc(2, true))   // [true, true]
+```
 
 ### 声明合并
+如果定义了两个相同名字的函数、接口或类，那么它们会合并成一个类型。
+声明合并，我们在上面已经有实例的案例了，那就是函数的重载。
+```ts
+function add (a: number, b: number): number;
+function add (a: string, b: string): string;
+function add (a: number | string, b: number | string): number | string {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a + b
+  } else {
+    return a + '' + b
+  }
+}
+console.log(add(1, 2))      // 3
+console.log(add('1', '2'))  // 12
+```
 
-### 声明文件
+当重复定义同一个接口时，会进行接口合并：
+```ts
+interface Person {
+  name: string,
+  address: string
+}
+interface Person {
+  name: string,
+  age: 23
+}
+// 相当于
+interface Person {
+  name: string,
+  address: string,
+  age: 23
+}
+```
+:::  warning
+当合并的属性类型不一致时，会报错。
+:::
+```ts
+interface Person {
+  name: string,
+  address: string
+}
+interface Person {
+  // 报错，name类型冲突
+  name: number,
+  age: 23
+}
+```
+
+### 命名空间
+在我们以上所有案例中，我们编写的代码大多数是运行在`Node`环境下的，接下来我们来编写一些代码，让其在浏览器环境中运行。
+
+首先我们需要创建如下的项目以及目录结构：
+```sh
+|-- TypeScript
+|   |-- dist
+|   |   |-- index.html
+|   |-- src
+|   |   |-- page.ts
+|   |-- tsconfig.json
+```
+其中，`tsconfig.json`的配置如下：
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",                
+    "outDir": "./dist",
+    "rootDir": "./src", 
+    "strict": true,
+    "esModuleInterop": true
+  }
+}
+```
+在配置完`tsconfig.json`以后，我们来撰写`page.ts`中的代码：
+```ts
+class Header {
+  constructor () {
+    let dom = document.createElement('div')
+    dom.innerHTML = 'Header'
+    document.body.append(dom)
+  }
+}
+class Content {
+  constructor () {
+    let dom = document.createElement('div')
+    dom.innerHTML = 'Content'
+    document.body.append(dom)
+  }
+}
+class Footer {
+  constructor () {
+    let dom = document.createElement('div')
+    dom.innerHTML = 'Footer'
+    document.body.append(dom)
+  }
+}
+class Page {
+  constructor () {
+    new Header()
+    new Content()
+    new Footer()
+  }
+}
+```
+编写完以上代码后，我们运行如下命令：
+```sh
+# 编译src下的*.ts文件到dist目录下
+$ tsc
+```
+随后我们在`dist/index.html`中引用我们刚刚编译的代码：
+```html
+<script src="./page.js"></script>
+<script>
+  new Page()
+</script>
+```
+当我们在浏览器中运行`index.html`文件后，我们可以在浏览器下正确的看到我们想要的输出内容。
+
+当我们在打开`page.js`文件时，我们可以发现：
+![page.js代码](../images/typescript/1.png)
+
+**在全局作用域环境下，我们一次性引入了四个全局变量**：`Header`、`Content`、`Footer`和`Page`。要解决这个问题，我们可以使用`namespace`命令空间：
+```ts
+// 使用命名空间包裹我们的代码并把Page类导出出去
+namespace Home {
+  class Header {
+    constructor () {
+      let dom = document.createElement('div')
+      dom.innerHTML = 'Header'
+      document.body.append(dom)
+    }
+  }
+  class Content {
+    constructor () {
+      let dom = document.createElement('div')
+      dom.innerHTML = 'Content'
+      document.body.append(dom)
+    }
+  }
+  class Footer {
+    constructor () {
+      let dom = document.createElement('div')
+      dom.innerHTML = 'Footer'
+      document.body.append(dom)
+    }
+  }
+  export class Page {
+    constructor () {
+      new Header()
+      new Content()
+      new Footer()
+    }
+  }
+}
+```
+随后，再次使用`tsc`命令重新编译代码，编译后的`page.js`如下：
+![Page.js代码](../images/typescript/2.png)
+
+再次修改`index.html`中的代码，我们依然能够得到跟前面示例代码一样的输出结果：
+```html
+<script src="./page.js"></script>
+<script>
+  new Home.Page()
+</script>
+```
+### 装饰器
 
 ## 工程
 
