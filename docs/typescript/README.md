@@ -1059,10 +1059,3 @@ namespace Home {
   new Home.Page()
 </script>
 ```
-### 装饰器
-
-## 工程
-
-### 代码检查
-
-### 工程配置
