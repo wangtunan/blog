@@ -1,8 +1,8 @@
 const nav = require('./utils/nav.js')
 var { cssSidebar,webpackSidebar } = nav
 module.exports = {
-  title: '一蓑烟雨、汪汪汪',
-  description: '一蓑烟雨、汪汪汪的个人站点',
+  title: '一蓑烟雨、烟池鱼',
+  description: '一蓑烟雨、烟池鱼汪的个人站点',
   base: '/blog/',
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }]
