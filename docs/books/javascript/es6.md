@@ -2078,7 +2078,7 @@ function * createIterator () {
 }
 let it = createIterator()
 console.log(it.next())  // {done: false, value: 1}
-console.log(it.next())  // {done: false, value: 2}
+console.log(it.next())  // {done: true, value: 2}
 console.log(it.next())  // {done: true, value: undefined}
 ```
 代码分析：在生成器中，`return`语句表示所有的操作都已经完成，属性值`done`会被设置成`true`，如果同时提供了响应的值，则属性`value`会被设置为这个值，并且`return`语句之后的`yield`不会被执行。
@@ -2131,7 +2131,7 @@ console.log(it.next().value)  // undefined
 ## JavaScript中的类
 
 ### ES5中的近类结构
-在`ES5`及早期版本中没有类的概念，最相近的思路创建一个自定义类型：首先创建一个构造函数，然后定义另一个方法并赋值给构造函数的原型，例如：
+在`ES5`及早期版本中没有类的概念，最相近的思路是创建一个自定义类型：首先创建一个构造函数，然后定义另一个方法并赋值给构造函数的原型，例如：
 ```js
 function Person (name) {
   this.name = name
