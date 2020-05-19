@@ -2585,7 +2585,7 @@ var square = new Square(3)
 console.log(square.getArea())             // 9
 console.log(square instanceof Rectangle)  // true
 ```
-我们已经可以从上面的例子中看到，可以用过一个函数调用的形式，动态的返回需要继承的类，那么扩展开来，我们可以创建不同的继承`mixin`方法：
+我们已经可以从上面的例子中看到，可以用一个函数调用的形式，动态的返回需要继承的类，那么扩展开来，我们可以创建不同的继承`mixin`方法：
 ```js
 const NormalizeMixin = {
   normalize () {
@@ -2613,7 +2613,7 @@ const square = new Square(3)
 console.log(square.getArea())     // 9
 console.log(square.normalize())   // {width:3, height: 3}
 ```
-代码分析：与`getBaseClass()`方法直接返回单一对象不同的是，我们定义了一个`mixin()`方法，作用是把多个对象的属性合并在一起并返回，然后使用`extends`来继承这个对象，从而达到继承`NormalizeMixin`对象的`normalize()`方法和`AreaMixin`对象的`getArea()`方法。
+代码分析：与`getBaseClass()`方法直接返回单一对象不同的是，我们定义了一个`mixin()`方法，作用是把多个对象的属性合并在一起并返回，然后使用`extends`来继承这个对象，从而达到继承`NormalizeMixin`对象的`normalize()`方法和`AreaMixin`对象的`getArea()`方法的目的。
 
 #### 内建对象的继承
 在`ES5`及其早期版本中，如果我们想要通过继承的方式来创建属于我们自己的特殊数组几乎是不可能的，例如：
