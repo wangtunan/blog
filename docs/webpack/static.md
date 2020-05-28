@@ -289,7 +289,7 @@ module.exports = {
 
 ![打包运行结果](../images/webpack/12.png)
 
-**注意**：如果`autoprefixer`没有生效，可以在`package.json`中配置目标浏览器，如下：
+**注意一**：如果`autoprefixer`没有生效，可以在`package.json`中配置目标浏览器，如下：
 ```js
 "browserslist": [
   "defaults",
@@ -302,9 +302,18 @@ defaults
 last 2 versions
 ```
 
+**注意二**：如果你使用的是`Stylus`预处理器，由于`Stylus`可以省略`css`的花括号，这对于`postcss-loader`来说可能会识别不出来，这时需要我们把`postcss-loader`移动到`stylus-loader`的前面，如下：
+```js
+{
+  test: /\.styl$/,
+  use: ['style-loader', 'css-loader', 'postcss-loader', 'stylus-loader']
+}
+```
+
+
 #### 模块化打包CSS文件
 ::: tip 概念
-`CSS`的模块化打包的理解是：除非我主动引用你的样式，否则你打包的样式不能影响到我。
+`CSS`的模块化打包的理解是：各个样式相互独立，除非我主动引用你的样式，否则你打包的样式不能影响到我。
 :::
 根目录下添加`createAvatar.js`文件，并填写下面这段代码
 ```js
