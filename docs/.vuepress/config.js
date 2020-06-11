@@ -94,6 +94,13 @@ module.exports = {
         ]
       },
       {
+        text: '自动化测试',
+        items: [
+          { text: 'Jest测试框架', link: '/test/jest.md' },
+          { text: 'Vue-Test-Utils', link: '/test/vue-test' }
+        ]
+      },
+      {
         text: 'Webpack',
         link: '/webpack/'
       },
@@ -101,6 +108,7 @@ module.exports = {
         text: 'TypeScript',
         link: '/typescript/'
       },
+      
       {
         text: 'VuePress',
         link: '/vuepress/'
