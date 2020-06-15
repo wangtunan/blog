@@ -132,7 +132,7 @@ describe('HelloWorld.vue', () => {
 
 最后有一个值得注意的挂载选项：`attachToDocument`，其默认值为`false`。如果我们在挂载时提供了`true`值，则组件会被挂载到DOM上，那么我们应该在测试的最后手动调用`wrapper.destory()`函数，让元素从文档中移除并销毁已经被挂载的组件实例。
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -172,7 +172,7 @@ export default {
 ```
 那么我们依据以上代码，撰写如下测试用例：
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -186,7 +186,7 @@ describe('HelloWorld.vue', () => {
 ### 挂载PropsData
 对于需要传递`props`属性的组件，我们可以在挂载的时候，使用`PropsData`进行注入，随后可以`wrapper.props`进行访问。
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -205,7 +205,7 @@ describe('HelloWorld.vue', () => {
 ### 挂载后Html和Text
 和`props`相似，我们可以在挂载后访问到挂载后的`html`标签和`text`文本。
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -232,7 +232,7 @@ describe('HelloWorld.vue', () => {
 ```
 那么我们可以依据此撰写如下测试用例：
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -248,7 +248,7 @@ describe('HelloWorld.vue', () => {
 ### 挂载Mocks
 当我们想要在全局伪造一些额外属性的时候，例如：`$route`，可以在挂载的时候提供`mocks`属性。
 ```js
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 
 describe('HelloWorld.vue', () => {
@@ -265,7 +265,74 @@ describe('HelloWorld.vue', () => {
 
 ```
 ### 挂载Slots
+在一个组件在挂载时，需要提供`slot`插槽内容，可以使用组件提供的`slot`对象，它的键代表插槽的名称，它的值可以是一个组件、一个组件数组、一个字符串模板或文本。
+假设我们把`HelloWorld.vue`的模板改成如下所示：
+```vue
+<template>
+  <div>
+    <h1>{{ msg }}</h1>
+    <slot />
+    <slot name="foo" />
+  </div>
+</template>
+```
+那么我们测试`slot`的测试用例可以写成下面这样：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test slots', () => {
+    const testComponentA = {
+      name: 'TestA',
+      template: `<div>testComponentA</div>`
+    }
+    const testComponentB = {
+      name: 'TestB',
+      template: `<p>testComponentB</p>`
+    }
+    const wrapper = shallowMount(HelloWorld, {
+      slots: {
+        default: [testComponentA],
+        foo: testComponentB
+      }
+    })
+    expect(wrapper.text()).toContain('testComponentA')
+    expect(wrapper.findComponent(testComponentB).exists()).toBe(true)
+  })
+})
+```
 ### 挂载其它选项
+当我们在挂载一个组件的时候需要额外的给这个组件提供一些额外的配置，可以通过`options`去扩展。
+
+假设我们有如下所示的组件：
+```js
+const MyComponent = {
+  template: `<div>{{foo()}} {{bar()}} {{baz()}}</div>`,
+  methods: {
+    foo () {
+      return 'foo'
+    },
+    bar () {
+      return 'bar'
+    }
+  }
+}
+```
+
+当我们在测试的时候，我们扩展有如下的`options`配置，并根据配置可以撰写扩展后的测试用例。
+```js
+const options = {
+  methods: {
+    baz () {
+      return 'baz'
+    }
+  }
+}
+
+const wrapper = shallowMount(MyComponent, options)
+expect(wrapper.text()).toBe('foo bar baz')
+```
 
 
 ## 匹配和搜索
