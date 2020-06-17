@@ -465,7 +465,6 @@ describe('HelloWorld.vue', () => {
   })
 })
 ```
-
 ## 模拟用户交互
 ### trigger触发事件
 假设我们有`counter.vue`组件，其代码如下：
@@ -524,7 +523,6 @@ describe('counter.vue', () => {
 * `setProps`
 * `setData`
 * `trigger`
-
 ### 键盘事件
 假设我们把`counter.vue`的代码改成如下的方式：
 ```vue
@@ -575,14 +573,99 @@ describe('counter.vue', () => {
 })
 ```
 ### emit派发事件
+每个被挂载的包裹器都会通过其背后的`Vue`实例来记录所有被触发的事件，我们可以使用`wrapper.emitted()`来回去这些事件的记录。
+
+假设组件手动触发下面这些事件
+```js
+wrapper.vm.$emit('foo')
+wrapper.vm.$emit('foo', 123)
+/*
+`wrapper.emitted()` 返回以下对象：
+{
+  foo: [[], [123]]
+}
+*/
+```
+那么我们可以根据上面的代码做一些测试用例：
+```js
+// 断言事件已经被触发过
+expect(wrapper.emitted().foo).toBeTruthy()
+// 断言事件的数量
+exprect(wrapper.emitted().foo.length).toBe(2)
+// 断言事件的参数
+expect(wrapper.emitted().foo[1]).toEqual([123])
+```
+
+#### 从子组件派发事件
+假设我们下面这样的组件：
+```vue
+<template>
+  <div>
+    <child-component @custom="onCustom" />
+    <p v-if="emitted">Emitted!</p>
+  </div>
+</template>
+
+<script>
+  import ChildComponent from './ChildComponent'
+
+  export default {
+    name: 'ParentComponent',
+    components: { ChildComponent },
+    data() {
+      return {
+        emitted: false
+      }
+    },
+    methods: {
+      onCustom() {
+        this.emitted = true
+      }
+    }
+  }
+</script>
+```
+那么我们可以依据此来撰写测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import ParentComponent from '@/components/ParentComponent'
+import ChildComponent from '@/components/ChildComponent'
+
+describe('ParentComponent', () => {
+  it("displays 'Emitted!' when custom event is emitted", () => {
+    const wrapper = shallowMount(ParentComponent)
+    wrapper.find(ChildComponent).vm.$emit('custom')
+    expect(wrapper.html()).toContain('Emitted!')
+  })
+})
+```
+
 ### 使用nextTick
-
-
+正如我们前面已经介绍过和使用过的，当使用某些`set`方法或者`trigger`触发事件是，我们需要等待组件下一轮`tick`。通常来说简单的做法是使用`async/await`，像下面这样:
+```js
+describe('nextTick', () => {
+  it('async/await', async () => {
+    // 省略挂载
+    wrapper.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('next tick')
+  })
+})
+```
+除了`async/await`，我们还有另外一种选择：`done`回调：
+```js
+describe('nextTick', () => {
+  it('done callback', (done) => {
+    // 省略挂载
+    wrapper.trigger('click')
+    wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.text()).toContain('next tick')
+      done()
+    })
+  })
+})
+```
 ## 使用第三方插件
 ### 安装Vue-Router
 ### 存根
 ### 安装及模拟Vuex
-
-
-## 测试覆盖率
-
