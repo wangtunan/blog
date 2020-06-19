@@ -8,7 +8,6 @@ sidebar: auto
 对于UI组件来说，并不推荐一味的追求行级覆盖率，因为过度注重覆盖率可能会严重导致我们过分关注组件内部的实现细节，从而导致过多的繁琐测试。取而代之的是，我们希望把组件测试撰写为断言组件的公共接口，并在一个黑盒中去处理它，一个简单的UI组件测试用例将断言一些输入(**用户交互**或**Prop输入**)提供给组件之后，期望组件的预期结果(**渲染结果**或**响应事件**)。
 
 ## 安装
-
 ### 官方自动化测试仓库
 如果你仅仅只是为了学习`vue-test-utils`，那么可以尝试官方提供的一份极简的测试仓库。
 ```sh
@@ -27,7 +26,6 @@ npm install
 |   |-- README.md
 ```
 **注意**：需要注意的是，此种方式可能并不直接支持我们使用`.vue`文件的形式，如果需要支持`.vue`文件，需要我们进行一些额外的配置。
-
 ### 使用官方脚手架安装
 如果你是`Vue-Cli`的重度热爱者，那么通过`Vue-Cli4.0+`可以快速创建一个包含`test`测试相关的项目配置。
 ```sh
@@ -71,7 +69,6 @@ describe('HelloWorld.vue', () => {
   })
 })
 ```
-
 ### 现有Vue项目中添加Jest测试
 如果你是在现有Vue项目需要添加`Jest`自动化测试框架，可以在项目目录中运行如下命令：
 ```sh
@@ -97,7 +94,6 @@ describe('HelloWorld.vue', () => {
 })
 ```
 以下测试案例均依据以上第二或第三种方式进行的测试环境配置。
-
 ### VsCode编辑器插件
 对于使用`vscode`编辑器，可以通过安装`jest`插件，它可以在我们不运行`npm run test:unit`命令的时候就提示测试用例是否通过。
 
@@ -639,7 +635,6 @@ describe('ParentComponent', () => {
   })
 })
 ```
-
 ### 使用nextTick
 正如我们前面已经介绍过和使用过的，当使用某些`set`方法或者`trigger`触发事件是，我们需要等待组件下一轮`tick`。通常来说简单的做法是使用`async/await`，像下面这样:
 ```js
@@ -665,7 +660,155 @@ describe('nextTick', () => {
   })
 })
 ```
+
+
 ## 使用第三方插件
 ### 安装Vue-Router
-### 存根
+在我们测试的过程中，如果想要测试跟路由相关的功能，我们选择安装`Vue-Router`。这里需要注意的是，应该避免直接在`Vue`原型上安装`Vue-Router`，而是应该把它安装在一个`localVue`中。
+```js
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import VueRouter from 'vue-router'
+import MyComponent from '@/components/my-component.vue'
+
+const localVue = createLocalVue()
+localVue.use(VueRouter)
+const router = new VueRouter()
+
+shallowMount(MyComponent, {
+  localVue,
+  router
+})
+```
+**注意**：当我们在`localVue`上安装`Vue-Router`以后，我们就不能再像前面我们提到的，在一个组件挂载的过程中提供`mocks`选项来覆写`$route`和`$router`了。
+
+在上面我们提到，可以在`localVue`上安装`Vue-Router`，那么在其安装完毕后，与路由相关的两个组件就被注册了：`router-link`和`router-view`，我们可以在任何地方使用它们。
+
+如果没有安装`Vue-Router`，可以使用存根的方式进行组件占位：
+```js
+import { shallowMount } from '@vue/test-utils'
+import MyComponent from '@/components/my-component.vue'
+
+const wrapper = shallowMount(MyComponent, {
+  stubs: ['router-link', 'router-view']
+})
+```
 ### 安装及模拟Vuex
+同`Vue-Router`一样，我们同样应该避免在`Vue`上直接安装`Vuex`，而是应该创建一个`localVue`:
+```js
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import Vuex from 'Vuex'
+import MyComponent from '@/components/my-component.vue'
+
+const localVue = createLocalVue()
+localVue.use(Vuex)
+const store = new Vuex.Store({
+  state: {},
+  mutations: {},
+  actions: {}
+})
+
+shallowMount(MyComponent, {
+  localVue,
+  store
+})
+```
+
+现在假设我们有下面这样一个简洁的`store`：
+```js
+export default new Vuex.Store({
+  state: {
+    input: '',
+    click: ''
+  },
+  mutations: {
+    actionInput(state, value) {
+      state.input = value
+    },
+    actionClick(state, value) {
+      state.click = value
+    }
+  },
+  actions: {
+    actionInput ({ commit }, value) {
+      commit('actionInput', value)
+    },
+    actionClick ({ commit }, value) {
+      commit('actionClick', value)
+    }
+  }
+```
+
+在假设我们的`HelloWorld.vue`组件的代码如下：
+```vue
+<template>
+  <div>
+    <input type="text" @input="handleActionInput" />
+    <button @click="actionClick()">Click</button>
+  </div>
+</template>
+
+<script>
+import { mapActions } from 'vuex'
+export default {
+  name: 'HelloWorld',
+  methods: {
+    ...mapActions(['actionClick']),
+    handleActionInput (event) {
+      const inputValue = event.target.value
+      if (inputValue === 'input') {
+        this.$store.dispatch('actionInput', inputValue)
+      }
+    }
+  }
+}
+</script>
+```
+
+那么我们可以根据以上信息，撰写以下测试用例：
+```js
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+import Vuex from 'vuex'
+const localVue = createLocalVue()
+localVue.use(Vuex)
+describe('HelloWorld.vue', () => {
+  let actions
+  let store
+  let wrapper
+  beforeEach(() => {
+    actions = {
+      actionClick: jest.fn(),
+      actionInput: jest.fn()
+    }
+    store = new Vuex.Store({
+      state: {},
+      actions
+    })
+    wrapper = shallowMount(HelloWorld, {
+      store,
+      localVue
+    })
+  })
+
+  it('dispatch actionInput when input value is "input"', () => {
+    const input = wrapper.find('input')
+    input.element.value = 'input'
+    input.trigger('input')
+    expect(actions.actionInput).toHaveBeenCalled()
+  })
+  it('not dispatch actionInput when input value is not "input"', () => {
+    const input = wrapper.find('input')
+    input.element.value = 'no-input'
+    input.trigger('input')
+    expect(actions.actionInput).not.toHaveBeenCalled()
+  })
+  it('dispatch actionClick when click btn', () => {
+    wrapper.find('button').trigger('click')
+    expect(actions.actionClick).toHaveBeenCalled() 
+  })
+})
+```
+
+#### 伪造Getter
+#### 伪造Module
+#### 测试Vuex
