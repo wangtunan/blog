@@ -112,20 +112,20 @@ module.exports = {
       {
         text: 'VuePress',
         link: '/vuepress/'
-      },
-      {
-        text: 'CSS',
-        items: [
-          {
-            text: 'CSS奇技淫巧',
-            link: '/css/'
-          },
-          {
-            text: 'SCSS/SASS',
-            link: '/css/scss/'
-          }
-        ]
       }
+      // {
+      //   text: 'CSS',
+      //   items: [
+      //     {
+      //       text: 'CSS奇技淫巧',
+      //       link: '/css/'
+      //     },
+      //     {
+      //       text: 'SCSS/SASS',
+      //       link: '/css/scss/'
+      //     }
+      //   ]
+      // }
     ],
     sidebar: {
       '/css/': [cssSidebar],

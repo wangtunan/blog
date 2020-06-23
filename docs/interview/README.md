@@ -544,7 +544,8 @@ console.log(dog1.eat()); // 报错
 
 #### 组合继承
 ::: tip
-组合继承是组合了原型链继承和借用构造函数继承这两种方法，它保留了两种继承方式的优点，但它并不是百分百完美的：父类构造函数被调用多次。
+组合继承是组合了原型链继承和借用构造函数继承这两种方法，它保留了两种继承方式的优点，但它并不是百分百完美的：
+* 父类构造函数被调用多次。
 :::
 ```js
 function Animal(name) {
@@ -1100,7 +1101,7 @@ window.requestAnimationFrame(render);
 
 #### 进程和线程
 ::: tip
-`JavaScript`是单线程执行的，在`JavaScript`运行期间，有可能会阻塞UI渲染，这在一方面说明`JavaScript`引擎线程和UI渲染线程是互斥的。`JavaScript`被设计成单线程的原因在于，`JavaScript`可以修改DOM，如果在js工作期间，UI还在渲染的话，则可能不会正确渲染DOM。单线程也有一些好处，如下：
+`JavaScript`是单线程执行的，在`JavaScript`运行期间，有可能会阻塞UI渲染，这在一方面说明`JavaScript`引擎线程和UI渲染线程是互斥的。`JavaScript`被设计成单线程的原因在于，`JavaScript`可以修改DOM，如果在`JavaScript`工作期间，UI还在渲染的话，则可能不会正确渲染DOM。单线程也有一些好处，如下：
 1. 节省内存空间
 2. 节省上下文切换时间
 3. 没有锁的问题存在
@@ -2119,9 +2120,6 @@ CDN的原理是尽可能的在各地部署机房缓存数据，这样即使主�
 
 ## 常见数据结构和算法面试题
 推荐阅读[常见数据结构和算法](/books/javascript/algorithm.md)
-
-## CSS面试题
-本部分只列举CSS概念部分，实战部分请点击[CSS奇淫技巧](/css/)
 
 ## Vue相关面试题
 强烈建议阅读[Vue模块](/vue/)
