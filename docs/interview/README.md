@@ -1162,9 +1162,10 @@ var url = 'https://www.baidu.com/s?id=123&name=why&phone=13876769797';
 function getQueryString(name) {
   var strs = '';
   var index = url.indexOf('?');
-  if(index!=-1) {
-    strs = url.substring(index+1).split('&');
+  if (index === -1) {
+    return undefined
   }
+  strs = url.substring(index+1).split('&');
   for (let index = 0; index < strs.length; index++) {
     var splitItem = strs[index].split('=');
     if(splitItem[0]==name) {
@@ -1219,11 +1220,12 @@ Function.prototype.myCall = function(context) {
   if(typeof this !== 'function') {
     throw new TypeError('error');
   }
+  const symbolFn = Symbol()
   context = context || window;
-  context.fn = this;
+  context[symbolFn] = this;
   var args = [...arguments].slice(1);
-  var result = context.fn(...args);
-  delete context.fn;
+  var result = context[symbolFn](...args);
+  delete context[symbolFn];
   return result;
 }
 function foo(){
