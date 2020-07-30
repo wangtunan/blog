@@ -51,19 +51,6 @@ module.exports = {
                 text: '深入理解ES6',
                 link: '/books/javascript/es6'
               }
-              // {
-              //   text: '深入浅出Vue.js',
-              //   link: '/books/javascript/vue'
-              // }
-            ]
-          },
-          {
-            text: 'Vue书籍',
-            items: [
-              {
-                text: '深入浅出Vue.js',
-                link: '/books/javascript/vue.md'
-              }
             ]
           },
           {
@@ -90,7 +77,7 @@ module.exports = {
         text: 'Vue',
         items: [
           { text: 'Vue基础知识', link: '/vue/' },
-          { text: '深入浅出Vue.js书籍', link: '/books/javascript/vue.md' }
+          { text: 'Vue源码分析', link: '/vue/analysis.md' }
         ]
       },
       {
@@ -112,20 +99,20 @@ module.exports = {
       {
         text: 'VuePress',
         link: '/vuepress/'
-      },
-      {
-        text: 'CSS',
-        items: [
-          {
-            text: 'CSS奇技淫巧',
-            link: '/css/'
-          },
-          {
-            text: 'SCSS/SASS',
-            link: '/css/scss/'
-          }
-        ]
       }
+      // {
+      //   text: 'CSS',
+      //   items: [
+      //     {
+      //       text: 'CSS奇技淫巧',
+      //       link: '/css/'
+      //     },
+      //     {
+      //       text: 'SCSS/SASS',
+      //       link: '/css/scss/'
+      //     }
+      //   ]
+      // }
     ],
     sidebar: {
       '/css/': [cssSidebar],

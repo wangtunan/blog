@@ -810,5 +810,58 @@ describe('HelloWorld.vue', () => {
 ```
 
 #### 伪造Getter
-#### 伪造Module
-#### 测试Vuex
+假设我们有如下组件和`Getters`：
+```vue
+<template>
+  <div>
+    <p v-if="inputValue">{{inputValue}}</p>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'HelloWorld',
+  computed: {
+    ...mapGetters(['inputValue'])
+  }
+}
+</script>
+```
+Getters代码：
+```js
+export const inputValue = state => state.inputValue
+```
+同测试`Actions`一样，我们并不关心`Getters`是什么，对于一个组件来说，我们只希望能够正确渲染我们期望的`Getters`值。
+
+根据以上代码和规则，我们可以撰写如下的测试用例：
+```js
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+import Vuex from 'vuex'
+const localVue = createLocalVue()
+localVue.use(Vuex)
+describe('HelloWorld.vue', () => {
+  let store
+  let getters
+  let wrapper
+  beforeEach(() => {
+    getters = {
+      inputValue: () => 'input value'
+    }
+    store = new Vuex.Store({
+      getters
+    })
+    wrapper = shallowMount(HelloWorld, {
+      store,
+      localVue
+    })
+  })
+
+  it('render getters.inputValue', () => {
+    const p = wrapper.find('p')
+    expect(p.text()).toBe(getters.inputValue())
+  })
+})
+
+```
