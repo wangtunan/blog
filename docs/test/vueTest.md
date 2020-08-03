@@ -163,17 +163,59 @@ describe('HelloWorld.vue', () => {
 })
 ```
 以下测试案例均依据以上第二或第三种方式进行的测试环境配置。
-### Vscode编辑器插件
-对于使用`Vscode`编辑器，可以通过安装`jest`插件，它可以在我们不运行`npm run test:unit`命令的时候就提示测试用例是否通过。
+### VsCode编辑器插件
+对于使用`VsCode`编辑器，可以通过安装`jest`插件，它可以在我们不运行`npm run test:unit`命令的时候就提示测试用例是否通过。
 ![jest插件](../images/test/vue-test1.png)
+### 测试覆盖率和测试报告
+在根目录下的`jest.config.js`中，我们进行如下配置：
+```js
+module.exports = {
+  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
+  snapshotSerializers: ['jest-serializer-vue'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1'
+  },
+  testMatch: [
+    '**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
+  ],
+  collectCoverage: true,
+  coverageDirectory: '<rootDir>/tests/unit/coverage',
+  collectCoverageFrom: [
+    'src/components/**/*.vue',
+    'src/utils/**/*.ts',
+    'src/store/modules/*.ts',
+    '!src/utils/axios.ts',
+    '!src/utils/notify.ts'
+  ]
+}
+```
 
-### 测试报告和测试覆盖率
+对以上配置的解释如下：
+* `snapshotSerializers`: `Vue`组件进行`Jest`快照序列化的工具配置。
+* `moduleNameMapper`：模块别名配置。
+* `testMatch`：测试文件查找规则，可以是统一放在`src/tests`目录下，也可以就近放在`__tests/__`目录下。
+* `collectCoverage`：是否进行测试覆盖率收集。
+* `coverageDirectory`：测试报告存放位置。
+* `collectCoverageFrom`：测试哪些文件和不测试哪些文件，你可以根据你的团队或者个人偏好进行设置。
+
+在完善以上配置后，你可以在终端运行`npm run test:unit`命令，随后你将得到如下类似下面这样的测试报告：
+
+![测试覆盖率](../images/test/vue-test2.png)
+
+
+在以上测试报告中，我们明显可以看到有一些没有覆盖到的代码，这时我们可以在`src/tests/units/coverage/lcov-report`目录下找到我们对应的测试文件，随后点开。这里以以上`base/scroll/index.vue`为例，它有如下两个文件：
+* `index.html`: 此处是对`scroll/index.vue`组件测试的一个总结报告，如下：
+![测试覆盖率](../images/test/vue-test3.png)
+
+* `index.vue.html`：此处是对`scroll/index.vue`组件测试的一个详细描述，其中对于没有覆盖到的代码进行不同颜色的标识，如下：
+![测试覆盖率](../images/test/vue-test4.png)
+
 
 ## 测试组件渲染输出
 ### 组件挂载
-对于不包含子组件的组件来说，使用`shallowMount`和`mount`，对组件的效果是一样的。二者的区别在于，`shallowMount`只渲染组件本身，但会保留子组件的组件中的存根。
+对于不包含子组件的组件来说，使用`shallowMount`和`mount`对组件的效果是一样的。二者的区别在于，`shallowMount`只渲染组件本身，但会保留子组件在组件中的存根。
 
-区别这两种方法的目的在于，当我们只想对某个孤立的组件进行测试的时候，一方面可以避免其子组件的影响，另一方面对于包含许多子组件的组件来说，完全渲染子组件会导致组件的渲染树非常庞大，这可能会让影响到我们的测试速度。
+区别这两种方法的目的在于，当我们只想对某个孤立的组件进行测试的时候，一方面可以避免其子组件的影响，另一方面对于包含许多子组件的组件来说，完全渲染子组件会导致组件的渲染树过大，这可能会让影响到我们的测试速度。
 
 ```js
 import { shallowMount, mount } from '@vue/test-utils'
@@ -193,6 +235,40 @@ describe('HelloWorld.vue', () => {
 })
 ```
 ### 渲染文本测试
+在组件挂载后，返回的包裹器有一个`wrapper.text()`方法，他返回组件渲染后的文本内容。
+
+假设有如下组件：
+```vue
+<template>
+ <div>{{msg}}</div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      msg: 'Hello, Vue and Jest...'
+    }
+  }
+}
+</script>
+```
+那么我们就可以撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test text', () => {
+    const msg = 'Hello, Vue and Jest...'
+    const wrapper = shallowMount(HelloWorld)
+    // 更推荐具有扩展性的toContain匹配器而不是toBe
+    expect(wrapper.text()).toBe(msg)       // 严格相等
+    expect(wrapper.text()).toContain(msg)  // 是否包含
+  })
+})
+```
+
+
 ### 渲染HTML结构测试
 ### DOM属性测试
 ### Props测试
