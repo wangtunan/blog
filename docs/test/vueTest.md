@@ -198,12 +198,12 @@ module.exports = {
 * `coverageDirectory`：测试报告存放位置。
 * `collectCoverageFrom`：测试哪些文件和不测试哪些文件，你可以根据你的团队或者个人偏好进行设置。
 
-在完善以上配置后，你可以在终端运行`npm run test:unit`命令，随后你将得到如下类似下面这样的测试报告：
+在完善以上配置后，你可以在终端运行`npm run test:unit`命令，随后你将得到类似下面这样的测试报告：
 
 ![测试覆盖率](../images/test/vue-test2.png)
 
 
-在以上测试报告中，我们明显可以看到有一些没有覆盖到的代码，这时我们可以在`src/tests/units/coverage/lcov-report`目录下找到我们对应的测试文件，随后点开。这里以以上`base/scroll/index.vue`为例，它有如下两个文件：
+在以上测试报告中，我们明显可以看到有一些没有覆盖到的代码，这时我们可以在`src/tests/units/coverage/lcov-report`目录下找到我们对应的测试文件，随后点开。这里以`base/scroll/index.vue`为例，它有如下两个文件：
 * `index.html`: 此处是对`scroll/index.vue`组件测试的一个总结报告，如下：
 ![测试覆盖率](../images/test/vue-test3.png)
 
@@ -215,8 +215,11 @@ module.exports = {
 ### 组件挂载
 对于不包含子组件的组件来说，使用`shallowMount`和`mount`对组件的效果是一样的。二者的区别在于，`shallowMount`只渲染组件本身，但会保留子组件在组件中的存根。
 
-区别这两种方法的目的在于，当我们只想对某个孤立的组件进行测试的时候，一方面可以避免其子组件的影响，另一方面对于包含许多子组件的组件来说，完全渲染子组件会导致组件的渲染树过大，这可能会让影响到我们的测试速度。
+区别这两种方法的目的在于，当我们只想对某个孤立的组件进行测试的时候，一方面可以避免其子组件的影响，另一方面对于包含许多子组件的组件来说，完全渲染子组件会导致组件的渲染树过大，这可能会影响到我们的测试速度。
 
+在组件挂载后，我们可以通过`wrapper.vm`访问到组件的实例，通过`wrapper.vm`进而可以访问到组件所有的`props`、`data`、`methods`等等。
+
+**注意：** 在我们使用`mount`或者`shallowMount`的时候，我们可以期望组件响应几乎所有的`Vue`生命周期函数，但除非手动调用`wrapper.destory()`函数，否则组件的`beforeDestroy()`和`destroyed()`不会被触发。
 ```js
 import { shallowMount, mount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
@@ -226,6 +229,9 @@ describe('HelloWorld.vue', () => {
     const wrapper = shallowMount(HelloWorld)
     // 判断组件是否挂载
     expect(wrapper.exists()).toBe(true)
+    
+    // 访问vm实例
+    console.log(wrapper.vm)
   })
   it('test mount', () => {
     const wrapper = mount(HelloWorld)
@@ -267,12 +273,103 @@ describe('HelloWorld.vue', () => {
   })
 })
 ```
-
-
 ### 渲染HTML结构测试
-### DOM属性测试
+在组件挂载后，返回的包裹器有一个`wrapper.html()`方法，他返回组件渲染后的DOM结构。
+
+对`HelloWorld.vue`组件做如下改动：
+```vue
+<template>
+  <div>
+    <span class="item">item</span>
+    {{msg}}
+  </div>
+</template>
+<script>
+
+export default {
+  data () {
+    return {
+      msg: 'Hello, Vue and Jest...'
+    }
+  }
+}
+</script>
+```
+那么我们就可以撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test html', () => {
+    const wrapper = shallowMount(HelloWorld)
+    expect(wrapper.html()).toContain('<span class="item">item</span>')
+  })
+})
+```
+### DOM属性测试和Class测试
+在组件挂载后，返回的包裹器有一个`wrapper.attributes()`方法，他返回组件渲染后的DOM属性对象，`attributes()`方法如果提供了属性名参数，则直接返回此属性的值，否则返回全部属性的对象，`wrapper.classes()`方法类似。
+
+依然以以上`HelloWorld.vue`组件为例，如果我们要测试`span`标签是否有`.item`样式，是否有`id`，可以进行如下测试：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test attribute and class', () => {
+    const wrapper = shallowMount(HelloWorld)
+    // 查找第一个span标签
+    const dom = wrapper.find('span')
+    expect(dom.classes()).toContain('item')
+    expect(dom.attributes().id).toBeFalsy()
+  })
+})
+```
 ### Props测试
-### Class测试
+在组件挂载后，返回的包裹器有一个`wrapper.props()`方法，他返回组件实例的所有`props`，`props()`方法如果提供了参数，则直接返回此参数的值，否则返回全部。
+
+我们对`HelloWorld.vue`组件做进一步的调整：
+```vue
+<template>
+  <div>
+    <span class="item">item</span>
+    {{msg}}
+    <span>{{name}}</span>
+    <span>{{age}}</span>
+  </div>
+</template>
+<script>
+
+export default {
+  props: ['name', 'age'],
+  data () {
+    return {
+      msg: 'Hello, Vue and Jest...'
+    }
+  }
+}
+</script>
+```
+
+随后我们撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test props', () => {
+    const wrapper = shallowMount(HelloWorld, {
+      propsData: {
+        name: 'AAA',
+        age: 23
+      }
+    })
+    expect(wrapper.props('name')).toBe('AAA')
+    expect(wrapper.props().age).toBe(23)
+  })
+})
+
+```
 ### Style测试
 
 
