@@ -36,7 +36,52 @@ const webpackSidebar = {
   ]
 }
 
+// Vue源码分析目录结构
+const vueAnalysisSidebar = [
+  {
+    title: '源码目录设计',
+    collapsable: false,
+    children: [ '/vueAnalysis/']
+  },
+  {
+    title: 'Rollup构建版本',
+    collapsable: false,
+    children: ['/vueAnalysis/rollup/']
+  },
+  {
+    title: '从入口到实例挂载',
+    collapsable: false,
+    children: ['/vueAnalysis/entry/']
+  },
+  {
+    title: '响应式原理',
+    collapsable: false,
+    children: ['/vueAnalysis/reactive/']
+  },
+  {
+    title: '组件化',
+    collapsable: false,
+    children: ['/vueAnalysis/component/']
+  },
+  {
+    title: '编译',
+    collapsable: false,
+    children: ['/vueAnalysis/parse/']
+  },
+  {
+    title: 'Vue-Router',
+    collapsable: false,
+    children: ['/vueAnalysis/router/']
+  },
+  {
+    title: 'Vuex',
+    collapsable: false,
+    children: ['/vueAnalysis/vuex/']
+  }
+]
+
 module.exports = {
   cssSidebar,
-  webpackSidebar
+  webpackSidebar,
+  vueAnalysisSidebar
 }

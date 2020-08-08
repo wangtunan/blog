@@ -1,5 +1,5 @@
 const nav = require('./utils/nav.js')
-var { cssSidebar,webpackSidebar } = nav
+var { cssSidebar,webpackSidebar, vueAnalysisSidebar } = nav
 module.exports = {
   title: '一蓑烟雨、烟池鱼',
   description: '一蓑烟雨、烟池鱼汪的个人站点',
@@ -77,14 +77,14 @@ module.exports = {
         text: 'Vue',
         items: [
           { text: 'Vue基础知识', link: '/vue/' },
-          { text: 'Vue源码分析', link: '/vue/analysis.md' }
+          { text: 'Vue源码分析', link: '/vueAnalysis/' }
         ]
       },
       {
         text: '自动化测试',
         items: [
           { text: 'Jest测试框架', link: '/test/jest.md' },
-          { text: 'Vue-Test-Utils', link: '/test/vue-test' }
+          { text: 'Vue应用测试', link: '/test/vueTest' }
         ]
       },
       {
@@ -95,28 +95,15 @@ module.exports = {
         text: 'TypeScript',
         link: '/typescript/'
       },
-      
       {
         text: 'VuePress',
         link: '/vuepress/'
       }
-      // {
-      //   text: 'CSS',
-      //   items: [
-      //     {
-      //       text: 'CSS奇技淫巧',
-      //       link: '/css/'
-      //     },
-      //     {
-      //       text: 'SCSS/SASS',
-      //       link: '/css/scss/'
-      //     }
-      //   ]
-      // }
     ],
     sidebar: {
       '/css/': [cssSidebar],
-      '/webpack/': [webpackSidebar]
+      '/webpack/': [webpackSidebar],
+      '/vueAnalysis/': vueAnalysisSidebar
     }
   },
   configureWebpack: {
