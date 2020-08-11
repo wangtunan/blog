@@ -148,27 +148,7 @@ describe('child-component.vue', () => {
   })
 })
 ```
-### 匹配是否存在、为空、可见、Vue实例
-如果要判断搜索出来的结果是否存在、为空、可见或者为一个Vue实例，可以分别使用下面的方法：
-* `wrapper.exists()`：在`DOM`上是否存在。
-* `wrapper.isEmpty()`：是否有子元素。
-* `wrapper.isVisible()`：是否被隐藏(`display: none`或`visibility: hidden`)时返回`false`。
-* `wrapper.isVueInstance()`：判断是否为Vue实例。
 
-```js
-import { shallowMount } from '@vue/test-utils'
-import HelloWorld from '@/components/HelloWorld.vue'
-
-describe('HelloWorld.vue', () => {
-  it('匹配是否存在、为空、可见、Vue实例', () => {
-    const wrapper = shallowMount(HelloWorld)
-    expect(wrapper.exists()).toBe(true)
-    expect(wrapper.isEmpty()).toBe(false)
-    expect(wrapper.isVisible()).toBe(true)
-    expect(wrapper.isVueInstance()).toBe(true)
-  })
-})
-```
 ### 断言为DOM节点或有效的匹配选择器
 在组件挂载后，我们可以使用`wrapper.is()`方法进行断言其为一个DOM节点或者一个有效的VM匹配选择器。
 ```js

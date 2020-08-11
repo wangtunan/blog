@@ -2,7 +2,7 @@ const nav = require('./utils/nav.js')
 var { cssSidebar,webpackSidebar, vueAnalysisSidebar } = nav
 module.exports = {
   title: '一蓑烟雨、烟池鱼',
-  description: '一蓑烟雨、烟池鱼汪的个人站点',
+  description: '一蓑烟雨、烟池鱼的个人站点',
   base: '/blog/',
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }]

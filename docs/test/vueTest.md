@@ -3,6 +3,7 @@ sidebar: auto
 ---
 
 # Vue应用测试
+本篇文章由阅读《Vue.js应用测试》书籍、学习《Vue Test Utils》`Vue`官网知识，以及实际工作经验总结而来，阅读书籍请支持正版。
 
 ## 测试介绍
 前端应用程序主要编写三种测试类型：**单元测试**、**快照测试**、**端到端测试**。
@@ -371,15 +372,144 @@ describe('HelloWorld.vue', () => {
 
 ```
 ### Style测试
+返回的包裹器中包含一个`element`属性，它是对当前`DOM`节点的应用，可以使用`element.style`访问该`DOM`节点的**内联样式**。
+
+假设我们对`HelloWorld.vue`做如下调整：
+```vue
+<template>
+  <div class="hello">
+    <h1 style="width: 100px;height: 50px;">{{ msg }}</h1>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  props: {
+    msg: String
+  }
+}
+</script>
+```
+
+基于以上组件，我们可以撰写如下测试用例:
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('test style', () => {
+    const wrapper = shallowMount(HelloWorld)
+    const style = wrapper.find('h1').element.style
+    expect(style.width).toBe('100px')
+    expect(style.height).toBe('50px')
+  })
+})
+
+```
+
 
 
 ## 测试组件方法
-### 测试私有方法
-### 测试公共方法
+测试一个组件的自有方法的方式很简单，但实际上一个方法通常是具有依赖的。依赖是指：在被测代码单元控制之外的任何代码，依赖有很多种存在形式，例如：浏览器方法、被导入的模块和被注入的`Vue`示例属性。显而易见，要测试这些具有依赖的方法，无疑会引入一个更复杂的环境，因此我们要很小心的去处理。
+
+### 私有和公共方法
+对于一个组件而言，绝大部分可能是私有方法，私有方法指的是只会在组件内部使用的方法，与私有方法相对来说有一个公共方法，公共方法会被外部调用。
+
+测试规则：
+* 私有方法：私有方法一般只会在组件内部进行调用，它是组件内实现细节的，通常而言可以不用为其撰写测试用例，但也不是绝对的。
+* 公共方法：公共方法会被外部组件进行调用，因此需要为公共方法撰写测试用例。
+
+假设我们有如下`loading.vue`组件：
+```vue
+<template>
+  <div v-show="showLoading" class="loading-box">
+    {{loadingText}}
+  </div>
+</template>
+
+<script>
+export default {
+  data () {
+    return {
+      loadingText: '',
+      showLoading: false
+    }
+  },
+  methods: {
+    show () {
+      this.showLoading = true
+      this.getLoadingText()
+    },
+    hide () {
+      this.showLoading = false
+      this.getLoadingText()
+    },
+    getLoadingText () {
+      this.loadingText = this.showLoading ?  `loading show text` : ''
+    }
+  }
+}
+</script>
+```
+
+组件方法分析:
+* 私有方法：`getLoadingText()`，我们不需要为其撰写测试用例。
+* 公共方法：`show()`、`hide()`，我们需要为其撰写测试用例。
+
+那么根据以上规则，我们可以撰写一下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import Loading from '@/components/loading.vue'
+
+describe('loading.vue', () => {
+  let wrapper
+  beforeEach(() => {
+    wrapper = shallowMount(Loading)
+  })
+  it('show func', async () => {
+    expect(wrapper.vm.loadingText).toBe('')
+    expect(wrapper.vm.showLoading).toBe(false)
+    expect(wrapper.isVisible()).toBe(false)
+
+    wrapper.vm.show()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(true)
+    expect(wrapper.isVisible()).toBe(true)
+  })
+
+  it('hide func', async () => {
+    wrapper.setData({
+      showLoading: true
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(true)
+    expect(wrapper.isVisible()).toBe(true)
+
+    wrapper.vm.hide()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(false)
+    expect(wrapper.isVisible()).toBe(false)
+  })
+})
+```
+
+测试代码分析：
+* `beforeEach()`：它是`Jest`的钩子函数，会在执行每一个测试用例之前调用，在这个钩子函数中我们重新挂载组件，避免多个测试用例互相影响。
+* `async/await`：因为我们调用了公共方法，它修改了组件的数据，进而会触发`DOM`更新，因此我们需要调用组件的`$nextTick()`方法，以确保我们获取到了正确`DOM`的状态。
+* `isVisible()`：判断一个`DOM`元素是否可见，在`loading`组件中，因为我们使用了`v-show`指令，所以使用`isVisible()`更加语义化一些，我们可以也可以使用`exists()`和`v-if`指令来代替。
+* `setData()`：手动修改组件中`data`的值，用法与`Vue.set()`类似。不过需要注意的时，`setData()`方法是异步的，需要配合`$nextTick()`一起使用。
+
 ### 测试定时器函数
 ### Vue实例添加属性
 ### 模拟代码
 ### 模拟模块依赖
+
+
+## 挂载选项和Mock
+### 挂载slot
+### mock数据
+### 挂载其它选项
 
 
 
@@ -433,4 +563,10 @@ describe('HelloWorld.vue', () => {
 ### 动态组件快照
 
 
+## 测试用例调试
+### VsCode编辑器调试
+### Chrome浏览器调试
 
+
+## 业务组件测试示例
+### Pagination组件测试
