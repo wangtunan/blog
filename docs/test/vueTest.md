@@ -412,7 +412,6 @@ describe('HelloWorld.vue', () => {
 
 ## 测试组件方法
 测试一个组件的自有方法的方式很简单，但实际上一个方法通常是具有依赖的。依赖是指：在被测代码单元控制之外的任何代码，依赖有很多种存在形式，例如：浏览器方法、被导入的模块和被注入的`Vue`示例属性。显而易见，要测试这些具有依赖的方法，无疑会引入一个更复杂的环境，因此我们要很小心的去处理。
-
 ### 私有和公共方法
 对于一个组件而言，绝大部分可能是私有方法，私有方法指的是只会在组件内部使用的方法，与私有方法相对来说有一个公共方法，公共方法会被外部调用。
 
@@ -499,9 +498,124 @@ describe('loading.vue', () => {
 * `async/await`：因为我们调用了公共方法，它修改了组件的数据，进而会触发`DOM`更新，因此我们需要调用组件的`$nextTick()`方法，以确保我们获取到了正确`DOM`的状态。
 * `isVisible()`：判断一个`DOM`元素是否可见，在`loading`组件中，因为我们使用了`v-show`指令，所以使用`isVisible()`更加语义化一些，我们可以也可以使用`exists()`和`v-if`指令来代替。
 * `setData()`：手动修改组件中`data`的值，用法与`Vue.set()`类似。不过需要注意的时，`setData()`方法是异步的，需要配合`$nextTick()`一起使用。
-
 ### 测试定时器函数
+#### 使用假定时器函数
+在`JavaScript`中定时器函数有`setTimeout`和`setInterval`，如果我们不对定时器函数做处理的话，当一个组件有一个延时`1000ms`的`setTimeout`时，则意味着我们测试程序必须等待`1000ms`，如果系统中存在很多个`setTimeout`函数，那么对于以速度、高效率的单元测试来说无疑是一场灾难。
+
+在不减慢测试速度的情况下测试定时器函数，看起来唯一的办法就是让异步的定时器替换为同步的定时器函数，如下：
+```js
+setTimeout = () => { console.log('replace setTimeout') }
+```
+
+我们可以使用`Jest`库提供的`jest.useFakeTimers()`，当这个方法被调用时`Jest`提供的假定时器会替换全局定时器函数来工作，然后我们可以使用`jest.runTimersToTime()`来推进时间。
+
+假设我们有如下组件：
+```vue
+<template>
+  <div class="hello">
+    {{timeText}}<br/>
+    {{percent}}
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  data () {
+    return {
+      percent: 0,
+      timeText: ''
+    }
+  },
+  methods: {
+    start () {
+      this.percent = 0
+      this.timer = setInterval(() => {
+        this.percent++
+        if (this.percent >= 100) {
+          this.finish()
+        }
+      }, 100)
+    },
+    finish () {
+      this.percent = 100
+      clearInterval(this.timer)
+    }
+  },
+  mounted () {
+    setTimeout(() => {
+      this.timeText = 'setTimeout text'
+    }, 1000)
+  }
+}
+</script>
+```
+
+那么我们可以撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  let wrapper
+  beforeEach(() => {
+    jest.useFakeTimers()
+    wrapper = shallowMount(HelloWorld)
+  })
+  it('test setTimeout async timer', () => {
+    expect(wrapper.vm.timeText).toBe('')
+    jest.runTimersToTime(1000)
+    expect(wrapper.vm.timeText).toBe('setTimeout text')
+  })
+  it('test setInterval async timer', () => {
+    expect(wrapper.vm.percent).toBe(0)
+    wrapper.vm.start()
+    jest.runTimersToTime(100)
+    expect(wrapper.vm.percent).toBe(1)
+    jest.runTimersToTime(900)
+    expect(wrapper.vm.percent).toBe(10)
+    jest.runTimersToTime(2000)
+    expect(wrapper.vm.percent).toBe(30)
+  })
+})
+```
+
+测试代码分析：
+* `beforeEach`：因为我们在两个测试用例中都要使用`Jest`提供的假定时器函数，因此我们可以在`beforeEach`钩子函数中来使用。同样的道理，我们在`beforeEach`钩子函数中重新挂载组件，避免多个测试用例互相影响。
+* `jest.runTimersToTime()`：意味着推进时间，在第二个用例中：当第一次推进时间`100ms`时，`percent`值为1；当第二次推进时间`900ms`时，此时算上第一次推进`100ms`，一共`1000ms`，因此`percent`值为10。
+
+#### 使用spy测试
+当我们运行以上测试用例会发现测试用例已经全部测试通过了，但此时我们不能被暂时的胜利冲昏头脑，我们还需要测试`clearInterval()`是否成功执行，以确保我们没有写一个无限运行的定时器。
+
+在发现以上问题后，我们需要解决以下几个问题：
+* 如何测试`clearInterval()`函数被执行了。
+* 如何测试`clearInterval()`携带的参数。
+
+要解决以上第一个问题，我们需要使用`Jest`提供的`jest.spyOn()`函数，然后对`window.clearInterval()`进行间谍伪造，如下：
+```js
+jest.spyOn(window, 'clearInterval')
+```
+
+要解决第二个问题，我们可以使用`Jest`提供的`mockReturnValue`函数来模拟任何我们想要的返回值，如下：
+```js
+setInterval.mockReturnValue(996)
+```
+
+在解决完以上两个问题后，我们新增一个测试用例，如下：
+```js
+it('clearInterval success when percent >= 100', () => {
+  jest.spyOn(window, 'clearInterval')
+  setInterval.mockReturnValue(996)
+  wrapper.vm.start()
+  wrapper.vm.finish()
+  expect(wrapper.vm.percent).toBe(100)
+  expect(window.clearInterval).toHaveBeenCalledWith(996)
+})
+```
+
+测试代码分析：当我们的测试代码使用了我们不能控制的`API`时，我们可以使用`spy`来伪装，随后判断我们伪装的`API`是否被调用。
 ### Vue实例添加属性
+
 ### 模拟代码
 ### 模拟模块依赖
 
