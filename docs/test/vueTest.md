@@ -743,7 +743,7 @@ export function getLessonList () {
 * 第一步：我们要解决`getLessonList`方法返回假数据问题。
 * 第二步：我们要解决`HelloWorld.vue`组件正确渲染我们的假数据问题。
 
-对于第一个问题，我们需要在新建`src/api/__mocks__/api.js`文件夹，注意：
+对于第一个问题，我们需要新建`src/api/__mocks__/api.js`文件夹，注意：
 * `__mocks__`是固定写法，它能被`Jest`进行识别。
 * `__mocks__/api.js`，其中`__mocks__`目录下的文件名要和我们模拟的模块文件名相同。
 
@@ -760,13 +760,145 @@ export const getLessonList = jest.fn(() => {
   }
   return Promise.resolve(lessonResult)
 })
-
 ```
 
-## 挂载选项和Mock
-### 挂载slot
-### mock数据
+第二个问题，我们可以使用`getLessonList.mockResolvedValueOnce()`方法来传入我们模拟的数据。再解决完以上几个问题后，我们可以撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+import { getLessonList } from '../../src/api/api.js'
+jest.mock('../../src/api/api.js')
+describe('HelloWorld.vue', () => {
+  const lessonResult = {
+    success: true,
+    data: [
+      { id: 1, title: '深入理解ES6' },
+      { id: 2, title: 'JavaScript高级程序设计' },
+      { id: 3, title: 'CSS揭秘' },
+      { id: 4, title: '深入浅出Vue.js' }
+    ]
+  }
+  
+  it('mock http modules', async () => {
+    expect.assertions(1)
+    const result = await getLessonList()
+    expect(result).toEqual(lessonResult)
+  })
+  it('render mock http module result', async () => {
+    const mockAxiosResult = {
+      status: 200,
+      data: lessonResult
+    }
+    getLessonList.mockResolvedValueOnce(mockAxiosResult)
+    const wrapper = shallowMount(HelloWorld)
+    await wrapper.vm.$nextTick()
+    const lessonItems = wrapper.findAll('.lesson-item')
+    const lessonList = lessonResult.data
+    for (let i = 0; i < lessonItems.length; i++) {
+      const item = lessonItems.at(i)
+      expect(item.text()).toBe(lessonList[i].title)
+    }
+  })
+})
+```
+
+## 挂载选项和改变组件状态
 ### 挂载其它选项
+在我们以上的测试用例中，我们已经在尝试过在组件挂载的时候提供`propsData`或者`mocks`，我们还可以挂载以下常见的几种其它选项，如下：
+* `data`：在挂载阶段提供的`data`中的属性，会被合并、覆盖到当前组件的`data`中，如下：
+* `slots`：如果被挂载的组件有插槽内容，那么可以在挂载阶段手动提供`slots`。
+* `stubs`：如果被挂载的组件存在子组件，那么可以在挂载阶段手动提供子组件的存根，例如：`stubs: ['my-child', 'transition', 'router-view', 'router-link']`等。
+* `localVue`：提供一个本地的`Vue`实例，防止污染全局的`Vue`，这在使用第三方插件：`Vue-Router`、`Vuex`和`element-ui`等非常适用。
+
+#### 挂载Data
+假如我们有如下组件：
+```vue
+<template>
+  <div></div>
+</template>
+
+<script>
+export default {
+  data () {
+    return {
+      bar: 'bar',
+      foo: 'foo'
+    }
+  }
+}
+</script>
+```
+现在我们在测试用例中通过挂载`data`，来测试组件：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+describe('HelloWorld.vue', () => {
+  it('mount data', () => {
+    const wrapper = shallowMount(HelloWorld, {
+      data () {
+        return {
+          foo: 'foo override',
+          baz: 'baz'
+        }
+      }
+    })
+    expect(wrapper.vm.bar).toBe('bar')
+    expect(wrapper.vm.foo).toBe('foo override')
+    expect(wrapper.vm.baz).toBe('baz')
+  })
+})
+```
+#### 挂载Slots
+假如我们有如下组件：
+```vue
+<template>
+  <div>
+    <div class="header-slot">
+      <slot name="header" />
+    </div>
+    <div class="default-slot">
+      <slot />
+    </div>
+     <div class="footer-slot">
+      <slot name="footer" />
+    </div>
+  </div>
+</template>
+
+<script>
+export default {}
+</script>
+```
+那么我们挂载对应的插槽，撰写如下测试用例：
+```js
+import { mount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+describe('HelloWorld.vue', () => {
+  it('mount data', () => {
+    const headerSlot = {
+      template: `<div>header slot</div>`
+    }
+    const defaultSlot = {
+      template: `<div>default slot</div>`
+    }
+    const footerSlot = {
+      template: `<div>footer slot</div>`
+    }
+    const wrapper = mount(HelloWorld, {
+      slots: {
+        default: defaultSlot,
+        header: headerSlot,
+        footer: footerSlot
+      }
+    })
+    expect(wrapper.find('.header-slot').html()).toContain(headerSlot.template)
+    expect(wrapper.find('.default-slot').html()).toContain(defaultSlot.template)
+    expect(wrapper.find('.footer-slot').html()).toContain(footerSlot.template)
+  })
+})
+
+```
+### 改变组件状态
 
 
 
