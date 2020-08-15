@@ -583,7 +583,6 @@ describe('HelloWorld.vue', () => {
 测试代码分析：
 * `beforeEach`：因为我们在两个测试用例中都要使用`Jest`提供的假定时器函数，因此我们可以在`beforeEach`钩子函数中来使用。同样的道理，我们在`beforeEach`钩子函数中重新挂载组件，避免多个测试用例互相影响。
 * `jest.runTimersToTime()`：意味着推进时间，在第二个用例中：当第一次推进时间`100ms`时，`percent`值为1；当第二次推进时间`900ms`时，此时算上第一次推进`100ms`，一共`1000ms`，因此`percent`值为10。
-
 #### 使用spy测试
 当我们运行以上测试用例会发现测试用例已经全部测试通过了，但此时我们不能被暂时的胜利冲昏头脑，我们还需要测试`clearInterval()`是否成功执行，以确保我们没有写一个无限运行的定时器。
 
@@ -614,11 +613,155 @@ it('clearInterval success when percent >= 100', () => {
 ```
 
 测试代码分析：当我们的测试代码使用了我们不能控制的`API`时，我们可以使用`spy`来伪装，随后判断我们伪装的`API`是否被调用。
-### Vue实例添加属性
-
 ### 模拟代码
-### 模拟模块依赖
+在`Vue`开发中，为`Vue`实例添加一些属性或者方法是一种常见的方式，例如：
+```js
+import { Message } from 'element-ui'
+Vue.prototype.$message = Message
 
+this.$message.success('保存成功')
+```
+
+那么我们如何为这些实例属性添加单元测试呢？答案是`mocks`，它可以为`Vue`实例提供额外的属性。假如我们有如下`message.vue`组件：
+```vue
+<template>
+  <div>
+    <button id="success" @click="handleSuccessClick">成功</button>
+    <button id="warning" @click="handleWarningClick">警告</button>
+    <button id="error" @click="handleErrorClick">错误</button>
+    <button id="info" @click="handleInfoClick">消息</button>
+  </div>
+</template>
+
+<script>
+export default {
+  methods: {
+    handleSuccessClick () {
+      this.$message.success('成功')
+    },
+    handleWarningClick () {
+      this.$message.warning('警告')
+    },
+    handleErrorClick () {
+      this.$message.error('错误')
+    },
+    handleInfoClick () {
+      this.$message.info('消息')
+    }
+  }
+}
+</script>
+```
+
+由于我们就是要`mock`来自第三方的插件，因此我们在测试用例中并不需要安装`element-ui`，所以我们可撰写如下测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import Message from '@/components/message.vue'
+
+describe('message.vue', () => {
+  it('add mocks', () => {
+    const message = {
+      success: jest.fn(),
+      warning: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn()
+    }
+    const wrapper = shallowMount(Message, {
+      mocks: {
+        $message: message
+      }
+    })
+    const successBtn = wrapper.find('#success')
+    const warningBtn = wrapper.find('#warning')
+    const errorBtn = wrapper.find('#error')
+    const infoBtn = wrapper.find('#info')
+
+    successBtn.trigger('click')
+    expect(message.success).toHaveBeenCalledTimes(1)
+
+    warningBtn.trigger('click')
+    expect(message.warning).toHaveBeenCalledTimes(1)
+
+    errorBtn.trigger('click')
+    expect(message.error).toHaveBeenCalledTimes(1)
+
+    infoBtn.trigger('click')
+    expect(message.info).toHaveBeenCalledTimes(1)
+  })
+})
+```
+### 模拟模块依赖
+在一个组件中，我们无法将其单独的隔离开进行测试，因为组件往往有一些被导入的模块，而这些模块就成为了这个模块的依赖。在大多数情况下，在单元测试中有模块依赖是一件好事，但也有一些模块存在副作用。例如：发送`HTTP`请求，我们不可能在单元测试用例中为组件真正的发送`HTTP`请求，这是不合理的，因此我们需要有一种模拟模块依赖的手段来解决这种问题。
+
+ 加入我们有以下`HelloWorld.vue`组件
+```vue
+<template>
+  <ul>
+    <li
+      v-for="(item, index) in lessonList"
+      :key="index"
+      class="lesson-item"
+    >{{item.title}}</li>
+  </ul>
+</template>
+
+<script>
+import { getLessonList } from '@/api/api.js'
+export default {
+  data () {
+    return {
+      lessonList: []
+    }
+  },
+  methods: {
+    getLessonData () {
+      getLessonList().then(res => {
+        const { status, data } = res
+        if (status === 200) {
+          this.lessonList = data.data
+        }
+      })
+    }
+  },
+  mounted () {
+    this.getLessonData()
+  }
+}
+</script>
+```
+
+新建`src/api/api.js`文件，并添加如下代码：
+```js
+import axios from 'axios'
+
+export function getLessonList () {
+  return axios.get('http://www.dell-lee.com/react/api/list.json')
+}
+```
+
+问题分析：
+* 第一步：我们要解决`getLessonList`方法返回假数据问题。
+* 第二步：我们要解决`HelloWorld.vue`组件正确渲染我们的假数据问题。
+
+对于第一个问题，我们需要在新建`src/api/__mocks__/api.js`文件夹，注意：
+* `__mocks__`是固定写法，它能被`Jest`进行识别。
+* `__mocks__/api.js`，其中`__mocks__`目录下的文件名要和我们模拟的模块文件名相同。
+
+```js
+export const getLessonList = jest.fn(() => {
+  const lessonResult = {
+    success: true,
+    data: [
+      { id: 1, title: '深入理解ES6' },
+      { id: 2, title: 'JavaScript高级程序设计' },
+      { id: 3, title: 'CSS揭秘' },
+      { id: 4, title: '深入浅出Vue.js' }
+    ]
+  }
+  return Promise.resolve(lessonResult)
+})
+
+```
 
 ## 挂载选项和Mock
 ### 挂载slot
