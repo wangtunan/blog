@@ -61,16 +61,16 @@ module.exports = {
                 link: '/books/git/'
               }
             ]
-          },
-          {
-            text: 'CSS书籍',
-            items: [
-              {
-                text: 'CSS揭秘',
-                link: '/books/css/secret'
-              }
-            ]
           }
+          // {
+          //   text: 'CSS书籍',
+          //   items: [
+          //     {
+          //       text: 'CSS揭秘',
+          //       link: '/books/css/secret'
+          //     }
+          //   ]
+          // }
         ]
       },
       {
