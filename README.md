@@ -47,7 +47,8 @@ Vue基础部分主要依据Vue官网以及个人理解总结而来，Vue源码�
 此部分主要为阅读VuePress官网，实际经验积累以及其他博客整理而来。<br/>
 [VuePress基础知识](https://wangtunan.github.io/blog/vuepress/) (完结) <br/>
 
-
+## ✨Git
+[精通Git](https://wangtunan.github.io/blog/books/git/) (撰写中)
 # 安装和开发
 
 ## 安装VuePress
