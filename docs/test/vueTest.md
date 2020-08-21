@@ -3,12 +3,12 @@ sidebar: auto
 ---
 
 # Vue应用测试
-本篇文章由阅读《Vue.js应用测试》书籍、学习《Vue Test Utils》`Vue`官网知识，以及实际工作经验总结而来，阅读书籍请支持正版。
+本篇文章由阅读《Vue.js应用测试》书籍、学习《Vue Test Utils》`Vue`官网知识以及实际工作经验总结而来，阅读书籍请支持正版。
 
 ## 测试介绍
-前端应用程序主要编写三种测试类型：**单元测试**、**快照测试**、**端到端测试**。
+前端应用程序主要编写三种测试类型：**单元测试**、**快照测试**、**端到端测试**。本篇文章着重介绍`Vue`组件的**单元测试**和**快照测试**，对于**端到端测试**请自行搜索相关内容。
 
-对于不同类型的测试，我们应该正确对待它们，并能够根据他们各自的优缺点进行比例混合。在一个测试金字塔中，单元测试需要占大部分比例，因为它们在开发应用程序时可以提供快速的反馈。快照测试的覆盖范围比较广，因此我们并不需要太多的快照测试，以`Vue`组件为例，一个`Vue`组件可能只需要一个快照测试用例。端到端测试用例虽然对应用程序非常有用，但由于它可能很慢而且会不稳定，因此端到端测试比例应该是最少的。
+对于不同类型的测试，我们应该正确对待它们，并能够根据它们各自的优缺点进行比例混合。在一个测试金字塔中，单元测试需要占大部分比例，因为它们在开发应用程序时可以提供快速的反馈。快照测试的覆盖范围比较广，因此我们并不需要太多的快照测试。以`Vue`组件为例，一个`Vue`组件可能只需要一个快照测试用例。端到端测试用例虽然对应用程序非常有用，但由于它可能很慢而且会不稳定，因此端到端测试比例应该是最少的。
 
 代码覆盖率是度量一个应用程序或者库质量的一个重要指标，通常而言`0%`表示未进行任何代码测试，`100%`意味着在测试用例执行时，每一行代码都被执行过了。`100%`覆盖率可能同`0%`覆盖率一样可怕，因为这可能会给你一种错觉：它会让你以为你的程序永远不会出错，然而实际情况很可能是你对场景进行了错误的判断，进而得出错误的结论。例如：当你测试一个`API`接口时，你假定该`API`永远都不会返回错误信息，然而当`API`在正式环境中，它确实返回了错误信息。
 
@@ -72,10 +72,8 @@ describe('math.js', () => {
 
 
 ### 快照测试
-快照测试会给运行中的应用程序拍一张"照片"，并将其与之前保存的图片进行比较，如果二者不相同则测试失败。
-
+快照测试会给运行中的应用程序拍一张"照片"，并将其与之前保存的"照片"进行比较，如果二者不相同则测试失败。
 在之后，我们会使用`Jest`自动化测试框架来对`Vue`组件进行快照测试。
-
 
 ## 安装
 ### 官方自动化测试仓库
@@ -803,14 +801,13 @@ describe('HelloWorld.vue', () => {
 ```
 
 ## 挂载选项和改变组件状态
-### 挂载其它选项
 在我们以上的测试用例中，我们已经在尝试过在组件挂载的时候提供`propsData`或者`mocks`，我们还可以挂载以下常见的几种其它选项，如下：
 * `data`：在挂载阶段提供的`data`中的属性，会被合并、覆盖到当前组件的`data`中，如下：
 * `slots`：如果被挂载的组件有插槽内容，那么可以在挂载阶段手动提供`slots`。
 * `stubs`：如果被挂载的组件存在子组件，那么可以在挂载阶段手动提供子组件的存根，例如：`stubs: ['my-child', 'transition', 'router-view', 'router-link']`等。
 * `localVue`：提供一个本地的`Vue`实例，防止污染全局的`Vue`，这在使用第三方插件：`Vue-Router`、`Vuex`和`element-ui`等非常适用。
 
-#### 挂载Data
+### 挂载Data
 假如我们有如下组件：
 ```vue
 <template>
@@ -848,7 +845,7 @@ describe('HelloWorld.vue', () => {
   })
 })
 ```
-#### 挂载Slots
+### 挂载Slots
 假如我们有如下组件：
 ```vue
 <template>
@@ -898,21 +895,187 @@ describe('HelloWorld.vue', () => {
 })
 
 ```
+### 挂载Stubs
+就像我们上面已经提到的那样，`stubs`可以用来存根子组件，包括：普通子组件、`transition`、`router-link`和`router-view`，它提供了我们用来覆盖全局或者局部注册组件的能力。
+
+如果一个组件使用了`router-link`或者`router-view`，但我们又不想要在测试用例中安装`Vue-Router`，那么可以像下面这样进行存根：
+```js
+const wrapper = shallowMount(HelloWorld, {
+  stubs: ['router-link', 'router-view']
+})
+```
+### 挂载第三方应用
+有时候我们在开发`Vue`应用的时候，会经常用到第三方插件，例如：`Vue-Router`、`Vuex`以及`element-ui`等等。那么，如何在一个测试用例中优雅的安装这些第三方应用呢？
+
+可以使用`createLocalVue()`方法创建一个本地的`Vue`实例，用来替换全局的`Vue`，随后在挂载组件的时候传递这个本地`Vue`，如下：
+```js
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+import Vuex from 'vuex'
+import Router from 'vue-router'
+import ElementUI from 'element-ui'
+const localVue  = createLocalVue()
+localVue.use(Vuex)
+localVue.use(Router)
+localVue.use(Router)
+localVue.use(ElementUI)
+
+describe('HelloWorld.vue', () => {
+  it('use localVue', () => {
+    const wrapper = shallowMount(HelloWorld, {
+      localVue
+    })
+  })
+})
+```
 ### 改变组件状态
+在组件挂载后，可以使用如下几种`set`方法来改变组件中的数据。
+* `setChecked`：设置`checkbox`或者`radio`类元素的`checked`的值并更新`v-model`。
+* `setSelected`：设置一个`option`元素并更新`v-model`。
+* `setValue`：设置一个文本控件或`select`元素的值并更新`v-model`。
+* `setProps`：设置包裹器的`vm`实例中`prop`并强制更新。
+* `setData`：设置包裹器中`vm`实例中的`data`并更新。
 
+**注意**：由于`Vue`组件更新`DOM`是异步的，因此如果我们要测试组件更改数据后的`DOM`，我们应该使用`$nextTick()`。
 
+假设我们有如下组件：
+```vue
+<template>
+  <div>
+    <input v-model="radio" type="radio" :value="true" />
+    <select v-model="select">
+      <option :value="1">选项一</option>
+      <option :value="2">选项而</option>
+    </select>
+    <input v-model="txt" type="text">
+  </div>
+</template>
 
-## 添加第三方应用
-### 添加Vuex
-### 添加Vue-Router
-### 添加Element-UI
+<script>
+export default {
+  props: {
+    msg: String
+  },
+  data () {
+    return {
+      foo: '',
+      radio: false,
+      select: '',
+      txt: ''
+    }
+  }
+}
+</script>
+```
+
+随后，我们可以在组件挂载之后撰写如下测试用例来测试组件：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('change component data', () => {
+    const wrapper = shallowMount(HelloWorld)
+    const radioInput = wrapper.find('input[type="radio"]')
+    const options = wrapper.find('select').findAll('option')
+    const textInput = wrapper.find('input[type="text"]')
+    radioInput.setChecked()
+    options.at(1).setSelected()
+    textInput.setValue('txt value')
+    expect(wrapper.vm.radio).toBe(true)
+    expect(wrapper.vm.select).toBe(2)
+    expect(wrapper.vm.txt).toBe('txt value')
+
+    wrapper.setProps({
+      msg: 'msg value'
+    })
+    expect(wrapper.vm.msg).toBe('msg value')
+
+    wrapper.setData({
+      foo: 'foo value'
+    })
+    expect(wrapper.vm.foo).toBe('foo value')
+  })
+})
+```
+
 
 
 
 
 ## 测试事件
+在`Vue`应用程序中，我们主要会遇到两种类型的事件：**原生DOM事件**和**自定义Vue事件**
 ### 原生DOM事件
+通常而言原生`DOM`事件主要作为单元测试的输入，常见的原生`DOM`事件有：单击一个元素触发`click`事件、光标悬浮在元素上会触发`mouseenter`事件、在键盘按下任意键会触发`keyup/keydown`事件以及提交一个表单会触发`submit`事件等等。
+
+在`Vue-Test-Utils`中，每个包装器都有一个`trigger`方法，用于在包装元素上分发一个合成事件。所谓**合成事件**指的是在`JavaScript`中创建的事件，它的处理方式与浏览器分发事件的处理方式相同，区别在于原生事件通过`EventLoop`异步调用事件处理程序，而合成事件则是同步调用事件处理程序。
+
+`trigger`方法可用于模拟几乎任何原生`DOM`事件，例如`click`、`keydown`或`mouseenter`等。假设我们有这样一个需求，点击元素一下实现数字自增：
+```vue
+<template>
+  <div>
+    {{count}}
+    <button @click="count++">自增</button>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    msg: String
+  },
+  data () {
+    return {
+      count: 0
+    }
+  }
+}
+</script>
+```
+那么我们可以在以上组件的基础上撰写测试`click`原生事件的单元测试：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+describe('HelloWorld.vue', () => {
+  it('测试原生click事件', async () => {
+    const wrapper = shallowMount(HelloWorld)
+    const btn = wrapper.find('button')
+    expect(wrapper.vm.count).toBe(0)
+    btn.trigger('click')
+    expect(wrapper.vm.count).toBe(1)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain(1)
+  })
+})
+```
+### 传递事件参数
+在触发事件的同时，我们也可以选择传递事件参数，`trigger()`方法接受第二个可选的`options`参数，其中的属性会在分发事件时设置到`$event`对象上：
+```js
+// 传递事件参数
+btn.trigger('click', { count: 10 })
+
+// 获取事件参数
+handleIncrementClick ($event) {
+  console.log($event.count)
+}
+```
+
+**注意**：我们不能在`options`选项中设置事件目标`target`的值，如果我们`trigger`的是一个表单元素，想要在`trigger`之前修改其表单的值。一方面，我们可以使用前面介绍过的几个`set`方法，另一方面，我们可以修改`element`元素上的值以达到我们的目的：
+```js
+// setValue改变元素的值
+input.setValue(100)
+btn.trigger('click')
+
+// element元素改变元素的值
+input.element.value = 100
+btn.trigger('click')
+```
+
 ### 自定义事件
+在一个`Vue`应用程序中，自定义事件比原生`DOM`事件更加强大，因为自定义事件可以和父组件通信。
+
+### 子组件派发事件
+
 
 
 
