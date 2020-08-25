@@ -1161,21 +1161,191 @@ describe('ParentComponent', () => {
 
 
 ## 测试Vuex
+在一个`Vue应用程序中`经常会使用到`Vuex`，我们有下面这几种方式来测试`Vuex`：
+* 单独测试`store`中的每一个部分：我们可以把`store`中的`mutations`、`actions`和`getters`单独划分，分别进行测试。
+* 组合测试`store`：我们不拆分`store`，而是把它当做一个整体，我们测试`store`实例，进而希望它能按期望输出。
+
+单独测试`store`中的每一部分的好处是：单元测试可以小而且聚焦，当一个单元测试用例失败时，我们能够十分确切的知道错在哪里。缺点是：我们经常需要模拟`Vuex`的某些功能，而越多的模拟意味着越偏离实际，有时候很可能模拟错误而引入`bug`<br/>
+组合测试`store`的好处是：这种方法更加健壮，因为我们不需要在重新编写、模拟`Vuex`的功能。
+
 ### 测试Mutations
+对于一个`mutation`而言，它只是一个函数，因此`mutation`的单元测试非常简单。我们只需要传递参数，然后期望`state`能正确输出。假设一个`mutation`代码如下：
+```js
+// mutations.js
+setToken (state, token) {
+  state.token = token
+}
+```
+我们可以基于以上代码撰写如下单元测试：
+```js
+import mutations from './mutations.js'
+describe('mutations', () => {
+  it('test setToken mutations', () => {
+    const token = '123456'
+    const state = {
+      token: ''
+    }
+    mutations.setToken(state, token)
+    expect(state.token).toBe(token)
+  })
+})
+```
 ### 测试Getters
+同`mutations`一样，`getters`也是一个普通的函数，它始终返回一个值。因此这使得测试`getters`变得简单化，我们只需要断言`getter`函数的返回值即可。假设我们有如下`getters`代码：
+```js
+// getters.js
+export const passList = state => {
+  return state.students.filter(stu => stu.score >= 60)
+}
+```
+我们可以基于以上代码撰写如下单元测试：
+```js
+import getters from './getters.js'
+describe('getters', () => {
+  it('test passList getters', () => {
+    const students = [
+      { name: 'AAA', score: 59 },
+      { name: 'BBB', score: 70 },
+      { name: 'CCC', score: 10 }
+    ]
+    const state = {
+      students: students
+    }
+    const result = getters.passList(state)
+    expect(result).toEqual(students[1])
+  })
+})
+```
 ### 测试Actions
+不同于`mutations`，我们单独模拟`actions`要稍微复杂一点，假设我们有如下`actions`代码：
+```js
+// actions.js
+export const login = ({ commit }, { userInfo, token }) {
+  commit('setUserInfo', userInfo)
+  commit('setToken', token)
+}
+```
+我们可以基于以上代码撰写如下单元测试：
+```js
+import actions from './actions.js'
+describe('actions', () => {
+  const loginResult = {
+    userInfo: { name: 'AAA', age: 23 },
+    token: '123456'
+  }
+  it('test login action', () => {
+    expect.assertions(1)
+    const context = {
+      commit: jest.fn()
+    }
+    actions.login(context, loginResult)
+    expect(context.commit).toHaveBeenCalledWith('setToken', loginResult.token)
+  })
+})
+```
+
 ### 测试Vuex Store实例
-### 测试组件中的Vuex
+组合测试`store`一个需要注意的点是，我们需要使用`localVue`而不是全局`Vue`上挂载我们的`Vuex`，假设我们有如下代码：
+```js
+test('increment updates state.count by 1', () => {
+  Vue.use(Vuex)
+  const store = new Vuex.store({storeConfig})
+  expect(store.state.count).toBe(0)
 
+  store.commit('increment')
+  expect(store.state.count).toBe(1)
+})
+```
+当我们运行以上代码进行单独测试时，而确实能按照我们的期望进行输出，但存在一个致命问题：如果我们有多个测试用例，因为`store`对象是引用类型，我们在第一个测试用例修改的值，会影响其他测试用例。
 
+一个可行的办法时，我们每次使用`store`时，都使用`cloneDeep(store)`后的副本，这样确实能解决对象引用的问题，但`Vue-Test-Utils`提供了一种更友好的方式来处理这类问题：`localVue`。
 
-## 工厂函数组件测试
-### 了解工厂函数
-### 创建store工厂函数
-### 覆盖工厂函数中的默认选项
-### 创建包装器工厂函数
+`localVue`我们在之前已经提到过，我们可以按照之前介绍的方式来改造以上测试用例：
+```js
+import { createLocalVue } from '@vue/test-utils'
 
+const localVue = createLocalVue()
+localVue.use(Vuex)
 
+test('increment updates state.count by 1', () => {
+  const store = new Vuex.store({storeConfig})
+  expect(store.state.count).toBe(0)
+
+  store.commit('increment')
+  expect(store.state.count).toBe(1)
+})
+```
+
+要测试一个完整的`store`，我们假设有如下代码：
+```js
+import * as types from './mutation-types.js'
+import {
+  setToken,
+  getToken,
+  removeToken,
+  setUserInfo,
+  getUserInfo,
+  removeUserInfo
+} from '@/utils/cache.js'
+const state = {
+  token: getToken(),
+  userInfo: getUserInfo()
+}
+const mutations = {
+  [types.SET_TOKEN] (state, token) {
+    state.token = token
+  },
+  [types.SET_USER_INFO] (state, userInfo) {
+    state.userInfo = userInfo
+  }
+}
+const actions = {
+  login ({ commit }, { token, userInfo }) {
+    commit(`${types.SET_TOKEN}`, setToken(token))
+    commit(`${types.SET_USER_INFO}`, setUserInfo(userInfo))
+  },
+  logout ({ commit }) {
+    commit(`${types.SET_TOKEN}`, removeToken())
+    commit(`${types.SET_USER_INFO}`, removeUserInfo())
+  }
+}
+```
+我们同时定义`getters.js`代码如下：
+```js
+export const token = (state) => state.token
+
+export const userInfo = (state) => state.userInfo
+```
+
+因此我们可以撰写以下测试整体`store`的代码：
+```js
+import store from './store/index.js'
+import * as types from './store/mutation-types.js'
+import * as getters from './store/getters.js'
+
+describe('test store', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+  it('test login action', () => {
+    const loginResult = {
+      userInfo: { name: 'AAA', age: 23 },
+      token: '123456'
+    }
+    expect(getters.token).toBe('')
+    expect(getters.userInfo).toEqual({})
+
+    store.dispatch('login', loginResult)
+    expect(getters.token).toBe(loginResult.token)
+    expect(getters.userInfo).toEqual(loginResult.userInfo)
+  })
+  it('test logout action', () => {
+    store.dispatch('logout')
+    expect(getters.token).toBe('')
+    expect(getters.userInfo).toEqual({})
+  })
+})
+```
 
 ## 测试Vue-Router
 ### 测试$route
@@ -1191,15 +1361,152 @@ describe('ParentComponent', () => {
 
 
 ## 快照测试
-### 普通组件快照
+一个对快照测试简单的解释就是获取代码的快照，并将其与以前保存的快照进行比较，如果新的快照与前一个快照不匹配，测试会失败。快照测试对于测试一个组件来说，相对比较有用，因为如果添加了快照测试，它能防止我们错误的修改了组件。
+
+在`Jest`自动化测试框架中，我们可使用以下代码为组件进行快照：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+it('match snapshot', () => {
+  const wrapper = shallowMount(HelloWorld)
+  expect(wrapper.element).toMatchSnapshot()
+})
+```
+以上快照测试的流程如下：
+1. 运行快照测试。
+2. 生成输出。
+3. 之前是否有快照存在。
+4. 不存在，创建快照，测试通过
+5. 存在则继续与之前的快照进行比对，是否相同。
+6. 相同，测试通过。
+7. 不相同，测试失败。
+
+一个快照测试的示例如下：
+```js
+exports[`HelloWorld.vue match snapshot 1`] = `
+<div>
+  <span
+    class="item"
+  >
+    item
+  </span>
+  Hello, Vue and Jest...
+</div>
+`;
+```
 ### 静态组件快照
+**静态组件**：指的是总是渲染相同输出的组件，它不接受任何`prop`，也没有任何`state`，组件内也没有任何逻辑，并且总是会渲染相同的`HTML`元素。为静态组件编写单元测试完全没有必要，但对于一个组件来说，为其编写一个快照测试则十分有必要。
+
+假设我们有如下的静态组件：
+```vue
+<template>
+  <transition>
+    <svg class="spinner" width="44px" height="44px" viewBox="0 0 44 44">
+      <circle class="path" fill="none" stroke-width="4" stroke-linecap="round" cx="22" cy="22" r="20">
+    </svg>
+  </transition>
+</template>
+```
+
+我们编写如下静态快照测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import Spinner from '@/components/spinner.vue'
+
+describe('spinner.vue', () => {
+  it('match snapshot', () => {
+    const wrapper = shallowMount(Spinner)
+    expect(wrapper.element).toMatchSnapshot()
+  })
+})
+```
+
 ### 动态组件快照
+**动态组件**：指的是那些包含逻辑和状态的组件，比如点击按钮会传递`props`的值或更改组件数据。为动态组件编写测试用例时，应该尝试捕获最重要的几条分支逻辑。因为对于一个大的组件而言，它会的`props`，自身`data`或者其他数据影响组件的渲染结果，而我们又不可能为每一种分支逻辑都撰写一个快照测试。
+
+假设我们有如下组件代码：
+```vue
+<template>
+  <div>
+    <div v-if="age < 10"> child person </div>
+    <div v-else-if="age>=10&&age<30">youth person</div>
+    <div>{{msg}}</div>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    msg: {
+      type: String,
+      default: 'default msg'
+    }
+  },
+  data () {
+    return {
+      age: 11
+    }
+  }
+}
+</script>
+```
+我们依据以上代码撰写下面2个快照测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  let wrapper
+  beforeEach(() => {
+    wrapper = shallowMount(HelloWorld)
+  })
+  it('match msg snapshot', () => {
+    expect(wrapper.element).toMatchSnapshot()
+  })
+  it('match age snapshot', async () => {
+    wrapper.setData({
+      age: 6
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.element).toMatchSnapshot()
+  })
+})
+```
+运行`npm run test:unit`后，我们将得到如下快照：
+```js
+exports[`HelloWorld.vue match age snapshot 1`] = `
+<div>
+  <div>
+     child person 
+  </div>
+   
+  <div>
+    default msg
+  </div>
+</div>
+`;
+
+exports[`HelloWorld.vue match msg snapshot 1`] = `
+<div>
+  <div>
+    youth person
+  </div>
+   
+  <div>
+    default msg
+  </div>
+</div>
+`;
+```
+
+### 更新快照
+我们已经在上面分别介绍了静态组件和动态组件撰写快照测试的方法，我们也了解了快照测试对于一个组件的意义：当一个快照测试用例失败时，它提示我们组件相较于上一次做了修改。如果是计划外的，测试会捕获异常并将它输出提示我们。如果是计划内的，那么我们就需要更新快照。
+
+更新快照主要有2种情况：
+* 全部更新：我们可以使用`npm run test:unit -- -u`命令批量更新我们的快照，但这种方式是十分危险的，因为很可能其中某一个组件是计划外的更新，此时如果执行批量更新快照则会生成一个错误的快照文件。
+* 单个更新：我们可以使用`npm run test:unit -- --watch`命令进行`Jest`交互式更新，`i`键浏览所有失败的快照文件，`u`键使用最新值来更新之前保存的快照。其它按键请参照`Jest`官网上面的内容。
 
 
 ## 测试用例调试
 ### VsCode编辑器调试
 ### Chrome浏览器调试
-
-
-## 业务组件测试示例
-### Pagination组件测试
