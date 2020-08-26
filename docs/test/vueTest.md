@@ -3,12 +3,12 @@ sidebar: auto
 ---
 
 # Vue应用测试
-本篇文章由阅读《Vue.js应用测试》书籍、学习《Vue Test Utils》`Vue`官网知识以及实际工作经验总结而来，阅读书籍请支持正版。
+本篇文章由阅读《Vue.js应用测试》书籍、学习《Vue Test Utils》官网知识以及实际工作经验总结而来，阅读书籍请支持正版。
 
 ## 测试介绍
 前端应用程序主要编写三种测试类型：**单元测试**、**快照测试**、**端到端测试**。本篇文章着重介绍`Vue`组件的**单元测试**和**快照测试**，对于**端到端测试**请自行搜索相关内容。
 
-对于不同类型的测试，我们应该正确对待它们，并能够根据它们各自的优缺点进行比例混合。在一个测试金字塔中，单元测试需要占大部分比例，因为它们在开发应用程序时可以提供快速的反馈。快照测试的覆盖范围比较广，因此我们并不需要太多的快照测试。以`Vue`组件为例，一个`Vue`组件可能只需要一个快照测试用例。端到端测试用例虽然对应用程序非常有用，但由于它可能很慢而且会不稳定，因此端到端测试比例应该是最少的。
+对于不同类型的测试，我们应该正确对待它们，并能够根据它们各自的优缺点进行比例混合。在一个测试金字塔中，单元测试需要占大部分比例，因为它们在开发应用程序时可以提供快速的反馈。快照测试的覆盖范围比较广，因此我们并不需要太多的快照测试。以`Vue`组件为例，一个`Vue`组件可能只需要一个到三个的快照测试用例。端到端测试用例虽然对应用程序非常有用，但由于它可能很慢而且会不稳定，因此端到端测试比例应该是最少的。
 
 代码覆盖率是度量一个应用程序或者库质量的一个重要指标，通常而言`0%`表示未进行任何代码测试，`100%`意味着在测试用例执行时，每一行代码都被执行过了。`100%`覆盖率可能同`0%`覆盖率一样可怕，因为这可能会给你一种错觉：它会让你以为你的程序永远不会出错，然而实际情况很可能是你对场景进行了错误的判断，进而得出错误的结论。例如：当你测试一个`API`接口时，你假定该`API`永远都不会返回错误信息，然而当`API`在正式环境中，它确实返回了错误信息。
 
@@ -1348,16 +1348,246 @@ describe('test store', () => {
 ```
 
 ## 测试Vue-Router
-### 测试$route
-### 测试$router
-### 测试RouterLink
-### Vue-Router和Vuex配合使用
+当`Vue-Router`被安装到`Vue`以后，它会添加两个实例属性：`$route`和`$router`，这两个属性一旦被添加则不允许再重写。
 
+* `$route`：包含了当前匹配路由的信息，其中包含路由参数中的任何动态字段。
+* `$router`：是当前路由实例，它包含了可以控制当前路由的所有方法，例如：`push`、`replace`和`back`等。
+
+### 测试$route
+当我们的组件使用了`$route`实例属性，则该属性将成为组件的依赖，我们在之前已经介绍过，处理依赖的一种可行的方式就是模拟，假设我们有如下组件：
+```vue
+<template>
+  <div>
+    <p v-if="$route.query && $route.query.id">get detail</p>
+    <p v-else>need passed id</p>
+  </div>
+</template>
+```
+我们可以看到以上组件使用到了`$route`实例属性，因此我们为上面的组件撰写如下测试代码：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  let $route 
+  beforeEach(() => {
+    $route = {
+      query: {}
+    }
+  })
+it('no passed $route.query.id', () => {
+    const wrapper = shallowMount(HelloWorld, {
+      mocks: {
+        $route
+      }
+    })
+    expect(wrapper.text()).toContain('need passed id')
+  })
+  it('passed $route.query.id', () => {
+    $route.query.id = 123
+    const wrapper = shallowMount(HelloWorld, {
+      mocks: {
+        $route
+      }
+    })
+    expect(wrapper.text()).toContain('get detail')
+  })
+})
+```
+### 测试$router
+在以上测试`$route`组件的基础上，我们进一步修改代码：
+```vue
+<template>
+  <div>
+    <p v-if="$route.query.id">get detail</p>
+    <p v-else>need passed id</p>
+  </div>
+</template>
+<script>
+export default {
+  mounted () {
+    if (!this.$route.query.id) {
+      this.$router.replace('/home')
+    }
+  }
+}
+</script>
+```
+那么我们测试`$router`的代码可以像下面这样写：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  let $route
+  let $router
+  beforeEach(() => {
+    $route = {
+      query: {}
+    }
+    $router = {
+      replace: jest.fn()
+    }
+  })
+  it('replace home when no id', () => {
+    const wrapper = shallowMount(HelloWorld, {
+      mocks: {
+        $route,
+        $router
+      }
+    })
+    expect($router.replace).toHaveBeenCalled()
+  })
+})
+
+```
+### 测试RouterLink
+依旧以上面组件代码为例，我们添加`router-link`，当没有传递`id`参数时，我们让用户手动点击返回：
+```vue
+<template>
+  <div>
+    <p v-if="$route.query.id">get detail</p>
+    <p v-else>
+      need passed id
+      <router-link to="/home">返回</router-link>
+    </p>
+  </div>
+</template>
+```
+我们都知道，在安装了`Vue-Router`后，我们就可以使用`router-link`和`router-view`等内置组件，但是如果我们不做其他处理的话，我们并不能把`router-link`当做一个组件，进而根据`wrapper.findComponent()`方法去找到它。
+
+在`Vue-Test-Utils`中，我们可以使用`studs`存根`router-link`，然后使用`RouterLinkStub`控制`router-link`渲染：
+```js
+import { shallowMount, RouterLinkStub } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+const wrapper = shallowMount(HelloWorld, {
+  stubs: {
+    RouterLink: RouterLinkStub
+  }
+})
+```
+
+那么我们的测试代码如下：
+```js
+import { shallowMount, RouterLinkStub } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+
+describe('HelloWorld.vue', () => {
+  it('render router-link', () => {
+    const $route = {
+      query: {}
+    }
+    const wrapper = shallowMount(HelloWorld, {
+      stubs: {
+        RouterLink: RouterLinkStub
+      },
+      mocks: {
+        $route
+      }
+    })
+    expect(wrapper.findComponent(RouterLinkStub).props().to).toBe('/home')
+  })
+})
+```
+**注意**：如果我们要找元素标签推荐使用`wrapper.find()`方法，如果要找组件推荐使用`wrapper.findComponent()`。
 
 ## 测试Mixins和Filters
-### 局部mixin
-### 全局mixin
-### 过滤器测试
+
+### 测试mixin
+测试`mixin`的过程很简单：在组件中或全局注册`mixin`、挂载组件、最后检查`mixin`是否产生了预期的行为。
+
+假设我们有如下`titleMixin`代码：
+```js
+/// mixin.js
+export const titleMixin = {
+  mounted () {
+    const title = this.title
+    if (title) {
+      document.title = title
+    }
+  }
+}
+```
+
+然后我们在组件使用该`mixin`：
+```vue
+<template>
+  <div>
+    Hello,Vue.js
+  </div>
+</template>
+<script>
+import { titleMixin } from '@/mixin/index.js'
+export default {
+  mixins: [titleMixin],
+  data () {
+    return {
+      title: '测试title mixin'
+    }
+  }
+}
+</script>
+```
+最后，我们撰写测试`titleMixin`的测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+describe('HelloWorld.vue', () => {
+  it('test mixin', () => {
+    const wrapper = shallowMount(HelloWorld)
+    expect(document.title).toBe('测试title mixin')
+  })
+})
+```
+
+### 测试filters
+测试`filters`的方式同`mixins`十分相似，假设我们有如下反转字符串`filter`代码：
+```js
+export const reverseStr = (str) => {
+  if (!str) {
+    return
+  }
+  if (typeof str !== 'string') {
+    return str
+  }
+  return str.split('').reverse().join('')
+}
+```
+接下来，我们在组件中使用该`filter`：
+```vue
+<template>
+  <div>
+    <span>{{msg | reverseStr}}</span>
+    <span>{{age | reverseStr}}</span>
+  </div>
+</template>
+<script>
+import { reverseStr } from '@/filters/index.js'
+export default {
+  filters: {
+    reverseStr
+  },
+  data () {
+    return {
+      age: 23,
+      msg: 'ABC',
+    }
+  }
+}
+</script>
+```
+最后，我们为以上组件编写测试用例：
+```js
+import { shallowMount } from '@vue/test-utils'
+import HelloWorld from '@/components/HelloWorld.vue'
+describe('HelloWorld.vue', () => {
+  it('test filters', () => {
+    const wrapper = shallowMount(HelloWorld)
+    expect(wrapper.text()).toContain('CBA')
+    expect(wrapper.text()).toContain('23')
+  })
+})
+```
 
 
 ## 快照测试
@@ -1506,7 +1736,3 @@ exports[`HelloWorld.vue match msg snapshot 1`] = `
 * 全部更新：我们可以使用`npm run test:unit -- -u`命令批量更新我们的快照，但这种方式是十分危险的，因为很可能其中某一个组件是计划外的更新，此时如果执行批量更新快照则会生成一个错误的快照文件。
 * 交互时更新：我们可以使用`npm run test:unit -- --watch`命令进行`Jest`交互式更新，`i`键浏览所有失败的快照文件，`u`键使用最新值来更新之前保存的快照。其它按键请参照`Jest`官网上面的内容。
 
-
-## 测试用例调试
-### VsCode编辑器调试
-### Chrome浏览器调试
