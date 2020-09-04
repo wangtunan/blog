@@ -1,5 +1,5 @@
 const nav = require('./utils/nav.js')
-var { cssSidebar,webpackSidebar, vueAnalysisSidebar } = nav
+const { cssSidebar, webpackSidebar } = nav
 module.exports = {
   title: '一蓑烟雨、烟池鱼',
   description: '一蓑烟雨、烟池鱼的个人站点',
@@ -62,15 +62,6 @@ module.exports = {
               }
             ]
           }
-          // {
-          //   text: 'CSS书籍',
-          //   items: [
-          //     {
-          //       text: 'CSS揭秘',
-          //       link: '/books/css/secret'
-          //     }
-          //   ]
-          // }
         ]
       },
       {
@@ -102,8 +93,7 @@ module.exports = {
     ],
     sidebar: {
       '/css/': [cssSidebar],
-      '/webpack/': [webpackSidebar],
-      '/vueAnalysis/': vueAnalysisSidebar
+      '/webpack/': [webpackSidebar]
     }
   },
   configureWebpack: {
