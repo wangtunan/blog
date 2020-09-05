@@ -40,8 +40,8 @@ sidebar: auto
     },
     methods: {
       handleSubmitClick() {
-        this.list.push(this.inputValue);
-        this.inputValue = '';
+        this.list.push(this.inputValue)
+        this.inputValue = ''
       }
     }
   })
@@ -83,19 +83,19 @@ var app = new Vue({
     return {
       message: "hello,world",
       age: 23,
-      name: "AAA",
-    };
-  },
-});
+      name: "AAA"
+    }
+  }
+})
 
 // 实例属性和方法
-console.log(app.$data);
-console.log(app.$data.age);
-console.log(app.$el);
+console.log(app.$data)
+console.log(app.$data.age)
+console.log(app.$el)
 
 // 只有在data中声明的属性才是响应式的
-app.address = "广州"; // 这个属性不是响应式的
-app.age = 32; // 这个属性是响应式的
+app.address = "广州" // 这个属性不是响应式的
+app.age = 32 // 这个属性是响应式的
 ```
 
 ### Vue 生命周期
@@ -121,33 +121,33 @@ var app = new Vue({
   data() {
     return {
       message: "hello,world",
-    };
+    }
   },
   beforeCreate() {
-    console.log("beforeCreate");
+    console.log("beforeCreate")
   },
   created() {
-    console.log("created");
+    console.log("created")
   },
   beforeMount() {
-    console.log("beforeMount");
+    console.log("beforeMount")
   },
   mounted() {
-    console.log("mounted");
+    console.log("mounted")
   },
   beforeUpdate() {
-    console.log("beforeUpdate");
+    console.log("beforeUpdate")
   },
   updated() {
-    console.log("updated");
+    console.log("updated")
   },
   beforeDestory() {
-    console.log("beforeDestory");
+    console.log("beforeDestory")
   },
   destoryed() {
-    console.log("destoryed");
-  },
-});
+    console.log("destoryed")
+  }
+})
 ```
 
 ### Vue 模板语法
@@ -175,10 +175,10 @@ var app = new Vue({
   data() {
     return {
       message: "hello,world",
-      rawHTML: "<h1>hello,world</h1>",
-    };
-  },
-});
+      rawHTML: "<h1>hello,world</h1>"
+    }
+  }
+})
 ```
 
 ![插值表达式](../images/vue/1.png)
@@ -212,15 +212,15 @@ var app = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: false,
-    };
+      isShow: false
+    }
   },
   methods: {
     handleBtnClick() {
-      console.log("v-on click");
-    },
-  },
-});
+      console.log("v-on click")
+    }
+  }
+})
 ```
 
 **运行结果：**
@@ -273,7 +273,7 @@ var app = new Vue({
     },
     computed: {
       fullName() {
-        return this.firstName + this.lastName;
+        return this.firstName + this.lastName
       }
     }
   })
@@ -298,20 +298,20 @@ var app = new Vue({
   el: "#app",
   data() {
     return {
-      msg: "hello,world",
-    };
+      msg: "hello,world"
+    }
   },
   computed: {
     reverseMsg() {
-      return this.msg.split("").reverse().join("");
-    },
+      return this.msg.split("").reverse().join("")
+    }
   },
   methods: {
     reverseMsgMethods() {
-      return this.msg.split("").reverse().join("");
-    },
-  },
-});
+      return this.msg.split("").reverse().join("")
+    }
+  }
+})
 ```
 
 **运行结果：**
@@ -338,23 +338,23 @@ var app = new Vue({
     return {
       firstName: "foo",
       lastName: "bar",
-      fullNameWatch: "foo bar",
-    };
+      fullNameWatch: "foo bar"
+    }
   },
   computed: {
     fullName() {
-      return this.firstName + " " + this.lastName;
-    },
+      return this.firstName + " " + this.lastName
+    }
   },
   watch: {
     firstName(val) {
-      this.fullNameWatch = val + " " + this.lastName;
+      this.fullNameWatch = val + " " + this.lastName
     },
     lastName(val) {
-      this.fullNameWatch = this.firstName + " " + val;
-    },
-  },
-});
+      this.fullNameWatch = this.firstName + " " + val
+    }
+  }
+})
 ```
 
 **运行结果：**
@@ -377,22 +377,22 @@ var app = new Vue({
   data() {
     return {
       firstName: "foo",
-      lastName: "bar",
-    };
+      lastName: "bar"
+    }
   },
   computed: {
     fullName: {
       get() {
-        return this.firstName + " " + this.lastName;
+        return this.firstName + " " + this.lastName
       },
       set(val) {
-        let names = val.split(" ");
-        this.firstName = names[0];
-        this.lastName = names[names.length - 1];
-      },
-    },
-  },
-});
+        let names = val.split(" ")
+        this.firstName = names[0]
+        this.lastName = names[names.length - 1]
+      }
+    }
+  }
+})
 ```
 
 **运行结果：**
@@ -409,13 +409,13 @@ var app = new Vue({
 
 ```css
 .active {
-  color: red;
+  color: red
 }
 .star {
-  background-color: #eee;
+  background-color: #eee
 }
 .star-active {
-  background-color: #58a;
+  background-color: #58a
 }
 ```
 
@@ -434,18 +434,18 @@ var app = new Vue({
   data() {
     return {
       isActive: false,
-      classArr: ["star"],
-    };
+      classArr: ["star"]
+    }
   },
   methods: {
     handleChangeStyle() {
-      this.isActive = !this.isActive;
+      this.isActive = !this.isActive
     },
     handleAddStyle() {
-      this.classArr.push("star-active");
-    },
-  },
-});
+      this.classArr.push("star-active")
+    }
+  }
+})
 ```
 
 **绑定 class 结果：**
@@ -470,23 +470,23 @@ var app = new Vue({
       styleObj: {
         fontSize: "30px",
         color: "red",
-        backgroundColor: "#58a",
+        backgroundColor: "#58a"
       },
       styleOne: {
         color: "#f60",
-        backgroundColor: "#333",
+        backgroundColor: "#333"
       },
       styleTwo: {
-        fontSize: "20px",
-      },
-    };
+        fontSize: "20px"
+      }
+    }
   },
   methods: {
     handleChangeStyle() {
-      this.isActive = !this.isActive;
-    },
-  },
-});
+      this.isActive = !this.isActive
+    }
+  }
+})
 ```
 
 **绑定 style 结果：**
@@ -725,19 +725,19 @@ data() {
 ```js
 var vm = new Vue({
   data: {
-    items: ["a", "b", "c"],
-  },
-});
+    items: ["a", "b", "c"]
+  }
+})
 // 不是响应性的
-vm.items[1] = "d";
-vm.items.length = 2;
+vm.items[1] = "d"
+vm.items.length = 2
 ```
 
 **解决办法：** 第一个参数为要更改的数组，第二个参数为要更改项的索引，第三个参数为待更改的值
 
 ```js
 // 这是响应性的
-Vue.set(vm.items, 1, "d");
+Vue.set(vm.items, 1, "d")
 ```
 
 **对象的更新检测：** 相似的，只有在`data`中定义的对象属性，再做值的更改时，才会触发视图更新，新添加一个属性是不会触发视图更新的。
@@ -748,19 +748,19 @@ var vm = new Vue({
     student: {
       name: "张三",
       age: 23,
-      sex: "男",
-    },
-  },
-});
+      sex: "男"
+    }
+  }
+})
 // 不是响应性的
-vm.student.address = "广东广州";
+vm.student.address = "广东广州"
 ```
 
 **解决办法：** 第一个参数为要更改的对象，第二个参数为要添加的键，第三个参数待添加键的值
 
 ```js
 // 这是响应性的
-Vue.set(vm.student, "address", "广东广州");
+Vue.set(vm.student, "address", "广东广州")
 ```
 
 ### 修饰符
@@ -866,11 +866,11 @@ Vue.set(vm.student, "address", "广东广州");
 
 ```js
 Vue.component("row", {
-  template: "<tr> this is a row component!</tr>",
-});
+  template: "<tr> this is a row component!</tr>"
+})
 var app = new Vue({
-  el: "#app",
-});
+  el: "#app"
+})
 ```
 
 **渲染结果：**
@@ -912,26 +912,26 @@ Vue.component("item", {
   data() {
     return {
       message: "this is a  message!",
-    };
-  },
+    }
+  }
   methods: {
     handleItemClick() {
-      this.$emit("item-change");
-    },
+      this.$emit("item-change")
+    }
   },
   template: '<div @click="handleItemClick">{{message}}</div>',
-});
+})
 var app = new Vue({
   el: "#app",
   methods: {
     handleHelloClick() {
-      console.log(this.$refs.hello.innerHTML);
+      console.log(this.$refs.hello.innerHTML)
     },
     handleItemChange() {
-      console.log(this.$refs.item.message);
-    },
-  },
-});
+      console.log(this.$refs.item.message)
+    }
+  }
+})
 ```
 
 **引用结果：**
@@ -958,29 +958,29 @@ Vue.component("counter", {
   props: ["count"],
   data() {
     return {
-      number: this.count,
-    };
+      number: this.count
+    }
   },
   methods: {
     handleCounterClick() {
-      this.number++;
-      this.$emit("change", 1);
-    },
-  },
-});
+      this.number++
+      this.$emit("change", 1)
+    }
+  }
+})
 var app = new Vue({
   el: "#app",
   data() {
     return {
-      total: 0,
-    };
+      total: 0
+    }
   },
   methods: {
     handleChange(step) {
-      this.total += step;
-    },
-  },
-});
+      this.total += step
+    }
+  }
+})
 ```
 
 **父子组件通信结果：**
@@ -1008,21 +1008,21 @@ Vue.component("item", {
     // 字符串类型且必传
     name: {
       type: String,
-      required: true,
+      required: true
     },
     // 字符串类型或者数字类型，默认值为0
     age: {
       type: String | Number,
-      default: 0,
+      default: 0
     },
     // 长度必须是11位
     phone: {
       validator(value) {
-        return value.length == 11;
-      },
-    },
-  },
-});
+        return value.length == 11
+      }
+    }
+  }
+})
 ```
 
 **传参校验结果：**
@@ -1048,16 +1048,16 @@ Vue.component("item", {
     // 字符串类型且必传
     name: {
       type: String,
-      required: true,
+      required: true
     },
     // 长度必须是11位
     phone: {
       validator(value) {
-        return value.length == 11;
-      },
-    },
-  },
-});
+        return value.length == 11
+      }
+    }
+  }
+})
 ```
 
 **Props 特性和非 Props 特性：**
@@ -1077,15 +1077,15 @@ Vue.component("item", {
 ```js
 Vue.component("item", {
   template: "<div>hello,world</div>",
-});
+})
 var app = new Vue({
   el: "#app",
   methods: {
     handleItemClick() {
-      console.log("item native click");
-    },
-  },
-});
+      console.log("item native click")
+    }
+  }
+})
 ```
 
 **组件绑定原生事件结果：**
@@ -1113,7 +1113,7 @@ var app = new Vue({
 ```js
 Vue.component("item", {
   template: "<div><slot></slot></div>",
-});
+})
 ```
 
 **普通插槽的结果：**
@@ -1140,8 +1140,8 @@ Vue.component("item", {
               <div>content</div>
               <slot name="footer"></slot>
               <slot name="copyright"><div>default slot</div></slot>
-            </div>`,
-});
+            </div>`
+})
 ```
 
 **具名插槽的结果：**
@@ -1167,14 +1167,14 @@ Vue.component("item", {
   data() {
     return {
       list: [1, 2, 3, 4, 5],
-    };
+    }
   },
   template: `<div>
               <ul>
                 <slot v-for="item in list" :item="item"></slot>
               </ul>
-            </div>`,
-});
+            </div>`
+})
 ```
 
 **作用域插槽的结果：**
@@ -1193,24 +1193,24 @@ Vue.component("item", {
 
 ```js
 Vue.component("child-one", {
-  template: "<div>child-one</div>",
-});
+  template: "<div>child-one</div>"
+})
 Vue.component("child-two", {
-  template: "<div>child-two</div>",
-});
+  template: "<div>child-two</div>"
+})
 var app = new Vue({
   el: "#app",
   data() {
     return {
-      type: "child-one",
-    };
+      type: "child-one"
+    }
   },
   methods: {
     handleChange() {
-      this.type = this.type == "child-one" ? "child-two" : "child-one";
-    },
-  },
-});
+      this.type = this.type == "child-one" ? "child-two" : "child-one"
+    }
+  }
+})
 ```
 
 **动态组件结果：**
@@ -1225,11 +1225,11 @@ var app = new Vue({
 
 ```js
 Vue.component("child-one", {
-  template: "<div v-once>child-one</div>",
-});
+  template: "<div v-once>child-one</div>"
+})
 Vue.component("child-two", {
-  template: "<div v-once>child-two</div>",
-});
+  template: "<div v-once>child-two</div>"
+})
 ```
 
 #### keep-alive 保持动态组件的状态
@@ -1287,11 +1287,11 @@ Vue 在插入、移除 DOM 时，提供了多种应用过渡和动画的方式�
 ```css
 .fade-enter,
 .fade-leave-to {
-  opacity: 0;
+  opacity: 0
 }
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s;
+  transition: opacity 0.3s
 }
 ```
 
@@ -1307,15 +1307,15 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
+      isShow: true
+    }
   },
   methods: {
     handleShowClick() {
-      this.isShow = !this.isShow;
-    },
-  },
-});
+      this.isShow = !this.isShow
+    }
+  }
+})
 ```
 
 过渡 gif 录制中...
@@ -1328,22 +1328,22 @@ Vue 中动画的用法同 Vue 过渡，区别在于`v-enter`这个类名不会�
 
 ```css
 .bounce-enter-active {
-  transform-origin: left center;
-  animation: bounce-in 0.5s;
+  transform-origin: left center
+  animation: bounce-in 0.5s
 }
 .bounce-leave-active {
-  transform-origin: left center;
-  animation: bounce-in 0.5s reverse;
+  transform-origin: left center
+  animation: bounce-in 0.5s reverse
 }
 @keyframes bounce-in {
   0% {
-    transform: scale(0);
+    transform: scale(0)
   }
   50% {
-    transform: scale(1.5);
+    transform: scale(1.5)
   }
   100% {
-    transform: scale(1);
+    transform: scale(1)
   }
 }
 ```
@@ -1360,10 +1360,10 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
-  },
-});
+      isShow: true
+    }
+  }
+})
 ```
 
 动画 gif 录制中...
@@ -1400,30 +1400,30 @@ var vm = new Vue({
 ```css
 .fade-enter,
 .fade-leave-to {
-  opacity: 0;
+  opacity: 0
 }
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s;
+  transition: opacity 0.3s
 }
 
 .bounce-enter-active {
-  transform-origin: left center;
-  animation: bounce-in 0.5s;
+  transform-origin: left center
+  animation: bounce-in 0.5s
 }
 .bounce-leave-active {
-  transform-origin: left center;
-  animation: bounce-in 0.5s reverse;
+  transform-origin: left center
+  animation: bounce-in 0.5s reverse
 }
 @keyframes bounce-in {
   0% {
-    transform: scale(0);
+    transform: scale(0)
   }
   50% {
-    transform: scale(1.5);
+    transform: scale(1.5)
   }
   100% {
-    transform: scale(1);
+    transform: scale(1)
   }
 }
 ```
@@ -1445,10 +1445,10 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
-  },
-});
+      isShow: true
+    }
+  }
+})
 ```
 
 动画 gif 录制中
@@ -1461,10 +1461,10 @@ var vm = new Vue({
 
 ```css
 .animation-enter-active {
-  animation: flash 0.5s;
+  animation: flash 0.5s
 }
 .animation-leave-active {
-  animation: shake 0.5s reverse;
+  animation: shake 0.5s reverse
 }
 ```
 
@@ -1486,10 +1486,10 @@ var vm = new Vue({
 
 ```css
 .flash-enter-active {
-  animation: flash 0.5s;
+  animation: flash 0.5s
 }
 .bounce-leave-active {
-  animation: shake 0.5s;
+  animation: shake 0.5s
 }
 ```
 
@@ -1510,10 +1510,10 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
-  },
-});
+      isShow: true
+    }
+  }
+})
 ```
 
 动画 gif 录制中
@@ -1546,41 +1546,41 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
+      isShow: true
+    }
   },
   methods: {
     handelBeforeEnter(el) {
-      el.style.color = "red";
-      console.log("before enter");
+      el.style.color = "red"
+      console.log("before enter")
     },
     handleEnter(el, done) {
       setTimeout(() => {
-        el.style.color = "green";
-        done();
-        console.log("enter");
-      }, 1500);
+        el.style.color = "green"
+        done()
+        console.log("enter")
+      }, 1500)
     },
     handleAfterEnter(el) {
-      console.log("after enter");
+      console.log("after enter")
     },
 
     handleBeforeLeave(el) {
-      el.style.color = "yellow";
-      console.log("before leave");
+      el.style.color = "yellow"
+      console.log("before leave")
     },
     handleLeave(el, done) {
       setTimeout(() => {
-        el.style.color = "blue";
-        done();
-        console.log("leave");
-      }, 1000);
+        el.style.color = "blue"
+        done()
+        console.log("leave")
+      }, 1000)
     },
     handleAfterLeave(el) {
-      console.log("after leave");
-    },
-  },
-});
+      console.log("after leave")
+    }
+  }
+})
 ```
 
 动画 gif 录制中...
@@ -1594,11 +1594,11 @@ var vm = new Vue({
 ```css
 .v-enter,
 .v-leave-to {
-  opacity: 0;
+  opacity: 0
 }
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.5s;
+  transition: opacity 0.5s
 }
 ```
 
@@ -1615,10 +1615,10 @@ var vm = new Vue({
   el: "#app",
   data() {
     return {
-      isShow: true,
-    };
-  },
-});
+      isShow: true
+    }
+  }
+})
 ```
 
 动画 gif 录制中
@@ -1631,17 +1631,17 @@ var vm = new Vue({
 
 ```css
 .item {
-  display: inline-block;
-  margin-right: 10px;
+  display: inline-block
+  margin-right: 10px
 }
 .v-enter,
 .v-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
+  opacity: 0
+  transform: translateY(30px)
 }
 .v-enter-active,
 .v-leave-active {
-  transition: all 0.5s;
+  transition: all 0.5s
 }
 ```
 
@@ -1658,16 +1658,16 @@ var vm = new Vue({
   data() {
     return {
       isShow: true,
-      list: [1, 2, 3, 4, 5],
-    };
+      list: [1, 2, 3, 4, 5]
+    }
   },
   methods: {
     handleAddClick() {
-      let maxItem = this.list[this.list.length - 1];
-      this.list.push(maxItem + 1);
-    },
-  },
-});
+      let maxItem = this.list[this.list.length - 1]
+      this.list.push(maxItem + 1)
+    }
+  }
+})
 ```
 
 动画 gif 录制中
@@ -1712,21 +1712,21 @@ Vue.use(VueRouter)
 ```js
 var User = {
   template: "<div>{{$route.params.id}}<div>",
-};
+}
 var router = new VueRouter({
-  routes: [{ path: "/user/:id", component: User }],
-});
+  routes: [{ path: "/user/:id", component: User }]
+})
 ```
 
 我们也可以使用多段动态路由匹配规则，参数同样保存在`this.$route.params`中：
 
 ```js
 var User = {
-  template: "<div>{{$route.params.username}} - {{$route.params.postId}}<div>",
-};
+  template: "<div>{{$route.params.username}} - {{$route.params.postId}}<div>"
+}
 var router = new VueRouter({
-  routes: [{ path: "/user/:username/post/:postId", component: User }],
-});
+  routes: [{ path: "/user/:username/post/:postId", component: User }]
+})
 ```
 
 ### 嵌套路由
@@ -1760,17 +1760,17 @@ var User = {
       <router-link to="/user/123/address">地址信息</router-link>
       <router-link to="/user/123/avatar">头像信息</router-link>
       <router-view></router-view>
-    </div>`,
-};
+    </div>`
+}
 var UserOrder = {
-  template: "<div>这里是用户订单信息页面</div>",
-};
+  template: "<div>这里是用户订单信息页面</div>"
+}
 var UserAddress = {
-  template: "<div>这里是用户地址信息页面</div>",
-};
+  template: "<div>这里是用户地址信息页面</div>"
+}
 var UserAvatar = {
-  template: "<div>这里是用户头像信息页面</div>",
-};
+  template: "<div>这里是用户头像信息页面</div>"
+}
 var router = new VueRouter({
   routes: [
     {
@@ -1780,15 +1780,15 @@ var router = new VueRouter({
         // 不要带/
         { path: "order", component: UserOrder },
         { path: "address", component: UserAddress },
-        { path: "avatar", component: UserAvatar },
-      ],
-    },
-  ],
-});
+        { path: "avatar", component: UserAvatar }
+      ]
+    }
+  ]
+})
 
 var vue = new Vue({
   router,
-}).$mount("#app");
+}).$mount("#app")
 ```
 
 ![嵌套路由](../images/vue/33.png)
@@ -1804,16 +1804,16 @@ var vue = new Vue({
 
 ```js
 // 字符串
-this.$router.push("home");
+this.$router.push("home")
 
 // 对象
-this.$router.push({ path: "home" });
+this.$router.push({ path: "home" })
 
 // 命名的路由
-this.$router.push({ name: "user", params: { userId: "123" } });
+this.$router.push({ name: "user", params: { userId: "123" } })
 
 // 带查询参数，变成 /register?plan=private
-this.$router.push({ path: "register", query: { plan: "private" } });
+this.$router.push({ path: "register", query: { plan: "private" } })
 ```
 
 **注意：** 如果当前路由和待导航的路由是一致的，只是参数不同，这种情况下，需要使用`beforeRouteUpdate`来获取参数的变化。
@@ -1827,7 +1827,7 @@ this.$router.push({ path: "register", query: { plan: "private" } });
 
 ```js
 // 如果路由是/user，要替换到/order
-this.$router.replace("order");
+this.$router.replace("order")
 ```
 
 ::: tip router.go()
@@ -1836,13 +1836,13 @@ this.$router.replace("order");
 
 ```js
 // 前进一步 == history.forward()
-router.go(1);
+router.go(1)
 
 // 后退一步 == history.back()
-router.go(-1);
+router.go(-1)
 
 // 前进三步
-router.go(3);
+router.go(3)
 ```
 
 ### 命名路由和命令视图
@@ -1859,10 +1859,10 @@ const router = new VueRouter({
     {
       path: "/user/:userId",
       name: "user",
-      component: User,
-    },
-  ],
-});
+      component: User
+    }
+  ]
+})
 ```
 
 **在声明式导航中使用命名路由：** `<router-link to="xxx">` 其中`to`可以接受一个对象
@@ -1874,7 +1874,7 @@ const router = new VueRouter({
 **在编程式导航中使用命名路由：**
 
 ```js
-this.$router.push({ name: "user", params: { id: 123 } });
+this.$router.push({ name: "user", params: { id: 123 } })
 ```
 
 #### 命名视图
@@ -1889,14 +1889,14 @@ this.$router.push({ name: "user", params: { id: 123 } });
 
 ```js
 var UserOrder = {
-  template: "<div>这里是用户订单信息页面</div>",
-};
+  template: "<div>这里是用户订单信息页面</div>"
+}
 var UserAddress = {
-  template: "<div>这里是用户地址信息页面</div>",
-};
+  template: "<div>这里是用户地址信息页面</div>"
+}
 var UserAvatar = {
-  template: "<div>这里是用户头像信息页面</div>",
-};
+  template: "<div>这里是用户头像信息页面</div>"
+}
 var router = new VueRouter({
   routes: [
     {
@@ -1904,14 +1904,14 @@ var router = new VueRouter({
       components: {
         default: UserOrder,
         address: UserAddress,
-        avatar: UserAvatar,
-      },
-    },
-  ],
-});
+        avatar: UserAvatar
+      }
+    }
+  ]
+})
 var vue = new Vue({
-  router,
-}).$mount("#app");
+  router
+}).$mount("#app")
 ```
 
 ### 导航守卫
@@ -1970,10 +1970,10 @@ const router = new VueRouter({
       component: Foo,
       beforeEnter: (to, from, next) => {
         // todo
-      },
-    },
-  ],
-});
+      }
+    }
+  ]
+})
 ```
 
 #### 组件内的守卫
@@ -1997,8 +1997,8 @@ var User = {
   },
   beforeRouteLeave(to, from, next) {
     // 导航离开该组件对应的路由时触发，可以使用this
-  },
-};
+  }
+}
 ```
 
 #### 完整的导航解析过程
@@ -2081,9 +2081,9 @@ var router = new VueRouter({
   routes: [
     { path: "/order", component: () => import("@/components/order.vue") },
     { path: "/address", component: () => import("@/components/address.vue") },
-    { path: "/avatar", component: () => import("@/components/avatar.vue") },
-  ],
-});
+    { path: "/avatar", component: () => import("@/components/avatar.vue") }
+  ]
+})
 ```
 
 ## Vuex(状态管理)
@@ -2101,9 +2101,9 @@ $ npm install vuex --save
 **使用 Vuex：** 在使用`vue-cli`脚手架初始化项目的情况下，需要在`main.js`中通过以下方式来使用`Vuex`
 
 ```js
-import Vue from "vue";
-import Vuex from "vuex";
-Vue.use(Vuex);
+import Vue from "vue"
+import Vuex from "vuex"
+Vue.use(Vuex)
 ```
 
 ### Vuex 概念
@@ -2141,30 +2141,30 @@ $ touch index.js
 ```
 
 ```js
-import Vue from "vue";
-import Vuex from "vuex";
-Vue.use(Vuex);
+import Vue from "vue"
+import Vuex from "vuex"
+Vue.use(Vuex)
 
 const state = {
   count: 1,
-  price: 10,
-};
+  price: 10
+}
 export default new Vuex.Store({
-  state,
-});
+  state
+})
 ```
 
 **引用 store.js：** 在`main.js`中引入`store.js`，使得`vuex`注入每一个组件中
 
 ```js
-import store from "@/store/index.js";
+import store from "@/store/index.js"
 
 new Vue({
   el: "#app",
   store,
   components: { App },
-  template: "<App/>",
-});
+  template: "<App/>"
+})
 ```
 
 **在页面中使用 state：**
@@ -2177,16 +2177,16 @@ new Vue({
 ```
 
 ```js
-import { mapState } from "vuex";
+import { mapState } from "vuex"
 export default {
   name: "HelloWorld",
   data() {
-    return {};
+    return {}
   },
   computed: {
-    ...mapState(["count", "price"]),
-  },
-};
+    ...mapState(["count", "price"])
+  }
+}
 ```
 
 ### Getters
@@ -2205,18 +2205,18 @@ const state = {
     { id: 2, name: "学习HTML", done: false },
     { id: 3, name: "学习CSS", done: false },
     { id: 4, name: "学习Vue", done: true },
-    { id: 5, name: "学习Node", done: false },
-  ],
-};
+    { id: 5, name: "学习Node", done: false }
+  ]
+}
 const getters = {
   todoDone(state) {
-    return state.todos.filter((item) => item.done);
-  },
-};
+    return state.todos.filter((item) => item.done)
+  }
+}
 export default new Vuex.Store({
   state,
-  getters,
-});
+  getters
+})
 ```
 
 **组件代码：**
@@ -2229,17 +2229,17 @@ export default new Vuex.Store({
 ```
 
 ```js
-import { mapState, mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex"
 export default {
   name: "HelloWorld",
   data() {
-    return {};
+    return {}
   },
   computed: {
     ...mapState(["count", "price"]),
-    ...mapGetters(["todoDone"]),
-  },
-};
+    ...mapGetters(["todoDone"])
+  }
+}
 ```
 
 ![Getters结果](../images/vue/29.png)
@@ -2257,9 +2257,9 @@ export default {
 **store/index.js 代码：**
 
 ```js
-import Vue from "vue";
-import Vuex from "vuex";
-Vue.use(Vuex);
+import Vue from "vue"
+import Vuex from "vuex"
+Vue.use(Vuex)
 
 const state = {
   count: 1,
@@ -2269,27 +2269,27 @@ const state = {
     { id: 2, name: "学习HTML", done: false },
     { id: 3, name: "学习CSS", done: false },
     { id: 4, name: "学习Vue", done: true },
-    { id: 5, name: "学习Node", done: false },
-  ],
-};
+    { id: 5, name: "学习Node", done: false }
+  ]
+}
 const getters = {
   todoDone(state) {
-    return state.todos.filter((item) => item.done);
-  },
-};
+    return state.todos.filter((item) => item.done)
+  }
+}
 const mutations = {
   add(state, number) {
-    state.count += number;
+    state.count += number
   },
   reduce(state) {
-    state.count--;
-  },
-};
+    state.count--
+  }
+}
 export default new Vuex.Store({
   state,
   getters,
-  mutations,
-});
+  mutations
+})
 ```
 
 **组件代码：**
@@ -2304,23 +2304,23 @@ export default new Vuex.Store({
 ```
 
 ```js
-import { mapState, mapGetters, mapMutations } from "vuex";
+import { mapState, mapGetters, mapMutations } from "vuex"
 export default {
   name: "HelloWorld",
   data() {
-    return {};
+    return {}
   },
   computed: {
     ...mapState(["count", "price"]),
-    ...mapGetters(["todoDone"]),
+    ...mapGetters(["todoDone"])
   },
   methods: {
     ...mapMutations({
       handleAddClick: "add",
-      handleReduceClick: "reduce",
-    }),
-  },
-};
+      handleReduceClick: "reduce"
+    })
+  }
+}
 ```
 
 ![mutation结果](../images/vue/30.png)
@@ -2345,47 +2345,47 @@ const state = {
     { id: 2, name: "学习HTML", done: false },
     { id: 3, name: "学习CSS", done: false },
     { id: 4, name: "学习Vue", done: true },
-    { id: 5, name: "学习Node", done: false },
-  ],
-};
+    { id: 5, name: "学习Node", done: false }
+  ]
+}
 const getters = {
   todoDone(state) {
-    return state.todos.filter((item) => item.done);
-  },
-};
+    return state.todos.filter((item) => item.done)
+  }
+}
 const mutations = {
   add(state, number) {
-    state.count += number;
+    state.count += number
   },
   reduce(state) {
-    state.count--;
+    state.count--
   },
   reduceResult(state, flag) {
-    state.reduceResult = flag;
-  },
-};
+    state.reduceResult = flag
+  }
+}
 const actions = {
   asyncAdd({ commit }, number) {
     setTimeout(() => {
-      commit("add", number);
-    }, 0);
+      commit("add", number)
+    }, 0)
   },
   asyncReduce({ commit }) {
     return new Promise((resolve, reject) => {
-      commit("reduce");
-      resolve(true);
-    });
+      commit("reduce")
+      resolve(true)
+    })
   },
   reduceResult({ commit }, flag) {
-    commit("reduceResult", flag);
-  },
-};
+    commit("reduceResult", flag)
+  }
+}
 export default new Vuex.Store({
   state,
   getters,
   mutations,
-  actions,
-});
+  actions
+})
 ```
 
 **组件代码：**
@@ -2401,33 +2401,33 @@ export default new Vuex.Store({
 ```
 
 ```js
-import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex"
 export default {
   name: "HelloWorld",
   data() {
-    return {};
+    return {}
   },
   computed: {
     ...mapState(["count", "price", "reduceResult"]),
-    ...mapGetters(["todoDone"]),
+    ...mapGetters(["todoDone"])
   },
   methods: {
     handleAsyncReduce() {
       this.asyncReduce().then((flag) => {
-        this.asyncReduceResult(flag);
-      });
+        this.asyncReduceResult(flag)
+      })
     },
     ...mapMutations({
       handleAddClick: "add",
-      handleReduceClick: "reduce",
+      handleReduceClick: "reduce"
     }),
     ...mapActions({
       handleAsyncAdd: "asyncAdd",
       asyncReduce: "asyncReduce",
-      asyncReduceResult: "reduceResult",
-    }),
-  },
-};
+      asyncReduceResult: "reduceResult"
+    })
+  }
+}
 ```
 
 ![action的结果](../images/vue/31.png)
@@ -2469,31 +2469,31 @@ store.state.b // -> moduleB 的状态
 ```js
 const state = {
   counter: 11,
-  price: 111,
-};
+  price: 111
+}
 const mutations = {
   add(state) {
-    state.counter++;
+    state.counter++
   },
   reduce(state) {
-    state.counter -= 10;
-  },
-};
+    state.counter -= 10
+  }
+}
 const actions = {
   add({ commit }) {
-    commit("add");
+    commit("add")
   },
   reduce({ commit }) {
-    commit("reduce");
-  },
-};
+    commit("reduce")
+  }
+}
 // 开启命名空间能够让模块具有更高的封装度和复用性
 export default {
   namespaced: true,
   state,
   mutations,
-  actions,
-};
+  actions
+}
 ```
 
 **添加 store/B.js：**
@@ -2501,48 +2501,48 @@ export default {
 ```js
 const state = {
   counter: 22,
-  price: 222,
-};
+  price: 222
+}
 const mutations = {
   add(state) {
-    state.counter++;
+    state.counter++
   },
   reduce(state) {
-    state.counter -= 10;
-  },
-};
+    state.counter -= 10
+  }
+}
 const actions = {
   add({ commit }) {
-    commit("add");
+    commit("add")
   },
   reduce({ commit }) {
-    commit("reduce");
-  },
-};
+    commit("reduce")
+  }
+}
 // 开启命名空间能够让模块具有更高的封装度和复用性
 export default {
   namespaced: true,
   state,
   mutations,
-  actions,
-};
+  actions
+}
 ```
 
 **index.js 代码：**
 
 ```js
-import Vue from "vue";
-import Vuex from "vuex";
-import A from "./a";
-import B from "./b";
-Vue.use(Vuex);
+import Vue from "vue"
+import Vuex from "vuex"
+import A from "./a"
+import B from "./b"
+Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
     A,
-    B,
-  },
-});
+    B
+  }
+})
 ```
 
 **组件代码：**
@@ -2563,35 +2563,35 @@ export default new Vuex.Store({
 ```
 
 ```js
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions } from "vuex"
 export default {
   name: "HelloWorld",
   data() {
-    return {};
+    return {}
   },
   computed: {
     // 第一个参数代表模块的名字
     ...mapState("A", {
       ACounter: "counter",
-      APrice: "price",
+      APrice: "price"
     }),
     ...mapState("B", {
       BCounter: "counter",
-      BPrice: "price",
-    }),
+      BPrice: "price"
+    })
   },
   methods: {
     // 第一个参数代表模块的名字
     ...mapActions("A", {
       handleAModuleAdd: "add",
-      handleAModuleReduce: "reduce",
+      handleAModuleReduce: "reduce"
     }),
     ...mapActions("B", {
       handleBModuleAdd: "add",
-      handleBModuleReduce: "reduce",
-    }),
-  },
-};
+      handleBModuleReduce: "reduce"
+    })
+  }
+}
 ```
 
 ![Module结果](../images/vue/32.png)
@@ -2619,4 +2619,4 @@ export default {
 
 ### Vue 原理剖析
 
-关于 Vue 相关原理剖析，请跳转至[Vue 原理剖析](/vue/principle.md)阅读更多。
+关于 Vue 相关原理剖析，请跳转至[Vue 原理剖析](/vue/vueAnalysis.md)阅读更多。

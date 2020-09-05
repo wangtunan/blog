@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "docs:dev": "vuepress dev docs",
+    "docs:dev": "vuepress dev docs --temp .temp",
     "docs:build": "vuepress build docs",
     "depoly": "depoly.sh"
   },

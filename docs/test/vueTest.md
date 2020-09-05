@@ -32,7 +32,7 @@ function testCalc(browser) {
     .click("#button-plus")
     .click("#button")
     .assert.containsText("#result", "2")
-    .end();
+    .end()
 }
 ```
 
@@ -58,16 +58,16 @@ function testCalc(browser) {
 ```js
 // math.js
 export function add(a, b) {
-  return a + b;
+  return a + b
 }
 
 // math.spec.js
-import { add } from "math.js";
+import { add } from "math.js"
 describe("math.js", () => {
   it("add func", () => {
-    expect(add(1, 2)).toBe(3);
-  });
-});
+    expect(add(1, 2)).toBe(3)
+  })
+})
 ```
 
 我们可以对单元测试进行总结：
@@ -147,18 +147,18 @@ $ vue create vue-jest
 :::
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("renders props.msg when passed", () => {
-    const msg = "new message";
+    const msg = "new message"
     const wrapper = shallowMount(HelloWorld, {
-      propsData: { msg },
-    });
-    expect(wrapper.text()).toMatch(msg);
-  });
-});
+      propsData: { msg }
+    })
+    expect(wrapper.text()).toMatch(msg)
+  })
+})
 ```
 
 ### 现有 Vue 项目中添加 Jest 测试
@@ -176,18 +176,18 @@ $ vue add unit-jest
 :::
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("renders props.msg when passed", () => {
-    const msg = "new message";
+    const msg = "new message"
     const wrapper = shallowMount(HelloWorld, {
-      propsData: { msg },
-    });
-    expect(wrapper.text()).toMatch(msg);
-  });
-});
+      propsData: { msg }
+    })
+    expect(wrapper.text()).toMatch(msg)
+  })
+})
 ```
 
 以下测试案例均依据以上第二或第三种方式进行测试环境配置。
@@ -206,10 +206,10 @@ module.exports = {
   preset: "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
   snapshotSerializers: ["jest-serializer-vue"],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@/(.*)$": "<rootDir>/src/$1"
   },
   testMatch: [
-    "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)",
+    "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
   ],
   collectCoverage: true,
   coverageDirectory: "<rootDir>/tests/unit/coverage",
@@ -218,9 +218,9 @@ module.exports = {
     "src/utils/**/*.ts",
     "src/store/modules/*.ts",
     "!src/utils/axios.ts",
-    "!src/utils/notify.ts",
-  ],
-};
+    "!src/utils/notify.ts"
+  ]
+}
 ```
 
 对以上配置的解释如下：
@@ -257,24 +257,24 @@ module.exports = {
 **注意：** 在我们使用`mount`或者`shallowMount`的时候，我们可以期望组件响应几乎所有的`Vue`生命周期函数，但除非手动调用`wrapper.destory()`函数，否则组件的`beforeDestroy()`和`destroyed()`不会被触发。
 
 ```js
-import { shallowMount, mount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount, mount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test shallowMount", () => {
-    const wrapper = shallowMount(HelloWorld);
+    const wrapper = shallowMount(HelloWorld)
     // 判断组件是否挂载
-    expect(wrapper.exists()).toBe(true);
+    expect(wrapper.exists()).toBe(true)
 
     // 访问vm实例
-    console.log(wrapper.vm);
-  });
+    console.log(wrapper.vm)
+  })
   it("test mount", () => {
-    const wrapper = mount(HelloWorld);
+    const wrapper = mount(HelloWorld)
     // 判断组件是否挂载
-    expect(wrapper.exists()).toBe(true);
-  });
-});
+    expect(wrapper.exists()).toBe(true)
+  })
+})
 ```
 
 ### 渲染文本测试
@@ -291,28 +291,28 @@ describe("HelloWorld.vue", () => {
 export default {
   data() {
     return {
-      msg: "Hello, Vue and Jest...",
-    };
-  },
-};
+      msg: "Hello, Vue and Jest..."
+    }
+  }
+}
 </script>
 ```
 
 那么我们就可以撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test text", () => {
-    const msg = "Hello, Vue and Jest...";
-    const wrapper = shallowMount(HelloWorld);
+    const msg = "Hello, Vue and Jest..."
+    const wrapper = shallowMount(HelloWorld)
     // 更推荐具有扩展性的toContain匹配器而不是toBe
-    expect(wrapper.text()).toBe(msg); // 严格相等
-    expect(wrapper.text()).toContain(msg); // 是否包含
-  });
-});
+    expect(wrapper.text()).toBe(msg) // 严格相等
+    expect(wrapper.text()).toContain(msg) // 是否包含
+  })
+})
 ```
 
 ### 渲染 HTML 结构测试
@@ -332,25 +332,25 @@ describe("HelloWorld.vue", () => {
 export default {
   data() {
     return {
-      msg: "Hello, Vue and Jest...",
-    };
-  },
-};
+      msg: "Hello, Vue and Jest..."
+    }
+  }
+}
 </script>
 ```
 
 那么我们就可以撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test html", () => {
-    const wrapper = shallowMount(HelloWorld);
-    expect(wrapper.html()).toContain('<span class="item">item</span>');
-  });
-});
+    const wrapper = shallowMount(HelloWorld)
+    expect(wrapper.html()).toContain('<span class="item">item</span>')
+  })
+})
 ```
 
 ### DOM 属性测试和 Class 测试
@@ -360,18 +360,18 @@ describe("HelloWorld.vue", () => {
 依然以以上`HelloWorld.vue`组件为例，如果我们要测试`span`标签是否有`.item`样式，是否有`id`，可以进行如下测试：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test attribute and class", () => {
-    const wrapper = shallowMount(HelloWorld);
+    const wrapper = shallowMount(HelloWorld)
     // 查找第一个span标签
-    const dom = wrapper.find("span");
-    expect(dom.classes()).toContain("item");
-    expect(dom.attributes().id).toBeFalsy();
-  });
-});
+    const dom = wrapper.find("span")
+    expect(dom.classes()).toContain("item")
+    expect(dom.attributes().id).toBeFalsy()
+  })
+})
 ```
 
 ### Props 测试
@@ -394,31 +394,31 @@ export default {
   props: ["name", "age"],
   data() {
     return {
-      msg: "Hello, Vue and Jest...",
-    };
-  },
-};
+      msg: "Hello, Vue and Jest..."
+    }
+  }
+}
 </script>
 ```
 
 随后我们撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test props", () => {
     const wrapper = shallowMount(HelloWorld, {
       propsData: {
         name: "AAA",
-        age: 23,
-      },
-    });
-    expect(wrapper.props("name")).toBe("AAA");
-    expect(wrapper.props().age).toBe(23);
-  });
-});
+        age: 23
+      }
+    })
+    expect(wrapper.props("name")).toBe("AAA")
+    expect(wrapper.props().age).toBe(23)
+  })
+})
 ```
 
 ### Style 测试
@@ -430,7 +430,7 @@ describe("HelloWorld.vue", () => {
 ```vue
 <template>
   <div class="hello">
-    <h1 style="width: 100px;height: 50px;">{{ msg }}</h1>
+    <h1 style="width: 100pxheight: 50px">{{ msg }}</h1>
   </div>
 </template>
 
@@ -438,26 +438,26 @@ describe("HelloWorld.vue", () => {
 export default {
   name: "HelloWorld",
   props: {
-    msg: String,
-  },
-};
+    msg: String
+  }
+}
 </script>
 ```
 
 基于以上组件，我们可以撰写如下测试用例:
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("test style", () => {
-    const wrapper = shallowMount(HelloWorld);
-    const style = wrapper.find("h1").element.style;
-    expect(style.width).toBe("100px");
-    expect(style.height).toBe("50px");
-  });
-});
+    const wrapper = shallowMount(HelloWorld)
+    const style = wrapper.find("h1").element.style
+    expect(style.width).toBe("100px")
+    expect(style.height).toBe("50px")
+  })
+})
 ```
 
 ## 测试组件方法
@@ -487,23 +487,23 @@ export default {
   data() {
     return {
       loadingText: "",
-      showLoading: false,
-    };
+      showLoading: false
+    }
   },
   methods: {
     show() {
-      this.showLoading = true;
-      this.getLoadingText();
+      this.showLoading = true
+      this.getLoadingText()
     },
     hide() {
-      this.showLoading = false;
-      this.getLoadingText();
+      this.showLoading = false
+      this.getLoadingText()
     },
     getLoadingText() {
-      this.loadingText = this.showLoading ? `loading show text` : "";
-    },
-  },
-};
+      this.loadingText = this.showLoading ? `loading show text` : ""
+    }
+  }
+}
 </script>
 ```
 
@@ -515,39 +515,39 @@ export default {
 那么根据以上规则，我们可以撰写一下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import Loading from "@/components/loading.vue";
+import { shallowMount } from "@vue/test-utils"
+import Loading from "@/components/loading.vue"
 
 describe("loading.vue", () => {
-  let wrapper;
+  let wrapper
   beforeEach(() => {
-    wrapper = shallowMount(Loading);
-  });
+    wrapper = shallowMount(Loading)
+  })
   it("show func", async () => {
-    expect(wrapper.vm.loadingText).toBe("");
-    expect(wrapper.vm.showLoading).toBe(false);
-    expect(wrapper.isVisible()).toBe(false);
+    expect(wrapper.vm.loadingText).toBe("")
+    expect(wrapper.vm.showLoading).toBe(false)
+    expect(wrapper.isVisible()).toBe(false)
 
-    wrapper.vm.show();
-    await wrapper.vm.$nextTick();
-    expect(wrapper.vm.showLoading).toBe(true);
-    expect(wrapper.isVisible()).toBe(true);
-  });
+    wrapper.vm.show()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(true)
+    expect(wrapper.isVisible()).toBe(true)
+  })
 
   it("hide func", async () => {
     wrapper.setData({
-      showLoading: true,
-    });
-    await wrapper.vm.$nextTick();
-    expect(wrapper.vm.showLoading).toBe(true);
-    expect(wrapper.isVisible()).toBe(true);
+      showLoading: true
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(true)
+    expect(wrapper.isVisible()).toBe(true)
 
-    wrapper.vm.hide();
-    await wrapper.vm.$nextTick();
-    expect(wrapper.vm.showLoading).toBe(false);
-    expect(wrapper.isVisible()).toBe(false);
-  });
-});
+    wrapper.vm.hide()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.showLoading).toBe(false)
+    expect(wrapper.isVisible()).toBe(false)
+  })
+})
 ```
 
 测试代码分析：
@@ -567,8 +567,8 @@ describe("loading.vue", () => {
 
 ```js
 setTimeout = () => {
-  console.log("replace setTimeout");
-};
+  console.log("replace setTimeout")
+}
 ```
 
 我们可以使用`Jest`库提供的`jest.useFakeTimers()`，当这个方法被调用时`Jest`提供的假定时器会替换全局定时器函数来工作，然后我们可以使用`jest.runTimersToTime()`来推进时间。
@@ -589,61 +589,61 @@ export default {
   data() {
     return {
       percent: 0,
-      timeText: "",
-    };
+      timeText: ""
+    }
   },
   methods: {
     start() {
-      this.percent = 0;
+      this.percent = 0
       this.timer = setInterval(() => {
-        this.percent++;
+        this.percent++
         if (this.percent >= 100) {
-          this.finish();
+          this.finish()
         }
-      }, 100);
+      }, 100)
     },
     finish() {
-      this.percent = 100;
-      clearInterval(this.timer);
-    },
+      this.percent = 100
+      clearInterval(this.timer)
+    }
   },
   mounted() {
     setTimeout(() => {
-      this.timeText = "setTimeout text";
-    }, 1000);
-  },
-};
+      this.timeText = "setTimeout text"
+    }, 1000)
+  }
+}
 </script>
 ```
 
 那么我们可以撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
-  let wrapper;
+  let wrapper
   beforeEach(() => {
-    jest.useFakeTimers();
-    wrapper = shallowMount(HelloWorld);
-  });
+    jest.useFakeTimers()
+    wrapper = shallowMount(HelloWorld)
+  })
   it("test setTimeout async timer", () => {
-    expect(wrapper.vm.timeText).toBe("");
-    jest.runTimersToTime(1000);
-    expect(wrapper.vm.timeText).toBe("setTimeout text");
-  });
+    expect(wrapper.vm.timeText).toBe("")
+    jest.runTimersToTime(1000)
+    expect(wrapper.vm.timeText).toBe("setTimeout text")
+  })
   it("test setInterval async timer", () => {
-    expect(wrapper.vm.percent).toBe(0);
-    wrapper.vm.start();
-    jest.runTimersToTime(100);
-    expect(wrapper.vm.percent).toBe(1);
-    jest.runTimersToTime(900);
-    expect(wrapper.vm.percent).toBe(10);
-    jest.runTimersToTime(2000);
-    expect(wrapper.vm.percent).toBe(30);
-  });
-});
+    expect(wrapper.vm.percent).toBe(0)
+    wrapper.vm.start()
+    jest.runTimersToTime(100)
+    expect(wrapper.vm.percent).toBe(1)
+    jest.runTimersToTime(900)
+    expect(wrapper.vm.percent).toBe(10)
+    jest.runTimersToTime(2000)
+    expect(wrapper.vm.percent).toBe(30)
+  })
+})
 ```
 
 测试代码分析：
@@ -663,26 +663,26 @@ describe("HelloWorld.vue", () => {
 要解决以上第一个问题，我们需要使用`Jest`提供的`jest.spyOn()`函数，然后对`window.clearInterval()`进行间谍伪造，如下：
 
 ```js
-jest.spyOn(window, "clearInterval");
+jest.spyOn(window, "clearInterval")
 ```
 
 要解决第二个问题，我们可以使用`Jest`提供的`mockReturnValue`函数来模拟任何我们想要的返回值，如下：
 
 ```js
-setInterval.mockReturnValue(996);
+setInterval.mockReturnValue(996)
 ```
 
 在解决完以上两个问题后，我们新增一个测试用例，如下：
 
 ```js
 it("clearInterval success when percent >= 100", () => {
-  jest.spyOn(window, "clearInterval");
-  setInterval.mockReturnValue(996);
-  wrapper.vm.start();
-  wrapper.vm.finish();
-  expect(wrapper.vm.percent).toBe(100);
-  expect(window.clearInterval).toHaveBeenCalledWith(996);
-});
+  jest.spyOn(window, "clearInterval")
+  setInterval.mockReturnValue(996)
+  wrapper.vm.start()
+  wrapper.vm.finish()
+  expect(wrapper.vm.percent).toBe(100)
+  expect(window.clearInterval).toHaveBeenCalledWith(996)
+})
 ```
 
 测试代码分析：当我们的测试代码使用了我们不能控制的`API`时，我们可以使用`spy`来伪装，随后判断我们伪装的`API`是否被调用。
@@ -692,10 +692,10 @@ it("clearInterval success when percent >= 100", () => {
 在`Vue`开发中，为`Vue`实例添加一些属性或者方法是一种常见的方式，例如：
 
 ```js
-import { Message } from "element-ui";
-Vue.prototype.$message = Message;
+import { Message } from "element-ui"
+Vue.prototype.$message = Message
 
-this.$message.success("保存成功");
+this.$message.success("保存成功")
 ```
 
 那么我们如何为这些实例属性添加单元测试呢？答案是`mocks`，它可以为`Vue`实例提供额外的属性。假如我们有如下`message.vue`组件：
@@ -714,27 +714,27 @@ this.$message.success("保存成功");
 export default {
   methods: {
     handleSuccessClick() {
-      this.$message.success("成功");
+      this.$message.success("成功")
     },
     handleWarningClick() {
-      this.$message.warning("警告");
+      this.$message.warning("警告")
     },
     handleErrorClick() {
-      this.$message.error("错误");
+      this.$message.error("错误")
     },
     handleInfoClick() {
-      this.$message.info("消息");
-    },
-  },
-};
+      this.$message.info("消息")
+    }
+  }
+}
 </script>
 ```
 
 由于我们就是要`mock`来自第三方的插件，因此我们在测试用例中并不需要安装`element-ui`，所以我们可撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import Message from "@/components/message.vue";
+import { shallowMount } from "@vue/test-utils"
+import Message from "@/components/message.vue"
 
 describe("message.vue", () => {
   it("add mocks", () => {
@@ -742,31 +742,31 @@ describe("message.vue", () => {
       success: jest.fn(),
       warning: jest.fn(),
       error: jest.fn(),
-      info: jest.fn(),
-    };
+      info: jest.fn()
+    }
     const wrapper = shallowMount(Message, {
       mocks: {
-        $message: message,
-      },
-    });
-    const successBtn = wrapper.find("#success");
-    const warningBtn = wrapper.find("#warning");
-    const errorBtn = wrapper.find("#error");
-    const infoBtn = wrapper.find("#info");
+        $message: message
+      }
+    })
+    const successBtn = wrapper.find("#success")
+    const warningBtn = wrapper.find("#warning")
+    const errorBtn = wrapper.find("#error")
+    const infoBtn = wrapper.find("#info")
 
-    successBtn.trigger("click");
-    expect(message.success).toHaveBeenCalledTimes(1);
+    successBtn.trigger("click")
+    expect(message.success).toHaveBeenCalledTimes(1)
 
-    warningBtn.trigger("click");
-    expect(message.warning).toHaveBeenCalledTimes(1);
+    warningBtn.trigger("click")
+    expect(message.warning).toHaveBeenCalledTimes(1)
 
-    errorBtn.trigger("click");
-    expect(message.error).toHaveBeenCalledTimes(1);
+    errorBtn.trigger("click")
+    expect(message.error).toHaveBeenCalledTimes(1)
 
-    infoBtn.trigger("click");
-    expect(message.info).toHaveBeenCalledTimes(1);
-  });
-});
+    infoBtn.trigger("click")
+    expect(message.info).toHaveBeenCalledTimes(1)
+  })
+})
 ```
 
 ### 模拟模块依赖
@@ -785,37 +785,37 @@ describe("message.vue", () => {
 </template>
 
 <script>
-import { getLessonList } from "@/api/api.js";
+import { getLessonList } from "@/api/api.js"
 export default {
   data() {
     return {
-      lessonList: [],
-    };
+      lessonList: []
+    }
   },
   methods: {
     getLessonData() {
       getLessonList().then((res) => {
-        const { status, data } = res;
+        const { status, data } = res
         if (status === 200) {
-          this.lessonList = data.data;
+          this.lessonList = data.data
         }
-      });
-    },
+      })
+    }
   },
   mounted() {
-    this.getLessonData();
-  },
-};
+    this.getLessonData()
+  }
+}
 </script>
 ```
 
 新建`src/api/api.js`文件，并添加如下代码：
 
 ```js
-import axios from "axios";
+import axios from "axios"
 
 export function getLessonList() {
-  return axios.get("http://www.dell-lee.com/react/api/list.json");
+  return axios.get("http://www.dell-lee.com/react/api/list.json")
 }
 ```
 
@@ -837,20 +837,20 @@ export const getLessonList = jest.fn(() => {
       { id: 1, title: "深入理解ES6" },
       { id: 2, title: "JavaScript高级程序设计" },
       { id: 3, title: "CSS揭秘" },
-      { id: 4, title: "深入浅出Vue.js" },
-    ],
-  };
-  return Promise.resolve(lessonResult);
-});
+      { id: 4, title: "深入浅出Vue.js" }
+    ]
+  }
+  return Promise.resolve(lessonResult)
+})
 ```
 
 第二个问题，我们可以使用`getLessonList.mockResolvedValueOnce()`方法来传入我们模拟的数据。再解决完以上几个问题后，我们可以撰写如下测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
-import { getLessonList } from "../../src/api/api.js";
-jest.mock("../../src/api/api.js");
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
+import { getLessonList } from "../../src/api/api.js"
+jest.mock("../../src/api/api.js")
 describe("HelloWorld.vue", () => {
   const lessonResult = {
     success: true,
@@ -858,31 +858,31 @@ describe("HelloWorld.vue", () => {
       { id: 1, title: "深入理解ES6" },
       { id: 2, title: "JavaScript高级程序设计" },
       { id: 3, title: "CSS揭秘" },
-      { id: 4, title: "深入浅出Vue.js" },
-    ],
-  };
+      { id: 4, title: "深入浅出Vue.js" }
+    ]
+  }
 
   it("mock http modules", async () => {
-    expect.assertions(1);
-    const result = await getLessonList();
-    expect(result).toEqual(lessonResult);
-  });
+    expect.assertions(1)
+    const result = await getLessonList()
+    expect(result).toEqual(lessonResult)
+  })
   it("render mock http module result", async () => {
     const mockAxiosResult = {
       status: 200,
-      data: lessonResult,
-    };
-    getLessonList.mockResolvedValueOnce(mockAxiosResult);
-    const wrapper = shallowMount(HelloWorld);
-    await wrapper.vm.$nextTick();
-    const lessonItems = wrapper.findAll(".lesson-item");
-    const lessonList = lessonResult.data;
-    for (let i = 0; i < lessonItems.length; i++) {
-      const item = lessonItems.at(i);
-      expect(item.text()).toBe(lessonList[i].title);
+      data: lessonResult
     }
-  });
-});
+    getLessonList.mockResolvedValueOnce(mockAxiosResult)
+    const wrapper = shallowMount(HelloWorld)
+    await wrapper.vm.$nextTick()
+    const lessonItems = wrapper.findAll(".lesson-item")
+    const lessonList = lessonResult.data
+    for (let i = 0 i < lessonItems.length i++) {
+      const item = lessonItems.at(i)
+      expect(item.text()).toBe(lessonList[i].title)
+    }
+  })
+})
 ```
 
 ## 挂载选项和改变组件状态
@@ -908,33 +908,33 @@ export default {
   data() {
     return {
       bar: "bar",
-      foo: "foo",
-    };
-  },
-};
+      foo: "foo"
+    }
+  }
+}
 </script>
 ```
 
 现在我们在测试用例中通过挂载`data`，来测试组件：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("mount data", () => {
     const wrapper = shallowMount(HelloWorld, {
       data() {
         return {
           foo: "foo override",
-          baz: "baz",
-        };
-      },
-    });
-    expect(wrapper.vm.bar).toBe("bar");
-    expect(wrapper.vm.foo).toBe("foo override");
-    expect(wrapper.vm.baz).toBe("baz");
-  });
-});
+          baz: "baz"
+        }
+      }
+    })
+    expect(wrapper.vm.bar).toBe("bar")
+    expect(wrapper.vm.foo).toBe("foo override")
+    expect(wrapper.vm.baz).toBe("baz")
+  })
+})
 ```
 
 ### 挂载 Slots
@@ -957,40 +957,40 @@ describe("HelloWorld.vue", () => {
 </template>
 
 <script>
-export default {};
+export default {}
 </script>
 ```
 
 那么我们挂载对应的插槽，撰写如下测试用例：
 
 ```js
-import { mount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { mount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("mount data", () => {
     const headerSlot = {
-      template: `<div>header slot</div>`,
-    };
+      template: `<div>header slot</div>`
+    }
     const defaultSlot = {
-      template: `<div>default slot</div>`,
-    };
+      template: `<div>default slot</div>`
+    }
     const footerSlot = {
-      template: `<div>footer slot</div>`,
-    };
+      template: `<div>footer slot</div>`
+    }
     const wrapper = mount(HelloWorld, {
       slots: {
         default: defaultSlot,
         header: headerSlot,
-        footer: footerSlot,
-      },
-    });
-    expect(wrapper.find(".header-slot").html()).toContain(headerSlot.template);
+        footer: footerSlot
+      }
+    })
+    expect(wrapper.find(".header-slot").html()).toContain(headerSlot.template)
     expect(wrapper.find(".default-slot").html()).toContain(
       defaultSlot.template
-    );
-    expect(wrapper.find(".footer-slot").html()).toContain(footerSlot.template);
-  });
-});
+    )
+    expect(wrapper.find(".footer-slot").html()).toContain(footerSlot.template)
+  })
+})
 ```
 
 ### 挂载 Stubs
@@ -1001,8 +1001,8 @@ describe("HelloWorld.vue", () => {
 
 ```js
 const wrapper = shallowMount(HelloWorld, {
-  stubs: ["router-link", "router-view"],
-});
+  stubs: ["router-link", "router-view"]
+})
 ```
 
 ### 挂载第三方应用
@@ -1012,23 +1012,23 @@ const wrapper = shallowMount(HelloWorld, {
 可以使用`createLocalVue()`方法创建一个本地的`Vue`实例，用来替换全局的`Vue`，随后在挂载组件的时候传递这个本地`Vue`，如下：
 
 ```js
-import { shallowMount, createLocalVue } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
-import Vuex from "vuex";
-import Router from "vue-router";
-import ElementUI from "element-ui";
-const localVue = createLocalVue();
-localVue.use(Vuex);
-localVue.use(Router);
-localVue.use(ElementUI);
+import { shallowMount, createLocalVue } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
+import Vuex from "vuex"
+import Router from "vue-router"
+import ElementUI from "element-ui"
+const localVue = createLocalVue()
+localVue.use(Vuex)
+localVue.use(Router)
+localVue.use(ElementUI)
 
 describe("HelloWorld.vue", () => {
   it("use localVue", () => {
     const wrapper = shallowMount(HelloWorld, {
-      localVue,
-    });
-  });
-});
+      localVue
+    })
+  })
+})
 ```
 
 ### 改变组件状态
@@ -1060,50 +1060,50 @@ describe("HelloWorld.vue", () => {
 <script>
 export default {
   props: {
-    msg: String,
+    msg: String
   },
   data() {
     return {
       foo: "",
       radio: false,
       select: "",
-      txt: "",
-    };
-  },
-};
+      txt: ""
+    }
+  }
+}
 </script>
 ```
 
 随后，我们可以在组件挂载之后撰写如下测试用例来测试组件：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("change component data", () => {
-    const wrapper = shallowMount(HelloWorld);
-    const radioInput = wrapper.find('input[type="radio"]');
-    const options = wrapper.find("select").findAll("option");
-    const textInput = wrapper.find('input[type="text"]');
-    radioInput.setChecked();
-    options.at(1).setSelected();
-    textInput.setValue("txt value");
-    expect(wrapper.vm.radio).toBe(true);
-    expect(wrapper.vm.select).toBe(2);
-    expect(wrapper.vm.txt).toBe("txt value");
+    const wrapper = shallowMount(HelloWorld)
+    const radioInput = wrapper.find('input[type="radio"]')
+    const options = wrapper.find("select").findAll("option")
+    const textInput = wrapper.find('input[type="text"]')
+    radioInput.setChecked()
+    options.at(1).setSelected()
+    textInput.setValue("txt value")
+    expect(wrapper.vm.radio).toBe(true)
+    expect(wrapper.vm.select).toBe(2)
+    expect(wrapper.vm.txt).toBe("txt value")
 
     wrapper.setProps({
-      msg: "msg value",
-    });
-    expect(wrapper.vm.msg).toBe("msg value");
+      msg: "msg value"
+    })
+    expect(wrapper.vm.msg).toBe("msg value")
 
     wrapper.setData({
-      foo: "foo value",
-    });
-    expect(wrapper.vm.foo).toBe("foo value");
-  });
-});
+      foo: "foo value"
+    })
+    expect(wrapper.vm.foo).toBe("foo value")
+  })
+})
 ```
 
 ## 测试事件
@@ -1129,33 +1129,33 @@ describe("HelloWorld.vue", () => {
 <script>
 export default {
   props: {
-    msg: String,
+    msg: String
   },
   data() {
     return {
-      count: 0,
-    };
-  },
-};
+      count: 0
+    }
+  }
+}
 </script>
 ```
 
 那么我们可以在以上组件的基础上撰写测试`click`原生事件的单元测试：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("测试原生click事件", async () => {
-    const wrapper = shallowMount(HelloWorld);
-    const btn = wrapper.find("button");
-    expect(wrapper.vm.count).toBe(0);
-    btn.trigger("click");
-    expect(wrapper.vm.count).toBe(1);
-    await wrapper.vm.$nextTick();
-    expect(wrapper.text()).toContain(1);
-  });
-});
+    const wrapper = shallowMount(HelloWorld)
+    const btn = wrapper.find("button")
+    expect(wrapper.vm.count).toBe(0)
+    btn.trigger("click")
+    expect(wrapper.vm.count).toBe(1)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain(1)
+  })
+})
 ```
 
 ### 传递事件参数
@@ -1176,12 +1176,12 @@ handleIncrementClick ($event) {
 
 ```js
 // setValue改变元素的值
-input.setValue(100);
-btn.trigger("click");
+input.setValue(100)
+btn.trigger("click")
 
 // element元素改变元素的值
-input.element.value = 100;
-btn.trigger("click");
+input.element.value = 100
+btn.trigger("click")
 ```
 
 ### 自定义事件
@@ -1194,11 +1194,11 @@ btn.trigger("click");
 在`Vue-Test-Utils`中，一个组件它发射的事件可以通过`wrapper.emitted()`获取，它的返回值是一个对象，其中事件名作为对象的键名，对应的参数作为键的值，例如：
 
 ```js
-wrapper.vm.$emit("change", 100);
-wrapper.vm.$emit("update:visible", false);
+wrapper.vm.$emit("change", 100)
+wrapper.vm.$emit("update:visible", false)
 
-const emitted = wrapper.emitted();
-console.log(emitted);
+const emitted = wrapper.emitted()
+console.log(emitted)
 /*
 {
   'change': [[100]],
@@ -1210,23 +1210,23 @@ console.log(emitted);
 我们先来看第一场情况，组件自身向外触发事件：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("emit触发事件", () => {
-    const wrapper = shallowMount(HelloWorld);
-    wrapper.vm.$emit("change", 100);
-    wrapper.vm.$emit("update:visible", false);
+    const wrapper = shallowMount(HelloWorld)
+    wrapper.vm.$emit("change", 100)
+    wrapper.vm.$emit("update:visible", false)
 
-    const emitted = wrapper.emitted();
+    const emitted = wrapper.emitted()
 
-    expect(emitted["change"]).toBeTruthy();
-    expect(emitted["change"][0]).toEqual([100]);
+    expect(emitted["change"]).toBeTruthy()
+    expect(emitted["change"][0]).toEqual([100])
 
-    expect(emitted["update:visible"]).toBeTruthy();
-    expect(emitted["update:visible"][0]).toEqual([false]);
-  });
-});
+    expect(emitted["update:visible"]).toBeTruthy()
+    expect(emitted["update:visible"][0]).toEqual([false])
+  })
+})
 ```
 
 接下来我们来看第二种子组件派发事件，父组件监听事件的情况，假设我们有如下父组件：
@@ -1240,39 +1240,39 @@ describe("HelloWorld.vue", () => {
 </template>
 
 <script>
-import ChildComponent from "./ChildComponent";
+import ChildComponent from "./ChildComponent"
 
 export default {
   name: "ParentComponent",
   components: { ChildComponent },
   data() {
     return {
-      emitted: false,
-    };
+      emitted: false
+    }
   },
   methods: {
     onCustom() {
-      this.emitted = true;
-    },
-  },
-};
+      this.emitted = true
+    }
+  }
+}
 </script>
 ```
 
 那么我们可以撰写如下测试用例：
 
 ```js
-import { mount } from "@vue/test-utils";
-import ParentComponent from "@/components/ParentComponent";
-import ChildComponent from "@/components/ChildComponent";
+import { mount } from "@vue/test-utils"
+import ParentComponent from "@/components/ParentComponent"
+import ChildComponent from "@/components/ChildComponent"
 
 describe("ParentComponent", () => {
   it("displays 'Emitted!' when custom event is emitted", () => {
-    const wrapper = mount(ParentComponent);
-    wrapper.find(ChildComponent).vm.$emit("custom");
-    expect(wrapper.html()).toContain("Emitted!");
-  });
-});
+    const wrapper = mount(ParentComponent)
+    wrapper.find(ChildComponent).vm.$emit("custom")
+    expect(wrapper.html()).toContain("Emitted!")
+  })
+})
 ```
 
 测试用例说明：`find()`方法不仅可以传递我们熟知的标准选择器：元素标签，类名等还可以传递一个组件，传递组件返回的是一个组件的包装器。
@@ -1301,17 +1301,17 @@ setToken (state, token) {
 我们可以基于以上代码撰写如下单元测试：
 
 ```js
-import mutations from "./mutations.js";
+import mutations from "./mutations.js"
 describe("mutations", () => {
   it("test setToken mutations", () => {
-    const token = "123456";
+    const token = "123456"
     const state = {
-      token: "",
-    };
-    mutations.setToken(state, token);
-    expect(state.token).toBe(token);
-  });
-});
+      token: ""
+    }
+    mutations.setToken(state, token)
+    expect(state.token).toBe(token)
+  })
+})
 ```
 
 ### 测试 Getters
@@ -1321,28 +1321,28 @@ describe("mutations", () => {
 ```js
 // getters.js
 export const passList = (state) => {
-  return state.students.filter((stu) => stu.score >= 60);
-};
+  return state.students.filter((stu) => stu.score >= 60)
+}
 ```
 
 我们可以基于以上代码撰写如下单元测试：
 
 ```js
-import getters from "./getters.js";
+import getters from "./getters.js"
 describe("getters", () => {
   it("test passList getters", () => {
     const students = [
       { name: "AAA", score: 59 },
       { name: "BBB", score: 70 },
-      { name: "CCC", score: 10 },
-    ];
+      { name: "CCC", score: 10 }
+    ]
     const state = {
-      students: students,
-    };
-    const result = getters.passList(state);
-    expect(result).toEqual(students[1]);
-  });
-});
+      students: students
+    }
+    const result = getters.passList(state)
+    expect(result).toEqual(students[1])
+  })
+})
 ```
 
 ### 测试 Actions
@@ -1360,21 +1360,21 @@ export const login = ({ commit }, { userInfo, token }) {
 我们可以基于以上代码撰写如下单元测试：
 
 ```js
-import actions from "./actions.js";
+import actions from "./actions.js"
 describe("actions", () => {
   const loginResult = {
     userInfo: { name: "AAA", age: 23 },
-    token: "123456",
-  };
+    token: "123456"
+  }
   it("test login action", () => {
-    expect.assertions(1);
+    expect.assertions(1)
     const context = {
-      commit: jest.fn(),
-    };
-    actions.login(context, loginResult);
-    expect(context.commit).toHaveBeenCalledWith("setToken", loginResult.token);
-  });
-});
+      commit: jest.fn()
+    }
+    actions.login(context, loginResult)
+    expect(context.commit).toHaveBeenCalledWith("setToken", loginResult.token)
+  })
+})
 ```
 
 ### 测试 Vuex Store 实例
@@ -1383,13 +1383,13 @@ describe("actions", () => {
 
 ```js
 test("increment updates state.count by 1", () => {
-  Vue.use(Vuex);
-  const store = new Vuex.store({ storeConfig });
-  expect(store.state.count).toBe(0);
+  Vue.use(Vuex)
+  const store = new Vuex.store({ storeConfig })
+  expect(store.state.count).toBe(0)
 
-  store.commit("increment");
-  expect(store.state.count).toBe(1);
-});
+  store.commit("increment")
+  expect(store.state.count).toBe(1)
+})
 ```
 
 当我们运行以上代码进行单独测试时，而确实能按照我们的期望进行输出，但存在一个致命问题：如果我们有多个测试用例，因为`store`对象是引用类型，我们在第一个测试用例修改的值，会影响其他测试用例。
@@ -1399,93 +1399,93 @@ test("increment updates state.count by 1", () => {
 `localVue`我们在之前已经提到过，我们可以按照之前介绍的方式来改造以上测试用例：
 
 ```js
-import { createLocalVue } from "@vue/test-utils";
+import { createLocalVue } from "@vue/test-utils"
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+const localVue = createLocalVue()
+localVue.use(Vuex)
 
 test("increment updates state.count by 1", () => {
-  const store = new Vuex.store({ storeConfig });
-  expect(store.state.count).toBe(0);
+  const store = new Vuex.store({ storeConfig })
+  expect(store.state.count).toBe(0)
 
-  store.commit("increment");
-  expect(store.state.count).toBe(1);
-});
+  store.commit("increment")
+  expect(store.state.count).toBe(1)
+})
 ```
 
 要测试一个完整的`store`，我们假设有如下代码：
 
 ```js
-import * as types from "./mutation-types.js";
+import * as types from "./mutation-types.js"
 import {
   setToken,
   getToken,
   removeToken,
   setUserInfo,
   getUserInfo,
-  removeUserInfo,
-} from "@/utils/cache.js";
+  removeUserInfo
+} from "@/utils/cache.js"
 const state = {
   token: getToken(),
-  userInfo: getUserInfo(),
-};
+  userInfo: getUserInfo()
+}
 const mutations = {
   [types.SET_TOKEN](state, token) {
-    state.token = token;
+    state.token = token
   },
   [types.SET_USER_INFO](state, userInfo) {
-    state.userInfo = userInfo;
-  },
-};
+    state.userInfo = userInfo
+  }
+}
 const actions = {
   login({ commit }, { token, userInfo }) {
-    commit(`${types.SET_TOKEN}`, setToken(token));
-    commit(`${types.SET_USER_INFO}`, setUserInfo(userInfo));
+    commit(`${types.SET_TOKEN}`, setToken(token))
+    commit(`${types.SET_USER_INFO}`, setUserInfo(userInfo))
   },
   logout({ commit }) {
-    commit(`${types.SET_TOKEN}`, removeToken());
-    commit(`${types.SET_USER_INFO}`, removeUserInfo());
-  },
-};
+    commit(`${types.SET_TOKEN}`, removeToken())
+    commit(`${types.SET_USER_INFO}`, removeUserInfo())
+  }
+}
 ```
 
 我们同时定义`getters.js`代码如下：
 
 ```js
-export const token = (state) => state.token;
+export const token = (state) => state.token
 
-export const userInfo = (state) => state.userInfo;
+export const userInfo = (state) => state.userInfo
 ```
 
 因此我们可以撰写以下测试整体`store`的代码：
 
 ```js
-import store from "./store/index.js";
-import * as types from "./store/mutation-types.js";
-import * as getters from "./store/getters.js";
+import store from "./store/index.js"
+import * as types from "./store/mutation-types.js"
+import * as getters from "./store/getters.js"
 
 describe("test store", () => {
   beforeEach(() => {
-    localStorage.clear();
-  });
+    localStorage.clear()
+  })
   it("test login action", () => {
     const loginResult = {
       userInfo: { name: "AAA", age: 23 },
-      token: "123456",
-    };
-    expect(getters.token).toBe("");
-    expect(getters.userInfo).toEqual({});
+      token: "123456"
+    }
+    expect(getters.token).toBe("")
+    expect(getters.userInfo).toEqual({})
 
-    store.dispatch("login", loginResult);
-    expect(getters.token).toBe(loginResult.token);
-    expect(getters.userInfo).toEqual(loginResult.userInfo);
-  });
+    store.dispatch("login", loginResult)
+    expect(getters.token).toBe(loginResult.token)
+    expect(getters.userInfo).toEqual(loginResult.userInfo)
+  })
   it("test logout action", () => {
-    store.dispatch("logout");
-    expect(getters.token).toBe("");
-    expect(getters.userInfo).toEqual({});
-  });
-});
+    store.dispatch("logout")
+    expect(getters.token).toBe("")
+    expect(getters.userInfo).toEqual({})
+  })
+})
 ```
 
 ## 测试 Vue-Router
@@ -1511,34 +1511,34 @@ describe("test store", () => {
 我们可以看到以上组件使用到了`$route`实例属性，因此我们为上面的组件撰写如下测试代码：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
-  let $route;
+  let $route
   beforeEach(() => {
     $route = {
-      query: {},
-    };
-  });
+      query: {}
+    }
+  })
   it("no passed $route.query.id", () => {
     const wrapper = shallowMount(HelloWorld, {
       mocks: {
-        $route,
-      },
-    });
-    expect(wrapper.text()).toContain("need passed id");
-  });
+        $route
+      }
+    })
+    expect(wrapper.text()).toContain("need passed id")
+  })
   it("passed $route.query.id", () => {
-    $route.query.id = 123;
+    $route.query.id = 123
     const wrapper = shallowMount(HelloWorld, {
       mocks: {
-        $route,
-      },
-    });
-    expect(wrapper.text()).toContain("get detail");
-  });
-});
+        $route
+      }
+    })
+    expect(wrapper.text()).toContain("get detail")
+  })
+})
 ```
 
 ### 测试\$router
@@ -1556,40 +1556,40 @@ describe("HelloWorld.vue", () => {
 export default {
   mounted() {
     if (!this.$route.query.id) {
-      this.$router.replace("/home");
+      this.$router.replace("/home")
     }
-  },
-};
+  }
+}
 </script>
 ```
 
 那么我们测试`$router`的代码可以像下面这样写：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
-  let $route;
-  let $router;
+  let $route
+  let $router
   beforeEach(() => {
     $route = {
-      query: {},
-    };
+      query: {}
+    }
     $router = {
-      replace: jest.fn(),
-    };
-  });
+      replace: jest.fn()
+    }
+  })
   it("replace home when no id", () => {
     const wrapper = shallowMount(HelloWorld, {
       mocks: {
         $route,
-        $router,
-      },
-    });
-    expect($router.replace).toHaveBeenCalled();
-  });
-});
+        $router
+      }
+    })
+    expect($router.replace).toHaveBeenCalled()
+  })
+})
 ```
 
 ### 测试 RouterLink
@@ -1613,37 +1613,37 @@ describe("HelloWorld.vue", () => {
 在`Vue-Test-Utils`中，我们可以使用`studs`存根`router-link`，然后使用`RouterLinkStub`控制`router-link`渲染：
 
 ```js
-import { shallowMount, RouterLinkStub } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount, RouterLinkStub } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 const wrapper = shallowMount(HelloWorld, {
   stubs: {
-    RouterLink: RouterLinkStub,
-  },
-});
+    RouterLink: RouterLinkStub
+  }
+})
 ```
 
 那么我们的测试代码如下：
 
 ```js
-import { shallowMount, RouterLinkStub } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount, RouterLinkStub } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
   it("render router-link", () => {
     const $route = {
-      query: {},
-    };
+      query: {}
+    }
     const wrapper = shallowMount(HelloWorld, {
       stubs: {
-        RouterLink: RouterLinkStub,
+        RouterLink: RouterLinkStub
       },
       mocks: {
-        $route,
-      },
-    });
-    expect(wrapper.findComponent(RouterLinkStub).props().to).toBe("/home");
-  });
-});
+        $route
+      }
+    })
+    expect(wrapper.findComponent(RouterLinkStub).props().to).toBe("/home")
+  })
+})
 ```
 
 **注意**：如果我们要找元素标签推荐使用`wrapper.find()`方法，如果要找组件推荐使用`wrapper.findComponent()`。
@@ -1660,12 +1660,12 @@ describe("HelloWorld.vue", () => {
 /// mixin.js
 export const titleMixin = {
   mounted() {
-    const title = this.title;
+    const title = this.title
     if (title) {
-      document.title = title;
+      document.title = title
     }
-  },
-};
+  }
+}
 ```
 
 然后我们在组件使用该`mixin`：
@@ -1675,29 +1675,29 @@ export const titleMixin = {
   <div>Hello,Vue.js</div>
 </template>
 <script>
-import { titleMixin } from "@/mixin/index.js";
+import { titleMixin } from "@/mixin/index.js"
 export default {
   mixins: [titleMixin],
   data() {
     return {
-      title: "测试title mixin",
-    };
-  },
-};
+      title: "测试title mixin"
+    }
+  }
+}
 </script>
 ```
 
 最后，我们撰写测试`titleMixin`的测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("test mixin", () => {
-    const wrapper = shallowMount(HelloWorld);
-    expect(document.title).toBe("测试title mixin");
-  });
-});
+    const wrapper = shallowMount(HelloWorld)
+    expect(document.title).toBe("测试title mixin")
+  })
+})
 ```
 
 ### 测试 filters
@@ -1707,13 +1707,13 @@ describe("HelloWorld.vue", () => {
 ```js
 export const reverseStr = (str) => {
   if (!str) {
-    return;
+    return
   }
   if (typeof str !== "string") {
-    return str;
+    return str
   }
-  return str.split("").reverse().join("");
-};
+  return str.split("").reverse().join("")
+}
 ```
 
 接下来，我们在组件中使用该`filter`：
@@ -1726,33 +1726,33 @@ export const reverseStr = (str) => {
   </div>
 </template>
 <script>
-import { reverseStr } from "@/filters/index.js";
+import { reverseStr } from "@/filters/index.js"
 export default {
   filters: {
-    reverseStr,
+    reverseStr
   },
   data() {
     return {
       age: 23,
-      msg: "ABC",
-    };
-  },
-};
+      msg: "ABC"
+    }
+  }
+}
 </script>
 ```
 
 最后，我们为以上组件编写测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 describe("HelloWorld.vue", () => {
   it("test filters", () => {
-    const wrapper = shallowMount(HelloWorld);
-    expect(wrapper.text()).toContain("CBA");
-    expect(wrapper.text()).toContain("23");
-  });
-});
+    const wrapper = shallowMount(HelloWorld)
+    expect(wrapper.text()).toContain("CBA")
+    expect(wrapper.text()).toContain("23")
+  })
+})
 ```
 
 ## 快照测试
@@ -1762,13 +1762,13 @@ describe("HelloWorld.vue", () => {
 在`Jest`自动化测试框架中，我们可使用以下代码为组件进行快照：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 it("match snapshot", () => {
-  const wrapper = shallowMount(HelloWorld);
-  expect(wrapper.element).toMatchSnapshot();
-});
+  const wrapper = shallowMount(HelloWorld)
+  expect(wrapper.element).toMatchSnapshot()
+})
 ```
 
 以上快照测试的流程如下：
@@ -1793,7 +1793,7 @@ exports[`HelloWorld.vue match snapshot 1`] = `
   </span>
   Hello, Vue and Jest...
 </div>
-`;
+`
 ```
 
 ### 静态组件快照
@@ -1815,15 +1815,15 @@ exports[`HelloWorld.vue match snapshot 1`] = `
 我们编写如下静态快照测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import Spinner from "@/components/spinner.vue";
+import { shallowMount } from "@vue/test-utils"
+import Spinner from "@/components/spinner.vue"
 
 describe("spinner.vue", () => {
   it("match snapshot", () => {
-    const wrapper = shallowMount(Spinner);
-    expect(wrapper.element).toMatchSnapshot();
-  });
-});
+    const wrapper = shallowMount(Spinner)
+    expect(wrapper.element).toMatchSnapshot()
+  })
+})
 ```
 
 ### 动态组件快照
@@ -1845,40 +1845,40 @@ export default {
   props: {
     msg: {
       type: String,
-      default: "default msg",
-    },
+      default: "default msg"
+    }
   },
   data() {
     return {
-      age: 11,
-    };
-  },
-};
+      age: 11
+    }
+  }
+}
 </script>
 ```
 
 我们依据以上代码撰写下面 2 个快照测试用例：
 
 ```js
-import { shallowMount } from "@vue/test-utils";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { shallowMount } from "@vue/test-utils"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 describe("HelloWorld.vue", () => {
-  let wrapper;
+  let wrapper
   beforeEach(() => {
-    wrapper = shallowMount(HelloWorld);
-  });
+    wrapper = shallowMount(HelloWorld)
+  })
   it("match msg snapshot", () => {
-    expect(wrapper.element).toMatchSnapshot();
-  });
+    expect(wrapper.element).toMatchSnapshot()
+  })
   it("match age snapshot", async () => {
     wrapper.setData({
-      age: 6,
-    });
-    await wrapper.vm.$nextTick();
-    expect(wrapper.element).toMatchSnapshot();
-  });
-});
+      age: 6
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.element).toMatchSnapshot()
+  })
+})
 ```
 
 运行`npm run test:unit`后，我们将得到如下快照：
@@ -1894,7 +1894,7 @@ exports[`HelloWorld.vue match age snapshot 1`] = `
     default msg
   </div>
 </div>
-`;
+`
 
 exports[`HelloWorld.vue match msg snapshot 1`] = `
 <div>
@@ -1906,7 +1906,7 @@ exports[`HelloWorld.vue match msg snapshot 1`] = `
     default msg
   </div>
 </div>
-`;
+`
 ```
 
 ### 更新快照

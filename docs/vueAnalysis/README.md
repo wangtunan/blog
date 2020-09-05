@@ -3,34 +3,75 @@ sidebar: auto
 ---
 
 # Vue 源码分析
+本篇`Vue2.0`源码分析文章由观看[Vue.js源码全方位深入解析](https://coding.imooc.com/class/228.html)视频，阅读[深入浅出Vue.js](https://www.ituring.com.cn/book/2675)书籍以及参考其他`Vue`源码分析博客而来，阅读视频和书籍请支持正版。
 
-## 源码目录设计
+## 介绍
 
+### Vue发展简史
+* 2013年7月，`Vue.js`在`Github`上第一次提交，此时名字叫做`Element`，后来被改名为`Seed.js`，到现在的`Vue.js`。
+* 2013年12月，`Github`发布`0.6`版本，并正式更名为`Vue.js`。
+* 2014年2月，在`Hacker News`网站上时候首次公开。
+* 2015年10月，`Vue.js`发布`1.0.0`版本。
+* 2016年10月，`Vue.js`发布`2.0`版本。
+
+### Vue版本变化
+`Vue2.0`版本和`Vue1.0`版本之间内部变化非常大，整个渲染层都重写了，但`API`层面的变化却很小。`Vue2.0`版本还引入了很多特性：
+* `Virtual Dom`虚拟DOM。
+* 支持`JSX`语法。
+* 支持`TypeScript`。
+* 支持服务端渲染。
+* 提供跨平台能力。
+
+`Vue`借鉴了开源库[snabbdom](https://github.com/snabbdom/snabbdom)的实现，并根据自身特色添加了许多特性。引入虚拟DOM的一个很重要的好处是：绝大部分情况下，组件渲染变得更快了，而少部分情况下反而变慢了。引入虚拟DOM这项技术通常都是在解决一些问题，然而解决一个问题的同时也可能会引入其它问题，这种情况更多的是如何做权衡、如何做取舍。
+
+`Vue.js`两大核心思想是：**数据驱动**和**组件化**，因此我们在介绍完源码目录设计和整体流程后，会先介绍这两方面。
+
+## 源码目录设计和架构设计
+
+### 源码目录设计
+`Vue.js`源码目录设计如下：
 ```sh
-|-- src
+|-- dist              # 构建目录
+|-- flow              # flow的类型声明，类似于TypeScipt
+|-- packages          # 衍生的npm包，例如vue-server-renderer和vue-template-compiler
+|-- scripts           # 构建配置和构建脚本
+|-- test              # 端到端测试和单元测试用例
+|-- src               # 源代码
 |   |-- compiler      # 编译相关代码
 |   |-- core          # 核心代码
 |   |-- platforms     # 跨平台
 |   |-- server        # 服务端渲染
-|   |-- sfc           # .vue文件解析
+|   |-- sfc           # .vue文件解析逻辑
 |   |-- shared        # 工具函数/共享代码
 ```
-### Compiler
+* `dist`：`rollup`构建目录，里面存放了所有`Vue`构建后不同版本的文件。
+* `flow`：它是Facebook出品的`JavaScript`静态类型检查工具，早期`Vue.js`选择了`flow`而不是现在的`TypeScript`来做静态类型检查。
+* `packages`：`Vue.js`衍生的其它`npm`包，它们在`Vue`构建时自动从源码中生成并且始终和`Vue.js`保持相同的版本，主要是`vue-server-renderer`和`vue-template-compiler`这两个包，其中最后一个包在我们使用脚手架生成项目，使用`.vue`文件开发`Vue`项目时会使用到这个包。
+* `scripts`：`rollup`构建配置和构建脚本，`Vue.js`能够通过不同的环境构建不同的版本的秘密都在这个目录下。
+* `test`：`Vue.js`测试目录，自动化测试对于一个开源库来说是至关重要的，测试覆盖率在一定程度上是衡量一个库质量的一个重要指标。测试用例无论对于开发还是阅读源码，都是有很大益处的，其中通过测试用例去阅读`Vue`源码是普遍认为可行的一种方式。
 
-`compiler`目录包含了`Vue.js`编译相关的代码，它包括：模板编译成 AST 抽象语法树、AST 抽象语法树优化、代码生成等相关代码。
-
-编译的工作可以在构建时用`runtime-only`版本，借助`webpack`和`vue-loader`等工具或插件来进行编译。也可以在运行时，使用包含构建功能的`runtime + compiler`版本。
-
-显然，编译是一项比较消耗性能的工作，所以我们日常的开发中，更推荐使用`runtime-only`的版本开发(体积也更小)，也就是通过`.vue`文件的形式开发，而不是通过如下的方式：
+* `src/compiler`：此目录包含了与`Vue.js`编译相关的代码，它包括：模板编译成 AST 抽象语法树、AST 抽象语法树优化和代码生成相关代码。编译的工作可以在构建时用`runtime-only`版本，借助`webpack`和`vue-loader`等工具或插件来进行编译。也可以在运行时，使用包含构建功能的`runtime + compiler`版本。显然，编译是一项比较消耗性能的工作，所以我们日常的开发中，更推荐使用`runtime-only`的版本开发(体积也更小)，也就是通过`.vue`文件的形式开发。
 
 ```js
-const myComponent = {
-  template: '<div>hello,world</div>',
-}
-```
-### Core
+// 需要使用编译版本
+new Vue({
+  data: {
+    msg: 'hello,world'
+  }
+  template: '<div>{{msg}}</div>'
+})
 
-`core`目录包含了`Vue.js`的核心代码，包括：内置组件(`keep-alive`)、全局 API(`Vue.use`、`Vue.mixin`和`Vue.extend`等)、Vue 实例化、响应式相关、虚拟 DOM 和工具函数等。
+// 不需要使用编译版本
+new Vue({
+  data: {
+    msg: 'hello,world'
+  },
+  render (h) {
+    return h('div', this.msg)
+  }
+})
+```
+*  `src/core`：此目录包含了`Vue.js`的核心代码，包括：内置组件`keep-alive`、全局 API(`Vue.use`、`Vue.mixin`和`Vue.extend`等)、实例化、响应式相关、虚拟 DOM 和工具函数等。
 
 ```sh
 |-- core
@@ -41,28 +82,30 @@ const myComponent = {
 |   |-- util            # 工具函数
 |   |-- vdom            # 虚拟DOM
 ```
-### Platform
-
-`Vue.js`是一个跨平台的`MVVM`框架。在`React`中，有`React Native`跨平台客户端，而在`Vue`中其对应的跨平台就是`Weex`。`platform`有 2 个目录：
+* `src/platform`：`Vue2.0`提供了跨平台的能力，在`React`中有`React Native`跨平台客户端，而在`Vue2.0`中其对应的跨平台就是`Weex`。
 
 ```js
 |-- platform
-|   |-- web      # web平台浏览器端
+|   |-- web      # web浏览器端
 |   |-- weex     # native客户端
 ```
-### Server
 
-`Vue.js2.0`开始就支持了服务端渲染，所有跟服务端渲染相关的代码都在`server`目录下，此部分代码是运行在服务端，而非 Web 浏览器端。
-### Sfc
+* `src/server`: `Vue2.0`提供服务端渲染的能力，所有跟服务端渲染相关的代码都在`server`目录下，此部分代码是运行在服务端，而非 Web 浏览器端。
 
-通常来说，我们开发`Vue`应用是借助了`Webpack`等工具的构建，然后通过`.vue`单文件来编写组件，而`vue-loader`就是专门用来解析`.vue`文件的。这个目录下的代码，只要作用是把`.vue`文件解析成一个`JavaScript`对象。
-### Shared
+* `src/sfc`：此目录的主要作用是如何把`.vue`文件解析成一个`JavaScript`对象。
 
-此目录下存放了一些在 Web 浏览器端和服务端都会用到的共享代码。
+* `src/shared`：此目录下存放了一些在 Web 浏览器端和服务端都会用到的共享代码。
 
+
+### 架构设计
+我们通过以上目录结构可以很容易的发现，`Vue.js`整体分为三个部分：**核心代码**、**跨平台相关**和**公共工具函数**。
+
+同时其架构是分层的，最底层是一个构造函数(普通的函数)，最上层是一个入口，也就是将一个完整的构造函数导出给用户使用。在中间层，我们需要逐渐添加一些方法和属性，主要原型`prototype`相关和全局API相关。
+
+![Vue架构设计](../images/vueAnalysis/composition.png)
 
 ## Rollup构建
-`Vue.js`通过`rollup`构建工具进行构建，它是一个类似于`webpack`的打包工具，区别于`webpack`，它更适合作为一个`Library`库的打包。在学习`Vue.js`源码之前，我们有必要知道`Vue.js`是如何构建不同版本的。
+`Vue.js`通过`rollup`构建工具进行构建，它是一个类似于`webpack`的打包工具，区别于`webpack`它更适合一个`Library`库的打包。在学习`Vue.js`源码之前，我们有必要知道`Vue.js`是如何构建不同版本的。
 
 ### Rollup基础知识
 #### 核心概念
@@ -86,9 +129,9 @@ export default {
 ```
 
 构建版本说明：
-* `umd`：此选项构建出来的库文件主要适用于`Web`端，可以通过常见的方式去使用：`script`标签，`ES Module`规范引入和`CommonJs`规范等方式引入。
+* `umd`：此选项构建出来的库文件主要适用于`Web`端，可以通过不同的方式去使用：`script`标签引入，`ES Module`规范引入和`CommonJs`规范引入等。
 * `cjs`: 此选项构建出来的库文件主要为`CommonJs`规范，可在`Node`环境中使用。
-* `es`：此版本构建出来的库文件主要为`ES Module`规范，可在支持`import/export`的环境中使用。
+* `es`：此版本构建出来的库文件主要为`ES Module`规范，可在支持`ES Module`也就是`import/export`的环境中使用。
 
 有了以上配置文件，我们可以在`package.json`中进行如下修改：
 ```json
@@ -108,10 +151,10 @@ export default {
 #### 常用插件
 `rollup`并不像`webpack`那样强大，它需要和其它插件配合使用才能完成特定的功能，常用的插件有：
 * `@rollup/plugin-json`： 支持从`.json`读取信息，配合`rollup`的`Tree Shaking`可只打包`.json`文件中我们用到的部分。
-* `@rollup/plugin-commonjs`：将`CommonJs`规范的模块，转换为`ES6`提供`rollup`使用。
+* `@rollup/plugin-commonjs`：将`CommonJs`规范的模块转换为`ES6`提供`rollup`使用。
 * `@rollup/plugin-node-resolve`：与`@rollup/plugin-commonjs`插件一起使用，配合以后就可以使用`node_modules`下的第三方模块代码了。
-* `@rollup/plugin-babel`：把`ES6`代码转义成`ES5`代码，需要同时按照`@babel/core`和`@babel/preset-env`插件。注意：如果使用了高于`ES6`标准的语法，则需要进行额外的配置。
-* `rollup-plugin-terser`：代码压缩插件，不推荐使用`rollup-plugin-uglify` + `uglify-es`进行代码压缩。
+* `@rollup/plugin-babel`：把`ES6`代码转义成`ES5`代码，需要同时安装`@babel/core`和`@babel/preset-env`插件。注意：如果使用了高于`ES6`标准的语法，例如`async/await`，则需要进行额外的配置。
+* `rollup-plugin-terser`：代码压缩插件，另外一种方案是`rollup-plugin-uglify` + `uglify-es`进行代码压缩，不过更推荐第一种方案。
 
 以上插件使用方式如下：
 ```js
@@ -194,7 +237,7 @@ const config =  {
 }
 export default config
 ```
-配置说明：本地开发环境下，我们可以有选择的添加`rollup-plugin-serve`插件，它类似于`webpack-dev-server`，能在开发环境下起一个小型服务，方便我们进行代码调试。
+配置说明：本地开发环境下，我们可以有选择的添加`rollup-plugin-serve`插件，它类似于`webpack-dev-server`，能在开发环境下起一个服务方便我们进行开发和代码调试。
 
 `rollup.config.prod.js`代码如下：
 ```js
@@ -223,8 +266,8 @@ export default config
 |-- dist
 |   |-- vue.js            # UMD未压缩版本
 |   |-- vue.min.js        # UMD压缩版本
-|   |-- vue.esm.js         # ES Module未压缩版本
-|   |-- vue.esm.min.js     # ES Module压缩版本
+|   |-- vue.esm.js        # ES Module未压缩版本
+|   |-- vue.esm.min.js    # ES Module压缩版本
 |   |-- vue.common.js     # CommonJs未压缩版本
 |   |-- vue.common.min.js # CommonJs压缩版本
 ```
@@ -233,7 +276,7 @@ export default config
 ```json
 {
   "main": "dist/vue.common.js",
-  "module": "dist/vue.esm.js",
+  "module": "dist/vue.esm.js"
 }
 ```
 
@@ -325,7 +368,7 @@ module.exports = [
   { file: 'web', replacement: resolve('src/platforms/web' },
   { file: 'weex', replacement: resolve('src/platforms/weex') },
   { file: 'server', replacement: resolve('src/server') },
-  { file: 'sfc', replacement: resolve('src/sfc') },
+  { file: 'sfc', replacement: resolve('src/sfc') }
 ]
 ```
 其在`config.js`新的使用方式同样需要做调整，如下：
@@ -345,8 +388,119 @@ function genConfig () {
 ```
 
 #### config.js
+首先我们从`package.json`打包命令中可以看到，在`development`环境下它通过`-c`指定了`rollup`的配置文件，所以会使用到`scripts/config.js`文件，并且打包命令还提供了一个叫做`TARGET`的环境变量：
+```json
+{
+  "scripts": {
+    "dev": "rollup -w -c scripts/config.js --environment TARGET:web-full-dev",
+    "dev:cjs": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-cjs-dev",
+    "dev:esm": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-esm",
+  }
+}
+```
+那么在`scripts/config.js`文件下，我们可以看到它是通过`module.exports`导出的一个对象：
+```js
+function genConfig (name) {
+  const opts = builds[name]
+  const config = {
+    input: opts.entry,
+    external: opts.external,
+    plugins: [
+      flow(),
+      alias(Object.assign({}, aliases, opts.alias))
+    ].concat(opts.plugins || []),
+    output: {
+      file: opts.dest,
+      format: opts.format,
+      name: opts.moduleName || 'Vue'
+    },
+    onwarn: (msg, warn) => {
+      if (!/Circular/.test(msg)) {
+        warn(msg)
+      }
+    }
+  }
+  return config
+}
+if (process.env.TARGET) {
+  module.exports = genConfig(process.env.TARGET)
+} else {
+  exports.getBuild = genConfig
+  exports.getAllBuilds = () => Object.keys(builds).map(genConfig)
+}
+```
+在以上代码中，我们可以看到`module.exports`导出的对象，主要是通过`genConfig()`函数返回的，其中这个函数接受的参数正是我们在打包命令中提供的环境变量`TARGET`。我们再来粗略的看一下`genConfig()`函数，它的主要作用依然是生成`rollup`几大核心配置，然后返回配置完毕后的对象。
+
+我们再来看一个叫做`builds`的对象，由于在源码中它的内容非常多，为了节省篇幅我们精简后其代码如下：
+```js
+const builds = {
+  // Runtime+compiler CommonJS build (CommonJS)
+  'web-full-cjs-dev': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.common.dev.js'),
+    format: 'cjs',
+    env: 'development',
+  },
+  'web-full-cjs-prod': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.common.prod.js'),
+    format: 'cjs',
+    env: 'production'
+  },
+  // Runtime+compiler ES modules build (for bundlers)
+  'web-full-esm': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.esm.js'),
+    format: 'es'
+  },
+  // Runtime+compiler development build (Browser)
+  'web-full-dev': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.js'),
+    format: 'umd',
+    env: 'development'
+  },
+  // Runtime+compiler production build  (Browser)
+  'web-full-prod': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.min.js'),
+    format: 'umd',
+    env: 'production'
+  }
+}
+```
+我们可以发现它的键名正好是我们打包命令中提供的环境变量`TARGET`的值，这里以`web-full-dev`为例，它通过`web-full-dev`这个键可以得到一个对象：
+```js
+{
+  entry: resolve('web/entry-runtime-with-compiler.js'),
+  dest: resolve('dist/vue.js'),
+  format: 'umd',
+  env: 'development'
+}
+```
+然后配合`resolve`函数和上面我们已经提到过的别名配置，就可以构造下面这样的`rollup`配置对象：
+```js
+{
+  // 省略其它
+  input: 'src/platforms/web/entry-runtime-with-compiler.js',
+  output: {
+    dest: 'dist/vue.js',
+    format: 'umd',
+    name: 'Vue'
+  }
+}
+```
+
 
 #### build.js
+`srcipts/build.js`文件的作用就是通过配置然后生成不同版本的压缩文件，其中它获取配置的方式同样是在`scripts/config.js`文件中，其中关键代码为：
+```js
+// config.js中导出
+exports.getAllBuilds = () => Object.keys(builds).map(genConfig)
+
+// build.js中引入
+let builds = require('./config').getAllBuilds()
+```
 
 ## 从入口到Vue构造函数整体流程
 
@@ -361,3 +515,50 @@ function genConfig () {
 ### lifecycleMixin流程
 
 ### renderMixin流程
+
+
+
+## 深入响应式原理
+### Object变化侦测
+### Array变化侦测
+### 变化侦测注意事项
+### 变化侦测相关API实现
+
+
+
+
+## 虚拟DOM和VNode介绍
+### 虚拟DOM介绍
+### VNode介绍
+
+
+
+## 组件化
+### 组件生成createComponent
+### 合并策略
+### 生命周期
+### 组件注册
+### 异步组件
+### patch派发更新
+
+
+
+## 编译原理
+### 解析器parse
+### 优化器optimize
+### 代码生成器codegen
+
+
+## 扩展
+### 生命周期
+### 指令
+### 过滤器
+### v-model
+### 插槽
+### event事件中心
+### 内置组件
+
+
+## 第三方插件
+### VueRouter
+### Vuex
