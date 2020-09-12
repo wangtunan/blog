@@ -15,16 +15,16 @@ sidebar: auto
 * 2016年10月，`Vue.js`发布`2.0`版本。
 
 ### Vue版本变化
-`Vue2.0`版本和`Vue1.0`版本之间内部变化非常大，整个渲染层都重写了，但`API`层面的变化却很小。`Vue2.0`版本还引入了很多特性：
+`Vue2.0`版本和`Vue1.0`版本之间虽然内部变化非常大，整个渲染层都重写了，但`API`层面的变化却很小，对开发者来说非常友好，另外`Vue2.0`版本还引入了很多特性：
 * `Virtual Dom`虚拟DOM。
 * 支持`JSX`语法。
 * 支持`TypeScript`。
-* 支持服务端渲染。
-* 提供跨平台能力。
+* 支持服务端渲染`ssr`。
+* 提供跨平台能力`weex`。
 
-`Vue`借鉴了开源库[snabbdom](https://github.com/snabbdom/snabbdom)的实现，并根据自身特色添加了许多特性。引入虚拟DOM的一个很重要的好处是：绝大部分情况下，组件渲染变得更快了，而少部分情况下反而变慢了。引入虚拟DOM这项技术通常都是在解决一些问题，然而解决一个问题的同时也可能会引入其它问题，这种情况更多的是如何做权衡、如何做取舍。
+**正确理解虚拟DOM**：`Vue`中的虚拟DOM借鉴了开源库[snabbdom](https://github.com/snabbdom/snabbdom)的实现，并根据自身特色添加了许多特性。引入虚拟DOM的一个很重要的好处是：绝大部分情况下，组件渲染变得更快了，而少部分情况下反而变慢了。引入虚拟DOM这项技术通常都是在解决一些问题，然而解决一个问题的同时也可能会引入其它问题，这种情况更多的是如何做权衡、如何做取舍。因此，一味的强调虚拟DOM在任何时候都能提高性能这种说法需要正确对待和理解。
 
-`Vue.js`两大核心思想是：**数据驱动**和**组件化**，因此我们在介绍完源码目录设计和整体流程后，会先介绍这两方面。
+**核心思想**：`Vue.js`两大核心思想是**数据驱动**和**组件化**，因此我们在介绍完源码目录设计和整体流程后，会先介绍这两方面。
 
 ## 源码目录设计和架构设计
 
@@ -44,16 +44,17 @@ sidebar: auto
 |   |-- sfc           # .vue文件解析逻辑
 |   |-- shared        # 工具函数/共享代码
 ```
+对以上目录简要做如下介绍：
 * `dist`：`rollup`构建目录，里面存放了所有`Vue`构建后不同版本的文件。
-* `flow`：它是Facebook出品的`JavaScript`静态类型检查工具，早期`Vue.js`选择了`flow`而不是现在的`TypeScript`来做静态类型检查。
-* `packages`：`Vue.js`衍生的其它`npm`包，它们在`Vue`构建时自动从源码中生成并且始终和`Vue.js`保持相同的版本，主要是`vue-server-renderer`和`vue-template-compiler`这两个包，其中最后一个包在我们使用脚手架生成项目，使用`.vue`文件开发`Vue`项目时会使用到这个包。
+* `flow`：它是Facebook出品的`JavaScript`静态类型检查工具，早期`Vue.js`选择了`flow`而不是现在的`TypeScript`来做静态类型检查，而在最新的`Vue3.0`版本则选择使用`TypeScript`来重写。
+* `packages`：`Vue.js`衍生的其它`npm`包，它们在`Vue`构建时自动从源码中生成并且始终和`Vue.js`保持相同的版本，主要是`vue-server-renderer`和`vue-template-compiler`这两个包，其中最后一个包在我们使用脚手架生成项目，也就是使用`.vue`文件开发`Vue`项目时会使用到这个包。
 * `scripts`：`rollup`构建配置和构建脚本，`Vue.js`能够通过不同的环境构建不同的版本的秘密都在这个目录下。
 * `test`：`Vue.js`测试目录，自动化测试对于一个开源库来说是至关重要的，测试覆盖率在一定程度上是衡量一个库质量的一个重要指标。测试用例无论对于开发还是阅读源码，都是有很大益处的，其中通过测试用例去阅读`Vue`源码是普遍认为可行的一种方式。
 
 * `src/compiler`：此目录包含了与`Vue.js`编译相关的代码，它包括：模板编译成 AST 抽象语法树、AST 抽象语法树优化和代码生成相关代码。编译的工作可以在构建时用`runtime-only`版本，借助`webpack`和`vue-loader`等工具或插件来进行编译。也可以在运行时，使用包含构建功能的`runtime + compiler`版本。显然，编译是一项比较消耗性能的工作，所以我们日常的开发中，更推荐使用`runtime-only`的版本开发(体积也更小)，也就是通过`.vue`文件的形式开发。
 
 ```js
-// 需要使用编译版本
+// 需要使用带编译的版本
 new Vue({
   data: {
     msg: 'hello,world'
@@ -61,7 +62,7 @@ new Vue({
   template: '<div>{{msg}}</div>'
 })
 
-// 不需要使用编译版本
+// 不需要使用带编译的版本
 new Vue({
   data: {
     msg: 'hello,world'
@@ -100,7 +101,7 @@ new Vue({
 ### 架构设计
 我们通过以上目录结构可以很容易的发现，`Vue.js`整体分为三个部分：**核心代码**、**跨平台相关**和**公共工具函数**。
 
-同时其架构是分层的，最底层是一个构造函数(普通的函数)，最上层是一个入口，也就是将一个完整的构造函数导出给用户使用。在中间层，我们需要逐渐添加一些方法和属性，主要原型`prototype`相关和全局API相关。
+同时其架构是分层的，最底层是一个构造函数(普通的函数)，最上层是一个入口，也就是将一个完整的构造函数导出给用户使用。在中间层，我们需要逐渐添加一些方法和属性，主要是原型`prototype`相关和全局API相关。
 
 ![Vue架构设计](../images/vueAnalysis/composition.png)
 
@@ -599,6 +600,134 @@ export default Vue
 
 
 ### initMixin流程
+在上一节我们讲到了`initGlobalAPI`的整体流程，这一节，我们来介绍`initMixin`的整体流程。首选，我们把目光回到`src/core/index.js`文件中：
+```js
+import Vue from './instance/index'
+import { initGlobalAPI } from './global-api/index'
+initGlobalAPI(Vue)
+
+export default Vue
+```
+我们发现，它从别的模块中引入了大`Vue`，那么接下来我们的首要任务就是揭开`Vue`构造函数的神秘面纱。
+
+在看`src/core/instance/index.js`代码之前，我们发现`instance`目录结构如下：
+```sh
+|-- instance
+|   |-- render-helpers      # render渲染相关的工具函数目录
+|   |-- events.js           # 事件处理相关
+|   |-- init.js             # _init等方法相关
+|   |-- inject.js           # inject和provide相关
+|   |-- lifecycle.js        # 生命周期相关
+|   |-- proxy.js            # 代理相关
+|   |-- render.js           # 渲染相关
+|   |-- state.js            # 数据状态相关
+|   |-- index.js            # 入口文件
+```
+
+可以看到，目录结构文件有很多，而且包含的面也非常杂，但我们现在只需要对我们最关心的几个部分做介绍：
+* `events.js`：处理事件相关，例如：`$on`，`$off`，`$emit`以及`$once`等方法的实现。
+* `init.js`：此部分代码逻辑包含了`Vue`从创建实例到实例挂载阶段的所有主要逻辑。
+* `lifecycle.js`：生命周期相关，例如：`$destroy`、`$activated`和`$deactivated`。
+* `state.js`：数据状态相关，例如：`data`、`props`以及`computed`等。
+* `render.js`：渲染相关，其中最值得关注的是`Vue.prototype._render`渲染函数的定义。
+
+在介绍了`instance`目录结构的及其各自的作用以后，我们再来看入口文件，其实入口文件这里才是`Vue`构造函数庐山真面目：
+```js
+import { initMixin } from './init'
+import { stateMixin } from './state'
+import { renderMixin } from './render'
+import { eventsMixin } from './events'
+import { lifecycleMixin } from './lifecycle'
+import { warn } from '../util/index'
+
+function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)
+  ) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
+  this._init(options)
+}
+
+initMixin(Vue)
+stateMixin(Vue)
+eventsMixin(Vue)
+lifecycleMixin(Vue)
+renderMixin(Vue)
+
+export default Vue
+```
+
+代码分析：
+* `Vue`构造函数其实就是一个普通的函数，我们只能通过`new`操作符进行访问，既`new Vue()`的形式，`Vue`函数内部也使用了`instanceof`操作符来判断实例的父类是否为`Vue`构造函数，不是的话则在开发环境下输出一个警告信息。
+* 除了声明`Vue`构造函数，这部分的代码也调用了几种`mixin`方法，其中每种`mixin`方法各司其职，处理不同的内容。
+
+从以上代码中，我们能得到`src/core/instance/index.js`文件非常直观的代码逻辑流程图：
+
+![instance流程](../images/vueAnalysis/instance.png)
+
+接下来我们的首要任务是弄清楚`_init()`函数的代码逻辑以及`initMixin`的整体流程。我们从上面的代码发现，在构造函数内部会调用`this._init()`方法，也就是说：
+```js
+// 实例化时，会调用this._init()方法。
+new Vue({
+  data: {
+    msg: 'Hello, Vue.js'
+  }
+})
+```
+
+然后，我们在`init.js`中来看`initMixin()`方法是如何被定义的：
+```js
+export function initMixin (Vue) {
+  Vue.prototype._init = function (options) {
+    // 省略代码
+  }
+}
+```
+我们可以发现，`initMixin()`方法的主要作用就是在`Vue.prototype`上定义一个`_init()`实例方法，接下来我们来看一下`_init()`函数的具体实现逻辑：
+```js
+Vue.prototype._init = function (options) {
+    const vm = this
+    // 1. 合并配置
+    if (options && options._isComponent) {
+      initInternalComponent(vm, options)
+    } else {
+      vm.$options = mergeOptions(
+        resolveConstructorOptions(vm.constructor),
+        options || {},
+        vm
+      )
+    }
+
+    // 2.render代理
+    if (process.env.NODE_ENV !== 'production') {
+      initProxy(vm)
+    } else {
+      vm._renderProxy = vm
+    }
+
+    // 3.初始化生命周期、初始化事件中心、初始化inject，初始化state、初始化provide、调用生命周期
+    vm._self = vm
+    initLifecycle(vm)
+    initEvents(vm)
+    initRender(vm)
+    callHook(vm, 'beforeCreate')
+    initInjections(vm)
+    initState(vm)
+    initProvide(vm)
+    callHook(vm, 'created')
+
+    // 4.挂载
+    if (vm.$options.el) {
+      vm.$mount(vm.$options.el)
+    }
+  }
+```
+因为我们是要分析`initMixin`整体流程，对于其中某些方法的具体实现逻辑会在后续进行详细的说明，因此我们可以从以上代码得到`initMixin`的整体流程图。
+<div style="text-align: center">
+  <img src="../images/vueAnalysis/initMixin.png" alt="initMixin流程" />
+</div>
+
 
 ### stateMixin流程
 
