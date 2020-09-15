@@ -15,10 +15,6 @@
 [JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html) (撰写中)<br/>
 [JavaScript 高级程序设计](https://wangtunan.github.io/blog/books/javascript/red-book.html) (撰写中)
 
-### Git
-
-[精通 Git](https://wangtunan.github.io/blog/books/git/) (撰写中)
-
 ## 设计模式&数据结构和算法
 
 [JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/)(完结) <br/>
@@ -43,6 +39,7 @@
 [TypeScript 基础知识](https://wangtunan.github.io/blog/typescript/) (完结) <br/>
 
 ## VuePress
+
 
 [VuePress 基础知识](https://wangtunan.github.io/blog/vuepress/) (完结) <br/>
 
