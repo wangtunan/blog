@@ -726,7 +726,7 @@ Vue.prototype._init = function (options) {
 ```
 因为我们是要分析`initMixin`整体流程，对于其中某些方法的具体实现逻辑会在后续进行详细的说明，因此我们可以从以上代码得到`initMixin`的整体流程图。
 <div style="text-align: center">
-  <img src="../images/vueAnalysis/initMixin.png" alt="stateMixi流程" />
+  <img src="../images/vueAnalysis/initMixin.png" />
 </div>
 
 ### stateMixin流程
@@ -794,7 +794,7 @@ Vue.prototype.$watch = function (
 ```
 在以上代码分析完毕后，我们可以得到`stateMixin`如下流程图：
 <div style="text-align: center">
-  <img src="../images/vueAnalysis/stateMixin.png" alt="stateMixi流程" />
+  <img src="../images/vueAnalysis/stateMixin.png" />
 </div>
 
 ### eventsMixin流程
@@ -1022,13 +1022,66 @@ Vue.prototype.$once = function (event: string, fn: Function): Component {
 
 在实现完以上几种方法后，我们可以得到`eventsMixin`如下流程图：
 <div style="text-align: center">
-  <img src="../images/vueAnalysis/eventsMixin.png" alt="stateMixi流程" />
+  <img src="../images/vueAnalysis/eventsMixin.png" />
 </div>
 
 ### lifecycleMixin流程
+和以上其它几种方法一样，`lifecycleMixin`主要是定义实例方法和生命周期，例如：`$forceUpdate()`、`$destroy`，另外它还定义一个`_update`的私有方法，其中`$forceUpdate()`方法会调用它，因此`lifecycleMixin`精简代码如下：
+```js
+export function lifecycleMixin (Vue) {
+  // 私有方法
+  Vue.prototype._update = function () {}
+
+  // 实例方法
+  Vue.prototype.$forceUpdate = function () {
+    if (this._watcher) {
+      this._watcher.update()
+    }
+  }
+  Vue.prototype.$destroy = function () {}
+}
+```
+代码分析：
+* `_update()`会在组件渲染的时候调用，其具体的实现我们会在组件章节详细介绍
+* `$forceUpdate()`为一个强制`Vue`实例重新渲染的方法，它的内部调用了`_update`，也就是强制组件重选编译挂载。
+* `$destroy()`为组件销毁方法，在其具体的实现中，会处理父子组件的关系，事件监听，触发生命周期等操作。
+
+`lifecycleMixin()`方法的代码不是很多，我们也能很容易的得到如下流程图：
+<div style="text-align: center">
+  <img src="../images/vueAnalysis/lifecycleMixin.png" />
+</div>
+
 
 ### renderMixin流程
+相比于以上几种方法，`renderMixin`是最简单的，它主要在`Vue.prototype`上定义各种私有方法和一个非常重要的实例方法：`$nextTick`，其精简代码如下：
+```js
+export function renderMixin (Vue) {
+  // 挂载各种私有方法，例如this._c，this._v等
+  installRenderHelpers(Vue.prototype)
+  Vue.prototype._render = function () {}
 
+  // 实例方法
+  Vue.prototype.$nextTick = function (fn) {
+    return nextTick(fn, this)
+  }
+}
+```
+代码分析：
+* `installRenderHelpers`：它会在`Vue.prototype`上挂载各种私有方法，例如`this._n = toNumber`、`this._s = toString`、`this._v = createTextVNode`和`this._e = createEmptyVNode`。
+* `_render()`：`_render()`方法会把模板编译成`VNode`，我们会在其后的编译章节详细介绍。
+* `nextTick`：就像我们之前介绍过的，`nextTick`会在`Vue`构造函数上挂载一个全局的`nextTick()`方法，而此处为实例方法，本质上引用的是同一个`nextTick`。
+
+在以上代码分析完毕后，我们可以得到`renderMixin`如下流程图：
+<div style="text-align: center">
+  <img src="../images/vueAnalysis/renderMixin.png" />
+</div>
+
+
+### 整体流程图
+在分析完从入口到构造函数的各个部分的流程后，我们可以得到一份大的流程图：
+<div style="text-align: center">
+  <img src="../images/vueAnalysis/process.png" />
+</div>
 
 
 ## 深入响应式原理
