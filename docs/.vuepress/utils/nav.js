@@ -39,44 +39,120 @@ const webpackSidebar = {
 // Vue源码分析目录结构
 const vueAnalysisSidebar = [
   {
-    title: '源码目录设计',
+    title: '介绍',
     collapsable: false,
-    children: [ '/vueAnalysis/']
+    children: ['introduction/']
+  },
+  {
+    title: '源码目录设计和架构设计',
+    collapsable: false,
+    children: ['design/']
   },
   {
     title: 'Rollup构建版本',
     collapsable: false,
-    children: ['/vueAnalysis/rollup/']
+    children: [
+      'rollup/',
+      'rollup/vue'
+    ]
   },
   {
-    title: '从入口到实例挂载',
+    title: '从入口到构造函数整体流程',
     collapsable: false,
-    children: ['/vueAnalysis/entry/']
+    children: [
+      'entry/',
+      'entry/global',
+      'entry/init',
+      'entry/state',
+      'entry/events',
+      'entry/lifecycle',
+      'entry/render'
+    ]
   },
   {
     title: '响应式原理',
     collapsable: false,
-    children: ['/vueAnalysis/reactive/']
+    children: [
+      'reactive/',
+      'reactive/prepare',
+      'reactive/props',
+      'reactive/methods',
+      'reactive/data',
+      'reactive/computed',
+      'reactive/watch',
+      'reactive/object-array',
+      'reactive/dep',
+      'reactive/notify',
+      'reactive/merge',
+      'reactive/nexttick',
+      'reactive/problem',
+      'reactive/api'
+    ]
+  },
+  {
+    title: '虚拟DOM和VNode',
+    collapsable: false,
+    children: [
+      'dom/',
+      'dom/vnode'
+    ]
   },
   {
     title: '组件化',
     collapsable: false,
-    children: ['/vueAnalysis/component/']
+    children: [
+      'component/',
+      'component/create',
+      'component/patch',
+      'component/merge',
+      'component/lifecycle',
+      'component/register',
+      'component/async'
+    ]
   },
   {
-    title: '编译',
+    title: '编译原理',
     collapsable: false,
-    children: ['/vueAnalysis/parse/']
+    children: [
+      'compile/',
+      'compile/parse',
+      'compile/optimize',
+      'compile/codegen'
+    ]
+  },
+  {
+    title: '扩展',
+    collapsable: false,
+    children: [
+      'expand/',
+      'expand/directive',
+      'expand/filter',
+      'expand/vmodel',
+      'expand/event',
+      'expand/slot',
+      'expand/components',
+      'expand/extend-mixin'
+    ]
   },
   {
     title: 'Vue-Router',
     collapsable: false,
-    children: ['/vueAnalysis/router/']
+    children: [
+      'router/',
+      'router/register',
+      'router/matcher',
+      'router/change',
+      'router/components',
+      'router/hooks'
+    ]
   },
   {
     title: 'Vuex',
     collapsable: false,
-    children: ['/vueAnalysis/vuex/']
+    children: [
+      'vuex/',
+      'vuex/init'
+    ]
   }
 ]
 
