@@ -60,7 +60,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
   })
 }
 ```
-其中`ASSET_TYPES`是一个定义在`src/shared/constants.js`中的一个数组，然后在`initAssetRegisters()`方法中遍历这个数组，依次在`Vue`构造函数上挂载`Vue.component()`、`Vue.directive()`和`Vue.directive()`方法，另外三种`init`开头的方法调用挂载对应的全局`API`是一样的道理：
+其中`ASSET_TYPES`是一个定义在`src/shared/constants.js`中的一个数组，然后在`initAssetRegisters()`方法中遍历这个数组，依次在`Vue`构造函数上挂载`Vue.component()`、`Vue.directive()`和`Vue.filter()`方法，另外三种`init`开头的方法调用挂载对应的全局`API`是一样的道理：
 ```js
 // initUse
 export function initUse(Vue) {

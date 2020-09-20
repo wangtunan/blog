@@ -195,7 +195,7 @@ Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): C
 ```
 
 ## $once的实现
-关于`$once`方法的实现比较简单，可以单纯的理解为在回调之后立马调用`$off`，因此我们来实现一个简单的`$once`方法：
+关于`$once`方法的实现比较简单，可以简单的理解为在回调之后立马调用`$off`，因此我们来实现一个简单的`$once`方法：
 ```js
 Vue.prototype.$once = function (event, fn) {
   function onFn () {
