@@ -68,7 +68,7 @@ module.exports = {
         text: 'Vue',
         items: [
           { text: 'Vue基础知识', link: '/vue/' },
-          { text: 'Vue源码分析', link: '/vueAnalysis/' }
+          { text: 'Vue源码分析', link: '/vueAnalysis/introduction/' }
         ]
       },
       {

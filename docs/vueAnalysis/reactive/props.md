@@ -234,6 +234,231 @@ proxy(vm, `_props`, key)
 console.log(this.name)
 ```
 
+### props校验求值
+最后我们来看稍微复杂一点的`props`校验求值，这部分的功能发生在`validateProp`，它的代码如下：
+```js
+export function validateProp (
+  key: string,
+  propOptions: Object,
+  propsData: Object,
+  vm?: Component
+): any {
+  const prop = propOptions[key]
+  const absent = !hasOwn(propsData, key)
+  let value = propsData[key]
+  // boolean casting
+  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  if (booleanIndex > -1) {
+    if (absent && !hasOwn(prop, 'default')) {
+      value = false
+    } else if (value === '' || value === hyphenate(key)) {
+      // only cast empty string / same name to boolean if
+      // boolean has higher priority
+      const stringIndex = getTypeIndex(String, prop.type)
+      if (stringIndex < 0 || booleanIndex < stringIndex) {
+        value = true
+      }
+    }
+  }
+  // check default value
+  if (value === undefined) {
+    value = getPropDefaultValue(vm, prop, key)
+    // since the default value is a fresh copy,
+    // make sure to observe it.
+    const prevShouldObserve = shouldObserve
+    toggleObserving(true)
+    observe(value)
+    toggleObserving(prevShouldObserve)
+  }
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    // skip validation for weex recycle-list child component props
+    !(__WEEX__ && isObject(value) && ('@binding' in value))
+  ) {
+    assertProp(prop, key, value, vm, absent)
+  }
+  return value
+}
+```
+**代码分析**：我们可以从以上代码中发现，`validateProp`虽然说的是带有校验的功能，但它并不会抛出错误进而阻止`validateProp()`方法返回`value`，而是根据校验的过程中的不同情况尽可能的提示出很清晰的提示。实质上`validateProp()`方法最主要的还是返回`value`，同时也根据不同的`props`写法处理不同的情况。我们可以将`validateProp()`方法进行总结，它主要做如下几件事情：
+* 处理`Boolean`类型的`props`。
+* 处理`default`默认数据。
+* 断言`props`。
+
+那么我们接下来将分别对这几件事情进行详细的描述。
+
+#### 处理Boolean类型
+我们先来看几个`props`传递`Boolean`的例子：
+```js
+// Component A
+export default {
+  props: {
+    fixed: Boolean
+  }
+}
+
+// Component B
+export default {
+  props: {
+    fixed: [Boolean, String]
+  }
+}
+
+// Component C
+export default {
+  props: {
+    fixed: []
+  }
+}
+```
+然后回到源码中处理`Boolean`类型`getTypeIndex`的地方，这个函数的代码如下：
+```js
+function getTypeIndex (type, expectedTypes): number {
+  if (!Array.isArray(expectedTypes)) {
+    return isSameType(expectedTypes, type) ? 0 : -1
+  }
+  for (let i = 0, len = expectedTypes.length; i < len; i++) {
+    if (isSameType(expectedTypes[i], type)) {
+      return i
+    }
+  }
+  return -1
+}
+```
+这个函数的实现逻辑比较清晰：
+1. 以`Component A`组件为例，它的`props`不是一个数组但却是`Boolean`类型，因此返回索引`0`。
+2. 以`Component B`组件为例，因为它的`props`都是一个数组，所以要遍历这个数组，然后返回`Boolean`类型在数组中的索引`i`。
+3. 以`Component C`组件为例，虽然它是一个数组，但数组中没有任何元素，因此返回索引`-1`。
+
+在拿到`booleanIndex`后，我们需要走下面这段代码逻辑：
+```js
+const booleanIndex = getTypeIndex(Boolean, prop.type)
+if (booleanIndex > -1) {
+  if (absent && !hasOwn(prop, 'default')) {
+    value = false
+  } else if (value === '' || value === hyphenate(key)) {
+    // only cast empty string / same name to boolean if
+    // boolean has higher priority
+    const stringIndex = getTypeIndex(String, prop.type)
+    if (stringIndex < 0 || booleanIndex < stringIndex) {
+      value = true
+    }
+  }
+}
+```
+代码分析：
+* 在`if`条件判断中`absent`代表虽然我们在子组件中定义了`props`，但是父组件并没有传递任何值，然后`&`条件又判断了子组件`props`有没有提供`default`默认值选项，如果没有，那么它的值只能为`false`。
+```js
+// 父组件未传递fixed
+export default {
+  name: 'ParentComponent'
+  template: `<child-component />`
+}
+
+// 子组件fixed值取false
+export default {
+  name: 'ChildComponent',
+  props: {
+    fixed: Boolean
+  }
+}
+```
+
+* 在`else if`条件判断中，我们判断了两种特殊的`props`传递方式：
+```js
+// Parent Component A
+export default {
+  name: 'ParentComponentA',
+  template: `<child-component fixed />`
+}
+
+// Parent Component B
+export default {
+  name: 'ParentComponentB',
+  template: `<child-component fixed="fixed" />`
+}
+```
+对于第一个种情况`stringIndex`为`-1`，`booleanIndex`为`0`，因此`value`的值为`true`。对于第二种情况，则需要根据`props`的定义具体区分：
+```js
+// Child Component A
+export default {
+  name: 'ChildComponentA'
+  props: {
+    fixed: [Boolean, String]
+  }
+}
+
+// Child Component B
+export default {
+  name: 'ChildComponentB',
+  props: [String, Boolean]
+}
+```
+1. 对于`ChildComponentA`来说，由于`stringIndex`值为`1`，`booleanIndex`值为`0`，`booleanIndex < stringIndex`因此我们可以认为`Boolean`具有更高的优先级，此时`value`的值为`true`。
+2. 对于`ChildComponentB`来说，由于`stringIndex`值为`0`，`booleanIndex`值为`1`，`stringIndex < booleanIndex`因此我们可以认为`String`具有更高的优先级，此时`value`的值不处理。
+
+#### 处理default默认数据
+处理完`Boolean`类型后，我们来处理默认值，既我们提到过的虽然子组件定义了`props`，但父组件没有传递的情况。
+```js
+// 父组件未传递fixed
+export default {
+  name: 'ParentComponent'
+  template: `<child-component />`
+}
+
+// 子组件提供了default选项
+export default {
+  name: 'ChildComponent',
+  props: {
+    fixed: {
+      type: Boolean,
+      default: false
+    }
+  }
+}
+```
+对于以上案例会走如下代码的逻辑：
+```js
+if (value === undefined) {
+  value = getPropDefaultValue(vm, prop, key)
+}
+
+function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): any {
+  // no default, return undefined
+  if (!hasOwn(prop, 'default')) {
+    return undefined
+  }
+  const def = prop.default
+  // warn against non-factory defaults for Object & Array
+  if (process.env.NODE_ENV !== 'production' && isObject(def)) {
+    warn(
+      'Invalid default value for prop "' + key + '": ' +
+      'Props with type Object/Array must use a factory function ' +
+      'to return the default value.',
+      vm
+    )
+  }
+  // the raw prop value was also undefined from previous render,
+  // return previous default value to avoid unnecessary watcher trigger
+  if (vm && vm.$options.propsData &&
+    vm.$options.propsData[key] === undefined &&
+    vm._props[key] !== undefined
+  ) {
+    return vm._props[key]
+  }
+  // call factory function for non-Function types
+  // a value is Function if its prototype is function even across different execution context
+  return typeof def === 'function' && getType(prop.type) !== 'Function'
+    ? def.call(vm)
+    : def
+}
+```
+代码分析：
+1. 首先判断了子组件有没有提供`default`
+
+#### 断言props
+
+
 ## props更新
 
 ## toggleObserving作用
