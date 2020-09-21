@@ -283,7 +283,7 @@ export function validateProp (
 **代码分析**：我们可以从以上代码中发现，`validateProp`虽然说的是带有校验的功能，但它并不会抛出错误进而阻止`validateProp()`方法返回`value`，而是根据校验的过程中的不同情况尽可能的提示出很清晰的提示。实质上`validateProp()`方法最主要的还是返回`value`，同时也根据不同的`props`写法处理不同的情况。我们可以将`validateProp()`方法进行总结，它主要做如下几件事情：
 * 处理`Boolean`类型的`props`。
 * 处理`default`默认数据。
-* 断言`props`。
+* `props`断言。
 
 那么我们接下来将分别对这几件事情进行详细的描述。
 
@@ -454,11 +454,162 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 }
 ```
 代码分析：
-1. 首先判断了子组件有没有提供`default`
+1. 首先判断了子组件有没有提供`default`默认值选项，没有则直接返回`undefined`。
+2. 随后判断了`default`如果是引用类型，则提示必须把`default`写成一个函数，既：
+```js
+default: {}
+default: []
 
-#### 断言props
+// 必须写成
+default () {
+  return {}
+}
+default () {
+  return []
+}
+```
+3. 最后再根据`default`的类型来取值，如果是函数类型则调用这个函数，如果不是函数类型则直接使用。
+4. 其中下面一段代码在这里我们并不会说明和分析它的具体作用，而是会在`props`更新章节来介绍。
+```js
+if (vm && vm.$options.propsData &&
+  vm.$options.propsData[key] === undefined &&
+  vm._props[key] !== undefined
+) {
+  return vm._props[key]
+}
+```
+
+#### props断言
+最后我们来分析一下`props`断言。
+```js
+function assertProp (
+  prop: PropOptions,
+  name: string,
+  value: any,
+  vm: ?Component,
+  absent: boolean
+) {
+  if (prop.required && absent) {
+    warn(
+      'Missing required prop: "' + name + '"',
+      vm
+    )
+    return
+  }
+  if (value == null && !prop.required) {
+    return
+  }
+  let type = prop.type
+  let valid = !type || type === true
+  const expectedTypes = []
+  if (type) {
+    if (!Array.isArray(type)) {
+      type = [type]
+    }
+    for (let i = 0; i < type.length && !valid; i++) {
+      const assertedType = assertType(value, type[i])
+      expectedTypes.push(assertedType.expectedType || '')
+      valid = assertedType.valid
+    }
+  }
+
+  if (!valid) {
+    warn(
+      getInvalidTypeMessage(name, value, expectedTypes),
+      vm
+    )
+    return
+  }
+  const validator = prop.validator
+  if (validator) {
+    if (!validator(value)) {
+      warn(
+        'Invalid prop: custom validator check failed for prop "' + name + '".',
+        vm
+      )
+    }
+  }
+}
+```
+在`assertProp`中我们有三种情况需要去断言：
+* `required`：如果子组件`props`提供了`required`选项，代表这个`props`必须在父组件中传递值，如果不传递则抛出错误信息`Missing required prop: fixed`。
+* 对于定义了多个`type`的类型数组，则我们会遍历这个类型数组，只要当前`props`的类型和类型数组中某一个元素匹配则终止遍历。，否则抛出错误提示信息。
+```js
+// Parent Component
+export default {
+  name: 'ParentComponent',
+  template: `<child-component :age="true" />`
+}
+// Chil Component
+export default {
+  name: 'ChilComponent',
+  props: {
+    age: [Number, String]
+  }
+}
+
+// 报错：Invalid prop: type check failed for prop age，Expected Number, String，got with value true
+```
+* 用户自己提供的`validator`校验器我们也需要进行断言：
+```js
+// Parent Component
+export default {
+  name: 'ParentComponent',
+  template: `<child-component :age="101" />`
+}
+// Chil Component
+export default {
+  name: 'ChilComponent',
+  props: {
+    age: {
+      type: Number,
+      validator (value) {
+        return value >=0 && value <=100
+      }
+    }
+  }
+}
+
+// 报错：Invalid prop: custom validator check failed for prop age
+```
 
 
 ## props更新
+我们都知道子组件的`props`值来源于父组件，当父组件值更新时，子组件的值也会发生改变，同时触发子组件的重新渲染。我们先跳过父组件的具体编译逻辑，直接看父组件的值更新，改变子组件`props`值的步骤：
+```js
+export function updateChildComponent (
+  vm: Component,
+  propsData: ?Object,
+  listeners: ?Object,
+  parentVnode: MountedComponentVNode,
+  renderChildren: ?Array<VNode>
+) {
+  // 省略代码
+  // update props
+  if (propsData && vm.$options.props) {
+    toggleObserving(false)
+    const props = vm._props
+    const propKeys = vm.$options._propKeys || []
+    for (let i = 0; i < propKeys.length; i++) {
+      const key = propKeys[i]
+      const propOptions: any = vm.$options.props // wtf flow?
+      props[key] = validateProp(key, propOptions, propsData, vm)
+    }
+    toggleObserving(true)
+    // keep a copy of raw propsData
+    vm.$options.propsData = propsData
+  }
+}
+```
+代码分析：
+1. 以上`vm`实例为子组件，`propsData`为父组件中传递的`props`的值，而`_propKeys`是之前`props`初始化过程中缓存起来的所有的`props`的key。
+2. 在父组件值更新后，会通过遍历`propsKey`来重新对子组件`props`进行**校验求值**，最后赋值。
+
+以上代码就是子组件`props`更新的过程，在`props`更新后会进行子组件的重新渲染，这个重新渲染的过程分两种情况：
+* 普通`props`值被修改：当`props`值被修改后，其中有段代码`props[key] = validateProp(key, propOptions, propsData, vm)`根据响应式原理，会触发属性的`setter`，进而子组件可以重新渲染。
+* 对象`props`内部属性变化：当这种情况发生时，并没有触发子组件`prop`的更新，但是在子组件渲染的时候读取到了`props`，因此会收集到这个`props`的`render watcher`，当对象`props`内部属性变化的时候，根据响应式原理依然会触发`setter`，进而子组件可以重新进行渲染。
 
 ## toggleObserving作用
+
+## 整体流程图
+在分析完以上所有与`props`相关的逻辑后，我们可以总结如下流程图。
