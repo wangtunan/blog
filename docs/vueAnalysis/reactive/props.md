@@ -148,6 +148,7 @@ export default {
   props: 'name, age'
 }
 ```
+
 ## props初始化
 在了解了`props`规范化后，我们紧接着来了解一下`props`初始化的过程。`props`初始化过程同样是发生在`this._init()`方法中，它在`initState`的时候被处理：
 ```js
@@ -610,6 +611,111 @@ export function updateChildComponent (
 * 对象`props`内部属性变化：当这种情况发生时，并没有触发子组件`prop`的更新，但是在子组件渲染的时候读取到了`props`，因此会收集到这个`props`的`render watcher`，当对象`props`内部属性变化的时候，根据响应式原理依然会触发`setter`，进而子组件可以重新进行渲染。
 
 ## toggleObserving作用
+`toggleObserving`是定义在`src/core/observer/index.js`文件中的一个函数，其代码很简单：
+```js
+export let shouldObserve: boolean = true
+export function toggleObserving (value: boolean) {
+  shouldObserve = value
+}
+```
+它的作用就是修改当前模块的`shouldObserve`变量，用来控制在`observe`的过程中是否需要把当前值变成一个`observer`对象。
+```js
+export function observe (value: any, asRootData: ?boolean): Observer | void {
+  if (!isObject(value) || value instanceof VNode) {
+    return
+  }
+  let ob: Observer | void
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    ob = value.__ob__
+  } else if (
+    shouldObserve &&
+    !isServerRendering() &&
+    (Array.isArray(value) || isPlainObject(value)) &&
+    Object.isExtensible(value) &&
+    !value._isVue
+  ) {
+    ob = new Observer(value)
+  }
+  if (asRootData && ob) {
+    ob.vmCount++
+  }
+  return ob
+}
+```
+接下来我们来分析，在处理`props`的过程中，什么时候`toggleObserving(true)`，什么时候`toggleObserving(false)`以及为什么需要这样处理？
+
+```js
+function initProps (vm: Component, propsOptions: Object) {
+  if (!isRoot) {
+    toggleObserving(false)
+  }
+  // 省略defineReactive的过程
+  toggleObserving(true)
+}
+```
+`props`初始化的时候：<br/>
+我们可以看到在最开始判断了当为非根实例(子组件)的时候，进行了`toggleObserving(false)`的操作，这样做的目的是因为：当非根实例的时候，组件的`props`来自于父组件。当`props`为对象或者数组时，根据响应式原理，我们会递归遍历子属性然后进行`observe(val)`，而正是因为`props`来源于父组件，这个过程其实已经在父组件执行过了，如果不做任何限制，那么会在子组件中又重复一次这样的过程，因此这里需要`toggleObserving(false)`，用来避免递归`props`子属性的情况，这属于响应式优化的一种手段。在代码最后，又调用了`toggleObserving(true)`，把`shouldObserve`的值还原。
+
+`props`校验的时候：<br/>
+我们先来看`props`提供了`default`默认值，且默认值返回了对象或者数组。
+```js
+export default {
+  props: {
+    point: {
+      type: Object,
+      default () {
+        return {
+          x: 0,
+          y: 0
+        }
+      }
+    },
+    list: {
+      type: Array,
+      default () {
+        return []
+      }
+    }
+  }
+}
+```
+对于以上`point`和`list`取默认值的情况，这个时候的`props`值与父组件没有关系，那么这个时候我们需要`toggleObserving(true)`，在`observe`后再把`shouldObserve`变量设置为原来的值。
+```js
+export function validateProp () {
+  // 省略代码
+  if (value === undefined) {
+    value = getPropDefaultValue(vm, prop, key)
+    const prevShouldObserve = shouldObserve 
+    toggleObserving(true)
+    observe(value)
+    toggleObserving(prevShouldObserve)
+  }
+}
+```
+
+在`props`更新的时候：<br/>
+当父组件更新的时候，会调用`updateChildComponent()`方法，用来更新子组件的`props`值，这个时候其实和`props`初始化的逻辑一样，我们同样不需要对指向父组件的对象或数组`props`进行递归子属性`observe`的过程，因此这里需要执行`toggleObserving(false)`。
+```js
+export function updateChildComponent () {
+  // update props
+  if (propsData && vm.$options.props) {
+    toggleObserving(false)
+    const props = vm._props
+    const propKeys = vm.$options._propKeys || []
+    for (let i = 0; i < propKeys.length; i++) {
+      const key = propKeys[i]
+      const propOptions: any = vm.$options.props // wtf flow?
+      props[key] = validateProp(key, propOptions, propsData, vm)
+    }
+    toggleObserving(true)
+    vm.$options.propsData = propsData
+  }
+}
+```
+
 
 ## 整体流程图
 在分析完以上所有与`props`相关的逻辑后，我们可以总结如下流程图。
+<div style="text-align:center">
+  <img src="../../images/vueAnalysis/props.png">
+</div>

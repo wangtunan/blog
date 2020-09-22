@@ -23,7 +23,7 @@
 ## Vue 基础&Vue2.0 源码分析
 
 [Vue 基础知识](https://wangtunan.github.io/blog/vue/)(完善中) <br>
-[Vue2.0 源码分析](https://wangtunan.github.io/blog/vueAnalysis/)(撰写中) <br/>
+[Vue2.0 源码分析](https://wangtunan.github.io/blog/vueAnalysis/introduction/)(撰写中) <br/>
 
 ## 自动化测试
 
