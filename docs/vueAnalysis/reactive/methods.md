@@ -49,7 +49,8 @@ vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
 在开发环境下，它还做了如下几种判断：
 * 必须为`function`类型。
 ```js
-// 抛出错误：Method sayHello has type null in the component definition. Did you reference the function correctly?
+// 抛出错误：Method sayHello has type null in the component definition. 
+//          Did you reference the function correctly?
 export default {
   methods: {
     sayHello: null
@@ -70,7 +71,8 @@ export default {
 ```
 * 命名不能和已有的实例方法冲突。
 ```js
-// 抛出错误：Method $set conflicts with an existing Vue instance method. Avoid defining component methods that start with _ or $.
+// 抛出错误：Method $set conflicts with an existing Vue instance method. 
+//          Avoid defining component methods that start with _ or $.
 export default {
   methods: {
     $set () {
@@ -79,3 +81,8 @@ export default {
   }
 }
 ```
+
+在分析完以上`initMethods`流程后，我们能得到如下流程图：
+<div style="text-align:center">
+  <img src="../../images/vueAnalysis/methods.png">
+</div>

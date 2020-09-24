@@ -2124,4 +2124,4 @@ CDN的原理是尽可能的在各地部署机房缓存数据，这样即使主�
 推荐阅读[常见数据结构和算法](/books/javascript/algorithm.md)
 
 ## Vue相关面试题
-强烈建议阅读[Vue模块](/vue/)
+强烈建议阅读[Vue源码分析](/vueAnalysis/introduction/)

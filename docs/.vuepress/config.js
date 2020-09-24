@@ -65,16 +65,12 @@ module.exports = {
         ]
       },
       {
-        text: 'Vue',
-        items: [
-          { text: 'Vue基础知识', link: '/vue/' },
-          { text: 'Vue源码分析', link: '/vueAnalysis/introduction/' }
-        ]
+        text: 'Vue源码分析',
+        link: '/vueAnalysis/introduction/'
       },
       {
         text: '自动化测试',
         items: [
-          { text: 'Jest测试框架', link: '/test/jest.md' },
           { text: 'Vue应用测试', link: '/test/vueTest' }
         ]
       },
