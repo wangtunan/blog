@@ -124,3 +124,26 @@ export default {
   }
 }
 ```
+
+* **proxy代理**：我们在之前已经介绍过`proxy`代理的作用，也讲过`proxy`代理`_props`的例子，这里代理`_data`跟代理`_props`是同样的道理。
+```js
+export default {
+  data () {
+    return {
+      msg: 'Hello, Msg'
+    }
+  }
+}
+// 代理前
+console.log(this._data.msg)
+proxy(vm, '_data', 'msg')
+// 代理后
+console.log(this.msg)
+```
+
+* **observe(data)**：`observe`的作用是把传入值所有的属性(包括嵌套属性)递归的进行响应式`defineReactive`，我们会在之后的章节中详细介绍`observe`的实现原理，在`initData`中我们只要知道`observe(data)`会把`data`函数返回对象的所有属性全部变成响应式的即可。
+
+在分析完`initData`的实现后，我们可以得到`initData`的整体流程图。
+<div style="text-align: center">
+  <img src="../../images/vueAnalysis/data.png" />
+</div>
