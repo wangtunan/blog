@@ -80,7 +80,7 @@ const vueAnalysisSidebar = [
       'reactive/data',
       'reactive/computed',
       'reactive/watch',
-      'reactive/object-array',
+      'reactive/reactive',
       'reactive/dep',
       'reactive/notify',
       'reactive/merge',

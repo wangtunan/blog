@@ -6,7 +6,7 @@
 * `key`：要定义或修改属性的名称。
 * `descriptor`：要定义或修改属性的描述符。
 
-其中`descriptor`有很多可选的键值， 然而对`Vue`响应式来说最重要的是`get`和`set`方法，它们分别会在获取属性值触发`getter`函数和设置属性值的时候触发`setter`。在介绍原理之前，我们来使用`Object.defineProperty()`来实现一个简单的响应式例子：
+其中`descriptor`有很多可选的键值， 然而对`Vue`响应式来说最重要的是`get`和`set`方法，它们分别会在获取属性值触发`getter`和设置属性值的时候触发`setter`。在介绍原理之前，我们来使用`Object.defineProperty()`来实现一个简单的响应式例子：
 ```js
 function defineReactive (obj, key, val) {
   Object.defineProperty(obj, key, {
@@ -48,6 +48,12 @@ console.log(this.name)       // AAA
 ```
 接下来我们详细介绍`proxy()`方法是如何实现的，在`instance/state.js`文件中定义了`proxy`方法，它的代码也很简单：
 ```js
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
