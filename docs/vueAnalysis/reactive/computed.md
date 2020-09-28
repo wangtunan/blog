@@ -221,6 +221,105 @@ class Watcher {
   }
 }
 ```
-我们可以从注释中看到`evaluate()`是一个特意为`computed`定义的方法，它的实现非常简单，就是触发`computed`的`getter`进行求值，然后把`dirty`设置为`false`。
+`evaluate()`方法它的实现非常简单，就是触发`computed`的`getter`进行求值，然后把`dirty`设置为`false`。
 
 ## computed更新
+在介绍完了`computed`的初始化后，我们在来看`computed`的更新过程，以下面例子为例：
+```js
+export default {
+  template: `
+    <div>{{fullName}}</div>
+    <button @click="change">change</button>
+  `
+  data () {
+    return {
+      total: 0,
+      firstName: 'first',
+      lastName: 'last'
+    }
+  },
+  computed: {
+    fullName () {
+      if (this.total > 0) {
+        return this.firstName + this.lastName
+      } else {
+        return 'pleace click'
+      }
+    }
+  },
+  methods: {
+    change () {
+      this.total++
+    }
+  }
+}
+```
+因为`total`、`firstName`和`lastName`全部为响应式变量，所以`fullName`这个计算属性初始化的时候，此时`total`值为`0`，`fullName`计算属性有两个`Watcher`，其中一个是计算属性`watcher`，另外一个是渲染`watcher`。当点击按钮触发事件后，会触发`total`属性的`setter`方法，进而调用一个叫做`notify`的方法。
+```js
+set： function reactiveSetter (newVal) {
+  // 省略
+  dep.notify()
+}
+```
+其中`notify()`是定义在`Dep`类中的一个方法：
+```js
+export default class Dep {
+   constructor () {
+    this.subs = []
+  }
+  notify () {
+    // stabilize the subscriber list first
+    const subs = this.subs.slice()
+    if (process.env.NODE_ENV !== 'production' && !config.async) {
+      // subs aren't sorted in scheduler if not running async
+      // we need to sort them now to make sure they fire in correct
+      // order
+      subs.sort((a, b) => a.id - b.id)
+    }
+    for (let i = 0, l = subs.length; i < l; i++) {
+      subs[i].update()
+    }
+  }
+}
+```
+代码分析：
+* `subs`就是我们收集起来的`watcher`，它是一个数组，对应上面案例的话它是一个长度为2的数组并且其中一个为`render watcher`。
+* 在`notify()`方法调用时，会遍历`subs`数组，然后依次调用当前`watcher`的`update`方法。其中`update`方法是定义在`Watcher`类中的一个实例方法，代码如下：
+```js
+class Watcher {
+  // 省略其它
+  update () {
+    /* istanbul ignore else */
+    if (this.lazy) {
+      this.dirty = true
+    } else if (this.sync) {
+      this.run()
+    } else {
+      queueWatcher(this)
+    }
+  }
+}
+```
+当第一次遍历时，此时的`watcher`为计算属性`watcher`，我们已经在前面介绍过计算属性`watcher`它的`this.lazy`值为`true`，因此会进行`this.dirty = true`。<br/>
+当第二次遍历时，此时的`watcher`为渲染`watcher`，对于渲染`watcher`而言，它的`lazy`值为`false`，`this.sync`为`false`，因此会调用`queueWatcher()`方法。我们目前不需要知道`queueWatcher`是怎么实现的，只需要知道`queueWatcher()`方法在调用时，会触发`updateComponent()`方法：
+```js
+updateComponent = () => {
+  vm._update(vm._render(), hydrating)
+}
+```
+我们可以看到`updateComponent()`方法调用了`vm._update`方法，而这个方法的作用就是重新进行组件渲染，在组件渲染的过程中，会再次读取`fullName`的值，也就是说会调用下面这段代码：
+```js
+fullName () {
+  if (this.total > 0) {
+    return this.firstName + this.lastName
+  } else {
+    return 'pleace click'
+  }
+}
+```
+因为此时的`total`值为`1`，所以会返回`this.firstName + this.lastName`的值，而`firstName`和`lastName`又是定义在`data`中的响应式变量，会依次触发`firstName`和`lastName`的`getter`，然后进行依赖收集。在组件渲染完毕后，`fullName`的依赖数组`subs`此时会有四个`watcher`，分别是三个计算属性`watcher`和一个渲染`watcher`。无论这三个计算属性`watcher`哪一个值更新了，都会再出重复以上的流程，这就是`computed`更新的过程。
+
+在分析完`computed`的相关流程后，我们可以得到如下流程图
+<div style="text-align: center">
+  <img src="../../images/vueAnalysis/computed.png">
+</div>
