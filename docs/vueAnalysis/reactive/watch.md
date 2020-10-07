@@ -1,7 +1,7 @@
 # watch处理
 在介绍完处理`computed`相关的逻辑后，我们接下来看`watch`是如何处理的。
 
-## watch初始化和更新
+## watch初始化
 ```js
 export function initState (vm: Component) {
   // 省略代码
@@ -142,6 +142,66 @@ Vue.prototype.$watch = function (
 我们可以发现，`$watch`方法主要做两件事情：**创建Watcher实例**和**返回unwatchFn函数**，接下来我们分别对这两部分的逻辑进行详细的解释。
 
 ### 创建Watcher实例
-### 返回unwatchFn函数
+我们先来看一下`Watcher`构造函数的代码：
+```js
+// 精简代码
+class Watcher {
+  constructor (vm, expOrFn, cb, options, isRenderWatcher) {
+    if (isRenderWatcher) {
+      vm._watcher = this
+    }
+    vm._watchers.push(this)
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+      this.before = options.before
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
+  }
+}
+```
+我们从构造函数中可以看到，当实例化一个`watch`的时候，会根据传递的`options`来处理`deep`、`user`、`lazy`、`sync`以及`before`属性。`watcher`根据不同的用法，有几种不同的分类：
+* `render watcher`：渲染`watcher`，例如当在`template`模板中使用`{{}}`语法读取一个变量的时候，此时这个变量收集的依赖就是`render watcher`，当这个变量值更新的时候会触发`render watcher`进行组件的重新渲染。是否为渲染`warcher`，使用构造函数参数`isRenderWatcher`为`true`进行区分。
+* `computed watcher`：计算属性`watcher`，当我们在定义计算属性的时候，计算属性收集的依赖就是另外一个或者多个变量，当其中一个变量的值发生变量，就会触发计算属性重新进行求值。是否为计算属性`watcher`，使用`options.lazy`为`true`进行区分。
+* `user watcher`：用户自定义`watcher`，多发生在`this.$watch`或者组件`watch`选择配置中，此时收集的依赖就是变量自身，当变量的值发生变化的时候，就会调用`watch`提供的回调函数。是否为用户自定义`watcher`，使用`options.user`为`true`进行区分。
 
-## watch参数
+### 返回unwatchFn函数
+我们在构造函数中可以发现，它定义了一个`_watchers`变量，然后在每次实例化的时候，把自身添加到这个数组中，这样做的目的是为了方便清除依赖。在之前的介绍中，我们知道`$watch`返回了一个`unwatchFn`函数，它用来取消监听。接下来，我们看一下`teardown()`方法的具体实现。
+```js
+// Watcher类精简代码
+class Watcher {
+  constructor () {
+    this.active = true
+    this.deps = []
+  }
+  teardown () {
+    if (this.active) {
+      // remove self from vm's watcher list
+      // this is a somewhat expensive operation so we skip it
+      // if the vm is being destroyed.
+      if (!this.vm._isBeingDestroyed) {
+        remove(this.vm._watchers, this)
+      }
+      let i = this.deps.length
+      while (i--) {
+        this.deps[i].removeSub(this)
+      }
+      this.active = false
+    }
+  }
+}
+
+// Dep类精简代码
+class Dep {
+  constructor () {
+    this.subs = []
+  }
+  removeSub (sub: Watcher) {
+    remove(this.subs, sub)
+  }
+}
+```
+`teardown()`方法的实现很简单，就是从`deps`数组中移除当前的`watcher`，其中`deps`存储的是`Dep`实例。
