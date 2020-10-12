@@ -430,3 +430,72 @@ export default {
   }
 }
 ```
+然后我们接下来看一下`protoAugment`和`copyAugment`的实现，首先是最简单的`protoAugment`：
+```js
+// 定义
+const arr = []
+export const arrayMethods = Object.create(arrayProto)
+function protoAugment (target, src: Object) {
+  target.__proto__ = src
+}
+
+// 调用
+protoAugment(arr, arrayMethods)
+
+// 调用后
+arr.__proto__ = {
+  // 省略其它
+  push: function () {},
+  pop: function () {},
+  shift: function () {},
+  unshift: function () {},
+  splice: function () {},
+  sort: function () {},
+  reverse: function () {}
+}
+arr.push()
+arr.pop()
+arr.shift()
+arr.unshift()
+arr.splice()
+arr.sort()
+arr.reverse()
+```
+代码分析：当浏览器支持`__proto__`属性的时候，直接把`__proto__`指向我们创建的`arrayMethods`变量，这个包含我们在上面定义的七种变异方法。
+
+当浏览器不支持`__proto__`属性的时候，我们就调用`copyAugment`方法：
+```js
+// 定义
+const arr = []
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+export const arrayMethods = Object.create(arrayProto)
+function copyAugment (target: Object, src: Object, keys: Array<string>) {
+  for (let i = 0, l = keys.length; i < l; i++) {
+    const key = keys[i]
+    def(target, key, src[key])
+  }
+}
+
+// 调用
+copyAugment(value, arrayMethods, arrayKeys)
+
+// 调用后
+arr = {
+  // 省略其它
+  push: function () {},
+  pop: function () {},
+  shift: function () {},
+  unshift: function () {},
+  splice: function () {},
+  sort: function () {},
+  reverse: function () {}
+}
+arr.push()
+arr.pop()
+arr.shift()
+arr.unshift()
+arr.splice()
+arr.sort()
+arr.reverse()
+```
+代码分析：我们可以从代码中看到，当浏览器不支持`__proto__`的时候，会把我们创建的`arrayMethods`变量上所有的`key`，遍历赋值到`value`数组上。
