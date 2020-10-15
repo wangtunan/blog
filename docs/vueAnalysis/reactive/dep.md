@@ -2,7 +2,7 @@
 在这一节中，我们来介绍依赖收集，在介绍之前我们需要知道什么是依赖收集，以及依赖收集的目的。
 
 问：什么是依赖收集？依赖收集的目的是什么？<br/>
-答：依赖收集就是对订阅数据变化的`Watcher`收集的过程。其目的是当响应式数据发生变化，触发它们的`setter`时，能够知道应该通知哪些订阅者去做相应的逻辑处理。例如，当在`template`模板中使用到了某个响应式变量，在组件初次渲染的时候。对这个响应式变量而言，应该收集`render watcher`，当其数据发生变化触发`setter`时，要通知`render watcher`进行组件重新更新。
+答：依赖收集就是对订阅数据变化的`Watcher`收集的过程。其目的是当响应式数据发生变化，触发它们的`setter`时，能够知道应该通知哪些订阅者去做相应的逻辑处理。例如，当在`template`模板中使用到了某个响应式变量，在组件初次渲染的时候，对这个响应式变量而言，应该收集`render watcher`依赖，当其数据发生变化触发`setter`时，要通知`render watcher`进行组件的重新渲染。
 
 在之前我们提到过，依赖收集发生在`Object.defineProperty()`的`getter`中，我们回顾一下`defineReactive()`代码：
 ```js
@@ -45,7 +45,7 @@ export function defineReactive (
 我们可以从代码中看到，当触发`getter`的时候，首先判断了`Dep.target`是否存在，如果存在则调用`dep.depend()`，`dep.depend()`函数就是依赖真正收集的地方。在阅读完以上代码后，我们可能会有这样几个疑问：
 * `Dep`是什么？
 * `Dep.target`是什么？
-* `dep.depend`是如何进行依赖收集的？
+* `dep.depend`是如何进行依赖收集的？又是如何进行移除的？
 
 ## Dep
 让我们首先来回答第一个问题，介绍一下`Dep`类，`Dep`类是定义在`observer`目录下`dep.js`文件中的一个类，`observer`目录结构如下：
@@ -101,12 +101,12 @@ export default class Dep {
 }
 ```
 代码分析：
-* `Dep`类首先定义了一个静态属性`target`，它就是`Dep.target`，我们会在之后介绍它。然后又定义了两个实例属性，`id`是`Dep`的主键，会在实例化的时候自增，`subs`是一个存储各种`Watcher`的数组。例如`render watcher`、`user watcher`和`computed watcher`。
-* `addSub`和`removeSub`对应的就是往`subs`数组中添加和移除`watcher`。
+* `Dep`类首先定义了一个静态属性`target`，它就是`Dep.target`，我们会在之后介绍它。然后又定义了两个实例属性，`id`是`Dep`的主键，会在实例化的时候自增，`subs`是一个存储各种`Watcher`的数组。例如`render watcher`、`user watcher`和`computed watcher`等。
+* `addSub`和`removeSub`对应的就是往`subs`数组中添加和移除各种`Watcher`。
 * `depend`为依赖收集过程。
 * `notify`当数据发生变化触发`setter`的时候，有一段这样的代码：`dep.notify()`，它的目的就是当这个响应式数据发生变化的时候，通知`subs`里面的各种`watcher`，然后执行其`update()`方法。
 
-在介绍完以上几个属性和方法后，我们就对`Dep`是什么以及它做了哪些事情有了一个具体的认识。
+在介绍完以上几个属性和方法后，我们就对`Dep`是什么以及它做哪些事情有了一个具体的认识。
 
 ## Dep.target和Watcher
 我们接下来回答第二个问题，`Dep.target`是什么？`Dep.target`就是各种`Watcher`的实例，以下面代码举例说明：
@@ -276,6 +276,145 @@ export default class Watcher {
 }
 
 ```
+
+从依赖收集的角度去看`Watcher`类的时候，我们在其构造函数中需要关注以下四个属性:
+```js
+this.deps = []             // 旧依赖列表
+this.newDeps = []          // 新依赖列表
+this.depIds = new Set()    // 旧依赖id集合
+this.newDepIds = new Set() // 新依赖id集合
+```
+我们会在之后的`addDep`和`cleanupDeps`环节详细介绍以上四个属性的作用，在这一小节，我们主要关注`Watcher`的构造函数以及`get()`方法的实现。
+
+在`Watcher`类的构造函数中，当实例化时，`deps`和`newDeps`数组以及`depIds`和`newDepIds`集合分别被初始化为空数组以及空集合，在构造函数的最后，判断了如果不是`computed watcher`(注：只有`computed watcher`其`lazy`属性才为`true`)，则会马上调用`this.get()`函数进行求值。
+
+接下来，我们来分析以下`this.get()`方法的实现，以及`pushTarget`和`popTarget`方法配合使用的场景介绍。
+
+```js
+get () {
+  pushTarget(this)
+  let value
+  const vm = this.vm
+  try {
+    value = this.getter.call(vm, vm)
+  } catch (e) {
+    if (this.user) {
+      handleError(e, vm, `getter for watcher "${this.expression}"`)
+    } else {
+      throw e
+    }
+  } finally {
+    // "touch" every property so they are all tracked as
+    // dependencies for deep watching
+    if (this.deep) {
+      traverse(value)
+    }
+    popTarget()
+    this.cleanupDeps()
+  }
+  return value
+}
+```
+我们可以看到，`get()`方法的代码不是很复杂，在方法的最前面首先调用`pushTarget(this)`，通过`pushTarget()`方法首先把当前`Watcher`实例压栈到`target`栈数组中，然后把`Dep.target`设置为当前的`Watcher`实例。
+```js
+Dep.target = null
+const targetStack = []
+
+export function pushTarget (target: ?Watcher) {
+  targetStack.push(target)
+  Dep.target = target
+}
+```
+然后调用`this.getter`进行求值，拿以下计算属性示例来说：
+```js
+export default {
+  data () {
+    return {
+      age: 23
+    }
+  },
+  computed: {
+    newAge () {
+      return this.age + 1
+    }
+  }
+}
+
+value = this.getter.call(vm, vm)
+// 相当于
+value = newAge()
+```
+对于`computed watcher`而言，它的`getter`属性就是我们撰写的计算属性方法，调用`this.getter`的过程，就是执行我们撰写的计算属性的方法进行求值。
+
+在`this.get()`方法的最后，调用了`popTarget()`，它会把当前`target`栈数组的最后一个移除，然后把`Dep.target`设置为倒数第二个。
+```js
+Dep.target = null
+const targetStack = []
+
+export function popTarget () {
+  targetStack.pop()
+  Dep.target = targetStack[targetStack.length - 1]
+}
+```
+在分析了`pushTarget`和`popTarget`后，我们可能会有一个疑问，就是为什么会存在这样的压栈/出栈的操作，这样做的目的是什么？这样做的目的是因为组件是可以嵌套的，使用栈数组进行压栈/出栈的操作是为了在组件渲染的过程中，保持正确的依赖，以下面代码为例：
+```js
+// child component
+export default {
+  name: 'ChildComponent',
+  template: '<div>{{childMsg}}</div>',
+  data () {
+    return {
+      childMsg: 'child msg'
+    }
+  }
+}
+
+export default {
+  name: 'ParentComponent',
+  template: `<div>
+    {{parentMsg}}
+    <child-component />
+  </div>`,
+  components: {
+    ChildComponent
+  }
+  data () {
+    return {
+      parentMsg: 'parent msg'
+    }
+  }
+}
+```
+我们都知道，组件渲染的时候，当父组件中有子组件时，会先渲染子组件，子组件全部渲染完毕后，父组件才算渲染完毕，因此组件渲染钩子函数的执行顺序为：
+```js
+parent beforeMount()
+child beforeMount()
+child mounted()
+parent mounted()
+```
+根据以上渲染步骤，当`parent beforeMount()`开始执行时，会进行`parent render watcher`实例化，然后调用`this.get()`，此时的`Dep.target`依赖为`parent render watcher`，`target`栈数组为：
+```js
+// 演示使用，实际为Watcher实例
+const targetStack = ['parent render watcher']
+```
+当`child beforeMount`开始执行的时候，会进行`child render watcher`实例化，然后调用`this.get()`，此时的`Dep.target`依赖为`child render watcher`，`target`栈数组为：
+```js
+// 演示使用，实际为Watcher实例
+const targetStack = ['parent render watcher', 'child render watcher']
+```
+当`child mounted()`执行时，代表子组件的`this.getter()`调用完毕，进而会调用`popTarget()`进行出栈操作，此时的栈数组和`Dep.target`会发生变化：
+```js
+// 演示使用，实际为Watcher实例
+const targetStack = ['parent render watcher']
+Dep.target = 'parent render watcher'
+```
+当`parent mounted()`执行时，代表父组件的`this.getter()`调用完毕，进而会调用`popTarget()`进行出栈操作，此时的栈数组和`Dep.target`会发生变化：
+```js
+// 演示使用，实际为Watcher实例
+const targetStack = []
+Dep.target = undefined
+```
+通过以上示例分析，我们就弄明白了为什么会有依赖压栈/出栈这样的步骤以及这样做的目的了。接下来，让我们来分析依赖收集的过程中，最后的`addDep`和`cleanupDeps`的逻辑。
 
 ## addDep和cleanupDeps
 
