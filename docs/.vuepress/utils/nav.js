@@ -83,7 +83,6 @@ const vueAnalysisSidebar = [
       'reactive/reactive',
       'reactive/dep',
       'reactive/notify',
-      'reactive/merge',
       'reactive/nexttick',
       'reactive/problem',
       'reactive/api'
