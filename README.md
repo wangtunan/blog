@@ -20,14 +20,12 @@
 [JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/)(完结) <br/>
 [JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html) (撰写中)
 
-## Vue 基础&Vue2.0 源码分析
+## Vue2.0 源码分析
 
-[Vue 基础知识](https://wangtunan.github.io/blog/vue/)(完善中) <br>
 [Vue2.0 源码分析](https://wangtunan.github.io/blog/vueAnalysis/introduction/)(撰写中) <br/>
 
 ## 自动化测试
 
-[Jest 测试框架](https://wangtunan.github.io/blog/test/jest.html) (撰写中) <br/>
 [Vue 应用测试](https://wangtunan.github.io/blog/test/vueTest.html) (完结) <br/>
 
 ## Webpack4.0
