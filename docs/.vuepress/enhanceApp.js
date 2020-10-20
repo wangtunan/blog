@@ -1,7 +1,3 @@
-import Vue from 'vue'
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-
 export default ({
   Vue,
   options, 
@@ -10,7 +6,6 @@ export default ({
 }) => {
   // 把components下的所有.vue文件全局注册
   Register()
-  Vue.use(ElementUI)
 }
 
 function Register () {

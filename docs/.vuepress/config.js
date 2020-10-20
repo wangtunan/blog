@@ -1,5 +1,5 @@
 const nav = require('./utils/nav.js')
-const { cssSidebar, webpackSidebar, vueAnalysisSidebar } = nav
+const { webpackSidebar, vueAnalysisSidebar } = nav
 module.exports = {
   title: '汪图南',
   description: '汪图南的个人博客',
@@ -88,7 +88,6 @@ module.exports = {
       }
     ],
     sidebar: {
-      '/css/': [cssSidebar],
       '/webpack/': [webpackSidebar],
       '/vueAnalysis/': vueAnalysisSidebar
     }
