@@ -15,9 +15,60 @@
 * `macro task`宏任务：`MessageChannel`、`postMessage`、`setImmediate`和`setTimeout`。
 * `micro task`微任务：`Promise.then`和`MutationObsever`。
 
-### Promise
-
 ### MutationObserver
+在[MDN文档](https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver)中，我们可以看到`MutationObserver`的详细用法，它不是很复杂，它的作用是：`MutationObserver`创建并返回一个新的 MutationObserver 它会在指定的DOM发生变化时被调用。
+
+我们按照文档介绍，来撰写一个例子：
+```js
+const callback = () => {
+  console.log('text node data change')
+}
+const observer = new MutationObserver(callback)
+let count = 1
+const textNode = document.createTextNode(count)
+observer.observe(textNode, {
+  characterData: true
+})
+
+function func () {
+  count++
+  textNode.data = count
+}
+func() // text node data change
+```
+代码分析：
+* 首先定义了`callback`回调函数和`MutationObserver`的实例对象，其中构造函数传递的参数是我们的`callback`。
+* 然后创建一个文本节点并传入文本节点的初始文本，接着调用`MutationObserver`实例的`observe`方法，传入我们创建的文本节点和一个`config`观察配置对象，其中`characterData:true`的意思是，我们要观察`textNode`节点的文本变动，`config`还有其他选项属性，你可以在`MDN`文档中查看到。
+* 接着，我们定义一个`func`函数，这个函数主要做的事情就是修改`textNode`文本节点中的文本内容，当文本内容变动后，`callback`会自动被调用，因此输出`text node data change`。
+
+
+在了解了`MutationObserver`的用法后，我们来看一下`nextTick`方法中，是如何使用`MutationObserver`的：
+```js
+import { isIE, isNative } from './env'
+
+// 省略代码
+else if (!isIE && typeof MutationObserver !== 'undefined' && (
+  isNative(MutationObserver) ||
+  // PhantomJS and iOS 7.x
+  MutationObserver.toString() === '[object MutationObserverConstructor]'
+)) {
+  // Use MutationObserver where native Promise is not available,
+  // e.g. PhantomJS, iOS7, Android 4.4
+  // (#6466 MutationObserver is unreliable in IE11)
+  let counter = 1
+  const observer = new MutationObserver(flushCallbacks)
+  const textNode = document.createTextNode(String(counter))
+  observer.observe(textNode, {
+    characterData: true
+  })
+  timerFunc = () => {
+    counter = (counter + 1) % 2
+    textNode.data = String(counter)
+  }
+  isUsingMicroTask = true
+}
+```
+我们可以看到，`nextTick`中首先判断了非`IE`并且`MutationObserver`可用且为原生`MutationObserver`时才会使用`MutationObserver`。对于判断非`IE`的情况，你可以看`Vue.js`的`issue`[#6466](https://github.com/vuejs/vue/issues/6466)来查看具体这样做的原因。
 
 ### setImmediate和setTimeout
 
