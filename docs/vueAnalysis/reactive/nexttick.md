@@ -71,7 +71,73 @@ else if (!isIE && typeof MutationObserver !== 'undefined' && (
 我们可以看到，`nextTick`中首先判断了非`IE`并且`MutationObserver`可用且为原生`MutationObserver`时才会使用`MutationObserver`。对于判断非`IE`的情况，你可以看`Vue.js`的`issue`[#6466](https://github.com/vuejs/vue/issues/6466)来查看具体这样做的原因。
 
 ### setImmediate和setTimeout
+`setTimeout`对于大部分人来说是非常常见的一个定时器方法，我们不做过多的介绍。在`nextTick`方法实现中，它使用到了`setImmediate`，我们在[Can I Use](https://www.caniuse.com/?search=setImmediate)网站上可以发现，这个`API`方法只存在于`IE`浏览器中。
+
+那么为什么会使用这个方法呢，这是因为我们之前提到的一个`issue`：`MutationObserver`在`IE`浏览器中并不可靠，因此在`IE`浏览器下降级到使用`setImmediate`，我们可以把`setImmediate`看做和`setTimeout`方法是相同的。
+```js
+setImmediate(() => {
+  console.log('setImmediate')
+}, 0)
+// 约等于
+setTimeout(() => {
+  console.log('setTimeout')
+}, 0)
+```
 
 ## nextTick实现
+介绍完`nextTick`与异步相关的知识后，我们来的分析一下`nextTick`方法的实现，首先要说的是：**异步降级**。
+```js
+let timerFunc
 
-## nextTick流程
+// The nextTick behavior leverages the microtask queue, which can be accessed
+// via either native Promise.then or MutationObserver.
+// MutationObserver has wider support, however it is seriously bugged in
+// UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
+// completely stops working after triggering a few times... so, if native
+// Promise is available, we will use it:
+/* istanbul ignore next, $flow-disable-line */
+if (typeof Promise !== 'undefined' && isNative(Promise)) {
+  const p = Promise.resolve()
+  timerFunc = () => {
+    p.then(flushCallbacks)
+    // In problematic UIWebViews, Promise.then doesn't completely break, but
+    // it can get stuck in a weird state where callbacks are pushed into the
+    // microtask queue but the queue isn't being flushed, until the browser
+    // needs to do some other work, e.g. handle a timer. Therefore we can
+    // "force" the microtask queue to be flushed by adding an empty timer.
+    if (isIOS) setTimeout(noop)
+  }
+  isUsingMicroTask = true
+} else if (!isIE && typeof MutationObserver !== 'undefined' && (
+  isNative(MutationObserver) ||
+  // PhantomJS and iOS 7.x
+  MutationObserver.toString() === '[object MutationObserverConstructor]'
+)) {
+  // Use MutationObserver where native Promise is not available,
+  // e.g. PhantomJS, iOS7, Android 4.4
+  // (#6466 MutationObserver is unreliable in IE11)
+  let counter = 1
+  const observer = new MutationObserver(flushCallbacks)
+  const textNode = document.createTextNode(String(counter))
+  observer.observe(textNode, {
+    characterData: true
+  })
+  timerFunc = () => {
+    counter = (counter + 1) % 2
+    textNode.data = String(counter)
+  }
+  isUsingMicroTask = true
+} else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+  // Fallback to setImmediate.
+  // Technically it leverages the (macro) task queue,
+  // but it is still a better choice than setTimeout.
+  timerFunc = () => {
+    setImmediate(flushCallbacks)
+  }
+} else {
+  // Fallback to setTimeout.
+  timerFunc = () => {
+    setTimeout(flushCallbacks, 0)
+  }
+}
+```
