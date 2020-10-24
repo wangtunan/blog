@@ -15,6 +15,8 @@
 * `macro task`宏任务：`MessageChannel`、`postMessage`、`setImmediate`和`setTimeout`。
 * `micro task`微任务：`Promise.then`和`MutationObsever`。
 
+![Event Loop](../../images/interview/6.png)
+
 ### MutationObserver
 在[MDN文档](https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver)中，我们可以看到`MutationObserver`的详细用法，它不是很复杂，它的作用是：创建并返回一个新的 `MutationObserver`实例，它会在指定的DOM发生变化时被调用。
 
