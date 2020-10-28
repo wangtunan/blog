@@ -1,2 +1,2 @@
-# patch派发更新
-patch派发更新
+# 组件patch
+组件patch

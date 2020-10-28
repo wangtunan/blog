@@ -82,6 +82,7 @@ const vueAnalysisSidebar = [
     collapsable: false,
     children: [
       'component/',
+      'component/mount',
       'component/create',
       'component/patch',
       'component/merge',
