@@ -320,3 +320,7 @@ export function mountComponent (
 3. **定义渲染Watcher**：在`mountComponent`方法中定义了一个渲染`Watcher`，其中渲染`Watcher`的第二个参数传递了我们的`updateComponent`，这个参数会在渲染`Watcher`实例化的时候赋值给`this.getter`属性，当进行派发更新的时候，会遍历`subs`数组执行`update`，然后调用`this.getter`，也就是再次调用`updateComponent`，然后让组件重新渲染。
 
 ## 流程图
+在分析完`$mount`方法后，我们可以得到如下流程图：
+<div style="text-align: center">
+  <img src="../../images/vueAnalysis/$mount.png" />
+</div>
