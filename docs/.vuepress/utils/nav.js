@@ -86,8 +86,8 @@ const vueAnalysisSidebar = [
       'component/render',
       'component/createElement',
       'component/createComponent',
-      'component/patch',
       'component/merge',
+      'component/patch',
       'component/lifecycle',
       'component/register',
       'component/async'
@@ -113,8 +113,7 @@ const vueAnalysisSidebar = [
       'expand/vmodel',
       'expand/event',
       'expand/slot',
-      'expand/components',
-      'expand/extend-mixin'
+      'expand/components'
     ]
   },
   {
