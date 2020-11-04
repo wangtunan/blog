@@ -216,14 +216,226 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 ```
-对于`el`和`propsData`这两个选择来说，使用默认合并策略的原因很简单，因为`el`和`propsData`只允许有一份。
+对于`el`和`propsData`这两个选项来说，使用默认合并策略的原因很简单，因为`el`和`propsData`只允许有一份。
 
 ### 生命周期hooks合并
+对于生命周期钩子函数而言，它们都是通过`mergeHook`方法来合并的，`strats`策略对象上关于`hooks`属性定义代码如下：
+```js
+export const LIFECYCLE_HOOKS = [
+  'beforeCreate',
+  'created',
+  'beforeMount',
+  'mounted',
+  'beforeUpdate',
+  'updated',
+  'beforeDestroy',
+  'destroyed',
+  'activated',
+  'deactivated',
+  'errorCaptured',
+  'serverPrefetch'
+]
 
+LIFECYCLE_HOOKS.forEach(hook => {
+  strats[hook] = mergeHook
+})
+```
+我们接下来看一下`mergeHook`是如何实现的，其代码如下：
+```js
+function mergeHook (
+  parentVal: ?Array<Function>,
+  childVal: ?Function | ?Array<Function>
+): ?Array<Function> {
+  const res = childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : Array.isArray(childVal)
+        ? childVal
+        : [childVal]
+    : parentVal
+  return res
+    ? dedupeHooks(res)
+    : res
+}
+
+function dedupeHooks (hooks) {
+  const res = []
+  for (let i = 0; i < hooks.length; i++) {
+    if (res.indexOf(hooks[i]) === -1) {
+      res.push(hooks[i])
+    }
+  }
+  return res
+}
+```
+我们可以看到在`mergeHook`方法中，它用到了三层三目运算来判断，首先判断了是否有`childVal`，如果没有则直接返回`parentVal`；如果有，则`parentVal`有没有，如果有则一定是数组形式，这个时候直接把`childVal`添加到`parentVal`数组的末尾；如果没有，则需要判断一下`childVal`是不是数组，如果不是数组则转成数组，如果已经是数组了，则直接返回。
+
+在最后还判断了`res`，然后满足条件则调用`dedupeHooks`，这个方法的作用很简单，就是剔除掉数组中的重复项。最后，我们根据以上逻辑撰写几个案例来说明。
+```js
+// 情况一
+const parentVal = [function created1 () {}]
+const childVal = undefined
+const res = [function created1 () {}]
+
+// 情况二
+const parentVal = [function created1 () {}]
+const childVal = [function created2 () {}]
+const res = [function created1 () {}, function created2 () {}]
+
+// 情况三
+const parentVal = undefined
+const childVal = [function created2 () {}]
+const res = [function created2 () {}]
+```
 ### data和provide合并
 
 ### components、directives和filters合并
+对于`components`、`directives`以及`filters`的合并是同一个`mergeAssets`方法，`strats`策略对象上关于这几种属性定义代码如下：
+```js
+const ASSET_TYPES = [
+  'component',
+  'directive',
+  'filter'
+]
+ASSET_TYPES.forEach(function (type) {
+  strats[type + 's'] = mergeAssets
+})
+```
+接下来，我们看一下`mergeAssets`具体定义：
+```js
+function mergeAssets (
+  parentVal: ?Object,1
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): Object {
+  const res = Object.create(parentVal || null)
+  if (childVal) {
+    process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm)
+    return extend(res, childVal)
+  } else {
+    return res
+  }
+}
+```
+`mergeAssets`方法的代码不是很多，逻辑也很清晰，首先以`parentVal`创建一个`res`原型，如果`childVal`没有，则直接返回这个`res`原型；如果有，则使用`extend`把`childVal`上的所有属性扩展到`res`原型上。有一点需要注意，`extend`不是我们之前提到的`Vue.extend`或者`this.$extend`，它是定义在`src/shared/utils.js`文件中的一个方法，其代码如下：
+```js
+export function extend (to: Object, _from: ?Object): Object {
+  for (const key in _from) {
+    to[key] = _from[key]
+  }
+  return to
+}
+```
+我们撰写一个简单的例子来说明一下`extend`方法的用法：
+```js
+const obj1 = {
+  name: 'AAA',
+  age: 23
+}
+const obj2 = {
+  sex: '男',
+  address: '广州'
+}
+const extendObj = extend(obj1, obj2)
+console.log(extendObj) // { name: 'AAA', age: 23, sex: '男', address: '广州' }
+```
+在介绍完`extend`方法后，我们回到`mergeAssets`方法，我们同样举例说明：
+```js
+// main.js
+import Vue from 'vue'
+import HelloWorld from '@/components/HelloWorld.vue'
+Vue.component('HelloWorld', HelloWorld)
+
+// App.vue
+import Test from '@/components/test.vue'
+export default {
+  name: 'App',
+  components: {
+    Test
+  }
+}
+```
+在`main.js`入口文件中，我们全局定义了一个`HelloWorld` 全局组件，然后在`App.vue`中又定义了一个`Test`局部组件，当代码运行到`mergeAssets`的时候，部分参数如下：
+```js
+const parentVal = {
+  HelloWorld: function VueComponent () {...},
+  KeepAlive: {...},
+  Transition: {...},
+  TransitionGroup: {...}
+}
+const childVal = {
+  Test: function VueComponent () {...}
+}
+```
+因为`parentVal`和`childVal`都有值，因此会调用`extend`方法，调用前和调用后的`res`如下所示：
+```js
+// 调用前
+const res = {
+  __proto__: {
+    HelloWorld: function VueComponent () {...},
+    KeepAlive: {...},
+    Transition: {...},
+    TransitionGroup: {...}
+  }
+}
+
+// extend调用后
+const res = {
+  Test: function VueComponent () {...},
+  __proto__: {
+    HelloWorld: function VueComponent () {...},
+    KeepAlive: {...},
+    Transition: {...},
+    TransitionGroup: {...}
+  }
+}
+```
+假如我们在`App.vue`组件中都使用了这两个组件，如下：
+```vue
+<template>
+  <div>
+    <test />
+    <hello-world />
+  </div>
+</template>
+```
+在`App.vue`组件渲染的过程中，当编译到`<test />`时，会在其`components`选项中查找组件，马上在自身属性上找到了`test.vue`。然后当编译到`<hello-world />`的时候，在自身对象上找不到这个属性，根据原型链的规则会在原型上去找，然后在`__proto__`上找到了`HelloWorld.vue`组件，两个组件得以顺利的被解析和渲染。
+
+对于另外两个选项`directives`和`filters`，它们跟`components`是一样的处理逻辑。
 
 ### watch合并
+对于`watch`选项而言，它使用了合并方法是单独定义的，其在`strats`策略对象上的属性定义如下：
+```js
+strats.watch = function (
+  parentVal: ?Object,
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): ?Object {
+  // work around Firefox's Object.prototype.watch...
+  if (parentVal === nativeWatch) parentVal = undefined
+  if (childVal === nativeWatch) childVal = undefined
+  /* istanbul ignore if */
+  if (!childVal) return Object.create(parentVal || null)
+  if (process.env.NODE_ENV !== 'production') {
+    assertObjectType(key, childVal, vm)
+  }
+  if (!parentVal) return childVal
+  const ret = {}
+  extend(ret, parentVal)
+  for (const key in childVal) {
+    let parent = ret[key]
+    const child = childVal[key]
+    if (parent && !Array.isArray(parent)) {
+      parent = [parent]
+    }
+    ret[key] = parent
+      ? parent.concat(child)
+      : Array.isArray(child) ? child : [child]
+  }
+  return ret
+}
+```
 
 ### props、methods、inject和computed合并
