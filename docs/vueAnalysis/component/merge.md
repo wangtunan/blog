@@ -19,7 +19,7 @@ Vue.mixin({
 
 ## 场景
 要进行配置合并的场景不止一两处，我们主要介绍以下四种场景：
-* **vue-loader**：在之前我们提到过当我们使用`.vue`文件的形式进行开发的时候，由于`.vue`属于特殊的文件扩展，`webpack`无法原生识别，因此需要对应的`loader`去解析，它就是`vue-loader`。假如我们撰写以下`HelloWorld.vue`组件，然后再别的地方去引入它。
+* **vue-loader**：在之前我们提到过当我们使用`.vue`文件的形式进行开发的时候，由于`.vue`属于特殊的文件扩展，`webpack`无法原生识别，因此需要对应的`loader`去解析，它就是`vue-loader`。假如我们撰写以下`HelloWorld.vue`组件，然后在别的地方去引入它。
 ```js
 // HelloWorld.vue
 export default {
@@ -88,10 +88,39 @@ export default {
 ```
 当在`App.vue`组件中提供`mixins`选择的时候，因为在我们定义的`sayMixin`也提供了`created`和`mounted`两个生命周期配置，因此这种情况下也要进行配置合并。又因为`mixins`接受一个数组选项，假如我们传递了多个已经定义的`mixin`，而这些`mixin`又可能会存在提供了相同配置的情况，因此同样需要进行配置合并。
 
+**注意**：`Vue.mixin`全局`API`方法在内部调用了`mergeOptions`来进行混入，它的定义位置我们在之前的`initGlobalAPI`小节中提到过，其实现代码如下：
+```js
+import { mergeOptions } from '../util/index'
+
+export function initMixin (Vue: GlobalAPI) {
+  Vue.mixin = function (mixin: Object) {
+    this.options = mergeOptions(this.options, mixin)
+    return this
+  }
+}
+```
+
 * **this._init**：严格意义上来说，这里其实并不算是一个配置合并的场景，而应该是一种配置合并的手段。对于第一种`vue-loader`和第二种`extend`的场景，它们在必要的场景下也会在`this._init`进行配置合并，例如在子组件实例化的时候，它在构造函数中就调用了`this._init`:
 ```js
 const Sub = function VueComponent (options) {
   this._init(options)
+}
+
+Vue.prototype._init = function () {
+  // ...省略其它
+  if (options && options._isComponent) {
+    // optimize internal component instantiation
+    // since dynamic options merging is pretty slow, and none of the
+    // internal component options needs special treatment.
+    initInternalComponent(vm, options)
+  } else {
+    vm.$options = mergeOptions(
+      resolveConstructorOptions(vm.constructor),
+      options || {},
+      vm
+    )
+  }
+  // ...省略其它
 }
 ```
 
@@ -287,7 +316,151 @@ const parentVal = undefined
 const childVal = [function created2 () {}]
 const res = [function created2 () {}]
 ```
+
+我们再来看一个比较特殊的场景：
+```js
+// mixin.js
+export const sayMixin = {
+  created () {
+    console.log('say mixin created')
+  }
+}
+export const helloMixin = {
+  created () {
+    console.log('hello mixin created')
+  }
+}
+
+
+// App.vue
+export default {
+  name: 'App',
+  created () {
+    console.log('component created')
+  }
+}
+
+// 执行顺序
+// say mixin created
+// hello mixin created
+// component created
+```
+代码分析：我们可以看到`mixins`里面的`created`生命周期函数会优先于组件自身提供的`created`生命周期函数，这是因为在遍历`parent`和`child`的属性之前，会优先处理`extends`和`mixins`选项。以`mixins`为例，它会首先遍历我们提供的`mixins`数组，然后依次把这些配置按照规则合并到`parent`上，最后在遍历`child`的属性时，才会把其自身的配置合并对应的位置，在我们提供的例子当中，自身提供的`created`会使用数组`concat`方法添加到数组的末尾。当组件触发`created`生命周期的时候，会按照数组顺序依次调用。
+```js
+if (!child._base) {
+  if (child.extends) {
+    parent = mergeOptions(parent, child.extends, vm)
+  }
+  if (child.mixins) {
+    for (let i = 0, l = child.mixins.length; i < l; i++) {
+      parent = mergeOptions(parent, child.mixins[i], vm)
+    }
+  }
+}
+```
+
 ### data和provide合并
+对于`data`和`provide`而言，它们最后都使用`mergeDataOrFn`来合并，只不过对于`data`选项比较特殊，它需要单独包裹一层，它们在`strats`策略对象上的属性定义如下：
+```js
+strats.data = function (
+  parentVal: any,
+  childVal: any,
+  vm?: Component
+): ?Function {
+  if (!vm) {
+    if (childVal && typeof childVal !== 'function') {
+      process.env.NODE_ENV !== 'production' && warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.',
+        vm
+      )
+
+      return parentVal
+    }
+    return mergeDataOrFn(parentVal, childVal)
+  }
+
+  return mergeDataOrFn(parentVal, childVal, vm)
+}
+strats.provide = mergeDataOrFn
+```
+在合并`data`的包裹函数中，对`childVal`进行了检验，如果不是函数类型，提示错误信息并直接返回。如果时，再调用`mergeDataOrFn`方法来合并。接下来，我们来看一下`mergeDataOrFn`方法的具体实现逻辑：
+```js
+export function mergeDataOrFn (
+  parentVal: any,
+  childVal: any,
+  vm?: Component
+): ?Function {
+  if (!vm) {
+    // in a Vue.extend merge, both should be functions
+    if (!childVal) {
+      return parentVal
+    }
+    if (!parentVal) {
+      return childVal
+    }
+    // when parentVal & childVal are both present,
+    // we need to return a function that returns the
+    // merged result of both functions... no need to
+    // check if parentVal is a function here because
+    // it has to be a function to pass previous merges.
+    return function mergedDataFn () {
+      return mergeData(
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
+      )
+    }
+  } else {
+    return function mergedInstanceDataFn () {
+      // instance merge
+      const instanceData = typeof childVal === 'function'
+        ? childVal.call(vm, vm)
+        : childVal
+      const defaultData = typeof parentVal === 'function'
+        ? parentVal.call(vm, vm)
+        : parentVal
+      if (instanceData) {
+        return mergeData(instanceData, defaultData)
+      } else {
+        return defaultData
+      }
+    }
+  }
+}
+```
+在`mergeDataOrFn`方法中，我们可以发现它根据`vm`进行了区分，但这两块的合并思路是一致的：如果`parentVal`和`childVal`是函数类型，则分别调用这个函数，然后合并它们返回的对象，这种情况主要针对`data`合并。对于`provide`而言，它不需要是`function`类型，因此直接使用`mergeData`来合并即可。我们再回过头来看，为什么要区分`vm`，这是因为要处理兼容`provide`的情况，当传递`provide`的时候，因为这个属性是在父级定义的，因此`this`属于父级而不是当前组件`vm`。
+
+最后来看一下`mergeData`方法的实现代码：
+```js
+function mergeData (to: Object, from: ?Object): Object {
+  if (!from) return to
+  let key, toVal, fromVal
+
+  const keys = hasSymbol
+    ? Reflect.ownKeys(from)
+    : Object.keys(from)
+
+  for (let i = 0; i < keys.length; i++) {
+    key = keys[i]
+    // in case the object is already observed...
+    if (key === '__ob__') continue
+    toVal = to[key]
+    fromVal = from[key]
+    if (!hasOwn(to, key)) {
+      set(to, key, fromVal)
+    } else if (
+      toVal !== fromVal &&
+      isPlainObject(toVal) &&
+      isPlainObject(fromVal)
+    ) {
+      mergeData(toVal, fromVal)
+    }
+  }
+  return to
+}
+```
+`mergeData`和前面提到`extend`方法所做的事情几乎是一样的，只不过由于`data`中所有的属性(包括嵌套对象的属性)，我们需要使用`set`处理成响应式的。`set`方法就是`Vue.set`或`this.$set`方法的本体，它定义在`src/core/observer/index.js`文件中，我们之前在响应式章节提到过。
 
 ### components、directives和filters合并
 对于`components`、`directives`以及`filters`的合并是同一个`mergeAssets`方法，`strats`策略对象上关于这几种属性定义代码如下：
@@ -405,7 +578,7 @@ const res = {
 对于另外两个选项`directives`和`filters`，它们跟`components`是一样的处理逻辑。
 
 ### watch合并
-对于`watch`选项而言，它使用了合并方法是单独定义的，其在`strats`策略对象上的属性定义如下：
+对于`watch`选项而言，它使用的合并方法是单独定义的，其在`strats`策略对象上的属性定义如下：
 ```js
 strats.watch = function (
   parentVal: ?Object,
@@ -437,5 +610,96 @@ strats.watch = function (
   return ret
 }
 ```
+我们可以看到`watch`配置的合并与`hooks`合并的思路几乎差不多，只是多了一些微小的差异，当`childVal`没有时，直接返回按照`parentVal`创建的原型，类似的当`parentVal`没有是，直接返回`childVal`，注意这里因为是自身的配置，因此不需要像`parentVal`那样创建并一个原型。当`parentVal`和`childVal`都存在时，首先把`parentVal`上的属性全部扩展到`ret`对象上，然后遍历`childVal`的属性键。在遍历的过程中如果`parent`值不为数组形式，则手动处理成数组形式，然后把`child`使用数组`concat`方法添加到数组的末尾。以上代码分析，可以使用下面的示例来说明：
+```js
+// 情况一
+const parentVal = {
+  msg: function () {
+    console.log('parent watch msg')
+  }
+}
+const childVal = undefined
+const ret = {
+  __proto__: {
+    msg: function () {
+      console.log('parent watch msg')
+    }
+  }
+}
+
+// 情况二
+const parentVal = undefined
+const childVal = {
+  msg: function () {
+    console.log('child watch msg')
+  }
+}
+const ret = {
+  msg: function () {
+    console.log('child watch msg')
+  }
+}
+
+// 情况三
+const parentVal = {
+  msg: function () {
+    console.log('parent watch msg')
+  }
+}
+const childVal = {
+  msg: function () {
+    console.log('child watch msg')
+  }
+}
+const ret = {
+  msg: [
+    function () {
+      console.log('parent watch msg')
+    },
+    function () {
+      console.log('child watch msg')
+    }
+  ]
+}
+```
+与`hooks`一样，如果在`mixins`里面也提供了与自身组件一样的`watch`，那么会优先执行`mixins`里面的`watch`，然后在执行自身组件中的`watch`。
 
 ### props、methods、inject和computed合并
+`props`、`methods`、`inject`和`computed`和之前我们提到的几种配置有点不一样，这几种配置有一个共同点：不允许存在相同的属性，例如我们在`methods`上提供的属性，不管来自于哪里，我们只需要把所有属性合并在一起即可。
+
+接下来我们来看一下这几个属性在`strats`策略对象上的具体定义：
+```js
+strats.props =
+strats.methods =
+strats.inject =
+strats.computed = function (
+  parentVal: ?Object,
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): ?Object {
+  if (childVal && process.env.NODE_ENV !== 'production') {
+    assertObjectType(key, childVal, vm)
+  }
+  if (!parentVal) return childVal
+  const ret = Object.create(null)
+  extend(ret, parentVal)
+  if (childVal) extend(ret, childVal)
+  return ret
+}
+```
+我们可以看到，在其实现方法中代码并不是很复杂，仅仅使用到`extend`方法合并对象属性即可。当`parentVal`没有时，直接返回`childVal`，这里也不需要创建并返回一个原型，原因在上面提到过。如果`parentVal`有，则先创建一个原型，再使用`extend`把`parentVal`上的所有属性全部扩展到`ret`对象上。最后再判断`childVal`，如果有则再使用`extend`把`childVal`上的对象扩展到`ret`上，如果没有，则直接返回。以上代码分析，我们举例说明：
+```js
+const parentVal = {
+  age: 23,
+  name: 'AAA'
+}
+const parentVal = {
+  address: '广州'
+}
+const ret = {
+  age: 23,
+  name: 'AAA',
+  address: '广州'
+}
+```
