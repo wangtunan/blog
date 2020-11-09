@@ -61,9 +61,9 @@ export function setActiveInstance(vm: Component) {
   }
 }
 ```
-我们可以看到在`setActiveInstance`中，它首先定义了闭包变量保存了当前激活的实例，然后把`activeInstance`设置为当前的参数`vm`，最后返回了一个函数，这个函数的目的是用来恢复`activeInstance`到上一个，也就是调用`restoreActiveInstance`方法。
+我们可以看到在`setActiveInstance`中，它首先定义了闭包变量保存了当前激活的实例，然后把`activeInstance`设置为当前的参数`vm`，最后返回了一个函数，这个函数的目的是用来恢复`activeInstance`到上一个缓存下来的激活实例，也就是调用`restoreActiveInstance`方法。
 
-既然当前渲染的实例以及解决了，那么我们来看一下父级在这个过程中是如何保证的。在`initLifecycle`的过程中，有这样一段代码：
+既然当前渲染的实例已经解决了，那么我们来看一下父级在这个过程中是如何保证的。在`initLifecycle`的过程中，有这样一段代码：
 ```js
 export function initLifecycle (vm: Component) {
   const options = vm.$options
@@ -138,7 +138,7 @@ export function appendChild (node: Node, child: Node) {
 * `modules`: `modules`是`platformModules`和`baseModules`两个数组合并的结果，其中`baseModules`是对模板标签上`ref`和`directives`各种操作的封装。`platformModules`是对模板标签上`class`、`style`、`attr`以及`events`等操作的封装。
 
 **小结**：
-1. 在`update`这一节，我们知道了首次渲染和派发更新渲染的`patch`是有一点差异的，其差异为首次渲染时提供的根节点是一个真实的`DOM`元素，在派发更新渲染时提供的是一个`VNode`，这里差异的逻辑是在下面这段代码中：
+1. 在`update`这一节，我们知道了首次渲染和派发更新重新渲染的`patch`是有一点差异的，其差异为首次渲染时提供的根节点是一个真实的`DOM`元素，在派发更新重新渲染时提供的是一个`VNode`，这里差异的逻辑是在下面这段代码中：
 ```js
 if (!prevVnode) {
   // initial render
@@ -169,3 +169,82 @@ if (!prevVnode) {
 在上一个章节，我们遗留了一个`createPatchFunction`方法还没有分析，在`patch`这个章节，我们主要任务就是弄清楚`createPatchFunction`的实现原理。
 
 因为在`v2.6.11`版本中，`createPatchFunction`方法代码非常多，因此我们采取分段来说明，建议一边看文章一边对照源码学习。
+
+### hooks钩子函数
+在`createPatchFunction`最开始，它首先处理了一些`hooks`钩子函数，代码如下：
+```js
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+export function createPatchFunction (backend) {
+  let i, j
+  const cbs = {}
+  const { modules, nodeOps } = backend
+
+  for (i = 0; i < hooks.length; ++i) {
+    cbs[hooks[i]] = []
+    for (j = 0; j < modules.length; ++j) {
+      if (isDef(modules[j][hooks[i]])) {
+        cbs[hooks[i]].push(modules[j][hooks[i]])
+      }
+    }
+  }
+  // ...
+}
+```
+注意：这里定义的`hooks`与我们组件的生命周期钩子函数很相似，但它并不是处理组件生命的，这些钩子函数是在`VNode`钩子函数执行阶段或者其它时机调用的，例如：在`VNode`插入的时候，需要执行`created`相关的钩子函数，在`VNode`移除的时候，需要执行`remove`相关的钩子函数。
+
+代码分析：
+* 首先通过解构获取到`modules`，它是一个数组，每个数组元素都有可能定义`create`、`update`、`remove`以及`destroy`等钩子函数，它可能是下面这样：
+```js
+const modules = [
+  {
+    created: function () {},
+    update: function () {}
+  },
+  {
+    update: function () {},
+    remove: function () {}
+  },
+  {
+    remove: function () {},
+    destroy: function () {}
+  }
+]
+```
+* 解构获取到`modules`后，使用`for`循环来遍历`modules`，目的是要把`hooks`当做`key`，`hooks`的函数当做`value`，循环遍历完毕后，它可能是下面这样：
+```js
+// 遍历前
+const cbs = {}
+
+// 遍历后
+const cbs = {
+  create: [ function () {}, function () {} ],
+  activate: [],
+  update: [ function () {}, function () {}, function () {} ],
+  remove: [ function () {} ],
+  destroy: [ function () {} ]
+}
+```
+
+* 以`create`钩子函数为例，它会在合适的时机调用，调用`create`的代码如下：
+```js
+function invokeCreateHooks (vnode, insertedVnodeQueue) {
+  for (let i = 0; i < cbs.create.length; ++i) {
+    cbs.create[i](emptyNode, vnode)
+  }
+  i = vnode.data.hook // Reuse variable
+  if (isDef(i)) {
+    if (isDef(i.create)) i.create(emptyNode, vnode)
+    if (isDef(i.insert)) insertedVnodeQueue.push(vnode)
+  }
+}
+```
+在`invokeCreateHooks`方法中，它通过`for`来遍历`cbs.create`钩子函数数组，然后依次调用这里面的每一个方法。在方法的最后，它还调用了`VNode`的2个钩子函数，在`createComponent`章节中我们提到过`vnode.data.hook`，它是`VNode`的钩子函数。
+```js
+const componentVNodeHooks = {
+  init: function () {},     // 初始化时触发
+  prepatch: function () {}, // patch之前触发
+  insert: function () {},   // 插入到DOM时触发
+  destroy: function () {}   // 节点移除之前触发
+  ...
+}
+```
