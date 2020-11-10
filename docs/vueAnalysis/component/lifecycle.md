@@ -25,7 +25,7 @@ export function callHook (vm: Component, hook: string) {
 }
 ```
 代码分析：
-* 我们可以看到在`for`遍历之前，使用了`pushTarget`，在遍历之后使用了`popTarget`。`pushTarget`和`popTarget`在之前的章节中，我们介绍过，这里主要提一个[issue 7573](https://github.com/vuejs/vue/issues/7573)，你在这个`issue`上面可以看到为什么要添加这两段代码。
+* 我们可以看到在`for`遍历之前，使用了`pushTarget`，在遍历之后使用了`popTarget`。`pushTarget`和`popTarget`在之前的章节中我们介绍过，这里主要提一个[issue 7573](https://github.com/vuejs/vue/issues/7573)，你在这个`issue`上面可以看到为什么要添加这两段代码。
 * 通过在`this.$options`对象上拿到`hook`参数对应`callback`数组，然后使用`for`循环遍历，在每个循环中通过`invokeWithErrorHandling`来触发回调函数。`invokeWithErrorHandling`方法是定义在`src/core/util/error.js`文件中的一个方法，其代码如下：
 ```js
 export function invokeWithErrorHandling (
@@ -54,7 +54,7 @@ export function invokeWithErrorHandling (
 ```js
 res = args ? handler.apply(context, args) : handler.call(context)
 ```
-* 在`for`循环遍历之后，它判断了`vm._hasHookEvent`，你可能会很好奇这个内部属性是什么？在哪里定义的？在`initEvents`方法中，首先默认设置这个属性为`false`，代码如下：
+* 在`for`循环遍历之后，它判断了`vm._hasHookEvent`，你可能会很好奇这个内部属性在哪里定义的？是做什么的？在`initEvents`方法中，首先默认设置这个属性为`false`，代码如下：
 ```js
 export function initEvents (vm: Component) {
   // ...
@@ -62,7 +62,7 @@ export function initEvents (vm: Component) {
   // ...
 }
 ```
-在事件系统中的`$on`方法中，它根据正则条件判断，如果调整为真，则赋值为`true`，代码如下：
+在事件中心`$on`方法中，它根据正则条件判断，如果判断为真则赋值为`true`，代码如下：
 ```js
 Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
   const vm: Component = this
@@ -81,7 +81,7 @@ Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Comp
   return vm
 }
 ```
-当`_hasHookEvent`属性为真，组件会触发对应的生命周期钩子函数，那么我们可以利用这个功能做两件事情：**监听子组件生命周期**和**监听自身组件生命周期**。
+当`_hasHookEvent`属性为真，组件会触发对应的生命周期钩子函数，那么我们可以利用这个功能做两件事情：**监听子组件生命周期**和**监听组件自身生命周期**。
 
 假设我们有如下组件：
 ```vue
@@ -122,5 +122,16 @@ export default {
 ## 生命周期
 我们先来看`beforeCreate`和`created`这一对钩子函数，它们是在`this._init`方法中被触发的：
 ```js
-
+Vue.prototype._init = function () {
+  // ...
+  initLifecycle(vm)
+  initEvents(vm)
+  initRender(vm)
+  callHook(vm, 'beforeCreate')
+  initInjections(vm) // resolve injections before data/props
+  initState(vm)
+  initProvide(vm) // resolve provide after data/props
+  callHook(vm, 'created')
+  // ...
+}
 ```
