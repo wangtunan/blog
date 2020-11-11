@@ -120,6 +120,8 @@ export default {
 * 在撰写`Vue`应用的时候，我们经常需要在`created/mounted`等生命周期中监听`resize/scroll`等事件，然后在`beforeDestroy/destroyed`生命周期中移除。对于这种需求，我们可以把逻辑写在同一个地方，而不是分散在两个生命周期中，这对于需要监听自身生命周期的需要来说也十分有用。
 
 ## 生命周期
+
+### beforeCreate和created
 我们先来看`beforeCreate`和`created`这一对钩子函数，它们是在`this._init`方法中被触发的：
 ```js
 Vue.prototype._init = function () {
@@ -135,3 +137,63 @@ Vue.prototype._init = function () {
   // ...
 }
 ```
+在`beforeCreate`和`created`生命周期中间，它调用了三个方法，这几个方法是用来初始化`inject`、`data`、`props`、`methods`、`computed`、`watch`以及`provide`等这些配置选项的。那么我们可以得出一个结论，以上这些属性我们只有在`created`中才可以访问到，在`beforeCreate`中访问不到，因为还没有初始化。
+
+### beforeMount和mounted
+在前面介绍`$mount`方法的时候，我们提到过`beforeMount`和`mounted`这两个方法，它们是在`mountComponent`中被触发的，代码如下：
+```js
+export function mountComponent (
+  vm: Component,
+  el: ?Element,
+  hydrating?: boolean
+): Component {
+  // ...
+  callHook(vm, 'beforeMount')
+  let updateComponent
+  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    // ...
+  } else {
+    updateComponent = () => {
+      vm._update(vm._render(), hydrating)
+    }
+  }
+  // ...
+  if (vm.$vnode == null) {
+    vm._isMounted = true
+    callHook(vm, 'mounted')
+  }
+  return vm
+}
+```
+我们可以看到，在`mountComponent`方法的最前面，它首先调用了`beforeMount`方法，然后开始执行`vm._update()`，这个方法在组件首次渲染和派发更新时递归渲染父子组件的时候被调用。
+
+在渲染完毕后，它判断了`vm.$vode == null`，如果条件满足才会触发`mounted`方法。你可能会很奇怪为什么这样做？在之前介绍`update/path`章节的时候，我们提到一个一对父子关系：`vm._vnode`和`vm.$vnode`，其中`vm.$vnode`表示父级的`vnode`。那么什么时候`vm.$vnode`会为`null`呢？答案是只有根实例，因为只有根实例才会满足这个条件，也就是说这里触发的是根实例的`mounted`方法，而不是组件的`mounted`方法。
+
+根据`beforeMount`和`mounted`的调用时机，我们可以知道：`beforeMount`生命周期是在`vm._update()`之前调用的，因此在这个生命周期的时候，我们还无法获取到正确的`DOM`。而`mounted`生命周期是在`vm._update()`方法之后执行的，所以我们可以在这个生命周期获取到正确的`DOM`。
+
+在`patch`的时候，我们提到过`VNode`有一些钩子函数，我们来回顾一下：
+```js
+const componentVNodeHooks = {
+  init: function () {},
+  prepatch: function () {},
+  insert: function (vnode) {
+    const { context, componentInstance } = vnode
+    if (!componentInstance._isMounted) {
+      componentInstance._isMounted = true
+      callHook(componentInstance, 'mounted')
+    }
+    // ...
+  },
+  destroy: function () {
+    
+  }
+}
+```
+其中，在`insert`钩子函数被触发的时候，它也触发了其组件的`mounted`方法，因此组件的`mounted`生命周期是在`VNode`触发`insert`钩子函数的时候被调用的。
+
+
+### beforeUpdate和updated
+
+### beforeDestroy和destroyed
+
+### activated和deactivated
