@@ -167,7 +167,7 @@ export function mountComponent (
 ```
 我们可以看到，在`mountComponent`方法的最前面，它首先调用了`beforeMount`方法，然后开始执行`vm._update()`，这个方法在组件首次渲染和派发更新时递归渲染父子组件的时候被调用。
 
-在渲染完毕后，它判断了`vm.$vode == null`，如果条件满足才会触发`mounted`方法。你可能会很奇怪为什么这样做？在之前介绍`update/path`章节的时候，我们提到一个一对父子关系：`vm._vnode`和`vm.$vnode`，其中`vm.$vnode`表示父级的`vnode`。那么什么时候`vm.$vnode`会为`null`呢？答案是只有根实例，因为只有根实例才会满足这个条件，也就是说这里触发的是根实例的`mounted`方法，而不是组件的`mounted`方法。
+在渲染完毕后，它判断了`vm.$vode == null`，如果条件满足才会触发`mounted`方法。你可能会很奇怪为什么这样做？在之前介绍`update/path`章节的时候，我们提到过一对父子关系：`vm._vnode`和`vm.$vnode`，其中`vm.$vnode`表示父级的`vnode`。那么什么时候`vm.$vnode`会为`null`呢？答案是只有根实例，因为只有根实例才会满足这个条件，也就是说这里触发的是根实例的`mounted`方法，而不是组件的`mounted`方法。
 
 根据`beforeMount`和`mounted`的调用时机，我们可以知道：`beforeMount`生命周期是在`vm._update()`之前调用的，因此在这个生命周期的时候，我们还无法获取到正确的`DOM`。而`mounted`生命周期是在`vm._update()`方法之后执行的，所以我们可以在这个生命周期获取到正确的`DOM`。
 
@@ -193,7 +193,78 @@ const componentVNodeHooks = {
 
 
 ### beforeUpdate和updated
+`beforeUpdate`和`updated`这一对生命周期钩子函数，是在派发更新的过程中被触发的。我们回顾一下依赖收集/派发更新这两个小节的内容，当某个响应式变量值更新的时候，会触发`setter`。
+```js
+Object.defineProperty(obj, key {
+  set: function reactiveSetter (newVal) {
+    // ...
+    dep.notify()
+  }
+})
+```
+在`setter`中会调用`dep.notify()`方法，去通知观察者更新，在`notify`实现方法中，它遍历了其`subs`数组，然后依次调用`update()`方法。
+```js
+export default class Dep {
+  // ...
+  notify () {
+    const subs = this.subs.slice()
+    if (process.env.NODE_ENV !== 'production' && !config.async) {
+      subs.sort((a, b) => a.id - b.id)
+    }
+    for (let i = 0, l = subs.length; i < l; i++) {
+      subs[i].update()
+    }
+  }
+}
+```
+这些`Watcher`实例的`update`最后会走到`flushSchedulerQueue`方法，在这个方法中会调用一个`callUpdatedHooks`方法
+```js
+function flushSchedulerQueue () {
+  // ...
+  callUpdatedHooks(updatedQueue)
+}
+function callUpdatedHooks (queue) {
+  let i = queue.length
+  while (i--) {
+    const watcher = queue[i]
+    const vm = watcher.vm
+    if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
+      callHook(vm, 'updated')
+    }
+  }
+}
+```
+在`callUpdatedHooks`这个方法里面，它会遍历`queue`的`Watcher`实例队列，在每个遍历的过程中，会触发`vm`的`updated`方法。当`updated`钩子函数被触发后，就代表派发更新阶段已经完成。 
+
+以上是对`updated`钩子函数的介绍，那么`beforeUpdate`呢，其实它是在实例化`render watcher`的时候被处理的。
+```js
+export function mountComponent () {
+  // ...
+  new Watcher(vm, updateComponent, noop, {
+    before () {
+      if (vm._isMounted && !vm._isDestroyed) {
+        callHook(vm, 'beforeUpdate')
+      }
+    }
+  }, true /* isRenderWatcher */)
+}
+```
+我们可以看到，在实例化`render watcher`的时候，它给第四个参数传对象递了一个`before`属性，这个属性会被赋值到`Watcher`实例的`before`属性上。然后在`flushSchedulerQueue`方法遍历`queue`队列的时候，它首先判断了`watcher.before`是否存在，存在则调用这这个方法。
+```js
+function flushSchedulerQueue () {
+  for (index = 0; index < queue.length; index++) {
+    watcher = queue[index]
+    if (watcher.before) {
+      watcher.before()
+    }
+    // ...
+  }
+  // ...
+  callUpdatedHooks(updatedQueue)
+}
+```
 
 ### beforeDestroy和destroyed
 
 ### activated和deactivated
+这两个生命周期方法是与`keep-alive`内置组件强相关的生命周期钩子函数，因此我们会把这两个钩子函数的介绍放在之后的`keep-alive`小节。
