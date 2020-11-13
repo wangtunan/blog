@@ -9,6 +9,23 @@ updateComponent = () => {
 
 这一章节，我们来分析一下`update`方法的实现以及其中`patch`的逻辑。
 
+## $forceUpdate
+在正式介绍`update/patch`之前，我们先来认识一个`API`方法：`$forceUpdate`，这个方法是用来强制组件重新渲染的。在开发`Vue`应用的时候，我们有可能遇到过虽然我们的响应式数据更改了，但组件并没有正确渲染。当遇到这种情况的时候，我们可以调用`$forceUpdate`来强制组件重新进行渲染。它的实现代码如下：
+```js
+Vue.prototype.$forceUpdate = function () {
+  const vm: Component = this
+  if (vm._watcher) {
+    vm._watcher.update()
+  }
+}
+```
+我们可以看到`$forceUpdate`方法的代码非常简单，它首先判断了`vm._watcher`是否存在，也就是判断当前组件的`render watcher`是否存在，如果存在则调用`render watcher`的`update`方法。在调用`update`方法后，这里的过程就跟派发更新的过程相同 ，因为这里是`render watcher`，因此它最后会调用下面这段代码，也就是我们这个章节的核心`update/patch`：
+```js
+updateComponent = () => {
+  vm._update(vm._render(), hydrating)
+}
+```
+
 ## update
 `_update`其实是一个内部私有方法，它的调用时机有两个：**初始化挂载阶段**和**派发更新阶段**，其代码是在`lifecycleMixin`方法中被定义的，如下：
 ```js
@@ -190,7 +207,7 @@ export function createPatchFunction (backend) {
   // ...
 }
 ```
-注意：这里定义的`hooks`与我们组件的生命周期钩子函数很相似，但它并不是处理组件生命的，这些钩子函数是在`VNode`钩子函数执行阶段或者其它时机调用的，例如：在`VNode`插入的时候，需要执行`created`相关的钩子函数，在`VNode`移除的时候，需要执行`remove`相关的钩子函数。
+注意：这里定义的`hooks`与我们组件的生命周期钩子函数很相似，但它并不是处理组件生命周期的，它们是在`VNode`钩子函数执行阶段或者其它时机调用的，例如：在`VNode`插入的时候，需要执行`created`相关的钩子函数，在`VNode`移除的时候，需要执行`remove/destroy`相关的钩子函数。
 
 代码分析：
 * 首先通过解构获取到`modules`，它是一个数组，每个数组元素都有可能定义`create`、`update`、`remove`以及`destroy`等钩子函数，它可能是下面这样：
@@ -238,7 +255,7 @@ function invokeCreateHooks (vnode, insertedVnodeQueue) {
   }
 }
 ```
-在`invokeCreateHooks`方法中，它通过`for`来遍历`cbs.create`钩子函数数组，然后依次调用这里面的每一个方法。在方法的最后，它还调用了`VNode`的2个钩子函数，在`createComponent`章节中我们提到过`vnode.data.hook`，它是`VNode`的钩子函数。
+在`invokeCreateHooks`方法中，它通过`for`来遍历`cbs.create`钩子函数数组，然后依次调用这里面的每一个方法。在方法的最后，它还调用了`VNode`的2个钩子函数，在`createComponent`章节中我们提到过`vnode.data.hook`。
 ```js
 const componentVNodeHooks = {
   init: function () {},     // 初始化时触发

@@ -184,9 +184,7 @@ const componentVNodeHooks = {
     }
     // ...
   },
-  destroy: function () {
-    
-  }
+  destroy: function () {}
 }
 ```
 其中，在`insert`钩子函数被触发的时候，它也触发了其组件的`mounted`方法，因此组件的`mounted`生命周期是在`VNode`触发`insert`钩子函数的时候被调用的。
@@ -265,6 +263,166 @@ function flushSchedulerQueue () {
 ```
 
 ### beforeDestroy和destroyed
+无论是`beforeDestroy`还是`destroyed`生命周期，都是在`vm.$destroy`实例方法中被触发的，这个方法它是在`lifecycleMixin`中被定义的，其代码如下：
+```js
+export function lifecycleMixin (Vue) {
+  // ..
+  Vue.prototype.$destroy = function () {
+    const vm: Component = this
+    if (vm._isBeingDestroyed) {
+      return
+    }
+    callHook(vm, 'beforeDestroy')
+    vm._isBeingDestroyed = true
+    // remove self from parent
+    const parent = vm.$parent
+    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
+      remove(parent.$children, vm)
+    }
+    // teardown watchers
+    if (vm._watcher) {
+      vm._watcher.teardown()
+    }
+    let i = vm._watchers.length
+    while (i--) {
+      vm._watchers[i].teardown()
+    }
+    // remove reference from data ob
+    // frozen object may not have observer.
+    if (vm._data.__ob__) {
+      vm._data.__ob__.vmCount--
+    }
+    // call the last hook...
+    vm._isDestroyed = true
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
+    // fire destroyed hook
+    callHook(vm, 'destroyed')
+    // turn off all instance listeners.
+    vm.$off()
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null
+    }
+    // release circular reference (#6759)
+    if (vm.$vnode) {
+      vm.$vnode.parent = null
+    }
+  }
+}
+```
+我们可以看到，在`$destroy`方法的最开始，它首先触发了`beforeDestroy`生命周期，随后又处理了一些其它操作：**在父组件的$children移除自身**、**移除自身依赖**、**触发子组件销毁动作**以及**移除事件监听**等。
+
+接下来，我们以上面这几个步骤来说明：
+* **在父组件的$children移除自身**：当某个组件销毁的时候，我们需要从其父组件的`$children`列表中移除自身，以下面代码为例：
+```vue
+<template>
+  <div class="parent">
+    <child-component />
+  </div>
+</template>
+```
+在`ChildComponent`组件销毁之前，`ParentComponent`组件的`$children`数组保存了其引用关系，当`ChildComponent`销毁的时候，为了正确保持这种引用关系，我们需要从`$children`列表中移除。
+```js
+// 展示使用，实际为vm实例
+// 移除前
+const $children = ['child-component', ...]
+
+// 移除后
+const $children = [...]
+```
+* **移除自身依赖**：在之前，我们提到过`vm._watchers`维护了一份观察者数组，它们都是`Watcher`实例，另外一个`vm._watcher`指的是当前组件的`render watcher`。当组件销毁的时候，需要把这些观察者移除掉，它们都通过`Watcher`实例的`teardown`方法来实现，其代码如下：
+```js
+export default class Watcher {
+  // ...
+  teardown () {
+    if (this.active) {
+      // remove self from vm's watcher list
+      // this is a somewhat expensive operation so we skip it
+      // if the vm is being destroyed.
+      if (!this.vm._isBeingDestroyed) {
+        remove(this.vm._watchers, this)
+      }
+      let i = this.deps.length
+      while (i--) {
+        this.deps[i].removeSub(this)
+      }
+      this.active = false
+    }
+  }
+}
+```
+* **触发子组件销毁动作**：在移除`Watcher`以后，它随后调用了`vm.__patch__`方法，我们在之前`update/patch`章节介绍过这个方法，这里注意它第二个参数传递了`null`，我们回顾一下`patch`方法的实现：
+```js
+export function createPatchFunction (backend) {
+  // ...
+  return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    if (isUndef(vnode)) {
+      if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
+      return
+    }
+    // ...
+  }
+}
+```
+在`patch`方法中，当我们传递的第二个参数`vnode`为`null`的时候，它会调用`invokeDestroyHook`方法，这个方法的代码如下：
+```js
+function invokeDestroyHook (vnode) {
+  let i, j
+  const data = vnode.data
+  if (isDef(data)) {
+    if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
+    for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
+  }
+  if (isDef(i = vnode.children)) {
+    for (j = 0; j < vnode.children.length; ++j) {
+      invokeDestroyHook(vnode.children[j])
+    }
+  }
+}
+```
+这个方法的主要作用就是递归调用子组件`VNode`的`destroy`钩子函数，我们来看一下`VNode`钩子函数`destroy`具体做了哪些事情：
+```js
+const componentVNodeHooks = {
+  // ...
+  destroy (vnode: MountedComponentVNode) {
+    const { componentInstance } = vnode
+    if (!componentInstance._isDestroyed) {
+      if (!vnode.data.keepAlive) {
+        componentInstance.$destroy()
+      } else {
+        deactivateChildComponent(componentInstance, true /* direct */)
+      }
+    }
+  }
+}
+```
+我们可以看到，在`destroy`钩子函数中，如果忽略`keep-alive`相关的逻辑，它的核心还是调用组件的`$destroy()`方法。
+
+**小结**：组件销毁的过程，应该是从父组件开始，然后递归销毁子组件，当子组件都销毁完毕时，父组件基本完成了销毁动作。因此父子组件关于`beforeDestroy`和`destroyed`这两个生命周期钩子函数的执行顺序为：
+```js
+// parent beforeDestroy
+// child beforeDestroy
+// child destroyed
+// parent destroyed
+```
+* **移除事件监听**：在前面我们提到当子组件完成销毁动作时，父组件基本也完成了销毁动作。这是因为，在使用`callHook`触发`destroyed`生命周期钩子函数之后，我们还需要移除相关的事件监听，它使用`$off`来实现，我们回顾一下代码：
+```js
+Vue.prototype.$off = function (
+  event?: string | Array<string>,
+  fn?: Function
+): Component {
+  const vm: Component = this
+  // all
+  if (!arguments.length) {
+    vm._events = Object.create(null)
+    return vm
+  }
+  // ...
+  return vm
+}
+```
+当我们不传递任何参数的时候，它直接把`vm._events`赋值为一个空对象，这样就达到了移除事件监听的目的。
 
 ### activated和deactivated
 这两个生命周期方法是与`keep-alive`内置组件强相关的生命周期钩子函数，因此我们会把这两个钩子函数的介绍放在之后的`keep-alive`小节。
