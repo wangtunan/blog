@@ -63,7 +63,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
 }
 ```
 `_update`代码并不是很多，其核心就是调用`__patch__`方法。在介绍`__patch__`之前，为了更好的理解后续相关的逻辑，我们先介绍几个小的知识点。
-* `activeInstance`：从命名可以看出来，它的意思是当前激活的实例对象。我们知道组件渲染是一个递归的过程，它会先从子节点开始渲染，等到所有子节点渲染完毕后，最后再渲染父级。那么在这种递归渲染的过程中，我们必须正确保证一对引用关系：当前渲染的组件实例以及其父级组件实例。`activeInstance`就是当前渲染的组件实例，它是一个模块变量：
+* `activeInstance`：从命名可以看出来，它的意思是当前激活的实例对象。我们知道组件渲染是一个递归的过程，渲染顺序是先子后父。那么在这种递归渲染的过程中，我们必须正确保证一对引用关系：当前渲染的组件实例以及其父级组件实例。`activeInstance`就是当前渲染的组件实例，它是一个模块变量：
 ```js
 export let activeInstance: any = null
 ```
@@ -96,7 +96,7 @@ export function initLifecycle (vm: Component) {
   // ...省略代码
 }
 ```
-在`initLifecycle`方法执行的过程中，通过`while`循环来保存`parent`和`children`父子关系，对于父级来说，`$children`中存储了它所有的子节点，对于`$children`来说，可以通过`vm.$parent`获取到它的父级。
+在`initLifecycle`方法执行的过程中，通过`while`循环来保存`parent`和`children`父子关系，对于父级来说，`$children`中存储了它所有的子节点，对于子级来说，可以通过`vm.$parent`获取到它的父级。
 * `_vnode和$vnode`：`_vnode`和`$vnode`也是一对父子关系，其中`_vnode`表示当前`VNode`节点，`$vnode`表示其父节点。我们来回顾一下`_render`方法，它有这样几段代码：
 ```js
 Vue.prototype._render = function () {
@@ -207,7 +207,7 @@ export function createPatchFunction (backend) {
   // ...
 }
 ```
-注意：这里定义的`hooks`与我们组件的生命周期钩子函数很相似，但它并不是处理组件生命周期的，它们是在`VNode`钩子函数执行阶段或者其它时机调用的，例如：在`VNode`插入的时候，需要执行`created`相关的钩子函数，在`VNode`移除的时候，需要执行`remove/destroy`相关的钩子函数。
+**注意**：这里定义的`hooks`与我们组件的生命周期钩子函数很相似，但它并不是处理组件生命周期的，它们是在`VNode`钩子函数执行阶段或者其它时机调用的，例如：在`VNode`插入的时候，需要执行`created`相关的钩子函数，在`VNode`移除的时候，需要执行`remove/destroy`相关的钩子函数。
 
 代码分析：
 * 首先通过解构获取到`modules`，它是一个数组，每个数组元素都有可能定义`create`、`update`、`remove`以及`destroy`等钩子函数，它可能是下面这样：
@@ -265,3 +265,63 @@ const componentVNodeHooks = {
   ...
 }
 ```
+
+### 返回patch函数
+我们回顾一下之前的代码：
+```js
+export const patch: Function = createPatchFunction({ nodeOps, modules })
+```
+我们可以发现，`patch`赋值的是`createPatchFunction`方法调用的结果，那么我们看一下`createPatchFunction`方法内部是如何定义这个返回函数的：
+```js
+export function createPatchFunction (backend) {
+  // ...
+  return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    if (isUndef(vnode)) {
+      if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
+      return
+    }
+
+    let isInitialPatch = false
+    const insertedVnodeQueue = []
+
+    if (isUndef(oldVnode)) { 
+      // ...
+    } else {
+      // ...
+    }
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
+    return vnode.elm
+  }
+}
+```
+在`patch`返回函数的最开始，它判断了`vnode`是否为`undefined`或者`null`，如果是并且`oldVnode`条件判断为真，那么它会调用`invokeDestroyHook`。执行`invokeDestroyHook`是为了触发子节点的销毁动作，那么很显然这段代码会在组件销毁的时候执行，我们可以在`$destroy`方法中看到下面这段代码(`$destroy`方法的介绍，我们会在组件生命周期小节中说明)：
+```js
+Vue.prototype.$destroy = function () {
+  // ...
+  vm.__patch__(vm._vnode, null)
+  // ...
+}
+```
+判断完`vnode`后，我们发现它对`oldVnode`也进行了判断，因此会有一个`if/else`分支逻辑。那么什么时候走`if`分支逻辑？什么时候走`else`分支逻辑？
+
+当`oldVnode`逻辑判断为真时，证明它首次渲染组件，因此会走`if`分支逻辑。当挂载根实例，普通节点或者派发更新的时候，它会走`else`分支逻辑。由于这两块的分支逻辑相对来说比较复杂，因此我们会在后续分模块中说明。
+
+在返回函数`patch`的最后，它调用了`invokeInsertHook`，这个方法的目的是为了触发`VNode`的`insert`钩子函数，其代码如下：
+```js
+ function invokeInsertHook (vnode, queue, initial) {
+  // delay insert hooks for component root nodes, invoke them after the
+  // element is really inserted
+  if (isTrue(initial) && isDef(vnode.parent)) {
+    vnode.parent.data.pendingInsert = queue
+  } else {
+    for (let i = 0; i < queue.length; ++i) {
+      queue[i].data.hook.insert(queue[i])
+    }
+  }
+}
+```
+### 根实例patch
+
+### 组件patch
+
+### createElm
