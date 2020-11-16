@@ -294,7 +294,7 @@ export function createPatchFunction (backend) {
   }
 }
 ```
-在`patch`返回函数的最开始，它判断了`vnode`是否为`undefined`或者`null`，如果是并且`oldVnode`条件判断为真，那么它会调用`invokeDestroyHook`。执行`invokeDestroyHook`是为了触发子节点的销毁动作，那么很显然这段代码会在组件销毁的时候执行，我们可以在`$destroy`方法中看到下面这段代码(`$destroy`方法的介绍，我们会在组件生命周期小节中说明)：
+在`patch`返回函数的最开始，它判断了`vnode`是否为`undefined`或者`null`，如果是并且`oldVnode`条件判断为真，那么它会调用`invokeDestroyHook`。执行`invokeDestroyHook`是为了触发子节点的销毁动作，那么很显然这段代码会在**组件销毁**的时候执行，我们可以在`$destroy`方法中看到下面这段代码(`$destroy`方法我们会在组件生命周期小节中介绍)：
 ```js
 Vue.prototype.$destroy = function () {
   // ...
@@ -304,7 +304,7 @@ Vue.prototype.$destroy = function () {
 ```
 判断完`vnode`后，我们发现它对`oldVnode`也进行了判断，因此会有一个`if/else`分支逻辑。那么什么时候走`if`分支逻辑？什么时候走`else`分支逻辑？
 
-当`oldVnode`逻辑判断为真时，证明它首次渲染组件，因此会走`if`分支逻辑。当挂载根实例，普通节点或者派发更新的时候，它会走`else`分支逻辑。由于这两块的分支逻辑相对来说比较复杂，因此我们会在后续分模块中说明。
+当使用`isUndef`方法对`oldVnode`逻辑判断为真时，证明此时的`oldVnode`没有，那么它表示组件是首次渲染，因此会走`if`分支逻辑。当挂载根实例或者派发更新的时候，此时的`oldVnode`存在，它会走`else`分支逻辑。由于这两块的分支逻辑相对来说比较复杂，因此我们会在后续单独划分模块说明。
 
 在返回函数`patch`的最后，它调用了`invokeInsertHook`，这个方法的目的是为了触发`VNode`的`insert`钩子函数，其代码如下：
 ```js
@@ -320,8 +320,299 @@ Vue.prototype.$destroy = function () {
   }
 }
 ```
+对于`VNode`的`insert`钩子函数而言，它主要做的事情就是触发组件的`mounted`钩子函数。对于组件一系列生命周期，我们会在下一个章节中介绍，这里只做了解。
+
 ### 根实例patch
+我们回顾一下`_update`方法，它有这样一段代码：
+```js
+if (!prevVnode) {
+  // initial render
+  vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+} else {
+  // updates
+  vm.$el = vm.__patch__(prevVnode, vnode)
+}
+```
+在首次渲染的时候，对于根实例而言，它传递的是一个真实的`DOM`节点，也就是说在`patch`返回函数中，第一个参数`oldVnode`不仅为真值，并且它还是一个真实的`DOM`节点。因此在`patch`返回函数中，它走下面这些代码：
+```js
+return function patch (oldVnode, vnode, hydrating, removeOnly) {
+  // ...
+  if (isUndef(oldVnode)) {
+    // ...
+  } else {
+    const isRealElement = isDef(oldVnode.nodeType)
+    if (!isRealElement && sameVnode(oldVnode, vnode)) {
+      // ...
+    } else {
+      if (isRealElement) {
+        // ...
+        // either not server-rendered, or hydration failed.
+        // create an empty node and replace it
+        oldVnode = emptyNodeAt(oldVnode)
+      }
+
+      // replacing existing element
+      const oldElm = oldVnode.elm
+      const parentElm = nodeOps.parentNode(oldElm)
+
+      // create new node
+      createElm(
+        vnode,
+        insertedVnodeQueue,
+        // extremely rare edge case: do not insert if old element is in a
+        // leaving transition. Only happens when combining transition +
+        // keep-alive + HOCs. (#4590)
+        oldElm._leaveCb ? null : parentElm,
+        nodeOps.nextSibling(oldElm)
+      )
+      // ...
+
+      // destroy old node
+      if (isDef(parentElm)) {
+        removeVnodes([oldVnode], 0, 0)
+      } else if (isDef(oldVnode.tag)) {
+        invokeDestroyHook(oldVnode)
+      }
+    }
+  }
+}
+```
+因为`oldVnode`参数为一个真实的`DOM`节点，所以`isRealElement`变量为`true`，它会调用`emptyNodeAt`。这个方法的作用是把一个真实`DOM`转换成一个`VNode`实例，其代码如下：
+```js
+function emptyNodeAt (elm) {
+  return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
+}
+```
+紧接着调用`createElm`方法，这个方法的主要作用就是把`VNode`实例转换成真实的`DOM`节点，我们会在后面的章节中单独介绍`createElm`，这里只做了解。
+
+在代码最后，它通过判断`parentElm`是否为真，来调用不同的方法，我们以`Vue-Cli`脚手架生成的`App.vue`组件为例。对于根实例而言，它的挂载节点为`<div id='app'></div>`，因此此时的`parentEl`为`body`节点，条件判断为真，因此调用`removeVnodes`方法，我们看一下这个方法的实现代码：
+```js
+function removeVnodes (vnodes, startIdx, endIdx) {
+  for (; startIdx <= endIdx; ++startIdx) {
+    const ch = vnodes[startIdx]
+    if (isDef(ch)) {
+      if (isDef(ch.tag)) {
+        removeAndInvokeRemoveHook(ch)
+        invokeDestroyHook(ch)
+      } else { // Text node
+        removeNode(ch.elm)
+      }
+    }
+  }
+}
+function removeAndInvokeRemoveHook (vnode, rm) {
+  if (isDef(rm) || isDef(vnode.data)) {
+    let i
+    const listeners = cbs.remove.length + 1
+    if (isDef(rm)) {
+      // we have a recursively passed down rm callback
+      // increase the listeners count
+      rm.listeners += listeners
+    } else {
+      // directly removing
+      rm = createRmCb(vnode.elm, listeners)
+    }
+    // recursively invoke hooks on child component root node
+    if (isDef(i = vnode.componentInstance) && isDef(i = i._vnode) && isDef(i.data)) {
+      removeAndInvokeRemoveHook(i, rm)
+    }
+    for (i = 0; i < cbs.remove.length; ++i) {
+      cbs.remove[i](vnode, rm)
+    }
+    if (isDef(i = vnode.data.hook) && isDef(i = i.remove)) {
+      i(vnode, rm)
+    } else {
+      rm()
+    }
+  } else {
+    removeNode(vnode.elm)
+  }
+}
+```
+我们可以看到，在`removeVnodes`方法中，它会删除旧的`id`等于`app`的节点，然后创建一个新的`id`为`app`的节点。看到这里，我们就能明白`Vue`官网上面这样一段话了：
+**所有的挂载元素会被 Vue 生成的 DOM 替换。因此不推荐挂载 root 实例到 html 或者 body 上**
 
 ### 组件patch
+在`patch`返回函数中，对于组件的首次渲染和派发更新渲染处理逻辑是不相同的，其中的差别体现在如下代码：
+```js
+return function patch (oldVnode, vnode, hydrating, removeOnly) {
+  // ...
+  if (isUndef(oldVnode)) {
+    // 组件首次渲染
+    isInitialPatch = true
+    createElm(vnode, insertedVnodeQueue)
+  } else {
+    const isRealElement = isDef(oldVnode.nodeType)
+    if (!isRealElement && sameVnode(oldVnode, vnode)) {
+      // 组件派发更新渲染
+      patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
+    } else {
+      // ...
+    }
+  }
+}
+```
+在组件`update/patch`章节，我们不会分析`patchVnode`方法，而是把它放在后面**编译**章节中。在这里，我们只需要看组件首次渲染即可。对于组件的首次渲染而言，依然还是调用`createElm`方法，不过这里要注意，它只传递了2个参数。
 
 ### createElm
+在上面两个小节，我们都提到过`createElm`，也知道它的主要作用是把`VNode`实例转换成真实的`DOM`节点，在这个小节我们来详细介绍`createElm`方法。
+```js
+function createElm (
+  vnode,
+  insertedVnodeQueue,
+  parentElm,
+  refElm,
+  nested,
+  ownerArray,
+  index
+) {
+  // ...
+  vnode.isRootInsert = !nested // for transition enter check
+  if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+    return
+  }
+
+  const data = vnode.data
+  const children = vnode.children
+  const tag = vnode.tag
+  if (isDef(tag)) {
+    if (process.env.NODE_ENV !== 'production') {
+      if (data && data.pre) {
+        creatingElmInVPre++
+      }
+      if (isUnknownElement(vnode, creatingElmInVPre)) {
+        warn(
+          'Unknown custom element: <' + tag + '> - did you ' +
+          'register the component correctly? For recursive components, ' +
+          'make sure to provide the "name" option.',
+          vnode.context
+        )
+      }
+    }
+
+    vnode.elm = vnode.ns
+      ? nodeOps.createElementNS(vnode.ns, tag)
+      : nodeOps.createElement(tag, vnode)
+    setScope(vnode)
+
+    /* istanbul ignore if */
+    if (__WEEX__) {
+      // ...
+    } else {
+      createChildren(vnode, children, insertedVnodeQueue)
+      if (isDef(data)) {
+        invokeCreateHooks(vnode, insertedVnodeQueue)
+      }
+      insert(parentElm, vnode.elm, refElm)
+    }
+
+    if (process.env.NODE_ENV !== 'production' && data && data.pre) {
+      creatingElmInVPre--
+    }
+  } else if (isTrue(vnode.isComment)) {
+    vnode.elm = nodeOps.createComment(vnode.text)
+    insert(parentElm, vnode.elm, refElm)
+  } else {
+    vnode.elm = nodeOps.createTextNode(vnode.text)
+    insert(parentElm, vnode.elm, refElm)
+  }
+}
+```
+我们可以在上面看到`createElm`方法的精简代码，它有几个主要的步骤：**创建组件节点**、**创建普通节点**、**创建注释节点**以及**创建文本节点**。
+
+* **创建组件节点**：在`createElm`方法的最开始，它通过调用`createComponent`方法尝试创建一个组件节点，如果`vnode`是一个组件`vnode`则返回`true`，并且提前`return`终止`createElm`方法，否则返回`false`。我们来看一下`createComponent`方法的实现代码：
+```js
+function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+  let i = vnode.data
+  if (isDef(i)) {
+    const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
+    if (isDef(i = i.hook) && isDef(i = i.init)) {
+      i(vnode, false /* hydrating */)
+    }
+    // after calling the init hook, if the vnode is a child component
+    // it should've created a child instance and mounted it. the child
+    // component also has set the placeholder vnode's elm.
+    // in that case we can just return the element and be done.
+    if (isDef(vnode.componentInstance)) {
+      initComponent(vnode, insertedVnodeQueue)
+      insert(parentElm, vnode.elm, refElm)
+      if (isTrue(isReactivated)) {
+        reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
+      }
+      return true
+    }
+  }
+}
+```
+对于组件`vnode`而言，判断其`data`条件是满足的，条件满足以后它处理了`i`，将其赋值为`i.init`。其实这里的`init`就是组件`vnode`的`init`钩子函数，其代码如下：
+```js
+const componentVNodeHooks = {
+  init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+    if (
+      vnode.componentInstance &&
+      !vnode.componentInstance._isDestroyed &&
+      vnode.data.keepAlive
+    ) {
+      // kept-alive components, treat as a patch
+      const mountedNode: any = vnode // work around flow
+      componentVNodeHooks.prepatch(mountedNode, mountedNode)
+    } else {
+      const child = vnode.componentInstance = createComponentInstanceForVnode(
+        vnode,
+        activeInstance
+      )
+      child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+    }
+  }
+  // ...
+}
+```
+当`i`方法执行时，它会在代码中通过`createComponentInstanceForVnode`来创建`Vue`实例，然后调用实例的`$mount`方法来挂载子组件。因为在这里调用了子组件的`$mount`方法，所以子组件会从头开始递归走一遍`update/patch`的过程，当子组件处理完毕后，会把子组件对应的真实`DOM`节点树插入到父级中该组件占位符的位置。这样经过一层层递归，反复执行`update/patch`的方式就可以构建成一个完整的组件树形结构。
+
+* **创建普通节点**：如果`VNode`实例的`tag`属性为真，则首先校验一遍`tag`是否为正确的标签，如果不是则会提示非法标签。如果是则先调用`createChildren`方法处理其子节点，子节点处理完毕后再调用`insert`直接插入到父级中。
+```js
+function createChildren (vnode, children, insertedVnodeQueue) {
+  if (Array.isArray(children)) {
+    if (process.env.NODE_ENV !== 'production') {
+      checkDuplicateKeys(children)
+    }
+    for (let i = 0; i < children.length; ++i) {
+      createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i)
+    }
+  } else if (isPrimitive(vnode.text)) {
+    nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)))
+  }
+}
+```
+我们可以看到在`createChildren`方法中，它首先判断了`VNode`的`children`子节点是否为数组，如果不是则直接创建一个文本节点插入到父级中，如果是则遍历子节点数组，然后递归调用`createElm`。根据以上分析，我们可以知道创建节点的过程是一个深度优先遍历的过程，子节点首先会被创建然后插入到其父级下面，最后才是父节点。因为子节点会优先创建并被插入，因此子节点会首先调用`insert`方法，其代码如下：
+```js
+function insert (parent, elm, ref) {
+  if (isDef(parent)) {
+    if (isDef(ref)) {
+      if (nodeOps.parentNode(ref) === parent) {
+        nodeOps.insertBefore(parent, elm, ref)
+      }
+    } else {
+      nodeOps.appendChild(parent, elm)
+    }
+  }
+}
+```
+其中`insertBefore`和`appendChild`是对真实`DOM`的一层封装。
+```js
+export function insertBefore (parentNode: Node, newNode: Node, referenceNode: Node) {
+  parentNode.insertBefore(newNode, referenceNode)
+}
+export function appendChild (node: Node, child: Node) {
+  node.appendChild(child)
+}
+```
+* **创建注释节点和创建文本节点**：创建注释节点和创建文本节点非常简单，它们分别调用了`createComment`和`createTextNode`，其实这两个方法是对原始`DOM`操作的一层封装而已：
+```js
+export function createTextNode (text: string): Text {
+  return document.createTextNode(text)
+}
+export function createComment (text: string): Comment {
+  return document.createComment(text)
+}
+```

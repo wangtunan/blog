@@ -99,7 +99,7 @@ export function _createElement (
 ```
 `_createElement`的代码看起来有点多，但它主要做两件事情：**规范化子节点和创建VNode节点**，接下来我们围绕这两个方面来详细介绍。
 
-* **规范化子节点**：因为虚拟`DOM`是一个树形结构，每一个节点都应该是`VNode`类型，但是`children`参数又是任意类型的，所以如果有子节点，我们需要把它进行规范化成`VNode`类型，如果没有子节点，那么`children`就是`undefined`。至于如何规范化，则是通过`normalizationType`参数来实现的，其中`normalizationType`可能的值有三种：`undefined`表示不进行规范化，`1`表示简单规范化，`2`表示始终规范化。我们先来看当值为`1`的情况，它调用了`simpleNormalizeChildren`，这个方法和`normalizeChildren`是定义在同一个地方`src/core/vdom/helpers/normalize-children.js`文件中，其代码如下：
+* **规范化子节点**：因为虚拟`DOM`是一个树形结构，每一个节点都应该是`VNode`类型，但是`children`参数又是任意类型的，所以如果有子节点，我们需要把它进行规范化成`VNode`类型，如果没有子节点，那么`children`就是`undefined`。至于如何规范化，则是通过`normalizationType`参数来实现的，其中`normalizationType`可能的值我们只说三种：`undefined`表示不进行规范化，`1`表示简单规范化，`2`表示始终规范化。我们先来看当值为`1`的情况，它调用了`simpleNormalizeChildren`，这个方法和`normalizeChildren`是定义在同一个地方`src/core/vdom/helpers/normalize-children.js`文件中，其代码如下：
 ```js
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {

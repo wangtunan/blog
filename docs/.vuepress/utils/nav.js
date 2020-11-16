@@ -89,8 +89,7 @@ const vueAnalysisSidebar = [
       'component/merge',
       'component/patch',
       'component/lifecycle',
-      'component/register',
-      'component/async'
+      'component/register'
     ]
   },
   {
