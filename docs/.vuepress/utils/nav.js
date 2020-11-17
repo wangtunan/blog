@@ -97,6 +97,7 @@ const vueAnalysisSidebar = [
     collapsable: false,
     children: [
       'compile/',
+      'compile/compileToFunctions',
       'compile/parse',
       'compile/optimize',
       'compile/codegen'
