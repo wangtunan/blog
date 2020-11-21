@@ -194,7 +194,11 @@ const textAST = {
 ```
 根据以上`ul`，`li`以及文本节点的`AST`对象，可以通过`parent`和`children`链接起来构造出一个简单的`AST`树形结构。
 
-## parseHTML及其钩子函数
+
+## HTML解析器
+在`parse`模板解析的时候，根据不同的情况，分为三种解析器：**HTML解析器**、**文本解析器**和**过滤器解析器**。其中`HTML`解析器是最主要、最核心的解析器。
+
+### 整体思想
 在`parse`方法中，我们可以看到它调用了`parseHTML`方法来编译模板，它是在`html-parser.js`文件中定义的：
 ```js
 export function parseHTML (html, options) {
@@ -205,9 +209,9 @@ export function parseHTML (html, options) {
   }
 }
 ```
-由于`parseHTML`的代码及其复杂，它的**整体思想**是通过字符串的`substring`方法来截取字符串，直到整个`template`被解析完毕，也就是`html`为空时`while`循环结束。为了更好的理解这种`while`循环，我们举例说明：
+由于`parseHTML`的代码极其复杂，它的**整体思想**是通过字符串的`substring`方法来截取`html`字符串，直到整个`html`被解析完毕，也就是`html`为空时`while`循环结束。为了更好的理解这种`while`循环，我们举例说明：
 ```js
-// 方法定义
+// 变量、方法定义
 let html = `<div class="list-box">{{msg}}</div>`
 let index = 0
 function advance (n) {
@@ -230,6 +234,223 @@ let html = `</div>`
 advance(6)
 let html = ``
 ```
-## parse细节
+在最后一次截取后，`html`变成了空字符串，此时`while`循环结束，也就代表整个`parse`模板解析过程结束了。在`while`循环的过程中，对于在哪里截取字符串是有讲究的，它实质上是使用正则表达式去匹配，当满足一定的条件时，会触发对应的钩子函数，在钩子函数中我们可以做一些事情。
+
+### 钩子函数
+我们发现当调用`parseHTML`方法的时候，它传递了一个对象`options`，其中这个`options`包括一些钩子函数，它们会在`HTML`解析的时候自动触发，这些钩子函数如下：
+```js
+parseHTML(template, {
+  start () {
+    // 开始标签钩子函数
+  },
+  end () {
+    // 结束标签钩子函数
+  },
+  char () {
+    // 文本钩子函数
+  },
+  comment () {
+    // 注释钩子函数
+  }
+})
+```
+为了更好的理解钩子函数，我们举例说明，假设我们有以下`template`模板：
+```html
+<div>文本</div>
+```
+解析分析：
+* 开始标签钩子函数：当模板开始解析的时候，会走下面这段代码的逻辑：
+```js
+// Start tag:
+const startTagMatch = parseStartTag()
+if (startTagMatch) {
+  handleStartTag(startTagMatch)
+  if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
+    advance(1)
+  }
+  continue
+}
+```
+就整段代码逻辑而言，它根据`parseStartTag`方法的调用结果来判断，如果条件为真则再调用`handleStartTag`方法，在`handleStartTag`方法中它会调用了`options.start`钩子函数。
+```js
+function handleStartTag () {
+  // ...
+  if (options.start) {
+    options.start(tagName, attrs, unary, match.start, match.end)
+  }
+}
+```
+我们回过头来再看`parseStartTag`方法，它的代码如下：
+```js
+import { unicodeRegExp } from 'core/util/lang'
+const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
+const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+const startTagOpen = new RegExp(`^<${qnameCapture}`)
+
+function parseStartTag () {
+  const start = html.match(startTagOpen)
+  if (start) {
+    const match = {
+      tagName: start[1],
+      attrs: [],
+      start: index
+    }
+    advance(start[0].length)
+    let end, attr
+    while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
+      attr.start = index
+      advance(attr[0].length)
+      attr.end = index
+      match.attrs.push(attr)
+    }
+    if (end) {
+      match.unarySlash = end[1]
+      advance(end[0].length)
+      match.end = index
+      return match
+    }
+  }
+}
+```
+在`parseStartTag`方法的最开始，它使用`match`方法并传递一个匹配开始标签的正则表达式，如果匹配成功则会返回一个对象。在目前阶段，我们不需要过多的关注`parseStartTag`方法过多的细节，我们只需要知道两点：
+1. 当匹配开始标签成功时，会返回一个对象。
+2. 在匹配的过程中，会调用`advance`方法截取掉这个开始标签。
+```js
+// 调用前
+let html = '<div>文本</div>'
+
+// 调用
+parseStartTag()
+
+// 调用后
+let html = '文本</div>'
+```
+* 文本钩子函数：在截取掉开始标签后，会通过`continue`走向第二次`while`循环，此时`textEnd`会重新求值：
+```js
+let html = '文本</div>'
+let textEnd = html.indexOf('<') // 2
+```
+因为第二次`while`循环时，`textEnd`值为`2`，因此会走下面这段逻辑：
+```js
+let text, rest, next
+if (textEnd >= 0) {
+  rest = html.slice(textEnd)
+  while (
+    !endTag.test(rest) &&
+    !startTagOpen.test(rest) &&
+    !comment.test(rest) &&
+    !conditionalComment.test(rest)
+  ) {
+    // < in plain text, be forgiving and treat it as text
+    next = rest.indexOf('<', 1)
+    if (next < 0) break
+    textEnd += next
+    rest = html.slice(textEnd)
+  }
+  text = html.substring(0, textEnd)
+}
+
+if (textEnd < 0) {
+  text = html
+}
+
+if (text) {
+  advance(text.length)
+}
+if (options.chars && text) {
+  options.chars(text, index - text.length, index)
+}
+```
+当以上代码`while`循环完毕后，`text`值为`文本`，然后调用`advence`以及触发`chars`钩子函数。
+```js
+// 截取前
+let html = '文本<div>'
+
+// 截取
+advence(2)
+
+// 截取后
+let html = '<div>'
+```
+* 结束标签钩子函数：在文本被截取之后，开始进入下一轮循环，重新对`textEnd`进行求值：
+```js
+let html = '</div>'
+let textEnd = html.indexOf('<') // 0
+```
+当`textEnd`为`0`的时候，会走下面这段逻辑：
+```js
+import { unicodeRegExp } from 'core/util/lang'
+const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
+const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+
+// End tag:
+const endTagMatch = html.match(endTag)
+if (endTagMatch) {
+  const curIndex = index
+  advance(endTagMatch[0].length)
+  parseEndTag(endTagMatch[1], curIndex, index)
+  continue
+}
+```
+当使用`match`传入一个匹配结束标签的正则表达式时，如果匹配成功会返回一个对象，然后调用`advance`和`parseEndTag`这两个方法。当调用`advence`后，就把结束标签全部截取掉了，此时`html`为一个空字符串。在`parseEndTag`方法中，它会调用`options.end`钩子函数。
+```js
+function parseEndTag () {
+  // ...
+  if (options.end) {
+    options.end(tagName, start, end)
+  }
+}
+```
+
+* 注释钩子函数：对于`HTML`注释节点来说，它会走下面这段代码的逻辑：
+```js
+// 注释节点的例子
+let html = '<!-- 注释节点 -->'
+// Comment:
+if (comment.test(html)) {
+  const commentEnd = html.indexOf('-->')
+
+  if (commentEnd >= 0) {
+    if (options.shouldKeepComment) {
+      options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
+    }
+    advance(commentEnd + 3)
+    continue
+  }
+}
+```
+当匹配到注释节点的时候，会先触发`options.comment`钩子函数，然后调用`advence`把注释节点截取掉。对于`comment`钩子函数所做的事情，它非常简单：
+```js
+comment (text: string, start, end) {
+  // adding anything as a sibling to the root node is forbidden
+  // comments should still be allowed, but ignored
+  if (currentParent) {
+    const child: ASTText = {
+      type: 3,
+      text,
+      isComment: true
+    }
+    if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+      child.start = start
+      child.end = end
+    }
+    currentParent.children.push(child)
+  }
+}
+```
+从以上代码可以看出来，当触发此钩子函数的时候，仅仅生成一个注释节点的`AST`对象，然后把它`push`到其父级的`children`数组中即可。
+
+### 标签解析类型
+
+### DOM层级维护
+
+### 属性解析
+
+
+
+## 文本解析器
+
+## 过滤器解析器
 
 ## parse流程图
