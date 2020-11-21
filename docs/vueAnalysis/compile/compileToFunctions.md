@@ -186,16 +186,16 @@ function baseCompile (
 * **CSP限制**：`CSP`是指内容安全策略，我们可以在[MDN](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CSP)上看到它对`CSP`的定义、描述以及一些示例，同时我们可以看到它有下面这样一段描述：
 > 一个策略由一系列策略指令所组成，每个策略指令都描述了一个针对某个特定类型资源以及生效范围的策略。你的策略应当包含一个default-src策略指令，在其他资源类型没有符合自己的策略时应用该策略(有关完整列表查看default-src )。一个策略可以包含 default-src  或者 script-src 指令来防止内联脚本运行, 并杜绝eval()的使用。 一个策略也可包含一个 default-src 或  style-src 指令去限制来自一个 style 元素或者style属性的內联样式。
 
-如果想深入了解`CSP`，你可以点击[Content Security Policy](https://developers.google.com/web/fundamentals/security/csp/#if_you_absolutely_must_use_it)去深入学习有关`CSP`方面的知识。
+如果想了解`CSP`，你可以点击[Content Security Policy](https://developers.google.com/web/fundamentals/security/csp/#if_you_absolutely_must_use_it)去深入学习有关`CSP`方面的知识。
 
-**注意**：`Vue`只在`1.0+`版本提供了特定的`CSP`兼容版本，你可以在[Vue Github](https://github.com/vuejs/vue/tree/1.0-csp)仓库去查看这个版本的源代码。
+**注意**：`Vue`只在`1.0+`提供了特定的`CSP`兼容版本，你可以在[Vue Github](https://github.com/vuejs/vue/tree/1.0-csp)分支仓库去查看这个版本的源代码。
 
-根据以上描述，如果存在某些`CSP`限制，那么我们可以无法使用`text-to-JavaScript`机制，也就是说下面这些代码可能无法正常运行：
+根据以上描述，如果存在某些`CSP`限制，那么我们可能无法使用`text-to-JavaScript`机制，也就是说下面这些代码可能无法正常运行：
 ```js
 const func = new Function('return 1')
 evel('alert(1)')
 ```
-在`compileToFunctions`返回函数代码中，我们在`try/catch`中尝试使用`new Function('return 1')`来检测是否存在`CSP`限制，如果存在那么提示相关错误语句。
+在`compileToFunctions`返回函数中，我们使用`try/catch`尝试检测`new Function('return 1')`是否存在`CSP`限制，如果存在就提示相关错误信息。
 ```js
 'It seems you are using the standalone build of Vue.js in an ' +
 'environment with Content Security Policy that prohibits unsafe-eval. ' +
@@ -213,7 +213,7 @@ const compiled = {
   render: 'with(this){return 1}'
 }
 ```
-在`res`返回对象中，`compileToFunctions`是使用下面这段代码来跟赋值的：
+在`res`返回对象中，`compileToFunctions`是使用下面这段代码来赋值的：
 ```js
 const res = {}
 const fnGenErrors = []
@@ -245,7 +245,7 @@ const res = {
   render: function () { with(this){return 1} }
 }
 ```
-* **核心编译**：在之前我们介绍过，`compileToFunctions`方法只有一段最核心的代码：
+* **核心编译**：在之前我们介绍过`compileToFunctions`方法，它只有一段最核心的代码：
 ```js
 // 核心代码
 const compiled = compile(template, options)
@@ -300,9 +300,10 @@ new Vue({
   template: '<App/>'
 })
 ```
-编译缓存后，`cache`如下：
+编译缓存后，`cache`缓存对象如下：
 ```js
 const cache = {
   '<App/>': 'with(this) { xxxx }'
 }
 ```
+当再次编译`App`组件的时候，发现在`cache`对象中已经存在这个键，因此直接返回。
