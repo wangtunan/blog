@@ -540,7 +540,7 @@ let html = ``
 ```
 
 ### DOM层级维护
-我们都知道`HTML`标签是一个`DOM`属性结构，在模板解析的时候，我们要正确维护这种`DOM`层级关系。在`Vue`中，它定义了一个`stack`栈数组来实现。这个`stack`栈数组不仅能帮我们维护`DOM`层级关系，还能帮我们做一些其它事情。
+我们都知道`HTML`是一个`DOM`树形结构，在模板解析的时候，我们要正确维护这种`DOM`层级关系。在`Vue`中，它定义了一个`stack`栈数组来实现。这个`stack`栈数组不仅能帮我们维护`DOM`层级关系，还能帮我们做一些其它事情。
 
 那么，在`Vue`中是如何通过`stack`栈数组来维护这种关系的呢？其实，维护这种`DOM`层级结构，需要和我们之前提到过的两个钩子函数进行配合：`start`开始标签钩子函数和`end`结束标签钩子函数。其实现思路是：**当触发开始标签钩子函数的时候，把当前节点推入栈数组中；当触发结束标签钩子函数的时候，把栈数组中栈顶元素推出。**
 
@@ -607,7 +607,7 @@ parseHTML(template, {
 })
 ```
 代码分析：
-* **start**: 首先在`start`钩子函数的最后，它有一段`if/else`分支逻辑，在`if`分支中它直接把`element`推入到了`stack`栈数组中，而在`else`分支逻辑中则调用了`closeElement`方法。造成存在这种逻辑分支的关键点在于`unary`参数，那么`unary`到底是什么？既然它是`start`钩子函数的参数，我们在此钩子函数调用的地方去找这个参数是如何传递的，其实它是在`handleStartTag`中定义的一个常量：
+* **start**: 首先在`start`钩子函数的最后，它有一段`if/else`分支逻辑，在`if`分支中它直接把`element`推入到了`stack`栈数组中，而在`else`分支逻辑中则调用了`closeElement`方法。造成存在这种逻辑分支的关键点在于`unary`参数，那么`unary`到底是什么？既然它是`start`钩子函数的参数，我们就在此钩子函数调用的地方去找这个参数是如何传递的，其实它是在`handleStartTag`方法中定义的一个常量：
 ```js
 export const isUnaryTag = makeMap(
   'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
@@ -617,9 +617,9 @@ const options.isUnaryTag = isUnaryTag
 const isUnaryTag = options.isUnaryTag || no
 const unary = isUnaryTag(tagName) || !!unarySlash
 ```
-其实`unary`代表一元的意思，我们可以发现`isUnaryTag`常量在赋值的过程中，给`makeMap`传递的参数标签全部是自闭合标签。这些自闭合标签，我们能触发其开始标签钩子函数，但无法触发其结束标签钩子函数，因此如果当前标签是自闭合标签的话，我们需要在`else`分支逻辑中调用`closeElement`方法手动闭合标签，而不需要把其推入`stack`栈数组中。
+`unary`代表一元的意思，我们可以发现`isUnaryTag`常量在赋值的过程中，给`makeMap`传递的参数标签全部是自闭合标签。这些自闭合标签，我们能触发其开始标签钩子函数，但无法触发其结束标签钩子函数，因此如果当前标签是自闭合标签的话，我们需要在`else`分支逻辑中调用`closeElement`方法手动处理结束标签钩子函数所做的事情，而不需要把其推入`stack`栈数组中。
 
-* **end**: 在触发结束标签钩子函数的时候，它做的事情并不复杂，首先拿到栈顶元素，然后把栈数组的`length`长度减去`1`以达到推出栈顶元素的目的，最后调用`closeElement`方法来处理后续的事情。由于`closeElement`方法的代码很多，我们并不需要全部理解。在这`stack`栈数组维护`DOM`层级这一小节我们只需要知道，在`closeElement`方法中，它会去正确处理`AST`对象的`parent`和`children`属性即可。
+* **end**: 在触发结束标签钩子函数的时候，它做的事情并不复杂，首先拿到栈顶元素，然后把栈数组的`length`长度减去`1`以达到推出栈顶元素的目的，最后调用`closeElement`方法来处理后续的事情。由于`closeElement`方法的代码很多，我们并不需要全部理解。在`stack`栈数组维护`DOM`层级这一小节我们只需要知道，在`closeElement`方法中，它会正确处理去`AST`对象的`parent`和`children`属性即可。
 
 我们在之前提到过，`stack`栈数组不仅能帮我们来维护`DOM`层级关系，还能帮我们来检查元素标签是否正确闭合，如果没有正确闭合则会提示相应错误信息。假设，我们有如下`template`模板：
 ```js
@@ -635,17 +635,409 @@ tag <p> has no matching end tag.
 // 举例使用，实际为AST对象
 const stack = ['div', 'p']
 ```
-因为`p`标签没有闭合，因此在随后的
+因为`p`标签没有闭合，因此在随后触发`div`节点的结束标签钩子函数的时候，会执行下面这段代码的逻辑：
+```js
+function parseEndTag (tagName, start, end) {
+  // ...
+  if (tagName) {
+    lowerCasedTagName = tagName.toLowerCase()
+    for (pos = stack.length - 1; pos >= 0; pos--) {
+      if (stack[pos].lowerCasedTag === lowerCasedTagName) {
+        break
+      }
+    }
+  } else {
+    // If no tag name is provided, clean shop
+    pos = 0
+  }
+  if (pos >= 0) {
+    // Close all the open elements, up the stack
+    for (let i = stack.length - 1; i >= pos; i--) {
+      if (process.env.NODE_ENV !== 'production' &&
+        (i > pos || !tagName) &&
+        options.warn
+      ) {
+        options.warn(
+          `tag <${stack[i].tag}> has no matching end tag.`,
+          { start: stack[i].start, end: stack[i].end }
+        )
+      }
+      if (options.end) {
+        options.end(stack[i].tag, start, end)
+      }
+    }
+
+    // Remove the open elements from the stack
+    stack.length = pos
+    lastTag = pos && stack[pos - 1].tag
+  }
+  // ...
+}
+```
+在第一个`for`循环中，它要在`stack`栈数组中找到`div`节点的位置索引，就前面的例子而言索引`pos`值为`0`。然后在第二个`for`循环的时候，发现栈顶元素到索引为`0`的位置还有其它元素。这代表中间肯定有元素标签没有正确闭合，因此先提示错误信息，然后触发`options.end`钩子函数，在`end`钩子函数中通过`closeElement`去手动闭合`p`标签。
+
 ### 属性解析
+在上面的所有小节中，我们都没有提到`parse`模板解析的时候是如何解析属性的，在这一小节我们来详细分析一下属性的解析原理。
 
-#### class
-#### style
-#### v-for
-#### v-if/v-show
+为了更好的理解属性解析原理，我们举例说明。假设，我们有以下`template`模板:
+```js
+const boxClass = 'box-red'
+let html = '<div id="box" class="box-class" :class="boxClass">属性解析</div>'
+```
+在首次匹配到`<div`这个开始标签的时候，它走下面这段代码的逻辑：
+```js
+// Start tag:
+const startTagMatch = parseStartTag()
+if (startTagMatch) {
+  handleStartTag(startTagMatch)
+  if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
+    advance(1)
+  }
+  continue
+}
+```
+在以上代码中，我们需要注意两个方法，一个是`parseStartTag`，另外一个是`handleStartTag`。我们先来看`parseStartTag`方法，在这个方法中它有一个`while`循环，匹配和处理`attrs`的过程就在这个`while`循环中，代码如下：
+```js
+function parseStartTag () {
+  const match = {
+    tagName: start[1],
+    attrs: [],
+    start: index
+  }
+  advance(start[0].length)
+  let end, attr
+  while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
+    attr.start = index
+    advance(attr[0].length)
+    attr.end = index
+    match.attrs.push(attr)
+  }
+}
+```
+代码分析：
+* 在第一次调用`advance`的时候，会把`<div`这段截取掉，截取后`html`值如下：
+```js
+let html = ' id="box" class="box-class" :class="boxClass">属性解析</div>'
+```
+随后，在`while`循环条件的中匹配了两个正则表达式：
+```js
+const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+```
+从命名我们可以看出来，一个是用来匹配动态属性的，一个是用来匹配属性的。
 
+* 在`while`判断条件中，它首先会匹配到`id`属性，条件判断为真，第一次执行`while`循环。在`while`循环中，它不仅调用`advance`方法把` id="box"`这段字符串截取掉，而且还把匹配的结果添加到了`match.attrs`数组中，第一次`while`循环执行完毕后，结果如下：
+```js
+let html = 'class="box-class" :class="boxClass">属性解析</div>'
+const match = {
+  tagName: 'div',
+  attrs: [
+    [' id="box"', 'id', '=', 'box']
+  ]
+}
+```
+* 在第二次判断`while`条件的时候，会同`id`一样匹配到`class`属性，第二次`while`循环执行完毕后，结果如下：
+```js
+let html = ' :class="boxClass">属性解析</div>'
+const match = {
+  tagName: 'div',
+  attrs: [
+    [' id="box"', 'id', '=', 'box'],
+    [' class="box-class"', 'class', '=', 'box-class']
+  ]
+}
+```
+* 在第三次判断`while`条件的时候，它匹配到的是动态属性，这一轮`while`执行循环完毕后，结果如下：
+```js
+let html = '>属性解析</div>'
+const match = {
+  tagName: 'div',
+  attrs: [
+    [' id="box"', 'id', '=', 'box'],
+    [' class="box-class"', 'class', '=', 'box-class'],
+    [' :class="boxClass"', ':class', '=', 'boxClass']
+  ]
+}
+```
+* `while`循环执行完毕后，它判断了`end`，其中`end`是在上一次`while`循环条件判断时使用`startTagClose`正则表达式匹配的结果。在以上例子中，它成功匹配到`>`，因此走`if`分支的逻辑。
+```js
+const startTagClose = /^\s*(\/?)>/
+let html = '属性解析</div>'
+```
+分析完`parseStartTag`，我们回过头来看一下`handleStartTag`方法，在这个方法中使用`for`循环来遍历`match.attrs`然后格式化`attrs`，其代码如下：
+```js
+function handleStartTag (match) {
+  const l = match.attrs.length
+  const attrs = new Array(l)
+  for (let i = 0; i < l; i++) {
+    const args = match.attrs[i]
+    const value = args[3] || args[4] || args[5] || ''
+    const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
+      ? options.shouldDecodeNewlinesForHref
+      : options.shouldDecodeNewlines
+    attrs[i] = {
+      name: args[1],
+      value: decodeAttr(value, shouldDecodeNewlines)
+    }
+    if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+      attrs[i].start = args.start + args[0].match(/^\s*/).length
+      attrs[i].end = args.end
+    }
+  }
+
+  // ...
+  if (options.start) {
+    options.start(tagName, attrs, unary, match.start, match.end)
+  }
+}
+```
+在`handleStartTag`方法中对于`attrs`的处理，主要是规范化`attrs`，将二维数组规范化为`name/value`形式的对象数组，在`for`循环完毕后`attrs`数组结果如下：
+```js
+const attrs = [
+  { name: 'id', value: 'box' },
+  { name: 'class', value: 'box-class' },
+  { name: ':class', value: 'boxClass' }
+]
+```
+
+规范化完`attrs`以后，就需要在`start`钩子函数中创建AST对象了，我们来回顾一下`createASTElement`方法：
+```js
+export function createASTElement (
+  tag: string,
+  attrs: Array<ASTAttr>,
+  parent: ASTElement | void
+): ASTElement {
+  return {
+    type: 1,
+    tag,
+    attrsList: attrs,
+    attrsMap: makeAttrsMap(attrs),
+    rawAttrsMap: {},
+    parent,
+    children: []
+  }
+}
+```
+以上代码比较简单，我们唯一值得关注的是`makeAttrsMap`方法，它的实现代码如下：
+```js
+function makeAttrsMap (attrs: Array<Object>): Object {
+  const map = {}
+  for (let i = 0, l = attrs.length; i < l; i++) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      map[attrs[i].name] && !isIE && !isEdge
+    ) {
+      warn('duplicate attribute: ' + attrs[i].name, attrs[i])
+    }
+    map[attrs[i].name] = attrs[i].value
+  }
+  return map
+}
+```
+`makeAttrsMap`方法的主要作用就是把`name/value`对象数组形式，转换成`key/value`对象，例如：
+```js
+const arr = [
+  { name: 'id', value: 'box' },
+  { name: 'class', value: 'box-class' }
+]
+const obj = makeAttrsMap(arr) // { id: 'box', class: 'box-class' }
+```
+在介绍完`makeAttrsMap`方法后，生成的`AST`对象如下：
+```js
+const ast = {
+  type: 1,
+  tag: 'div',
+  attrsList: [
+    { name: 'id', value: 'box' },
+    { name: 'class', value: 'box-class' },
+    { name: ':class', value: 'boxClass' }
+  ],
+  attrsMap: {
+    id: 'box',
+    class: 'box-class',
+    :class: 'boxClass'
+  },
+  rawAttrsMap: {},
+  parent: undefined,
+  children: []
+}
+```
+
+### 指令解析
+在分析完属性解析原理后，我们来看跟它解析流程非常相似的指令解析流程。在这一小节，我们来看两个非常具有代表性的指令：`v-if`和`v-for`。
+
+假设，我们有如下`template`模板：
+```js
+const list = ['AAA', 'BBB', 'CCC']
+let html = `
+  <ul v-if="list.length">
+    <li v-for="(item, index) in list" :key="index">{{item}}</li>
+  </ul>
+`
+```
+
+对于指令的解析，它们同`atts`解析过程非常相似，因为在`dynamicArgAttribute`正则表达式中，它是支持匹配指令的：
+```js
+const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+```
+
+在`parseStartTag`方法执行完毕后，`ul`标签的`attrs`值如下：
+```js
+const match = {
+  attrs: [' v-if="list.length"', 'v-if', '=', 'list.length']
+}
+```
+在`handleStartTag`方法执行完毕后，`ul`标签的`attrs`规范化后的值如下：
+```js
+const attrs = [
+  { name: 'v-if', value: 'list.length' }
+]
+```
+在`createASTElement`方法调用后，`ul`标签的`AST`对象为：
+```js
+const ast = {
+  type: 1,
+  tag: 'ul',
+  attrsList: [
+    { name: 'v-if', value: 'list.length' }
+  ],
+  attrsMap: {
+    v-if: 'list.length'
+  },
+  ...
+}
+```
+比属性解析多一个步骤，对于`v-if`指令来说，它在创建`AST`对象之后调用了`processIf`方法来处理`v-if`指令，其代码如下：
+```js
+function processIf (el) {
+  const exp = getAndRemoveAttr(el, 'v-if')
+  if (exp) {
+    el.if = exp
+    addIfCondition(el, {
+      exp: exp,
+      block: el
+    })
+  } else {
+    if (getAndRemoveAttr(el, 'v-else') != null) {
+      el.else = true
+    }
+    const elseif = getAndRemoveAttr(el, 'v-else-if')
+    if (elseif) {
+      el.elseif = elseif
+    }
+  }
+}
+export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
+  if (!el.ifConditions) {
+    el.ifConditions = []
+  }
+  el.ifConditions.push(condition)
+}
+```
+我们可以看到，`processIf`方法里面，它不仅可以处理`v-if`指令，还可以对`v-else/v-else-if`来进行处理。对于`v-if`而言，它通过调用`addIfCondition`方法，来给`AST`对象添加`ifConditions`属性，当`processIf`方法执行完毕后，`AST`对象的最新值为：
+```js
+const ast = {
+  type: 1,
+  tag: 'ul',
+  attrsList: [
+    { name: 'v-if', value: 'list.length' }
+  ],
+  attrsMap: {
+    v-if: 'list.length'
+  },
+  if: 'list.length',
+  ifConditions: [
+    { exp: 'list.length', block: 'ast对象自身', }
+  ],
+  ...
+}
+```
+`v-for`指令的解析过程跟`v-if`的基本相同，唯一的区别是`v-if`使用`processIf`来处理，`v-for`使用`processFor`来处理。
+
+对于解析`li`标签来说，在`processFor`方法调用之前，其`AST`对象为：
+```js
+const ast = {
+  type: 1,
+  tag: 'li',
+  attrsList: [
+    { name: 'v-for', value: '(item, index) in list' },
+    { name: ':key', value: 'index' }
+  ],
+  attrsMap: {
+    v-for: '(item, index) in list',
+    :key: 'index'
+  },
+  ...
+}
+```
+接下来，我们来看看`processFor`方法，其代码如下：
+```js
+export function processFor (el: ASTElement) {
+  let exp
+  if ((exp = getAndRemoveAttr(el, 'v-for'))) {
+    const res = parseFor(exp)
+    if (res) {
+      extend(el, res)
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
+        `Invalid v-for expression: ${exp}`,
+        el.rawAttrsMap['v-for']
+      )
+    }
+  }
+}
+```
+调用`getAndRemoveAttr`是为了从`ast`对象的`attrsList`属性数组中移除`v-for`，并且返回其`value`值，也就是`(item, index) in list`。然后使用`parseFor`方法解析这段字符串，其代码如下：
+```js
+export function parseFor (exp: string): ?ForParseResult {
+  const inMatch = exp.match(forAliasRE)
+  if (!inMatch) return
+  const res = {}
+  res.for = inMatch[2].trim()
+  const alias = inMatch[1].trim().replace(stripParensRE, '')
+  const iteratorMatch = alias.match(forIteratorRE)
+  if (iteratorMatch) {
+    res.alias = alias.replace(forIteratorRE, '').trim()
+    res.iterator1 = iteratorMatch[1].trim()
+    if (iteratorMatch[2]) {
+      res.iterator2 = iteratorMatch[2].trim()
+    }
+  } else {
+    res.alias = alias
+  }
+  return res
+}
+```
+就以上例子而言，使用`parseFor`方法解析`value`后，`res`对象值如下：
+```js
+const res = {
+  alias: 'item',
+  iterator1: 'index',
+  for: 'list'
+}
+```
+随后使用`extend`方法把这个对象，扩展到`AST`对象上，`extend`方法我们之前提到过，这里不在赘述。调用`processFor`方法后，最新的`AST`对象的最新值如下：
+```js
+const ast = {
+  type: 1,
+  tag: 'li',
+  attrsList: [
+    { name: ':key', value: 'index' }
+  ],
+  attrsMap: {
+    v-for: '(item, index) in list',
+    :key: 'index'
+  },
+  alias: 'item',
+  iterator1: 'index',
+  for: 'list',
+  ...
+}
+```
 ## 文本解析器
 
 ### 纯文本
+
 ### 带变量的文本
 
 ## 过滤器解析器
