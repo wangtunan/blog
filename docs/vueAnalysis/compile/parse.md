@@ -1034,12 +1034,264 @@ const ast = {
   ...
 }
 ```
+
 ## 文本解析器
+对于文本而言，我们在开发`Vue`应用的时候，通常有两种撰写方式：
+```js
+// 纯文本
+let html = '<div>纯文本</div>'
+
+// 带变量的文本
+const msg = 'Hello, Vue.js'
+let html = '<div>{{msg}}</div>'
+```
+接下来，我们按照这两种方式分开进行介绍。
 
 ### 纯文本
+在之前我们介绍过，当第一次`while`循环执行完毕后，此时`html`的值如下：
+```js
+let html = '纯文本</div>'
+```
+第二次执行`while`循环的时候，文本的正则会匹配到，进而触发`options.chars`钩子函数，在钩子函数中我们只需要关注以下部分代码即可：
+```js
+if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
+  child = {
+    type: 2,
+    expression: res.expression,
+    tokens: res.tokens,
+    text
+  }
+} else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
+  child = {
+    type: 3,
+    text
+  }
+}
+if (child) {
+  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+    child.start = start
+    child.end = end
+  }
+  children.push(child)
+}
+```
+我们可以看到，在`if/else`分支逻辑中，它根据条件判断的值来创建不同`type`的`child`。其中`type=2`代表带变量文本的`AST`，`type=3`代表纯文本`AST`。区分创建哪种`type`的关键逻辑在`parseText`方法中，其代码如下：
+```js
+const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g
+export function parseText (
+  text: string,
+  delimiters?: [string, string]
+): TextParseResult | void {
+  const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
+  if (!tagRE.test(text)) {
+    return
+  }
+  // 省略处理带变量的文本逻辑
+}
+```
+我们先来说一下`delimiters`这个参数，如果我们没有传递的话，那么默认就是`{{}}`双花括号，这个配置可以使用`Vue.config.delimiters`来指明。很明显，对于纯文本而言它并不匹配，因此直接`return`结束`parseText`方法。也就是说，它会走`else if`分支逻辑，进而创建一个`type=3`的纯文本`AST`对象，最后把这个对象`push`到父级`AST`的`children`数组中。
 
 ### 带变量的文本
+带变量的文本解析过程和纯文本类似，差别主要在于`parseText`方法中，我们来看一下在`parseText`方法中是如何处理的：
+```js
+export function parseText (
+  text: string,
+  delimiters?: [string, string]
+): TextParseResult | void {
+  const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
+
+  // 省略纯文本的逻辑
+  
+  const tokens = []
+  const rawTokens = []
+  let lastIndex = tagRE.lastIndex = 0
+  let match, index, tokenValue
+  while ((match = tagRE.exec(text))) {
+    index = match.index
+    // push text token
+    if (index > lastIndex) {
+      rawTokens.push(tokenValue = text.slice(lastIndex, index))
+      tokens.push(JSON.stringify(tokenValue))
+    }
+    // tag token
+    const exp = parseFilters(match[1].trim())
+    tokens.push(`_s(${exp})`)
+    rawTokens.push({ '@binding': exp })
+    lastIndex = index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    rawTokens.push(tokenValue = text.slice(lastIndex))
+    tokens.push(JSON.stringify(tokenValue))
+  }
+  return {
+    expression: tokens.join('+'),
+    tokens: rawTokens
+  }
+}
+```
+我们可以看到在`parseText`方法中，它在方法的最后返回了一个对象，并且这个对象包含两个属性：`expression`和`tokens`，在`return`之前的代码主要是为了解析插值文本。
+
+在`while`循环开始，首先定义了两个关键数组：`tokens`和`rawTokens`。然后开始执行`while`循环，并且`while`循环条件判断的是是否还能匹配到`{{}}`双花括号或者我们自定义的分隔符，这样做是因为我们可以撰写多个插值文本，例如：
+```js
+let html = '<div>{{msg}}{{msg1}}{{msg2}}</div>'
+```
+在`while`循环中，我们往`tokens`数组中`push`的元素有一个特点：`_s(exp)`，其中`_s()`是`toString()`方法的简写，`exp`就是解析出来的变量名。而往`rawTokens`数组中`push`的元素就更简单了，它是一个对象，其中固定使用`@binding`，值就是我们解析出来的`exp`。
+
+就我们撰写的例子而言，`while`循环执行完毕后，一起`parseText`方法返回的对象分别如下：
+```js
+// while循环执行完毕后
+const tokens = ['_s(msg)']
+const rawTokens = [{ '@binding': 'msg' }]
+
+// parseText返回对象
+const returnObj = {
+  expression: '_s(msg)',
+  tokens: [{ '@binding': 'msg' }]
+}
+```
+因为`parseText`返回的是一个对象，因此走`if`分支的逻辑，创建一个`type=2`的`AST`对象：
+```js
+const ast = {
+  type: 2,
+  expression: '_s(msg)',
+  tokens: [{ '@binding': 'msg' }],
+  text: '{{msg}}'
+}
+
+// 添加到父级的children数组中
+parent.children.push(ast)
+```
+
+### 异常情况
+解析文本的逻辑虽然非常简单，但有时候文本写错了位置也会造成`parse`模板解析失败。例如，有如下`template`模板：
+```js
+// template为一个纯文本
+let html1 = `
+  Hello, Vue.js
+`
+
+// 文本写在了根节点之外
+let html2 = `
+  文本1
+  <div>文本2</div>
+`
+```
+对于这两种情况，它们分别会在控制台抛出如下错误提示：
+```js
+'Component template requires a root element, rather than just text.'
+
+'text "xxx" outside root element will be ignored.'
+```
+其中，对于第二种错误而言，我们写在根节点之外的文本会被忽略掉。对于这两种错误的处理，在`options.chars`钩子函数中，代码如下：
+```js
+if (process.env.NODE_ENV !== 'production') {
+  if (text === template) {
+    warnOnce(
+      'Component template requires a root element, rather than just text.',
+      { start }
+    )
+  } else if ((text = text.trim())) {
+    warnOnce(
+      `text "${text}" outside root element will be ignored.`,
+      { start }
+    )
+  }
+}
+return
+```
 
 ## 过滤器解析器
+在撰写插值文本的时候，`Vue`允许我们可以使用过滤器，例如：
+```js
+const reverse = (text) => {
+  return text.split('').reverse.join('')
+}
+let html = '<div>{{ msg | reverse }}</div>'
+```
+你可能会很好奇，在`parse`编译的时候，它是如何处理过滤器的？其实，对于过滤器的解析它是在`parseText`方法中，在上一小节我们故意忽略了对`parseFilters`方法的介绍。在这一小节，我们将会详细介绍过滤器是如何解析的。
 
+对于文本解析器而言，`parseText`方法是定义在`text-parser.js`文件中，而对于过滤器解析器而言，`parseFilters`方法是定义在跟它同级的`filter-parser.js`文件中，其代码如下：
+```js
+export function parseFilters (exp: string): string {
+  let inSingle = false
+  let inDouble = false
+  let inTemplateString = false
+  let inRegex = false
+  let curly = 0
+  let square = 0
+  let paren = 0
+  let lastFilterIndex = 0
+  let c, prev, i, expression, filters
+
+  for (i = 0; i < exp.length; i++) {
+    prev = c
+    c = exp.charCodeAt(i)
+    if (inSingle) {
+      if (c === 0x27 && prev !== 0x5C) inSingle = false
+    } else if (inDouble) {
+      if (c === 0x22 && prev !== 0x5C) inDouble = false
+    } else if (inTemplateString) {
+      if (c === 0x60 && prev !== 0x5C) inTemplateString = false
+    } else if (inRegex) {
+      if (c === 0x2f && prev !== 0x5C) inRegex = false
+    } else if (
+      c === 0x7C && // pipe
+      exp.charCodeAt(i + 1) !== 0x7C &&
+      exp.charCodeAt(i - 1) !== 0x7C &&
+      !curly && !square && !paren
+    ) {
+      if (expression === undefined) {
+        // first filter, end of expression
+        lastFilterIndex = i + 1
+        expression = exp.slice(0, i).trim()
+      } else {
+        pushFilter()
+      }
+    } else {
+      switch (c) {
+        case 0x22: inDouble = true; break         // "
+        case 0x27: inSingle = true; break         // '
+        case 0x60: inTemplateString = true; break // `
+        case 0x28: paren++; break                 // (
+        case 0x29: paren--; break                 // )
+        case 0x5B: square++; break                // [
+        case 0x5D: square--; break                // ]
+        case 0x7B: curly++; break                 // {
+        case 0x7D: curly--; break                 // }
+      }
+      if (c === 0x2f) { // /
+        let j = i - 1
+        let p
+        // find first non-whitespace prev char
+        for (; j >= 0; j--) {
+          p = exp.charAt(j)
+          if (p !== ' ') break
+        }
+        if (!p || !validDivisionCharRE.test(p)) {
+          inRegex = true
+        }
+      }
+    }
+  }
+
+  if (expression === undefined) {
+    expression = exp.slice(0, i).trim()
+  } else if (lastFilterIndex !== 0) {
+    pushFilter()
+  }
+
+  function pushFilter () {
+    (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
+    lastFilterIndex = i + 1
+  }
+
+  if (filters) {
+    for (i = 0; i < filters.length; i++) {
+      expression = wrapFilter(expression, filters[i])
+    }
+  }
+
+  return expression
+}
+```
 ## 创建、管理AST树
