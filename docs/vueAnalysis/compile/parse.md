@@ -1206,7 +1206,10 @@ return
 const reverse = (text) => {
   return text.split('').reverse.join('')
 }
-let html = '<div>{{ msg | reverse }}</div>'
+const toUpperCase = (text) => {
+  return text.toLocaleUpperCase()
+}
+let html = '<div>{{ msg | reverse | toUpperCase }}</div>'
 ```
 你可能会很好奇，在`parse`编译的时候，它是如何处理过滤器的？其实，对于过滤器的解析它是在`parseText`方法中，在上一小节我们故意忽略了对`parseFilters`方法的介绍。在这一小节，我们将会详细介绍过滤器是如何解析的。
 
@@ -1294,4 +1297,43 @@ export function parseFilters (exp: string): string {
   return expression
 }
 ```
-## 创建、管理AST树
+代码分析：
+* 当`parseFilters`被调用的时候，`exp`参数传递的是整个文本内容，就我们的例子而言它的值为：
+```js
+const exp = '{{ msg | reverse | toUpperCase }}'
+```
+`for`循环的目的主要是来处理`exp`并把处理好的内容赋值到`expression`变量，就我们的例子而言，处理完毕后它的值为：
+```js
+const expression = 'msg | reverse | toUpperCase'
+```
+* 当`for`循环执行完毕时，此时`expression`值判断为真，调用`pushFilter`方法。当执行完`pushFilter`方法后，`filters`数组的值如下：
+```js
+const filters = ['reverse', 'toUpperCase']
+```
+* 最后判断了`filters`是否为真，为真则遍历`filters`数组，在每个遍历的过程中调用`wrapFilter`再次加工`expression`，`wrapFilter`方法代码如下：
+```js
+function wrapFilter (exp: string, filter: string): string {
+  const i = filter.indexOf('(')
+  if (i < 0) {
+    // _f: resolveFilter
+    return `_f("${filter}")(${exp})`
+  } else {
+    const name = filter.slice(0, i)
+    const args = filter.slice(i + 1)
+    return `_f("${name}")(${exp}${args !== ')' ? ',' + args : args}`
+  }
+}
+```
+对于我们的例子而言，在`wrapFilter`方法中它会走`if`分支的代码，当我们像下面这样撰写过滤器的时候，它才会走`else`分支的代码。
+```js
+let html = '<div>{{ msg | reverse() | toUpperCase() }}</div>'
+```
+在`wrapFilter`方法执行完毕后，`expression`变量的值如下：
+```js
+const expression = '_f("toUpperCase")(_f("reverse")(msg))'
+```
+由于过滤器的内容，同样是文本，所以最后差值文本最后会使用`_s`包裹起来。
+```js
+const tokens = ['_s(_f("toUpperCase")(_f("reverse")(msg)))']
+```
+**注意：** 我们会在之后的章节中介绍什么是`_f`函数。
