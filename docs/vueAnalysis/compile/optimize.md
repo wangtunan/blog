@@ -71,7 +71,7 @@ function isStatic (node: ASTNode): boolean {
   ))
 }
 ```
-在分析完`isStatic`方法后，静态节点必须满足以下几个情况：
+在阅读完`isStatic`方法后，我们发现静态节点必须满足以下几种情况：
 1. 带插值(表达式)的文本节点，不是静态节点，例如：
 ```js
 // 不是静态节点
@@ -129,7 +129,73 @@ function markStatic (node: ASTNode) {
 }
 ```
 代码分析：
-* `type=2`或`type=3`的时候，代表它们分别是带表达式的插值文本和纯文本，这个时候使用`isStatic`方法的返回结果直接标记`static`属性为`true`即可。
-* 对于`type=1`，它是普通元素节点的时候，判断逻辑稍微复杂一点。
+* `type=2`或`type=3`的时候，代表它们分别是带表达式的插值文本和纯文本，这个时候使用`isStatic`方法的返回结果，直接标记`static`属性为`true`即可。
+* 对于`type=1`，它是普通元素节点的时候，判断逻辑稍微复杂一点。第一步首先需要使用`for`循环去遍历`children`子节点，然后在`for`循环中递归调用`markStatic`方法，以达到深度遍历并标记子节点的目的。在这个过程中，唯一一个值得注意的地方就是，在对`children`子节点标记完毕后，会根据子节点的`static`属性来设置父节点的`static`属性。只要有一个子节点的`static`属性不为`true`，那么父节点也一定不为`true`。第二步，如果当前节点有`v-if/v-else-if/v-else`等指令，由于这些节点并不会保存在`children`数组中，而是在`node.ifConditions`属性下面，因此我们需要遍历`ifConditions`数组，来递归标记子节点。同样的，在标记完子节点后，我们需要根据子节点的`static`来同步更新父节点的`static`。
+```js
+const showMsg = false
+let html = `
+  <div>
+    <div v-if="showMsg">show</div>
+    <div v-else="showMsg">not show</div>
+  </div>
+`
+
+const node = {
+  ifConditions: [
+    { exp: 'showMsg', block: 'div的ast节点' }，
+    { exp: undefined, block: 'div的ast节点' }
+  ]
+}
+```
 
 ## 标记静态根节点
+在介绍完标记静态节点后，我们接着要介绍标记静态根节点`markStaticRoots`方法，其代码如下：
+```js
+function markStaticRoots (node: ASTNode, isInFor: boolean) {
+  if (node.type === 1) {
+    if (node.static || node.once) {
+      node.staticInFor = isInFor
+    }
+    // For a node to qualify as a static root, it should have children that
+    // are not just static text. Otherwise the cost of hoisting out will
+    // outweigh the benefits and it's better off to just always render it fresh.
+    if (node.static && node.children.length && !(
+      node.children.length === 1 &&
+      node.children[0].type === 3
+    )) {
+      node.staticRoot = true
+      return
+    } else {
+      node.staticRoot = false
+    }
+    if (node.children) {
+      for (let i = 0, l = node.children.length; i < l; i++) {
+        markStaticRoots(node.children[i], isInFor || !!node.for)
+      }
+    }
+    if (node.ifConditions) {
+      for (let i = 1, l = node.ifConditions.length; i < l; i++) {
+        markStaticRoots(node.ifConditions[i].block, isInFor)
+      }
+    }
+  }
+}
+```
+我们可以看到，在`markStaticRoots`方法中它对于`children`子节点和带`v-if/v-else-if/v-else`等指令的处理过程是类似的，我们省略这部分内容重复的介绍。
+
+我们来看下面这段有意思的代码：
+```js
+// For a node to qualify as a static root, it should have children that
+// are not just static text. Otherwise the cost of hoisting out will
+// outweigh the benefits and it's better off to just always render it fresh.
+if (node.static && node.children.length && !(
+  node.children.length === 1 &&
+  node.children[0].type === 3
+)) {
+  node.staticRoot = true
+  return
+} else {
+  node.staticRoot = false
+}
+```
+我们从注释中也可以看出来，如果当前节点`static`属性为`true`了，要标记它为静态根节点的话，还必须满足它的子节点不能只有一个纯文本节点，因为这样做其优化成本要大于其收益。
