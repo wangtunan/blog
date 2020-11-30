@@ -74,7 +74,8 @@ const vueAnalysisSidebar = [
     collapsable: false,
     children: [
       'dom/',
-      'dom/vnode'
+      'dom/vnode',
+      'dom/diff'
     ]
   },
   {
