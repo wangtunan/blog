@@ -139,7 +139,7 @@ export function addHandler (
 ```
 代码分析：
 * 首先判断修饰符中是否存在`native`，如果存在则把事件存放在`nativeEvents`对象中，否则存放在`events`中。关于`DOM`事件和自定义事件，我们会在之后的章节中进行单独分析，这里只要知道二者存放的位置不同即可。
-* 在代码最后，它首先判断了`handlers`是否是一个数组，如果是则根据`important`参数值选择添加到数组头部还是尾部，因为在`else if`分支中，调用`addHandler`方法时传递的参数为`false`，所以会添加到数组尾部；如果不是一个数组，则继续判断是否已经有值，有值则处理成数组形式；如果既不是数组，也没有值则直接赋值即可。这段代码的逻辑，意味着我们可以重复监听同一个事件，并绑定不同的事件名，它们并不会被相互覆盖，而是会在事件被触发的时候，依次调用`events`数组中的每一个函数。
+* 在代码最后，它首先判断了`handlers`是否是一个数组，如果是则根据`important`参数值选择添加到数组头部还是尾部，因为在`else if`分支中，调用`addHandler`方法时传递的参数为`false`，所以会添加到数组尾部；如果不是一个数组，则继续判断是否已经有值，有值则处理成数组形式；如果既不是数组，也没有值则直接赋值即可。根据这段代码的逻辑，意味着我们可以重复监听同一个事件，并绑定不同的事件名，它们并不会被相互覆盖，而是会在事件被触发的时候，依次调用`events`数组中的每一个函数。
 ```js
 new Vue({
   el: '#app',
@@ -272,21 +272,21 @@ export function bindDynamicKeys (baseObj: Object, values: Array<any>): Object {
   return baseObj
 }
 ```
-* **DOM事件类型和自定义事件类型**：区分`DOM`事件类型还是自定义事件类型，关键点是`native`事件修饰符，假设我们有如下案例：
+* **元素标签DOM事件类型和组件原生DOM事件类型**：区分元素标签`DOM`事件类型和组件原生`DOM`事件类型，关键点是`native`事件修饰符，假设我们有如下案例：
 ```js
-// DOM事件类型
-const domTemplate = '<button @click="handleClick">Button</button>'
+// 元素标签DOM事件类型
+const template = '<button @click="handleClick">Button</button>'
 
-// 自定义事件类型
-const customerTemplate = '<child-component @change="handleChange" />'
+// 组件原生DOM事件类型
+const nativeTemplate = '<child-component @click.native="handleClick" />'
 ```
 在调用`genHandlers`方法后，其方法返回值分别如下：
 ```js
-// DOM事件类型返回结果
-const domResult = 'on:{"click":handleClick}'
+// 元素标签DOM事件返回结果
+const result = 'on:{"click":handleClick}'
 
-// 自定义事件类型返回结果
-const customerResult = 'nativeOn:{"click":function($event){return handleClick($event)}}'
+// 组件原生DOM事件返回结果
+const nativeResult = 'nativeOn:{"click":function($event){return handleClick($event)}}'
 ```
 
 在分析完`genHandlers`方法后，接下来我们来分析一下`genHandler`方法：
@@ -317,7 +317,8 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
   }
 }
 ```
-**注意**：在`genHandler`方法中，我们省略了处理事件修饰符`else`分支的逻辑，这部分代码我们会在后续的章节中专门介绍。
+**注意**：在`genHandler`方法中，我们省略了处理修饰符`else`分支的逻辑，这部分代码我们会在后续的章节中专门介绍。
+
 代码分析：
 * **变量说明**：`isMethodPath`代表是否为简单访问方式、`isFunctionExpression`代表是否为函数表达式方式、`isFunctionInvocation`代表是否为函数调用方式。
 ```js
@@ -380,14 +381,14 @@ const template = '<button @click="handleClick">Button</button>'
 const code = generate(ast, options)
 // code 打印结果
 {
-  render: "with(this){return _c('button',{on:{"click":handleClick}},[_v("Button")])}",
+  render: `with(this){return _c('button',{on:{"click":handleClick}},[_v("Button")])}`,
   staticRenderFns: []
 }
 ```
 
 ## DOM事件和自定义事件
 ### DOM事件
-原生`DOM`事件需要写在`HTML`标签元素上，如果要在组件标签上添加原生`DOM`事件，则必须提供`native`事件修饰符。
+原生`DOM`事件需要写在`HTML`元素标签上，如果要在组件标签上添加原生`DOM`事件，则必须提供`native`事件修饰符。
 
 在这一章节，我们先来分析一下在`patch`的过程中，`DOM`事件是如何被处理的，我们以如下代码为例来进行说明：
 ```js
@@ -483,7 +484,7 @@ export function updateListeners (
 }
 ```
 `updateListeners`方法的代码虽然很长，但是所做的事情并不复杂。
-* `for-in`遍历`on`对象：其作用是用来`add`添加事件监听或者更新事件监听。在此循环中，首先判断了当前事件是否已经定义，如果没有则在开发环境下提示错误信息；如果已经定义，但在旧事件监听中没有，则表示应该使用`add`来新增这个事件监听；如果当前事件监听和旧事件监听都有，但是不并相同。则表明虽然监听的是同一个事件，但是回调函数不同，此时应该更新事件。
+* `for-in`遍历`on`对象：其作用是用来`add`添加事件监听或者更新事件监听。在此循环中，首先判断了当前事件是否已经定义，如果没有则在开发环境下提示错误信息；如果已经定义，但在旧事件监听中，没有则表示应该使用`add`来新增这个事件监听；如果当前事件监听和旧事件监听都有，但是不并相同。则表明虽然监听的是同一个事件，但是回调函数不同，此时应该更新事件。
 * `for-in`遍历`oldOn`对象：其作用是用来移除事件监听。在此循环中，判断旧事件监听不在新事件监听中，则表明应该移除这些事件监听，移除事件监听调用了`remove`方法。
 
 #### add添加事件监听
@@ -547,7 +548,7 @@ button.addEventListener('click', function invoker () { })
 ```
 当我们点击`button`按钮触发`click`事件的时候，`invoker`方法开始执行。在这个方法中，它首先拿到`fns`属性，然后判断如果是数组则遍历并调用其回调函数，如果不是数组则不需要遍历，直接调用即可。也就是说，这里拿到的`fns`就是我们案例中的`handleClick`方法。
 
-**注意**：`invokeWithErrorHandling`方法仅仅只是对函数调用多了一层`try/catch`包裹，这样做是为了方便捕获错误。在不考虑异常的情况下，你可以把`invokeWithErrorHandling`方法，替换成`fn.apply(context, args)`。
+**注意**：`invokeWithErrorHandling`方法仅仅只是对函数调用多了一层`try/catch`包裹，这样做是为了方便捕获错误。在不考虑异常的情况下，你可以把`invokeWithErrorHandling`方法，替换成`fn.apply(context, args)`来理解。
 ```js
 export function invokeWithErrorHandling (
   handler: Function,
@@ -573,7 +574,170 @@ export function invokeWithErrorHandling (
 ```
 
 ### 自定义事件
+前面提到过，只有组件才能同时拥有自定义事件和原生`DOM`事件，为了更好的理解组件是如何处理事件的，我们撰写如下案例来进行说明：
+```js
+Vue.component('child-component', {
+  template: '<button @click="handleClick">Button</button>',
+  methods: {
+    handleClick () {
+      console.log('click handler')
+      this.$emit('select')
+    }
+  }
+})
+new Vue({
+  el: '#app',
+  template: '<child-component @select="handleSelect" @click.native="handleClick" />',
+  methods: {
+    handleClick () {
+      console.log('child native click handler')
+    },
+    handleSelect () {
+      console.log('child customer select handler')
+    }
+  }
+})
+```
+在分析组件`patch`之前，我们先来看一下于`child-component`子组件生成的`render`函数：
+```js
+const render = `with(this){
+  return _c('child-component',{
+    on:{
+      "select":handleSelect
+    },
+    nativeOn:{
+      "click":function($event){
+        return handleClick($event)
+      }
+    }
+  })
+}`
+```
+然后我们回顾一下，在`patch`的过程中是如何通过`createComponent`创建一个组件`VNode`的，其代码路径为`src/core/vdom/create-component.js`：
+```js
+export function createComponent (
+  Ctor: Class<Component> | Function | Object | void,
+  data: ?VNodeData,
+  context: Component,
+  children: ?Array<VNode>,
+  tag?: string
+): VNode | Array<VNode> | void {
+  // ...省略代码
+  const listeners = data.on
+  data.on = data.nativeOn
+  // ...省略代码
+  const name = Ctor.options.name || tag
+  const vnode = new VNode(
+    `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
+    data, undefined, undefined, undefined, context,
+    { Ctor, propsData, listeners, tag, children },
+    asyncFactory
+  )
+  return vnode
+}
+```
+在`createComponent`方法中，有两段关键代码：
+```js
+// 自定义事件赋值
+const listeners = data.on
 
+// 原生DOM事件赋值
+data.on = data.nativeOn
+```
+我们在**原生DOM事件**小节中提到过，对于原生`DOM`事件它取的是`data.on`。但对于组件而言，因为添加了`native`修饰符，所以它会出现在`nativeOn`对象上，而不是`on`对象上。又因为此时的`on`对象，是我们撰写的组件自定义事件，所以需要特殊处理一下。
+
+处理完毕后，对于组件的原生`DOM`事件，它的处理方式在之前提到过，这里不再赘述，区别在于此时添加事件监听的的`target`为子节点的根节点。
+
+既然组件原生的`click`事件与之前一样，那么我们直接看`select`自定义事件的处理过程。在用`createComponent`创建组件`VNode`的过程中，会执行子组件的构造函数，接着会调用`initInternalComponent`方法：
+```js
+Vue.prototype._init = function (options?: Object) {
+    const vm: Component = this
+    // ...省略代码
+    if (options && options._isComponent) {
+      initInternalComponent(vm, options)
+    } else {
+      // ...省略代码
+    }
+    // ...省略代码
+    initEvents(vm)
+    // ...省略代码
+  }
+}
+```
+`initInternalComponent`方法的代码如下：
+```js
+export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+  const opts = vm.$options = Object.create(vm.constructor.options)
+  // ....省略代码
+  const vnodeComponentOptions = parentVnode.componentOptions
+  opts._parentListeners = vnodeComponentOptions.listeners
+  // ....省略代码
+}
+```
+**注意**：这里的`vnodeComponentOptions.listeners`就是我们的`select`自定义事件。
+
+在`initInternalComponent`执行完毕后，会接着调用`initEvents`，其代码如下：
+```js
+export function initEvents (vm: Component) {
+  vm._events = Object.create(null)
+  vm._hasHookEvent = false
+  // init parent attached events
+  const listeners = vm.$options._parentListeners
+  if (listeners) {
+    updateComponentListeners(vm, listeners)
+  }
+}
+```
+子组件在`initEvents`的时候，通过`_parentListeners`拿到父组件的事件监听，如果有值则调用`updateComponentListeners`方法来实现组件的事件监听，这个方法的代码如下：
+```js
+export function updateComponentListeners (
+  vm: Component,
+  listeners: Object,
+  oldListeners: ?Object
+) {
+  target = vm
+  updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
+  target = undefined
+}
+```
+`updateComponentListeners`方法的代码很简单，它首先设置事件监听的`target`为当前子组件实例，然后调用`updateListeners`方法。这里的`updateListeners`方法和**原生DOM事件**小节中提到的`updateListeners`是同一个。区别是，这里传递的`add`方法和`remove`方法有一点不同。
+```js
+function add (event, fn) {
+  target.$on(event, fn)
+}
+function remove (event, fn) {
+  target.$off(event, fn)
+}
+```
+`$on`和`$off`是`Vue`内置事件系统中的两个方法，这些内置事件方法的定义发生在`eventMixin`方法中：
+```js
+export function eventsMixin (Vue: Class<Component>) {
+  Vue.prototype.$on = function () {}
+  Vue.prototype.$once = function () {}
+  Vue.prototype.$off = function () {}
+  Vue.prototype.$emit = function () {}
+}
+```
+关于以上几种方法的原理解析，我们在**eventMixin整体流程**章节中已经提到过了，这里不再赘述。
+
+根据以上分析过程，我们知道子组件的`button`元素添加了两个`click`原生`DOM`事件，子组件的`vm`实例添加了一个自定义`select`事件。当我们点击`button`按钮的时候，其打印结果如下：
+```js
+'click handler'
+'child customer select handler'
+'child native click handler'
+```
 ## 常见修饰符的处理
 
+### stop修饰符
+### prevent修饰符
+### once修饰符
+### self修饰符
+
 ## 小结
+我们首先回顾了事件的各种使用方式：普通模式，函数表达式模式、函数调用模式以及使用事件修饰符等。
+
+然后我们又分析了事件的解析过程，知道了在不同的场景下，最后生成的不同的`render`函数。
+
+接着，我们对于原生`DOM`事件和自定义事件的处理过程进行了详细的分析，同时也知道了只有组件才能同时拥有自定义事件和原生`DOM`事件，只要给对应的事件添加`native`事件修饰符即可。还弄清楚了原生`DOM`事件和自定义事件在添加和删除这两方面处理是不相同的，原生`DOM`事件依靠`addEventListener`和`removeEventListener`，自定义事件依靠的是自有事件系统的`$on`和`$off`方法。
+
+最后，我们对于常见的事件修饰符的实现原理进行的分析。
