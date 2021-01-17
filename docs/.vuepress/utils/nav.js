@@ -111,8 +111,8 @@ const vueAnalysisSidebar = [
       'expand/',
       'expand/directive',
       'expand/filter',
-      'expand/vmodel',
       'expand/event',
+      'expand/vmodel',
       'expand/slot',
       'expand/components'
     ]
