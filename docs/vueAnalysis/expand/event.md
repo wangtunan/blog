@@ -728,10 +728,236 @@ export function eventsMixin (Vue: Class<Component>) {
 ```
 ## 常见修饰符的处理
 
-### stop修饰符
-### prevent修饰符
+在**directive指令**章节，我们提到过修饰符。对于事件修饰符而言，处理过程是相同的，假如我们有如下案例：
+```js
+const template = '<button @click.stop.prevent="handleClick">Button</button>'
+```
+那么在解析成`ast`的时候，会生成`modifiers`对象，如下：
+```js
+const modifiers = {
+  stop: true,
+  prevent: true
+}
+```
+在`genHandler`方法中，我们省略了`else`分支处理修饰符的逻辑，在这一小节我们分析事件修饰符的时候会用到这部分代码：
+```js
+function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): string {
+  // ...省略代码
+  const isMethodPath = simplePathRE.test(handler.value)
+  const isFunctionExpression = fnExpRE.test(handler.value)
+  const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
+
+  if (!handler.modifiers) {
+    // ...省略代码
+  } else {
+    let code = ''
+    let genModifierCode = ''
+    const keys = []
+    for (const key in handler.modifiers) {
+      if (modifierCode[key]) {
+        genModifierCode += modifierCode[key]
+        // left/right
+        if (keyCodes[key]) {
+          keys.push(key)
+        }
+      } else if (key === 'exact') {
+        // ...省略案件修饰符
+      } else {
+        keys.push(key)
+      }
+    }
+    if (keys.length) {
+      code += genKeyFilter(keys)
+    }
+    // Make sure modifiers like prevent and stop get executed after key filtering
+    if (genModifierCode) {
+      code += genModifierCode
+    }
+    const handlerCode = isMethodPath
+      ? `return ${handler.value}($event)`
+      : isFunctionExpression
+        ? `return (${handler.value})($event)`
+        : isFunctionInvocation
+          ? `return ${handler.value}`
+          : handler.value
+    // ...省略代码
+    return `function($event){${code}${handlerCode}}`
+  }
+}
+```
+### native修饰符
+对于`native`修饰符，我们在前面多多少少提到过它的作用，现在让我们集中起来一起说明。
+
+在`parse`阶段，会根据是否有`native`修饰符，来创建`events`对象或者`nativeEvents`对象，代码如下：
+```js
+if (modifiers.native) {
+  delete modifiers.native
+  events = el.nativeEvents || (el.nativeEvents = {})
+} else {
+  events = el.events || (el.events = {})
+}
+```
+下面是一个`template`案例以及它解析生成的`ast`对象：
+```js
+const tempalte = '<child-component @click.native="handleClick" />'
+const ast = {
+  type: 1,
+  tag: 'child-component',
+  nativeEvents: {
+    click: { value: 'handleClick', modifiers: {} }
+  }
+}
+```
+在`codegen`阶段，会根据是否存在`nativeEvents`和`events`，调用`genHandlers`方法，代码如下：
+```js
+if (el.events) {
+  data += `${genHandlers(el.events, false)},`
+}
+if (el.nativeEvents) {
+  data += `${genHandlers(el.nativeEvents, true)},`
+}
+```
+下面是一个`template`案例以及调用`genHandlers`方法返回的结果：
+```js
+const template = '<button @click="handleClick">Button</button>'
+const nativeTemplate = '<child-component @click.native="handleClick" />'
+
+const result = 'on:{click:"handleClick"}'
+const nativeResult = 'nativeOn:{click:function($event){return handleClick($event)'
+```
+### stop、prevent和self修饰符
+在分析这几个修饰符之前，让我们来看一个对象：
+```js
+const genGuard = condition => `if(${condition})return null;`
+const modifierCode: { [key: string]: string } = {
+  stop: '$event.stopPropagation();',
+  prevent: '$event.preventDefault();',
+  self: genGuard(`$event.target !== $event.currentTarget`),
+}
+```
+假设我们有如下案例：
+```js
+const template = '<button @click.stop.prevent.self="handleClick">Button</button>'
+```
+在`parse`完成后，其`ast`对象如下：
+```js
+const ast = {
+  type: 1,
+  tag: 'button',
+  events: {
+    click: {
+      value: 'handleClick',
+      modifiers: { stop: true, prevent: true, self: true }
+    }
+  }
+}
+```
+当调用到`genHandler`方法时，因为`modifiers`是一个对象，所以会走`else`分支逻辑，我来来看此分支处理后的关键代码：
+```js
+let code = ''
+let genModifierCode = ''
+for (const key in handler.modifiers) {
+  if (modifierCode[key]) {
+    genModifierCode += modifierCode[key]
+  }
+}
+if (genModifierCode) {
+  code += genModifierCode
+}
+const handlerCode = isMethodPath
+  ? `return ${handler.value}($event)`
+  : isFunctionExpression
+    ? `return (${handler.value})($event)`
+    : isFunctionInvocation
+      ? `return ${handler.value}`
+      : handler.value
+return `function($event){${code}${handlerCode}}`
+```
+在遍历`modifiers`对象的时候，因为我们添加的`stop`，`prevent`和`self`在`modifierCode`对象中都有定义，所以在遍历完成后，`genModifierCode`值如下所示：
+```js
+const genModifierCode = `
+  $event.stopPropagation();
+  $event.preventDefault();
+  if($event.target !== $event.currentTarget)return null;
+`
+```
+接下来生成`handlerCode`，对我们的例子而言它属于简单访问模式，`isMethodPath`值为`true`，所以`handlerCode`值如下所示：
+```js
+const handlerCode = `return handleClick($event)`
+```
+最后，需要把所有的`code`结合起来，结果如下：
+```js
+const result = `
+  function($event){
+    $event.stopPropagation();
+    $event.preventDefault();
+    if($event.target !== $event.currentTarget)
+      return null;
+    return handleClick($event)
+  }
+`
+```
+看到`reult`结果后，相信你一定会对`Vue`官网中这句话有了更加清晰的认知：**使用修饰符时，顺序很重要；相应的代码会以同样的顺序产生。因此，用`@click.prevent.self`会阻止所有的点击，而`@click.self.prevent`只会阻止对元素自身的点击。**
 ### once修饰符
-### self修饰符
+在分析`once`修饰符的时候，我们使用如下案例：
+```js
+const template = '<button @click.once="handleClick">Button</button>'
+```
+在`parse`编译的时候，如果提供了`once`事件修饰符，那么在`addHandler`方法中会特殊处理一下，代码如下：
+```js
+if (modifiers.once) {
+  delete modifiers.once
+  name = prependModifierMarker('~', name, dynamic)
+}
+```
+在`parse`编译阶段结束后，生成的`ast`对象如下：
+```js
+// click前面对了一个 "~" 符号
+const ast = {
+  type: 1,
+  tag: 'button',
+  events: {
+    '~click': {
+      value: 'handleClick',
+      modifiers: {}
+    }
+  }
+}
+```
+在`codegen`代码生成阶段完成后，生成的`render`函数如下：
+```js
+const render = `with(this){return _c('button',{on:{"~click":function($event){return handleClick($event)}}},[_v("Button")])}`
+```
+在`patch`生成`VNode`的过程中，会调用`updateListeners`方法，在这个方法中它处理了`once`事件修饰符相关的逻辑，代码如下：
+```js
+// normalizeEvent中也有处理once的代码：once = name.charAt(0) === '~'
+event = normalizeEvent(name)
+if (isTrue(event.once)) {
+  cur = on[name] = createOnceHandler(event.name, cur, event.capture)
+}
+```
+因为`updateListeners`是一个公共方法，`createOnceHandler`函数参数是由外部环境传递的，它定义在`src/platforms/web/runtime/modules/events.js`文件中：
+```js
+function createOnceHandler (event, handler, capture) {
+  const _target = target // save current target element in closure
+  return function onceHandler () {
+    const res = handler.apply(null, arguments)
+    if (res !== null) {
+      remove(event, onceHandler, capture, _target)
+    }
+  }
+}
+function remove (
+  name: string,
+  handler: Function,
+  capture: boolean,
+  _target?: HTMLElement
+) {
+  (_target || target).removeEventListener(
+    name,
+ 
+```
+我们可以看到，在`createOnceHandler`方法中，它返回了一个`onceHandler`方法，当我们点击按钮的时候，它会使用`remove`移除这个事件监听，这就是`once`事件修饰符起作用的真正原因。
 
 ## 小结
 我们首先回顾了事件的各种使用方式：普通模式，函数表达式模式、函数调用模式以及使用事件修饰符等。
@@ -740,4 +966,4 @@ export function eventsMixin (Vue: Class<Component>) {
 
 接着，我们对于原生`DOM`事件和自定义事件的处理过程进行了详细的分析，同时也知道了只有组件才能同时拥有自定义事件和原生`DOM`事件，只要给对应的事件添加`native`事件修饰符即可。还弄清楚了原生`DOM`事件和自定义事件在添加和删除这两方面处理是不相同的，原生`DOM`事件依靠`addEventListener`和`removeEventListener`，自定义事件依靠的是自有事件系统的`$on`和`$off`方法。
 
-最后，我们对于常见的事件修饰符的实现原理进行的分析。
+最后，我们对于常见的事件修饰符`native`、`stop`、`prevent`、`self`以及`once`的实现原理进行的分析。
