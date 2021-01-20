@@ -139,7 +139,57 @@ const vueAnalysisSidebar = [
   }
 ]
 
+// Vue3.0源码分析目录结构
+const vueNextAnalysisSidebar = [
+  {
+    title: '介绍',
+    collapsable: false,
+    children: ['introduction/']
+  },
+  {
+    title: '源码目录',
+    collapsable: false,
+    children: ['catalog/']
+  },
+  {
+    title: 'Monorepo',
+    collapsable: false,
+    children: ['monorepo/']
+  },
+  {
+    title: 'Rollup版本构建',
+    collapsable: false,
+    children: ['rollup/']
+  },
+  {
+    title: 'Composition API',
+    collapsable: false,
+    children: ['composition/']
+  },
+  {
+    title: '组件化',
+    collapsable: false,
+    children: ['components/']
+  },
+  {
+    title: '编译原理',
+    collapsable: false,
+    children: ['compile/']
+  },
+  {
+    title: 'Vue-Router',
+    collapsable: false,
+    children: ['router/']
+  },
+  {
+    title: 'Vuex',
+    collapsable: false,
+    children: ['vuex/']
+  }
+]
+
 module.exports = {
   webpackSidebar,
-  vueAnalysisSidebar
+  vueAnalysisSidebar,
+  vueNextAnalysisSidebar
 }
