@@ -1,8 +1,6 @@
 # v-model
 `v-model`指令可以用来在表单元素`input`、`select`等或者组件上创建双向数据绑定，既：**数据的改变会驱动视图更新、视图的更新反过来又会影响数据的变化。**
 
-在`v-model`这个章节，我们先来回顾`v-model`的解析过程，然后分别来分析`v-model`作用到表单元素和组件上的处理过程。
-
 ## v-model的解析
 在**directive指令**章节，我们提到过`v-model`和`v-show`是`Vue`默认提供的全局指令，我们可以直接拿来使用。
 
@@ -304,9 +302,7 @@ const ast = {
   }
 }
 ```
-**注意**：我们先忽略`input`事件中`if($event.target.composing)return;`，关于这段代码是如何出现的，又是什么作用，在之后我们会进行介绍。
-
-因为`ast`对象中多了`props`和`events`属性，所以`genData`方法中除了会像普通指令一样处理指令，还会处理`props`属性和`event`事件：
+因为`ast`对象中多了`props`和`events`属性，所以`genData`方法中除了会像普通指令一样处理指令，还会处理`props`属性和`events`事件：
 ```js
 export function genData (el: ASTElement, state: CodegenState): string {
   let data = '{'
@@ -332,12 +328,7 @@ const render = `
   with(this){
     return _c('input',{
       directives:[
-        {
-          name:"model",
-          rawName:"v-model",
-          value:(msg),
-          expression:"msg"
-        }
+        { name:"model", rawName:"v-model", value:(msg), expression:"msg" }
       ],
       domProps:{
         "value":(msg)
@@ -348,18 +339,16 @@ const render = `
           msg=$event.target.value
         }
       }
-    }
-  )}
+    })
+  }
 `
 ```
-在这一小节，我们花了很大的篇幅去介绍`v-model`是如何解析以及如何根据`ast`生成对应的`render`函数的，这样做是为了节省后面两个章节的篇幅，因为无论是`v-model`作用于表单元素，还是组件他们对于`v-model`的解析过程基本相同。
+在这一小节，我们花了很大的篇幅去介绍`v-model`是如何解析以及如何根据`ast`生成对应的`render`函数的，这样做是为了节省后面两个章节的篇幅，因为无论是`v-model`作用于表单元素，还是组件它们对于`v-model`的解析过程基本相同。
 
 ## 绑定表单元素
-在介绍绑定表单元素这一小节，我们选择根据不同的表单元素，分类进行说明。
+在介绍绑定表单元素这一小节，我们选择根据不同的表单元素，有选择性的进行分类说明。
 1. `input`文本框和`textarea`文本域。
 2. `checkbox`复选框。
-3. `radio`单选框。
-4. `select`下拉框。
 
 ### input和textarea
 `v-model`作用于`input`标签和作用于`textarea`标签的处理逻辑是相同的，我们以`input`标签为例：
@@ -414,34 +403,8 @@ export function genData (el: ASTElement, state: CodegenState): string {
 代码分析：
 * `genDirectives`：首先调用了`genDirectives`方法来处理指令，在这个方法中会调用一个与平台相关的`model`方法，在这个`model`方法中会根据不同元素标签的类型来分别处理，`input`或者`textarea`标签的处理逻辑如下：
 ```js
-export default function model (
-  el: ASTElement,
-  dir: ASTDirective,
-  _warn: Function
-): ?boolean {
-  warn = _warn
-  const value = dir.value
-  const modifiers = dir.modifiers
-  const tag = el.tag
-  const type = el.attrsMap.type
-  // ...省略代码
-
-  if (el.component) {
-    // ...省略代码
-  } else if (tag === 'select') {
-    // ...省略代码
-  } else if (tag === 'input' && type === 'checkbox') {
-    // ...省略代码
-  } else if (tag === 'input' && type === 'radio') {
-    // ...省略代码
-  } else if (tag === 'input' || tag === 'textarea') {
-    genDefaultModel(el, value, modifiers)
-  } else if (!config.isReservedTag(tag)) {
-    // ...省略代码
-  } else if (process.env.NODE_ENV !== 'production') {
-    // ...省略代码
-  }
-  return true
+else if (tag === 'input' || tag === 'textarea') {
+  genDefaultModel(el, value, modifiers)
 }
 ```
 我们接下来看一下`genDefaultModel`方法的完整代码：
@@ -533,13 +496,12 @@ const result = `on:{
   "input":function($event){
     if($event.target.composing)return;
     msg=$event.target.value
-    }
   }
-`
+}`
 ```
 
 ### checkbox
-当`v-model`作用于单个`checkbox`标签时，`v-model`绑定一个布尔值；当`v-model`作用与多个`checkbox`标签时，`v-model`绑定一个数组。
+当`v-model`作用于单个`checkbox`标签时，`v-model`绑定一个布尔值；当`v-model`作用于多个`checkbox`标签时，`v-model`绑定一个数组。
 
 我们先以单个`checkbox`标签为例：
 ```js
@@ -569,22 +531,8 @@ const ast = {
 ```
 在`codegen`代码生成阶段，当调用与平台相关`model`方法时，会调用`genCheckboxModel`方法：
 ```js
-export default function model (
-  el: ASTElement,
-  dir: ASTDirective,
-  _warn: Function
-): ?boolean {
-  warn = _warn
-  const value = dir.value
-  const modifiers = dir.modifiers
-  const tag = el.tag
-  const type = el.attrsMap.type
-  // ...省略代码
-  else if (tag === 'input' && type === 'checkbox') {
-    genCheckboxModel(el, value, modifiers)
-  }
-  // ...省略代码
-  return true
+else if (tag === 'input' && type === 'checkbox') {
+  genCheckboxModel(el, value, modifiers)
 }
 ```
 其中`genCheckboxModel`方法代码如下：
@@ -620,13 +568,382 @@ function genCheckboxModel (
   )
 }
 ```
+`genCheckboxModel`方法逻辑不是很复杂，但传递给`addProp`和`addHandler`这两个方法的参数却有点不太好理解，我们直接来看`input`标签生成的`render`函数：
+```js
+const render = `
+  _c('input',{
+    directives:[
+      { name:"model", rawName:"v-model", value:(checked), expression:"checked" }
+    ],
+    attrs:{
+      "type":"checkbox"
+    },
+    domProps:{
+      "checked":Array.isArray(checked)?_i(checked,null)>-1:(checked)
+    },
+    on:{
+      "change":function($event){
+        var $$a=checked,$$el=$event.target,$$c=$$el.checked?(true):(false);
+        if(Array.isArray($$a)){
+          var $$v=null,$$i=_i($$a,$$v);
+          if($$el.checked){
+            $$i<0&&(checked=$$a.concat([$$v]))
+          }else{
+            $$i>-1&&(checked=$$a.slice(0,$$i).concat($$a.slice($$i+1)))
+          }
+        }else{
+          checked=$$c
+        }
+      }
+    }
+  }
+)`
+```
+**注意**：这里的`_i`工具函数和我们之前提到的`_s`等工具函数是差不多处理方式，它是`looseIndexOf`方法的简写形式：
+```js
+/**
+ * Return the first index at which a loosely equal value can be
+ * found in the array (if value is a plain object, the array must
+ * contain an object of the same shape), or -1 if it is not present.
+ */
+export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
+  for (let i = 0; i < arr.length; i++) {
+    if (looseEqual(arr[i], val)) return i
+  }
+  return -1
+}
+```
+从以上代码可以看到，虽然我们撰写的`template`模板很简单，但是生成的`render`却有一大坨代码，到这里我们应该对**v-model双向绑定只是一种语法糖**这句话有了更加深刻的认识。
 
-### radio
-
-### select
 
 ## 绑定组件
 
-## 修饰符以及边界处理
+### 自定义输入组件
+在`Vue2.2.0+`版本，`v-model`还支持作用于一个组件上，我们以下面代码为例来进行分析：
+```js
+Vue.component('child-component', {
+  props: ['value'],
+  template: `<input :value="value" @input="handleInput" />`,
+  methods: {
+    handleInput ($event) {
+      this.$emit('input', $event.target.value)
+    }
+  }
+})
+new Vue({
+  el: '#app',
+  data () {
+    return {
+      msg: '',
+    }
+  },
+  template: `<child-component v-model="msg" />`
+})
+```
+既然`v-model`双向绑定的原理是需要一个属性和一个事件监听，那么我们按照标准写法，在子组件`input`标签上面提供一个`value`属性以及一个`input`事件监听。
 
-## 小节
+对于子组件的`parse`解析逻辑，我们在之前的章节中已经分析过了，它们的过程是一样的，现在我们先来看一看父组件`parse`解析结果：
+```js
+const ast = {
+  type: 1,
+  tag: 'child-component',
+  directives: [
+    { name: 'model', rawName: 'v-model', value: 'msg' }
+  ]
+}
+```
+接下来再看一下`codegen`阶段，父组件在`genData`方法中会调用`genDirectives`来处理指令，此时又会去执行与平台相关的`model`方法。因为在父组件中，`v-model`作用于一个组件，所有会执行下面这段分支的逻辑：
+```js
+else if (!config.isReservedTag(tag)) {
+  genComponentModel(el, value, modifiers)
+  // component v-model doesn't need extra runtime
+  return false
+}
+```
+如果你对比源码，可以发现在`model`方法中，还有一个分支的逻辑也同样调用了`genComponentModel`:
+```js
+if (el.component) {
+  genComponentModel(el, value, modifiers)
+  // component v-model doesn't need extra runtime
+  return false
+}
+```
+要命中这个`if`分支的逻辑，我们只需要简单的把父组件的`template`修改一下：
+```js
+const template = '<component v-model="msg" is="ChildComponent" />'
+```
+回过头来，我们来看一下`genComponentModel`方法的代码：
+```js
+export function genComponentModel (
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
+): ?boolean {
+  const { number, trim } = modifiers || {}
+
+  const baseValueExpression = '$$v'
+  let valueExpression = baseValueExpression
+  if (trim) {
+    valueExpression =
+      `(typeof ${baseValueExpression} === 'string'` +
+      `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
+  }
+  if (number) {
+    valueExpression = `_n(${valueExpression})`
+  }
+  const assignment = genAssignmentCode(value, valueExpression)
+
+  el.model = {
+    value: `(${value})`,
+    expression: JSON.stringify(value),
+    callback: `function (${baseValueExpression}) {${assignment}}`
+  }
+}
+```
+调用`genComponentModel`方法后，当前`ast`对象多了一个`model`属性：
+```js
+const ast = {
+  type: 1,
+  tag: 'child-component',
+  directives: [
+    { name: 'model', rawName: 'v-model', value: 'msg' }
+  ],
+  model: {
+    value: '(msg)',
+    expression: 'msg',
+    callback: 'function ($$v) {msg=$$v}'
+  }
+}
+```
+当`codegen`阶段完毕后，此时父组件生成的`render`函数如下：
+```js
+const render = `_c('child-component',{
+  model:{
+    value:(msg),
+    callback:function ($$v) {
+      msg=$$v
+    },
+    expression:"msg"
+  }
+})`
+```
+既然已经生成了`render`函数，那么在`patch`阶段，会生成一个组件`VNode`，创建组件`VNode`的方法是`createComponent`，代码路径为`src/core/vdom/create-component.js`：
+```js
+export function createComponent (
+  Ctor: Class<Component> | Function | Object | void,
+  data: ?VNodeData,
+  context: Component,
+  children: ?Array<VNode>,
+  tag?: string
+): VNode | Array<VNode> | void {
+  // ...省略代码
+  if (isDef(data.model)) {
+    transformModel(Ctor.options, data)
+  }
+  // ...省略代码
+}
+```
+当执行到`createComponent`方法的时候，由于我们存在`model`属性，所以会调用`transformModel`来处理这部分的逻辑，我们来看一下`transformModel`这个方法的代码：
+```js
+function transformModel (options, data: any) {
+  const prop = (options.model && options.model.prop) || 'value'
+  const event = (options.model && options.model.event) || 'input'
+  ;(data.attrs || (data.attrs = {}))[prop] = data.model.value
+  const on = data.on || (data.on = {})
+  const existing = on[event]
+  const callback = data.model.callback
+  if (isDef(existing)) {
+    if (
+      Array.isArray(existing)
+        ? existing.indexOf(callback) === -1
+        : existing !== callback
+    ) {
+      on[event] = [callback].concat(existing)
+    }
+  } else {
+    on[event] = callback
+  }
+}
+```
+代码分析：
+1. `prop`和`event`：代码中会优先获取组件的`options.model`属性，如果没有定义则为默认的`value`或者`input`。这段代码的逻辑表明如果`v-model`作用于一个组件，我们可以给组件提供`model`属性来改变`props`接收属性和派发的事件名，例如：
+```js
+const parent = '<child-component v-model="msg" />'
+
+const child = {
+  props: ['value'],
+  model: {
+    prop: 'value',
+    event: 'change'
+  },
+  template: `<input type="checkbox" :value="value" @change="handleChange" />`,
+  methods: {
+    handleChange ($event) {
+      this.$emit('change', $event.target.checked)
+    }
+  }
+}
+```
+2. `on[event]`：处理事件的逻辑也非常简单，判断当前组件派发的指定事件是否存在，如果存在则根据是否为数组形式分别进行处理，如果不存在则直接赋值。
+
+在`transformModel`方法执行完毕时，扩展后的`data`对象结果如下：
+```js
+const data = {
+  model: {
+    callback: function ($$v) {
+      msg = $$v
+    },
+    expression: 'msg',
+    value: ''
+  },
+  attrs: {
+    value: 'msg'
+  },
+  on: {
+    input: function ($$v) {
+      msg = $$v
+    }
+  }
+}
+```
+拿我们父组件的例子来说，换成非`v-model`形式等价于：
+```js
+new Vue({
+  el: '#app',
+  data () {
+    return {
+      msg: '',
+    }
+  },
+  template: `<child-component :value="msg" @input="msg=arguments[0]" />`
+})
+```
+
+#### .sync修饰符
+某些情况下，在组件上使用`v-model`非常方便，但也同时带来了新的问题：**由于子组件可以变更父组件的数据、但在父组件和子组件之间没有明显的变更来源，这给真正的双向绑定带来了一些维护上的问题**
+
+为了解决以上问题，在`Vue2.3.0+`版本，提供了`.sync`修饰符，同时在子组件中我们使用`$emit('update:xxx')`的形式触发事件，例如：
+```js
+const parent = '<child-component :value.sync="msg" />'
+
+const child = {
+  props: ['value'],
+  template: `<input :value="value" @input="handleInput" />`,
+  methods: {
+    handleInput ($event) {
+      this.$emit('update:value', $event.target.value)
+    }
+  }
+}
+```
+由于`sync`是一种修饰符，如果把`sync`修饰符去掉，对于以上例子`parse`解析阶段的过程跟以前一样，这里不在赘述。我们直接看`processAttrs`方法中，关于`sync`修饰符的处理逻辑：
+```js
+if (modifiers.sync) {
+  syncGen = genAssignmentCode(value, `$event`)
+  if (!isDynamic) {
+    addHandler(
+      el,
+      `update:${camelize(name)}`,
+      syncGen,
+      null,
+      false,
+      warn,
+      list[i]
+    )
+  }
+}
+```
+我们可以看到，如果提供了`sync`修饰符，会在父组件中添加一个`update:xxx`的事件监听，当`parse`解析过程完毕后，生成的`ast`内容如下：
+```js
+const ast = {
+  type: 1,
+  tag: 'child-component',
+  attrs: [
+    { name: 'value', value: 'msg', dynamic: false }
+  ],
+  attrsList: [
+    { name: ':value.sync', value: 'msg' }
+  ],
+  attrsMap: {
+    ':value.sync': 'msg'
+  },
+  events: {
+    'update:value': {
+      value: 'msg=$event'
+    }
+  }
+}
+```
+当`codegen`代码生成阶段完毕后，生成的`render`函数结果如下：
+```js
+const render = `
+  with(this){
+    return _c('child-component',{
+      attrs:{"value":msg},
+      on:{
+        "update:value":function($event){
+          msg=$event
+        }
+      }
+    })
+  }
+`
+```
+## 修饰符
+
+### .number和.trim修饰符
+对于`.number`修饰符和`.trim`修饰符的处理非常简单，在`genDefaultModel`方法中其逻辑如下(其它地方处理过程类似)：
+```js
+const { number, trim } = modifiers || {}
+let valueExpression = '$event.target.value'
+if (trim) {
+  valueExpression = `$event.target.value.trim()`
+}
+if (number) {
+  valueExpression = `_n(${valueExpression})`
+}
+```
+当提供了`.number`修饰符时，使用了`_n`工具函数进行包裹，`_n`工具函数就是`toNumber`方法的缩写形式。
+
+### .lazy修饰符
+我们先来看官网中对于`.lazy`修饰符的说明：**在默认情况下，v-model 在每次 input 事件触发后将输入框的值与数据进行同步 (除了上述输入法组合文字时)。你可以添加 lazy 修饰符，从而转为在 change 事件之后进行同步**。
+
+假设我们有如下案例：
+```js
+// normali
+const normalTemplate = '<input v-model="msg" />'
+
+// lazy
+const lazyTemplate = '<input v-model.lazy="msg" />'
+```
+在`codegen`代码生成后，它们生成的`render`函数`on`事件部分分别如下：
+```js
+// normal
+const normalRender = `
+  on:{
+    input:function($event){
+      if($event.target.composing)return;
+      msg=$event.target.value
+    }
+  }
+`
+
+// lazy
+const lazyRender = `
+  on:{
+    change:function($event){
+      msg=$event.target.value
+    }
+  }
+`
+```
+正如官网介绍中的那样，使用`lazy`修饰符后，它由监听`input`事件变成了监听`change`事件。
+## 小结
+在`v-model`这一小节，我们先详细介绍了`v-model`在`parse`解析、`codegen`代码生成环节的处理过程。
+
+接着，我们分别对`v-model`作用于表单元素`input`、`checkbox`以及组件的过程进行了分析。
+
+然后，我们对于`v-model`作用于组件的新方式`sync`修饰符的处理过程进行了介绍。
+
+最后，我们还对`v-model`配合使用的常见修饰符`.number`、`.trim`以及`.lazy`等进行了分析。
