@@ -90,7 +90,7 @@ module.exports = {
     sidebar: {
       '/webpack/': [webpackSidebar],
       '/vueAnalysis/': vueAnalysisSidebar,
-      '/vueNextAnalysis': vueNextAnalysisSidebar
+      '/vueNextAnalysis/': vueNextAnalysisSidebar
     }
   },
   configureWebpack: {
