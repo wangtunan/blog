@@ -479,7 +479,7 @@ const res = {
   }
 }
 ```
-到这里，我们就把`_u`和`_t`这两个方法串联起来了。接下来再看`renderSlot`方法，就容易很多。`renderSlot`方法的主要作用就是把`res.header`、`res.default`以及`res.footer`方法依次调用一遍并且返回生成的`vnode`。
+到这里，我们就把`_u`和`_t`这两个方法串联起来了。接下来再看`renderSlot`方法就容易很多。`renderSlot`方法的主要作用就是把`res.header`、`res.default`以及`res.footer`方法依次调用一遍并且返回生成的`vnode`。
 
 当`renderSlot`方法调用完毕后，可以得到子组件如下`vnode`对象：
 ```js
@@ -592,6 +592,227 @@ new Vue({
 ```
 在`slot`中，我们使用了来自父组件的响应式变量`msg`，当父组件初始化完毕时，会在`mounted`生命周期函数中延时`3s`去改变`msg`的值。因为`msg`的值发生了变动，所以需要通知子组件重新进行渲染，关于这部分的逻辑它属于**依赖收集**、**派发更新**的范畴。
 
-因为我们在模板中使用到了`msg`变量，而这个变量又是定义在插槽中的，当`_t`函数执行的时候，当前上下文环境为子组件，既`msg`会把这个上下文进行依赖收集。随后在`setTimeout`延时器方法中修改`msg`的时候，会通知依赖列表进行更新`dep.notify()`
+因为我们在模板中使用到了`msg`变量，而这个变量又是定义在插槽中的，当`_t`函数执行的时候，当前上下文环境为子组件，既`msg`会把这个上下文进行依赖收集。随后在`setTimeout`延时器方法中修改`msg`的时候，会`dep.notify()`通知依赖列表进行更新。
+
+* 插槽`template`上存在`v-if`、`v-for`或动态插槽名等情况，例如：
+```js
+// v-if 
+<template v-slot:header v-if="showSlot">header</template>
+// dynamic slotTarget + v-for
+<template v-slot:[item] v-for="item in list">
+  {{item}}
+</template>
+```
+对于使用`v-if`来控制是否显示插槽这个例子而言，当`showSlot`值变动的时候，它应该通知子组件重新进行渲染，这是一件很正常的事情，但问题的关键点在于什么时候？如何通知子组件重新进行渲染？
+
+我们先放下这两个问题，先来看第二个例子，对于这个例子而言，父组件和子组件生成的`render`函数如下：
+```js
+const parentRender = `with(this){
+  return _c('child-component',{
+    scopedSlots:_u([_l((list),function(item){
+      return {
+        key:item,
+        fn:function(){
+          return [_v(_s(item))]
+        },
+        proxy:true
+      }
+    })],null,true)
+  })
+}`
+
+const childRender = `with(this){
+  return _c('div',[
+    _t("header",null,{"msg":msg1}),
+    _t("default",null,{"msg":msg2}),
+    _t("footer",null,{"msg":msg3})
+  ],2)
+}`
+```
+`_l`函数就是`renderList`方法的简写形式，其代码如下：
+```js
+  val: any,
+  render: (
+    val: any,
+    keyOrIndex: string | number,
+    index?: number
+  ) => VNode
+): ?Array<VNode> {
+  let ret: ?Array<VNode>, i, l, keys, key
+  if (Array.isArray(val) || typeof val === 'string') {
+    ret = new Array(val.length)
+    for (i = 0, l = val.length; i < l; i++) {
+      ret[i] = render(val[i], i)
+    }
+  } else if (typeof val === 'number') {
+    // ...省略代码
+  } else if (isObject(val)) {
+    // ...省略代码
+  }
+  if (!isDef(ret)) {
+    ret = []
+  }
+  (ret: any)._isVList = true
+  return ret
+}
+```
+由于传递的第一个参数是一个数组形式，因此命中`if`分支的逻辑，当遍历完毕后返回的`ret`数组如下：
+```js
+const ret = [
+  { key: 'header', fn: function () {}, proxy: true },
+  { key: 'default', fn: function () {}, proxy: true },
+  { key: 'footer', fn: function () {}, proxy: true },
+]
+```
+我们把这个结果再带回到`parentRender`函数中：
+```js
+const parentRender = `with(this){
+  return _c('child-component', {
+    scopedSlots:_u([
+      { key:"header",fn:function(){return [_v("插槽头部内容")]},proxy:true },
+      { key:"default",fn:function(){return [_v("插槽内容")]},proxy:true },
+      { key:"footer",fn:function(){return [_v("插槽底部内容")]},proxy:true}
+    ])
+  })
+}`
+```
+这和我们在前面提到过的例子一模一样，但关键点在于这里使用的`v-for`指令，如果我们在父组件初始化完毕后，再去修改`list`数组的内容，那么应该需要去通知子组件重新进行渲染。
+
+既然我们搞清楚了这两个例子为什么要通知子组件重新进行渲染，接下来让我们来回答前面遗留的两个问题：**什么时候通知子组件重新进行渲染？**、**怎么通知子组件重新进行渲染？**。
+
+问：**什么时候通知子组件重新进行渲染？**<br/>
+答：当我们在父组件初始化完毕后，再次修改`list`数组时，父组件会触发`prepatch`钩子函数，在这个钩子函数中它调用了`updateChildComponent`方法，在这个方法中有如下代码逻辑：
+```js
+export function updateChildComponent (
+  vm: Component,
+  propsData: ?Object,
+  listeners: ?Object,
+  parentVnode: MountedComponentVNode,
+  renderChildren: ?Array<VNode>
+) {
+  // ...省略代码
+  const newScopedSlots = parentVnode.data.scopedSlots
+  const oldScopedSlots = vm.$scopedSlots
+  const hasDynamicScopedSlot = !!(
+    (newScopedSlots && !newScopedSlots.$stable) ||
+    (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+  )
+
+  // Any static slot children from the parent may have changed during parent's
+  // update. Dynamic scoped slots may also have changed. In such cases, a forced
+  // update is necessary to ensure correctness.
+  const needsForceUpdate = !!(
+    renderChildren ||               // has new static slots
+    vm.$options._renderChildren ||  // has old static slots
+    hasDynamicScopedSlot
+  )
+  // ...省略代码
+  // resolve slots + force update if has children
+  if (needsForceUpdate) {
+    vm.$slots = resolveSlots(renderChildren, parentVnode.context)
+    vm.$forceUpdate()
+  }
+}
+```
+从上面例子中我们可以看出来，当`needsForceUpdate`逻辑判断为真时，就会调用`$forceUpdate()`方法进行子组件的重新渲染逻辑，我们仔细分析后可以知道`needsForceUpdate`主要与`$stable`或`$key`这两个属性挂钩，这两个属性就是**怎么通知子组件重新进行渲染**的关键。
+
+问：**怎么通知子组件重新进行渲染？**<br>
+答：在介绍插槽的`parse`编译小节时，对于`genScopedSlots`方法、我们故意省略了一部分代码没有进行说明，完整代码如下：
+```js
+function genScopedSlots (
+  el: ASTElement,
+  slots: { [key: string]: ASTElement },
+  state: CodegenState
+): string {
+  // by default scoped slots are considered "stable", this allows child
+  // components with only scoped slots to skip forced updates from parent.
+  // but in some cases we have to bail-out of this optimization
+  // for example if the slot contains dynamic names, has v-if or v-for on them...
+  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
+    const slot = slots[key]
+    return (
+      slot.slotTargetDynamic ||
+      slot.if ||
+      slot.for ||
+      containsSlotChild(slot) // is passing down slot from parent which may be dynamic
+    )
+  })
+
+  // #9534: if a component with scoped slots is inside a conditional branch,
+  // it's possible for the same component to be reused but with different
+  // compiled slot content. To avoid that, we generate a unique key based on
+  // the generated code of all the slot contents.
+  let needsKey = !!el.if
+
+  // OR when it is inside another scoped slot or v-for (the reactivity may be
+  // disconnected due to the intermediate scope variable)
+  // #9438, #9506
+  // TODO: this can be further optimized by properly analyzing in-scope bindings
+  // and skip force updating ones that do not actually use scope variables.
+  if (!needsForceUpdate) {
+    let parent = el.parent
+    while (parent) {
+      if (
+        (parent.slotScope && parent.slotScope !== emptySlotScopeToken) ||
+        parent.for
+      ) {
+        needsForceUpdate = true
+        break
+      }
+      if (parent.if) {
+        needsKey = true
+      }
+      parent = parent.parent
+    }
+  }
+
+  const generatedSlots = Object.keys(slots)
+    .map(key => genScopedSlot(slots[key], state))
+    .join(',')
+
+  return `scopedSlots:_u([${generatedSlots}]${
+    needsForceUpdate ? `,null,true` : ``
+  }${
+    !needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``
+  })`
+}
+```
+从上面代码可以看到，在代码生成阶段，它会根据标签上是否存在`v-if`、`v-for`以及动态插槽名等情况来对`needsForceUpdate`变量进行赋值，直白一点的说：只要出现了`v-if`、`v-for`或动态插槽名，`needsForceUpdate`值就为`true`。
+
+如果以上情况都没有，还会调用`hash`方法对我们生成的字符串进行计算，如果计算的结果不一样(新旧$key对比)，同样会通知子组件重新进行渲染：
+```js
+function hash(str) {
+  let hash = 5381
+  let i = str.length
+  while(i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i)
+  }
+  return hash >>> 0
+}
+```
+从最后一个`return`语句中，我们可以发现，`needsForceUpdate`变量主要控制`_u`函数的第三个参数、`hash`计算的结果主要控制第四个参数，我们再来回顾一下`_u`函数：
+```js
+export function resolveScopedSlots (
+  fns: ScopedSlotsData, // see flow/vnode
+  res?: Object,
+  // the following are added in 2.6
+  hasDynamicKeys?: boolean,
+  contentHashKey?: number
+): { [key: string]: Function, $stable: boolean } {
+  res = res || { $stable: !hasDynamicKeys }
+  // ...省略代码
+  if (contentHashKey) {
+    (res: any).$key = contentHashKey
+  }
+  return res
+}
+```
+分析至此，我们已经能够回答以上问题了：**父组件通过控制scopedSlots.$stable变量以及scopedSlots.$key变量的值，来控制是否应该通知子组件重新进行渲染**。
 
 ## 小结
+在这一小节，我们首先回顾了插槽的`parse`编译过程以及插槽的`patch`过程。
+
+随后，我们对比了普通插槽和作用域插槽的区别，它们本质上的区别在于数据的作用域，普通插槽在生成`vnode`时无法访问子组件的`props`数据，但作用域插槽可以。
+
+最后，我们知道了当插槽`template`使用了来自父组件的响应式变量或者与`v-if`、`v-for`以及动态插槽名一起使用时，当响应式变量更新后，会强制通知子组件重新进行渲染。
