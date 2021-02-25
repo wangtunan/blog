@@ -14,9 +14,9 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ <br/>
 [深入理解 ES6](https://wangtunan.github.io/blog/books/javascript/es6.html)<br/>
 [JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/) <br/>
 [JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html) <br/>
-[JavaScript 高级程序设计](https://wangtunan.github.io/blog/books/javascript/red-book.html)
+[JavaScript 高级程序设计](https://wangtunan.github.io/blog/books/javascript/red-book.html)<br/>
 [JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/) <br/>
-[JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html)
+[JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html)<br/>
 
 
 ## Vue2.0 源码分析
