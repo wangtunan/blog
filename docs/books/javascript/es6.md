@@ -1563,6 +1563,9 @@ console.log(set.size)   // 0
 ```
 
 #### Set集合的forEach()方法
+::: tip
+除`forEach()`以外，还支持`keys()`、`values()`以及`entries()`方法。
+:::
 `Set`集合的`forEach()`方法和数组的`forEach()`方法是一样的，唯一的区别在于`Set`集合在遍历时，第一和第二个参数是一样的。
 ```js
 const set = new Set([1, 2])
