@@ -2046,7 +2046,7 @@ console.log(it.next())                    // {done: false, value: 1}
 console.log(it.next(4))                   // {done: false, value: 6}
 console.log(it.throw(new Error('break'))) // 抛出错误
 ```
-正如我们上面看到的那样，我们想生成器内部传递了一个错误对象，迭代器恢复执行时会抛出一个错误，我们可以使用`try-catch`语句来捕获这种错误：
+正如我们上面看到的那样，我们向生成器内部传递了一个错误对象，迭代器恢复执行时会抛出一个错误，我们可以使用`try-catch`语句来捕获这种错误：
 ```js
 function * createIterator () {
   let first = yield 1
