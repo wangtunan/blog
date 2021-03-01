@@ -3450,6 +3450,8 @@ console.log('name' in proxy)    // false
 `setPrototypeOf`陷阱接受两个参数：
 * `trapTarget`：接受原型设置的对象(代理的目标)。
 * `proto`：作为原型使用的对象。
+<br/>
+
 `getPrototypeOf`陷阱接受一个参数：
 * `trapTarget`：接受获取原型的对象(代理的目标)。
 
