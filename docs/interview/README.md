@@ -1183,33 +1183,35 @@ console.log(getQueryString('name'));
 用`requestAnimationFrame`实现自己的`setInterval`方法
 :::
 ```js
-// 手写
-function mySetInterval(callback, interval) {
-  var timer = null;
-  var now = Date.now;
-  var startTime = now();
-  var endTime = startTime;
-  var loop = function() {
-    timer = requestAnimationFrame(loop);
-    endTime = now();
-    if(endTime - startTime >=interval) {
-      startTime = endTime = now();
-      callback && callback(timer);
+const obj = {
+  timer: null,
+  setInterval: function (callback, interval) {
+    const now = Date.now
+    let startTime = now()
+    let endTime = startTime
+    const self = this
+    const loop = function () {
+      self.timer = requestAnimationFrame(loop)
+      endTime = now()
+      if (endTime - startTime >= interval) {
+        startTime = endTime = now()
+        callback && callback()
+      }
     }
+    this.timer = requestAnimationFrame(loop)
+    return this.timer
+  },
+  clearInterval: function () {
+    cancelAnimationFrame(this.timer)
   }
-
-  timer = requestAnimationFrame(loop);
-  return timer;
 }
-
-// 测试：输出三次'超级定时器已部署'自动停止
-var count = 0;
-mySetInterval(function(timer){
-  console.log('超级定时器已部署');
-  count++;
-  if(count>=3) {
-    cancelAnimationFrame(timer);
-  }
+let count = 0
+const timer = obj.setInterval(() => {
+  console.log('interval...')
+  count++
+  if (count >= 3) {
+    obj.clearInterval()
+  } 
 }, 500)
 ```
 
