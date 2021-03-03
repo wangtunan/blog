@@ -1078,7 +1078,7 @@ setInterval(() => {
 
 **requestAnimationFrame：** 翻译过来就是请求动画帧，它是html5专门用来设计请求动画的API，它与`setTimeout`相比有如下优势：
 1. 根据不同屏幕的刷新频率，自动调整执行回调函数的时机。
-2. 当窗口处于未激活状态时，`requestAnimationFrame`或停止执行，而`setTimeout`不会
+2. 当窗口处于未激活状态时，`requestAnimationFrame`会停止执行，而`setTimeout`不会
 3. 自带函数节流功能
 ```js
 var progress = 0;
@@ -1216,30 +1216,29 @@ mySetInterval(function(timer){
 ### 手写call、apply和bind方法
 #### 手写Call
 ```js
-Function.prototype.myCall = function(context) {
-  if(typeof this !== 'function') {
-    throw new TypeError('error');
+Function.prototype.myCall = function (context) {
+  if (typeof this !== 'function') {
+    throw new TypeError('not a function')
   }
   const symbolFn = Symbol()
-  context = context || window;
-  context[symbolFn] = this;
-  var args = [...arguments].slice(1);
-  var result = context[symbolFn](...args);
-  delete context[symbolFn];
-  return result;
+  const args = [...arguments].slice(1)
+  context = context || window
+  context[symbolFn] = this
+  const result = context[symbolFn](...args)
+  delete context[symbolFn]
+  return result
 }
-function foo(){
-  console.log(this.age);
+const obj = {
+  name: 'obj'
 }
-var obj = {
-  age: 101
+function foo () {
+  console.log(this.name)
 }
-foo.myCall(obj); // 输出 101
+foo.myCall(obj) // obj
 ```
 
 #### 手写apply
 ```js
-// 手写
 Function.prototype.myApply = function(context) {
   if(typeof this !== 'function') {
     throw new TypeError('error');
