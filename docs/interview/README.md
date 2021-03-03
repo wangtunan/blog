@@ -1422,22 +1422,28 @@ window.onresize = debounce(function() {
 `instanceof`原理是在对象原型链中是否能找到执行类型的`prototype`
 :::
 ```js
-function myInstanceof(left,right) {
-  let prototype = right.prototype
-  left = left.__proto__
-  while (true) {
-    if (left === null || left === undefined)
+function myInstanceOf (left, right) {
+  if (typeof left !== 'object') {
+    return false
+  }
+  while(true) {
+    if (left === null) {
       return false
-    if (prototype === left)
+    }
+    if (left.__proto__ === right.prototype) {
       return true
+    }
     left = left.__proto__
   }
 }
-function Student(name) {
-  this.name = name;
+function Person (name) {
+  this.name = name
 }
-var stu = new Student('张三');
-console.log(myInstanceof(stu, Student));  // 输出true
+const p1 = new Person('AAA')
+console.log(myInstanceOf(p1, Person)) // true
+console.log(myInstanceOf(p1, Object)) // true
+console.log(p1 instanceof Person)     // true
+console.log(p1 instanceof Object)     // true
 ```
 
 ### 手写简易深拷贝
@@ -1511,50 +1517,53 @@ for (const val of obj) {
 图片懒加载是一种常用的技术，如果直接给某个img标签设置src属性，由于图片过大或者网络不佳，图片的位置会出现一片空白，图片懒加载就是使用一个`loading`图片来进行站位，等真正的图片加载完毕后再显示出来。
 :::
 
-#### 不适用代理模式实现图片懒加载
+#### 不使用代理模式实现图片懒加载
 ```js
-var myImage = (function(){
-  var imgNode = document.createElement('img');
-  document.body.appendChild(imgNode);
-  var img = new Image();
-  img.onload = function() {
-    imgNode.src = img.src;
+const loadingSrc = 'https://www.imooc.com/static/img/index/logo2020.png'
+const imgSrc = 'https://img1.sycdn.imooc.com/5c09123400014ba418720632.jpg'
+const myImage = (function () {
+  const imgNode = document.createElement('img')
+  document.body.appendChild(imgNode)
+  const img = new Image()
+  img.onload = function () {
+    imgNode.src = img.src
   }
   return {
-    setSrc: function(src) {
-      imgNode.src = './img/loading.gif';
-      img.src = src;
+    setSrc: function (src) {
+      imgNode.src = loadingSrc
+      img.src = src
     }
   }
 })()
-myImage.setSrc('https://img1.sycdn.imooc.com/5c09123400014ba418720632.jpg');
+myImage.setSrc(imgSrc)
 ```
 
 #### 使用代理模式实现图片懒加载
-```
-var myImage = (function(){
-  var image = document.createElement('img');
-  document.body.appendChild(image);
+```js
+const loadingSrc = 'https://www.imooc.com/static/img/index/logo2020.png'
+const imgSrc = 'https://img1.sycdn.imooc.com/5c09123400014ba418720632.jpg'
+const myImage = (function(){
+  const imgNode = document.createElement('img')
+  document.body.appendChild(imgNode)
   return {
-    setSrc: function(src) {
-      image.src = src;
-    }
-  }
-})();
-
-var proxyImage = (function(){
-  var img = new Image();
-  img.onload = function() {
-    myImage.setSrc(this.src);
-  }
-  return {
-    setSrc: function(src) {
-      myImage.setSrc('file:///C:/Users/admin/Desktop/mask/img/7.jpg');
-      img.src = src;
+    setSrc: function (src) {
+      imgNode.src = src
     }
   }
 })()
-proxyImage.setSrc('https://img1.sycdn.imooc.com/5c09123400014ba418720632.jpg');
+const proxyImage = (function(){
+  const img = new Image()
+  img.onload = function () {
+    myImage.setSrc(img.src)
+  }
+  return {
+    setSrc: function (src) {
+      myImage.setSrc(loadingSrc)
+      img.src = src
+    }
+  }
+})()
+proxyImage.setSrc(imgSrc)
 ```
 
 ### 手写事件委托
@@ -1620,30 +1629,32 @@ xhr.onreadystatechange = function() {
 AOP(面向切面编程)的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计，安全控制，异常处理等。把这些功能抽离出来后，再通过动态织入的方式掺入业务逻辑模块中
 :::
 ```js
-Function.prototype.before = function(beforeFn) {
-  var _self = this;
-  return function() {
-    beforeFn.apply(this,arguments);
-    return _self.apply(this,arguments);
+Function.prototype.before = function (beforeFn) {
+  const self = this
+  return function beforeFunc () {
+    const args = arguments
+    beforeFn.apply(this, args)
+    return self.apply(this, args)
   }
 }
-Function.prototype.after = function(afterFn) {
-  var _self = this;
-  return function() {
-    var ret = _self.apply(this,arguments);
-    afterFn.apply(this,arguments);
-    return ret;
+Function.prototype.after = function (afterFn) {
+  const self = this
+  return function afterFunc () {
+    const args = arguments
+    const result = self.apply(this, args)
+    afterFn.apply(this, args)
+    return result
   }
 }
-var func = function() {
-  console.log(2);
+function func () {
+  console.log('2')
 }
-func = func.before(function(){
-  console.log(1);
-}).after(function(){
-  console.log(3);
+const newFunc = func.before(() => {
+  console.log('1')
+}).after(() => {
+  console.log('3')
 })
-func();
+newFunc() // 1 2 3
 ```
 
 ### 手写柯里化
