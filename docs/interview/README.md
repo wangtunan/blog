@@ -1153,7 +1153,7 @@ console.log(5);
 
 ## JavaScript进阶面试题
 
-### 手写GetQueryString
+### 手写getQueryString
 ::: tip
 给定一段URL和参数的名称，获取此参数的值
 :::
@@ -1688,7 +1688,7 @@ console.log(cost()); // 输出330
 
 ### 手写分时函数
 ::: tip
-分时函数案例：把1秒创建1000个DOM节点，改成每隔200毫秒创建10个节点，这样不同短时间在页面中创建大量的DOM。
+分时函数案例：把1秒创建1000个DOM节点，改成每隔200毫秒创建10个节点，这样不用短时间在页面中创建大量的DOM。
 :::
 ```js
 var timeChunk = function(arr,fn,count,interval) {
@@ -1696,8 +1696,7 @@ var timeChunk = function(arr,fn,count,interval) {
   var data = null;
   var start = function() {
     for(var i = 0 ; i < Math.min(count || 1 , arr.length) ; i++) {
-      data = arr.shift();
-      fn(data);
+      fn(arr.shift());
     }
   }
   return function() {
@@ -1731,25 +1730,33 @@ renderDOMList();
 JSONP实现跨域的原理是利用`script`标签没有跨域限制，通过`src`指向一个`ajax`的URL，最后跟一个回调函数`callback`
 :::
 ```js
-var jsonp = function (url, data, callback) {
-  var cbName = 'callback_' + new Date().getTime();
-  var queryString = url.indexOf('?') == -1 ? '?' : '&';
-  for (var k in data) {
-    queryString += k + '=' + data[k] + '&';
-  }
-  queryString += 'callback=' + cbName;
-  var script = document.createElement('script');
-  script.src = url + queryString;
+function JSONP (url, data, callback) {
+  const cbName = 'callback_' + new Date().getTime()
+  const queryString = normalizeParams(data)
+  const hasIndex = url.indexOf('?') !== -1
+  url = `${hasIndex ? url : url + '?'}${queryString}&jsoncallback=${cbName}`
+  const script = document.createElement('script')
+  script.src = url
   window[cbName] = function (data) {
-    callback(data);
-    document.body.removeChild(script);
-  };
-  // 添加到body尾部
-  document.body.appendChild(script);
+    callback(data)
+    document.body.removeChild(script)
+  }
+  document.body.appendChild(script)
 }
-
-// 实测
-jsonp('http://api.douban.com/v2/movie/in_theaters', {'count': 1}, function (data) {
+function normalizeParams (data) {
+  if (!data || Object.keys(data).length === 0) {
+    return ''
+  }
+  return Object.keys(data).map((key, index) => {
+    return `${index ? '&' : ''}${key}=${data[key]}`
+  })
+}
+const params = {
+  name: 'AAA',
+  age: 23,
+  address: '广东'
+}
+JSONP('https://www.runoob.com/try/ajax/jsonp.php', params, function (data) {
   console.log(data)
 })
 ```
