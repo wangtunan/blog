@@ -1447,32 +1447,45 @@ console.log(p1 instanceof Object)     // true
 案例只实现了简易的深拷贝函数，工作中推荐使用`lodash`的深拷贝方法。
 :::
 ```js
-function deepClone(obj) {
-  function isObject(o) {
-    return (typeof o === 'object' || typeof o === 'function') && o !== null;
-  }
-  if(!isObject(obj)) {
-    throw new Error('非对象');
-  }
-  var isArray = Array.isArray(obj);
-  var newObj = isArray ? [...obj] : {...obj};
-  Reflect.ownKeys(newObj).forEach(key => {
-    newObj[key] = isObject(newObj[key]) ? deepClone(newObj[key]) : newObj[key];
-  })
-  return newObj;
+function isObject (obj) {
+  return (typeof obj === 'object') && obj !== null
 }
-var obj = {
+function deepClone (obj) {
+  if (!isObject(obj)) {
+    return
+  }
+  const isArray = Array.isArray(obj)
+  const newObj = isArray ? [] : {}
+  Reflect.ownKeys(obj).forEach(key => {
+    const value = obj[key]
+    newObj[key] = isObject(value) ? deepClone(value) : value
+  })
+  return newObj
+}
+const obj = {
+  id: Symbol('id'),
   name: 'AAA',
   age: 23,
+  colors: ['red'],
   job: {
     name: 'FE',
-    money: 12000
+    salary: 200
+  },
+  sayName: function () {
+    console.log('funciton')
   }
 }
-var cloneObj = deepClone(obj);
-obj.job.money = 13000;
-console.log(obj.job.money);     // 输出13000
-console.log(cloneObj.job.money);// 输出12000
+const cloneObj = deepClone(obj)
+console.log(cloneObj.id)
+console.log(cloneObj.colors, obj.colors)
+console.log(cloneObj.job, obj.job)
+obj.job.name = 'UI'
+obj.job.salary = 300
+obj.colors.push('green')
+obj.sayName()
+console.log(cloneObj.colors, obj.colors)
+console.log(cloneObj.job, obj.job)
+cloneObj.sayName()
 ```
 
 ### 手写对象属性值迭代器
@@ -1761,6 +1774,218 @@ JSONP('https://www.runoob.com/try/ajax/jsonp.php', params, function (data) {
 })
 ```
 
+### 手写new关键词方法
+`new`关键词调用构造函数的过程如下：
+1. 创建一个空对象，这个对象讲会作为执行构造函数执行之后返回对象的实例。
+2. 将空对象的`__proto__`指向构造函数的`prototype`。
+3. 将这个空对象赋值给构造函数内部的`this`，并执行构造函数。
+4. 根据构造函数的逻辑，返回第一步创建的对象或者构造函数显示的返回值。
+```js
+function myNew (...args) {
+  // 1.获取构造函数
+  const constructor = args.shift()
+  // 2.创建空对象并设置原型
+  const obj = Object.create(constructor.prototype)
+  // 3.绑定this并执行构造函数
+  const result = constructor.apply(obj, args)
+  // 4.返回构造函数显示返回的值或新对象
+  return isObject(result) ? result : obj
+}
+function isObject (obj) {
+  return obj !== null && typeof obj === 'object'
+}
+// 案例一
+function Person (name) {
+  this.name = name
+}
+const p1 = myNew(Person, 'AAA')
+console.log(p1 instanceof Person)   // true
+console.log(p1.name)                // AAA
+
+// 案例二
+function Student (name) {
+  this.name = name
+  return {
+    name: 'AAA',
+    age: 23
+  }
+}
+const stu = myNew(Student, 'BBB')
+console.log(stu instanceof Student) // false
+console.log(stu) 
+```
+
+### 手写类extends关键词方法
+```js
+function inherit (child, parent) {
+  // 1.继承父类原型上的属性
+  child.prototype = Object.create(parent.prototype)
+  // 2.修复子类的构造函数
+  child.prototype.constructor = child
+  // 3.存储父类
+  child.super = parent
+  // 4.继承静态属性
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(child, parent)
+  } else if (child.__proto__) {
+    child.__proto__ = parent
+  } else {
+    for (const key in parent) {
+      if (parent.hasOwnProperty(k) && !(k in child)) {
+        child[key] = parent[key]
+      }
+    }
+  }
+}
+// 父类
+function Parent (name) {
+  this.name = name
+  this.parentColors = ['red']
+}
+Parent.prototype.sayName = function () {
+  console.log(this.name)
+}
+Parent.create = function (name) {
+  return new Parent(name)
+}
+// 子类
+function Child (name) {
+  this.name = name
+  this.childColors = ['green']
+}
+// 继承
+inherit(Child, Parent)
+
+// test
+const child1 = new Child('child1')
+console.log(child1 instanceof Child)  // true
+console.log(child1 instanceof Parent) // true
+console.log(child1.name)              // child1
+console.log(child1.childColors)       // ['green']
+console.log(child1.parentColors)      // undefined
+
+const child2 = Child.create('child2')
+console.log(child2 instanceof Child)  // false
+console.log(child2 instanceof Parent) // true
+console.log(child2.name)              // child2
+console.log(child2.childColors)       // undefined
+console.log(child2.parentColors)      // ['red']
+```
+
+### 手写基于发布/订阅的事件系统
+事件系统包括如下几个方法：
+1. `on`监听事件方法。
+2. `off`取消监听事件方法。
+3. `emit`触发事件方法。
+4. `once`绑定一次事件监听方法。
+```js
+function invokeCallback (callback, context, args) {
+  try {
+    callback && callback.apply(context, args)
+  } catch {
+    console.log('invoke callback error')
+  }
+}
+const event = {
+  subs: {},
+  on: function (event, callback) {
+    if (Array.isArray(event)) {
+      for (let index = 0; index < event.length; index++) {
+        this.on(event[index], callback)
+      }
+    } else {
+      if (!this.subs[event]) {
+        this.subs[event] = []
+      }
+      this.subs[event].push(callback)
+    }
+  },
+  off: function (event, callback) {
+    // 1、一个参数都没有，解绑全部
+    // 2、只传event，解绑改event所有事件
+    // 3、两个参数都传递，只移除指定某一个
+    if(!arguments.length) {
+      this.subs = Object.create(null)
+      return
+    }
+    if (Array.isArray(event)) {
+      for (let index = 0; index < event.length; index++) {
+        this.off(event[index], callback)
+      }
+      return
+    }
+    const cbs = this.subs[event]
+    if (!cbs || cbs.length === 0) {
+      return
+    }
+    if (!callback) {
+      this.subs[event] = null
+      return
+    }
+    let cb
+    let i = cbs.length
+    while(i--) {
+      cb = cbs[i]
+      if (cb === callback || cb.fn === callback) {
+        cbs.splice(i, 1)
+        break
+      }
+    }
+  },
+  once: function (event, callback) {
+    const self = this
+    function on () {
+      self.off(event, on)
+      callback.apply(self, arguments)
+    }
+    this.on(event, on)
+  },
+  emit: function (event) {
+    const cbs = this.subs[event]
+    if (cbs && cbs.length > 0) {
+      const args = [...arguments].slice(1)
+      for (let index = 0, len = cbs.length; index < len; index++) {
+        invokeCallback(cbs[index], this, args)
+      }
+    }
+  }
+}
+const speakCallback1 = () => {
+  console.log('speak callback1')
+}
+const speakCallback2 = () => {
+  console.log('speak callback2')
+}
+const combineCallback = () => {
+  console.log('write or listen callback')
+}
+const runningCallback1 = (msg) => {
+  console.log('running callback1')
+}
+const runningCallback2 = (msg) => {
+  console.log('running callback2')
+}
+event.on('speak', speakCallback1)
+event.on('speak', speakCallback2)
+event.on(['write', 'listen'], combineCallback)
+event.once('running', runningCallback1)
+event.once('running', runningCallback2)
+
+event.emit('speak')   // speak callback1, speak callback2
+event.emit('running') // running callback1
+event.emit('running') // running callback2
+event.emit('write')   // write or listen callback
+
+event.off('speak', speakCallback1)
+event.off(['write', 'listen'])
+event.emit('speak')   // speak callback2
+event.emit('write')   //
+event.emit('listen')  // 
+
+event.off()
+event.emit('speak')   // 
+event.emit('running') //
+```
 ### 手写Vue 数据响应式原理
 撰写中。。。
 
