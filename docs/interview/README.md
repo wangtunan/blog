@@ -1364,28 +1364,25 @@ new MyPromise((resolve, reject) => {
 4. 其他事件
 :::
 ```js
-function throttle(fn, interval) {
-  var timer = null;
-  var firstTime = true;
-  var _self = fn;
-  return function() {
-    var that = this;
-    var args = arguments;
-    // 判断是否第一次执行
-    if(firstTime) {
-      _self.apply(that, args);
-      return firstTime = false;
+function throttle (fn, interval = 500) {
+  let timer = null
+  let firstTime = true
+  return function () {
+    const args = arguments
+    const self = this
+    if (firstTime) {
+      fn.apply(self, args)
+      firstTime = false
+      return false
     }
-    // 判断定时器是否执行完毕
-    if(timer) {
-      return false;
+    if (timer) {
+      return false
     }
-    // 设置定时器
-    timer = setTimeout(function() {
-      clearTimeout(timer);
-      timer = null;
-      _self.apply(that,args);
-    }, interval || 500)
+    timer = setTimeout(() => {
+      clearTimeout(timer)
+      timer = null
+      fn.apply(self, args)
+    }, interval)
   }
 }
 // 运用
@@ -1493,8 +1490,8 @@ Object.defineProperty(obj, Symbol.iterator, {
     return {
       next: function() {
         return {
-          value: self[keys[index++]],
-          done: index > keys.length
+          done: index >= keys.length,
+          value: self[keys[index++]]
         }
       }
     }
