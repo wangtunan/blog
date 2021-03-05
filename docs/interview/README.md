@@ -1986,10 +1986,100 @@ event.off()
 event.emit('speak')   // 
 event.emit('running') //
 ```
+
 ### 手写Vue 数据响应式原理
 撰写中。。。
 
 ### 手写Vue nextTick方法
+`nextTick`支持两种形式使用方式：
+1. 回调函数形式。
+2. 如果当前环节支持`Promise`，还支持`Promise.then`的形式。
+```js
+this.$nextTick(() => {
+  // callback形式
+})
+this.$nextTick().then(() => {
+  // Promise.then形式
+})
+```
+基于`Vue`源码，`nextTick`手写代码如下：
+```js
+let pending = false
+let timeFunc
+const callbacks = []
+function flushCallbacks () {
+  pending = false
+  const cbs = callbacks.slice()
+  callbacks.length = 0
+  for (let index = 0, len = cbs.length; index < len; index++) {
+    cbs[index]()
+  }
+}
+
+function invokeCallback (callback, context) {
+  try {
+    callback.call(context)
+  } catch {
+    console.log('invoke nextTick callback error')
+  }
+}
+
+function nextTick (cb, context) {
+  context = context || window
+  let _resolve
+  callbacks.push(() => {
+    if (cb) {
+      invokeCallback(cb, context)
+    } else if (_resolve) {
+      _resolve(context)
+    }
+  })
+  if (!pending) {
+    pending = true
+    timeFunc()
+  }
+  if (!cb && typeof Promise !== 'undefined') {
+    return new Promise(resolve => {
+      _resolve = resolve
+    })
+  }
+}
+function setTimeFunc () {
+  if (typeof Promise !== 'undefined') {
+    const p = Promise.resolve()
+    timeFunc = () => {
+      p.then(flushCallbacks)
+    }
+  } else if (typeof MutationObserver !== 'undefined') {
+    let number = 1
+    const observer = new MutationObserver(flushCallbacks)
+    const textNode = document.createTextNode(String(number))
+    observer.observe(textNode, {
+      characterData: true
+    })
+    timeFunc = () => {
+      number = (number + 1) % 2
+      textNode.data = number
+    }
+  } else if (typeof setImmediate !== 'undefined') {
+    timeFunc = () => {
+      setImmediate(flushCallbacks)
+    }
+  } else {
+    timeFunc = () => {
+      setTimeout(flushCallbacks, 0)
+    }
+  }
+}
+setTimeFunc()
+
+nextTick(() => {
+  console.log('nextTick callback')
+})
+nextTick().then(() => {
+  console.log('nextTick promise')
+})
+```
 撰写中。。。
 
 ## 浏览器相关基础面试题
