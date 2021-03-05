@@ -7,7 +7,9 @@
   "keywords": [
     "vue",
     "vue源码分析",
-    "wangtunan"
+    "wangtunan",
+    "汪图南的博客",
+    "汪图南"
   ],
   "dependencies": {
     "element-ui": "^2.10.0"

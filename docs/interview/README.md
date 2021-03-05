@@ -1633,7 +1633,7 @@ xhr.onreadystatechange = function() {
 }
 ```
 
-### 手写AOP
+### 手写函数AOP
 ::: tip
 AOP(面向切面编程)的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计，安全控制，异常处理等。把这些功能抽离出来后，再通过动态织入的方式掺入业务逻辑模块中
 :::
@@ -1870,6 +1870,147 @@ console.log(child2 instanceof Parent) // true
 console.log(child2.name)              // child2
 console.log(child2.childColors)       // undefined
 console.log(child2.parentColors)      // ['red']
+```
+
+### 手写Object.create方法
+```js
+function create (obj, properties) {
+  const strType = typeof obj
+  const isObject = strType === 'object' || strType === 'function'
+  const isUndefined = strType === 'undefined'
+  if (isUndefined || !isObject) {
+    throw new TypeError('Object prototype may only be an Object or null')
+  }
+  // 设置原型
+  function F () {}
+  F.prototype = obj
+  const ret = new F()
+  // 兼容第二个参数
+  if (properties !== null && properties !== undefined) {
+    Object.defineProperties(ret, properties)
+  }
+  // 兼容null
+  if (obj === null) {
+    ret.__proto__ = null
+  }
+  return ret
+}
+const obj = {
+  age: 23,
+  name: 'AAA'
+}
+const myObj1 = create(obj, {
+  address: {
+    value: '广东'
+  }
+})
+const originObj1 = Object.create(obj, {
+  address: {
+    value: '广东'
+  }
+})
+console.log(myObj1.name)        // 23
+console.log(myObj1.address)     // 广东
+console.log(originObj1.name)    // 23
+console.log(originObj1.address) // 广东
+
+const myObj2 = create(null)
+const originObj2 = Object.create(null)
+console.log('toString' in myObj2)     // false
+console.log('toString' in originObj2) // false
+```
+
+### 手写数组降维flat方法
+原生`Array.prototype.flat`方法接受一个`depth`参数，默认值为`1`，`depth`表示要降维的维数：
+```js
+const arr = [1, [2, 3], [4, [5, 6]]]
+console.log(arr.flat(1))         // [1, 2, 3, 4, [5, 6]]
+console.log(arr.flat(Infinity))  // [1, 2, 3, 4, 5, 6]
+```
+
+#### reduce + 递归实现方案
+```js
+// MDN: 可查看更多flat实现方法
+function flat (arr = [], depth = 1) {
+  if (arr.length === 0) {
+    return []
+  }
+  let result = []
+  if (depth > 0) {
+    result = arr.reduce((acc, val) => {
+      return acc.concat(Array.isArray(val) ? flat(val, depth - 1) : val)
+    }, [])
+  } else {
+    result = arr.slice()
+  }
+  return result
+}
+const arr = [1, 2, 3, [1, 2, 3, 4, [2, 3, 4]]]
+const myResult1 = flat(arr, 1)
+const originResult1 = arr.flat(1)
+const myResult2 = flat(arr, Infinity)
+const originResult2 = arr.flat(Infinity)
+console.log(myResult1)      // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(originResult1)  // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(myResult2 )     // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
+console.log(originResult2 ) // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
+```
+
+#### forEach + 递归实现方案
+```js
+// MDN: 可查看更多flat实现方法
+function flat (arr = [], depth = 1) {
+  if (arr.length === 0) {
+    return []
+  }
+  const result = [];
+  // 注意：立即执行函书前的语句必须要有分号
+  (function flatFunc(arr, depth) {
+    arr.forEach(item => {
+      if (Array.isArray(item) && depth > 0) {
+        flatFunc(item, depth - 1)
+      } else {
+        result.push(item)
+      }
+    })
+  })(arr, depth)
+  return result
+}
+const arr = [1, 2, 3, [1, 2, 3, 4, [2, 3, 4]]]
+const myResult1 = flat(arr, 1)
+const originResult1 = arr.flat(1)
+const myResult2 = flat(arr, Infinity)
+const originResult2 = arr.flat(Infinity)
+console.log(myResult1)      // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(originResult1)  // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(myResult2 )     // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
+console.log(originResult2 ) // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
+```
+
+#### generator方案
+```js
+// MDN: 可查看更多flat实现方法
+function * flat (arr = [], depth = 1) {
+  if (arr.length === 0) {
+    return []
+  }
+  for (const item of arr) {
+    if (Array.isArray(item) && depth > 0) {
+      yield * flat(item, depth - 1)
+    } else {
+      yield item
+    }
+  }
+}
+const arr = [1, 2, 3, [1, 2, 3, 4, [2, 3, 4]]]
+const myResult1 = [...flat(arr, 1)]
+const originResult1 = arr.flat(1)
+const myResult2 = [...flat(arr, Infinity)]
+const originResult2 = arr.flat(Infinity)
+console.log(myResult1)      // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(originResult1)  // [1, 2, 3, 1, 2, 3, 4, [2, 3, 4]]
+console.log(myResult2 )     // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
+console.log(originResult2 ) // [1, 2, 3, 1, 2, 3, 4, 2, 3, 4]
 ```
 
 ### 手写基于发布/订阅的事件系统
