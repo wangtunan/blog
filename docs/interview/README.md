@@ -2154,6 +2154,34 @@ const func2 = pie(pieFunc1, pieFunc3)
 console.log(func1(0))   // 3
 console.log(func2(10))  // 14
 ```
+
+### 手写数组去重方法
+数组去重有很多种方法，这里只介绍两种：`Set`结构去重和`reduce`方法去重。
+```js
+// 定义变量
+const arr = [1, 2, 3, 1, 3, 4, 5, 4]
+let uniqueArray = []
+
+// 1.Set结构去重
+uniqueArr = Array.from(new Set(arr))
+console.log(uniqueArr) // [1, 2, 3, 4, 5]
+
+// 2.reduce方法去重
+function deDuplicationArray (array) {
+  if (!array || array.length === 0) {
+    return []
+  }
+  return array.reduce((acc, cur) => {
+    if (acc.indexOf(cur) === -1) {
+      acc.push(cur)
+    }
+    return acc
+  }, [])
+}
+uniqueArr = deDuplicationArray(arr)
+console.log(uniqueArr) // [1, 2, 3, 4, 5]
+```
+
 ### 手写基于发布/订阅的事件系统
 事件系统包括如下几个方法：
 1. `on`监听事件方法。
