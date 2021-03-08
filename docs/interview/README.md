@@ -2298,7 +2298,84 @@ event.emit('running') //
 ```
 
 ### 手写Vue 数据响应式原理
-撰写中。。。
+
+#### Object.defineProperty方案
+```js
+function observe (obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    return
+  }
+  Object.keys(obj).forEach(key => {
+    defineReactive(obj, key, obj[key])
+  })
+}
+function defineReactive (target, key, val) {
+  observe(val)
+  Object.defineProperty(target, key, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      console.log('get value')
+      return val
+    },
+    set: function (newVal) {
+      val = newVal
+      console.log('change value')
+    }
+  })
+}
+const obj = {
+  name: 'AAA',
+  age: 23,
+  job: {
+    name: 'FE',
+    salary: 1000
+  }
+}
+observe(obj)
+const name = obj.name
+obj.name = 'BBB'
+const jobName = obj.job.name
+obj.job.name = 'fe'
+```
+
+#### Proxy方案
+```js
+function observe (obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    return
+  }
+  const handler = {
+    get: function (target, key) {
+      const val = target[key]
+      if (typeof val === 'object' && val !== null) {
+        return new Proxy(val, handler)
+      }
+      console.log('get value')
+      return Reflect.get(target, key)
+    },
+    set: function (target, key, val) {
+      console.log('change value')
+      return Reflect.set(target, key, val)
+    }
+  }
+  return new Proxy(obj, handler)
+}
+const obj = {
+  name: 'AAA',
+  age: 23,
+  job: {
+    name: 'FE',
+    salary: 1000
+  }
+}
+const proxyObj = observe(obj)
+const name = proxyObj.name
+proxyObj.name = 'BBB'
+const jobName = proxyObj.job.name
+proxyObj.job.name = 'fe'
+```
+
 
 ### 手写Vue nextTick方法
 `nextTick`支持两种形式使用方式：
