@@ -116,7 +116,8 @@ const vueAnalysisSidebar = [
       'expand/slot',
       'expand/keep-alive',
       'expand/transition',
-      'expand/transition-group'
+      'expand/transition-group',
+      'expand/plugin'
     ]
   },
   {
