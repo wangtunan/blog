@@ -31,7 +31,7 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 ```
-我们可以看到，`initWatch()`方法的实现非常简单，首先对`watch`做了判断，如果是数组则遍历这个数组调用`createWatcher()`方法，如果不是则直接调用`createWatcher()`。按照`watch`的使用规则，我们有如下几种形式的写法：
+我们可以看到，`initWatch()`方法的实现非常简单，首先对`watch`做了判断，如果是数组则遍历这个数组调用`createWatcher()`方法，如果不是则直接调用`createWatcher()`。按照`watch`的使用规则，我们有如下几种常见的写法：
 ```js
 export default {
   data () {

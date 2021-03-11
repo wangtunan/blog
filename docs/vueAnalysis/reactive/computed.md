@@ -105,7 +105,8 @@ const getter = function () {
 ```
 
 * 最后、首先判断了当前遍历的`computed`是否已经在`vm`实例上，如果不在则调用`defineComputed()`方法，如果在还需要判断当前遍历的`computed`是否和`props`、`data`命名冲突，如果冲突则提示错误。
-**注意**：对应子组件而言，这个时候当前遍历的`computed`已经在`vm`实例上了，所以并不会调用`defineComputed()`方法，我们从上面代码注释也能看的出来。对于子组件而言，真正`initComputed`的过程是发生在`Vue.extend`方法中：
+
+**注意**：对于子组件而言，这个时候当前遍历的`computed`已经在`vm`实例上了，所以并不会调用`defineComputed()`方法，我们从上面代码注释也能看的出来。对于子组件而言，真正`initComputed`的过程是发生在`Vue.extend`方法中：
 ```js
 Vue.extend = function (extendOptions) {
   // 省略代码
@@ -283,7 +284,7 @@ export default class Dep {
 }
 ```
 代码分析：
-* `subs`就是我们收集起来的`watcher`，它是一个数组，对应上面案例的话它是一个长度为2的数组并且其中一个为`render watcher`。
+* `subs`就是我们收集起来的`watcher`，它是一个数组，对应上面案例的话它是一个长度为2的数组并且其中一个元素为`render watcher`，另一个元素为`computed watcher`。
 * 在`notify()`方法调用时，会遍历`subs`数组，然后依次调用当前`watcher`的`update`方法。其中`update`方法是定义在`Watcher`类中的一个实例方法，代码如下：
 ```js
 class Watcher {
@@ -317,7 +318,7 @@ fullName () {
   }
 }
 ```
-因为此时的`total`值为`1`，所以会返回`this.firstName + this.lastName`的值，而`firstName`和`lastName`又是定义在`data`中的响应式变量，会依次触发`firstName`和`lastName`的`getter`，然后进行依赖收集。在组件渲染完毕后，`fullName`的依赖数组`subs`此时会有四个`watcher`，分别是三个计算属性`watcher`和一个渲染`watcher`。无论这三个计算属性`watcher`哪一个值更新了，都会再出重复以上的流程，这就是`computed`更新的过程。
+因为此时的`total`值为`1`，所以会返回`this.firstName + this.lastName`的值，而`firstName`和`lastName`又是定义在`data`中的响应式变量，会依次触发`firstName`和`lastName`的`getter`，然后进行依赖收集。在组件渲染完毕后，`fullName`的依赖数组`subs`此时会有四个`watcher`，分别是三个计算属性`watcher`和一个渲染`watcher`。无论这三个计算属性`watcher`哪一个值更新了，都会再次重复以上的流程，这就是`computed`更新的过程。
 
 在分析完`computed`的相关流程后，我们可以得到如下流程图
 <div style="text-align: center">

@@ -10,7 +10,7 @@ export function initState (vm: Component) {
   }
 }
 ```
-在以上代码中，首先判断了`opts.data`，如果值为`true`则代表是子组件(子组件如果没有显示定义`data`，则使用默认值)，否则代表是根实例。对于根实例而言我们不需要执行`initData`的过程，只要对`vm._data`进行`observe`即可。
+在以上代码中，首先判断了`opts.data`，如果值为真则代表是子组件(子组件如果没有显示定义`data`，则使用默认值)，否则代表是根实例。对于根实例而言我们不需要执行`initData`的过程，只要对`vm._data`进行`observe`即可。
 
 接下来，我们详细分析`initData`的过程，它是定义在`src/core/instance/state.js`文件中的一个方法：
 ```js
