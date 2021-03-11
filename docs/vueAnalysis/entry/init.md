@@ -1,6 +1,6 @@
 
 # initMixin流程
-在上一节我们讲到了`initGlobalAPI`的整体流程，这一节，我们来介绍`initMixin`的整体流程。首选，我们把目光回到`src/core/index.js`文件中：
+在上一节我们讲到了`initGlobalAPI`的整体流程，这一节，我们来介绍`initMixin`的整体流程。首先，我们把目光回到`src/core/index.js`文件中：
 ```js
 import Vue from './instance/index'
 import { initGlobalAPI } from './global-api/index'
@@ -59,14 +59,14 @@ export default Vue
 ```
 
 代码分析：
-* `Vue`构造函数其实就是一个普通的函数，我们只能通过`new`操作符进行访问，既`new Vue()`的形式，`Vue`函数内部也使用了`instanceof`操作符来判断实例的父类是否为`Vue`构造函数，不是的话则在开发环境下输出一个警告信息。
+* `Vue`构造函数其实就是一个普通的函数，我们只能通过`new`操作符进行访问，既`new Vue()`的形式，`Vue`函数内部也使用了`instanceof`操作符来判断实例的父类是否为`Vue`构造函数，不是的话则在开发环境下输出警告信息。
 * 除了声明`Vue`构造函数，这部分的代码也调用了几种`mixin`方法，其中每种`mixin`方法各司其职，处理不同的内容。
 
 从以上代码中，我们能得到`src/core/instance/index.js`文件非常直观的代码逻辑流程图：
 
 ![instance流程](../../images/vueAnalysis/instance.png)
 
-接下来我们的首要任务是弄清楚`_init()`函数的代码逻辑以及`initMixin`的整体流程。我们从上面的代码发现，在构造函数内部会调用`this._init()`方法，也就是说：
+接下来我们的首要任务是弄清楚`_init()`函数的代码逻辑以及`initMixin`的整体流程。我们从上面的代码发现，在构造函数内部会调用`this._init()`方法，如下：
 ```js
 // 实例化时，会调用this._init()方法。
 new Vue({

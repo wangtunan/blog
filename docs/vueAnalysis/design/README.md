@@ -19,7 +19,7 @@
 对以上目录简要做如下介绍：
 * `dist`：`rollup`构建目录，里面存放了所有`Vue`构建后不同版本的文件。
 * `flow`：它是Facebook出品的`JavaScript`静态类型检查工具，早期`Vue.js`选择了`flow`而不是现在的`TypeScript`来做静态类型检查，而在最新的`Vue3.0`版本则选择使用`TypeScript`来重写。
-* `packages`：`Vue.js`衍生的其它`npm`包，它们在`Vue`构建时自动从源码中生成并且始终和`Vue.js`保持相同的版本，主要是`vue-server-renderer`和`vue-template-compiler`这两个包，其中最后一个包在我们使用脚手架生成项目，也就是使用`.vue`文件开发`Vue`项目时会使用到这个包。
+* `packages`：`Vue.js`衍生的其它`npm`包，它们在`Vue`构建时自动从源码中生成并且始终和`Vue.js`保持相同的版本，主要是`vue-server-renderer`和`vue-template-compiler`这两个包，其中最后一个包在我们使用脚手架生成项目，也就是使用`.vue`文件开发`Vue`项目时会使用到这个包(`vue-loader`)。
 * `scripts`：`rollup`构建配置和构建脚本，`Vue.js`能够通过不同的环境构建不同的版本的秘密都在这个目录下。
 * `test`：`Vue.js`测试目录，自动化测试对于一个开源库来说是至关重要的，测试覆盖率在一定程度上是衡量一个库质量的一个重要指标。测试用例无论对于开发还是阅读源码，都是有很大益处的，其中通过测试用例去阅读`Vue`源码是普遍认为可行的一种方式。
 

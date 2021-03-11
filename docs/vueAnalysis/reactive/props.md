@@ -17,7 +17,7 @@ export default {
   }
 }
 ```
-* 规范格式：此种方式是`Vue.js`接受`props`最好的格式，对于一个有很高要求的组件来说，它通过会撰写很严格的`props`规则，这在各个开源UI框架中是最常见的。
+* 规范格式：此种方式是`Vue.js`接受`props`最好的格式，对于一个有很高要求的组件来说，它通常会撰写很严格的`props`规则，这在各个开源UI框架中是最常见的。
 ```js
 export default {
   props: {
@@ -328,7 +328,7 @@ function getTypeIndex (type, expectedTypes): number {
 ```
 这个函数的实现逻辑比较清晰：
 1. 以`Component A`组件为例，它的`props`不是一个数组但却是`Boolean`类型，因此返回索引`0`。
-2. 以`Component B`组件为例，因为它的`props`都是一个数组，所以要遍历这个数组，然后返回`Boolean`类型在数组中的索引`i`。
+2. 以`Component B`组件为例，因为它的`props`是一个数组，所以要遍历这个数组，然后返回`Boolean`类型在数组中的索引`i`。
 3. 以`Component C`组件为例，虽然它是一个数组，但数组中没有任何元素，因此返回索引`-1`。
 
 在拿到`booleanIndex`后，我们需要走下面这段代码逻辑：

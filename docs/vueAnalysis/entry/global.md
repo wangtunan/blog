@@ -47,7 +47,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   initAssetRegisters(Vue)
 }
 ```
-我们能从以上代码很清晰的看到在`index.js`入口文件中，会在`Vue`构造函数上挂载各种全局`API`函数，其中`set`、`delete`、`nextTick`和`observable`直接赋值为一个函数，而其他几种`API`则是调用了一个以`init`开头的方法，我们以`initAssetRegisters()`方法为例，它的精简代码如下：
+从以上代码能够很清晰的看到在`index.js`入口文件中，会在`Vue`构造函数上挂载各种全局`API`函数，其中`set`、`delete`、`nextTick`和`observable`直接赋值为一个函数，而其他几种`API`则是调用了一个以`init`开头的方法，我们以`initAssetRegisters()`方法为例，它的精简代码如下：
 ```js
 // ['component','directive', 'filter']
 import { ASSET_TYPES } from 'shared/constants'
@@ -60,7 +60,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
   })
 }
 ```
-其中`ASSET_TYPES`是一个定义在`src/shared/constants.js`中的一个数组，然后在`initAssetRegisters()`方法中遍历这个数组，依次在`Vue`构造函数上挂载`Vue.component()`、`Vue.directive()`和`Vue.filter()`方法，另外三种`init`开头的方法调用挂载对应的全局`API`是一样的道理：
+其中`ASSET_TYPES`是一个定义在`src/shared/constants.js`中的一个数组，然后在`initAssetRegisters()`方法中遍历这个数组，依次在`Vue`构造函数上挂载`Vue.component()`、`Vue.directive()`和`Vue.filter()`方法，另外三种`init`开头的方法挂载对应的全局`API`是一样的道理：
 ```js
 // initUse
 export function initUse(Vue) {
@@ -86,5 +86,5 @@ Vue.compile = compileToFunctions
 export default Vue
 ```
 
-因此我们根据`initGlobalAPI()`方法的逻辑，可以得到如下流程图：
+根据`initGlobalAPI()`方法的逻辑，可以得到如下流程图：
 ![initGlobalAPI流程图](../../images/vueAnalysis/initGlobalAPIProcess.png)
