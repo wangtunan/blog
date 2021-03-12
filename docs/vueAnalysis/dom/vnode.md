@@ -75,7 +75,7 @@ export default class VNode {
 
 我们可以从以上代码看到，`VNode`有很多个属性，我们千万不要被这些属性吓到，最重要的属性只有几个：`tag`、`data`、`children`和`key`。其余很多属性只是在`Vue`中为适用不同的场景，额外添加的。
 
-`Vue`中的`VNode`实例有需要类型，具体如下：
+`Vue`中的`VNode`实例有几种类型，具体如下：
 * 注释节点：注释节点可以使用`text`和`isComment`两个属性来配合表示。
 ```vue
 <template>

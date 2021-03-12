@@ -184,7 +184,7 @@ export function renderMixin (Vue) {
   }
 }
 ```
-其中通过`$options`结构出来的`render`，就是我们实例化的时候提供的`render`选择或者通过`template`编译好的`render`函数。在`_render`代码中，最重要的一步是`render.call`函数的调用，`render`函数执行后会返回`VNode`，`VNode`会在之后的处理过程中使用到。
+其中通过`$options`解构出来的`render`，就是我们实例化的时候提供的`render`选择或者通过`template`编译好的`render`函数。在`_render`代码中，最重要的一步是`render.call`函数的调用，`render`函数执行后会返回`VNode`，`VNode`会在之后的处理过程中使用到。
 
 我们在`render.call`方法调用的时候，除了传递我们的`renderProxy`代理，还传递了一个`$createElement`函数，其中这个函数是在`initRender`方法中被定义：
 ```js

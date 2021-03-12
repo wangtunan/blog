@@ -351,7 +351,7 @@ defineReactive(c)
 ```js
 export const hasProto = '__proto__' in {}
 ```
-我们都知道因为原生`API`某些限制因素，`Vue.js`对数组七种可以改变自身数组的方法提供了变异方法支持，这七种方位分别为：
+我们都知道因为原生`API`某些限制因素，`Vue.js`对数组七种可以改变自身数组的方法提供了变异方法支持，这七种方法分别为：
 ```js
 const methodsToPatch = [
   'push',
@@ -477,7 +477,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 }
 
 // 调用
-copyAugment(value, arrayMethods, arrayKeys)
+copyAugment(arr, arrayMethods, arrayKeys)
 
 // 调用后
 arr = {

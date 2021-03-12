@@ -584,7 +584,7 @@ const dep = {
   subs: [new Watcher()]
 }
 ```
-* 当响应式变量`obj`的`getter`触发完毕后，会触发`obj.msg`的`getter`，此时的`dep`为`id=3`的那个闭包变量`dep`。此时的`Dep.target`依然为`render watcher`，然后进行`dep.depend()`依赖收集`，这个过程与`obj`的`getter`进行依赖收集的过程基本是一样的，当`addDep()`方法执行后，此时的`dep`表示如下：
+* 当响应式变量`obj`的`getter`触发完毕后，会触发`obj.msg`的`getter`，此时的`dep`为`id=3`的那个闭包变量`dep`。此时的`Dep.target`依然为`render watcher`，然后进行`dep.depend()`依赖收集，这个过程与`obj`的`getter`进行依赖收集的过程基本是一样的，当`addDep()`方法执行后，此时的`dep`表示如下：
 ```js
 const dep = {
   id: 3,
@@ -719,4 +719,4 @@ this.newDepIds = new Set([1, 3])
 ```
 在最后一次调用`this.get()`的时候，会调用`this.cleanupDeps()`方法，在这个方法中首先遍历旧依赖列表`deps`，如果发现其中某个`dep`不在新依赖`id`集合`newDepIds`中，则调用`dep.removeSub(this)`移除依赖。在组件渲染的过程中，`this`代表`render watcher`，调用这个方法后当我们再修改`msg`变量值的时候，就不会触发组件重新渲染了。在遍历完`deps`数组后，会把`deps`和`newDeps`、`depIds`和`newDepIds`的值进行交换，然后清空`newDeps`和`newDepIds`。
 
-在分析完以上示例后，我们就能明白为什么要进行依赖清除了：**避免无关的依赖进行组件的重复渲染**。
+在分析完以上示例后，我们就能明白为什么要进行依赖清除了：**避免无关的依赖进行组件的重复渲染、watch回调等**。
