@@ -36,8 +36,10 @@ createElement(this, 'div', 'Hello, Vue', 1, false)
 // 传递data
 createElement(this, 'div', undefined, 'Hello, Vue', 1, false)
 ```
-当不传递`data`的时候，我们需要把第三、第四个参数往后移动一个位置，然后把`data`赋值为`undefined`，最后在把处理好的参数传递给`_createElement`。接下来，我们先看一下`_createElement`方法几个参数的具体作用：
-* `context`：`VNode`当前上下环境。
+当不传递`data`的时候，我们需要把第三、第四个参数往后移动一个位置，然后把`data`赋值为`undefined`，最后在把处理好的参数传递给`_createElement`。
+
+接下来，我们先看一下`_createElement`方法几个参数的具体作用：
+* `context`：`VNode`当前上下文环境。
 * `tag`：标签，可以是正常的`HTML`元素标签，也可以是`Component`组件。
 * `data`：`VNode`的数据，其类型为`VNodeData`，可以在根目录`flow/vnode.js`文件中看到其具体定义。
 * `children`：`VNode`的子节点。

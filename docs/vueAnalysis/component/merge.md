@@ -2,7 +2,7 @@
 在这一节合并策略中，我们主要分三个步骤来说明：**配置合并的背景**、**配置合并的场景**以及**合并策略**。
 
 ## 背景
-我们可以会很好奇，为什么要进行配置合并？这是因为`Vue`内部存在一些默认的配置，在初始化的时候又允许我们提供一些自定义配置，这是为了在不同的场景下达到定制化个性需求的目的。纵观一些优秀的开源库、框架它们的设计理念几乎都是类似的。
+我们可能会很好奇，为什么要进行配置合并？这是因为`Vue`内部存在一些默认的配置，在初始化的时候又允许我们提供一些自定义配置，这是为了在不同的场景下达到定制化个性需求的目的。纵观一些优秀的开源库、框架它们的设计理念几乎都是类似的。
 
 我们举例来说明一下配置合并的背景：
 ```js
@@ -225,7 +225,7 @@ console.log($options) // { age: 23, name: 'child', sex: 1, address: '广州' }
 ```
 代码分析：在以上案例中，`age`和`name`都存在于`parent`和`child`对象中，因为`child.age`值为`undefined`，所以最后取`parent.age`值，这种情况也适用于`sex`属性的合并。因为`child.name`值不为`undefined`，所以最后取`child.name`的值，这种情况也适用于`address`属性的合并。
 
-**注意**：如果你想针对某一个选择修改它的默认合并策略，可以使用`Vue.config.optionMergeStrategies`去配置，例如：
+**注意**：如果你想针对某一个选项修改它的默认合并策略，可以使用`Vue.config.optionMergeStrategies`去配置，例如：
 ```js
 // 自定义el选择的合并策略，只取第二个参数的。
 import Vue from 'vue'
@@ -297,24 +297,24 @@ function dedupeHooks (hooks) {
   return res
 }
 ```
-我们可以看到在`mergeHook`方法中，它用到了三层三目运算来判断，首先判断了是否有`childVal`，如果没有则直接返回`parentVal`；如果有，则`parentVal`有没有，如果有则一定是数组形式，这个时候直接把`childVal`添加到`parentVal`数组的末尾；如果没有，则需要判断一下`childVal`是不是数组，如果不是数组则转成数组，如果已经是数组了，则直接返回。
+我们可以看到在`mergeHook`方法中，它用到了三层三目运算来判断，首先判断了是否有`childVal`，如果没有则直接返回`parentVal`；如果有，再判断`parentVal`有没有，如果有则一定是数组形式，这个时候直接把`childVal`添加到`parentVal`数组的末尾；如果没有，则需要判断一下`childVal`是不是数组，如果不是数组则转成数组，如果已经是数组了，则直接返回。
 
 在最后还判断了`res`，然后满足条件则调用`dedupeHooks`，这个方法的作用很简单，就是剔除掉数组中的重复项。最后，我们根据以上逻辑撰写几个案例来说明。
 ```js
 // 情况一
 const parentVal = [function created1 () {}]
 const childVal = undefined
-const res = [function created1 () {}]
+const result = [function created1 () {}]
 
 // 情况二
 const parentVal = [function created1 () {}]
 const childVal = [function created2 () {}]
-const res = [function created1 () {}, function created2 () {}]
+const result = [function created1 () {}, function created2 () {}]
 
 // 情况三
 const parentVal = undefined
 const childVal = [function created2 () {}]
-const res = [function created2 () {}]
+const result = [function created2 () {}]
 ```
 
 我们再来看一个比较特殊的场景：
@@ -333,8 +333,10 @@ export const helloMixin = {
 
 
 // App.vue
+import { sayMixin, helloMixin } from './mixin.js'
 export default {
   name: 'App',
+  mixins: [sayMixin, helloMixin],
   created () {
     console.log('component created')
   }
@@ -610,7 +612,7 @@ strats.watch = function (
   return ret
 }
 ```
-我们可以看到`watch`配置的合并与`hooks`合并的思路几乎差不多，只是多了一些微小的差异，当`childVal`没有时，直接返回按照`parentVal`创建的原型，类似的当`parentVal`没有是，直接返回`childVal`，注意这里因为是自身的配置，因此不需要像`parentVal`那样创建并一个原型。当`parentVal`和`childVal`都存在时，首先把`parentVal`上的属性全部扩展到`ret`对象上，然后遍历`childVal`的属性键。在遍历的过程中如果`parent`值不为数组形式，则手动处理成数组形式，然后把`child`使用数组`concat`方法添加到数组的末尾。以上代码分析，可以使用下面的示例来说明：
+我们可以看到`watch`配置的合并与`hooks`合并的思路几乎差不多，只是多了一些微小的差异，当`childVal`没有时，直接返回按照`parentVal`创建的原型，类似的当`parentVal`没有时，直接返回`childVal`，注意这里因为是自身的配置，因此不需要像`parentVal`那样创建并一个原型。当`parentVal`和`childVal`都存在时，首先把`parentVal`上的属性全部扩展到`ret`对象上，然后遍历`childVal`的属性键。在遍历的过程中如果`parent`值不为数组形式，则手动处理成数组形式，然后把`child`使用数组`concat`方法添加到数组的末尾。以上代码分析，可以使用下面的示例来说明：
 ```js
 // 情况一
 const parentVal = {
@@ -694,7 +696,7 @@ const parentVal = {
   age: 23,
   name: 'AAA'
 }
-const parentVal = {
+const childVal = {
   address: '广州'
 }
 const ret = {
