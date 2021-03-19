@@ -260,8 +260,8 @@ const fn = `function(${slotScope}){
 因为`template`里面只是一个简单的文本内容，所以当调用`genChildren`方法完毕后，`genScopedSlot`返回值如下：
 ```js
 let headerResult = '{key:"header",fn:function(){return [_v("插槽头部内容")]},proxy:true}'
-let defaultResult = '{key:"header",fn:function(){return [_v("插槽内容")]},proxy:true}'
-let footerResult = '{key:"header",fn:function(){return [_v("插槽底部内容")]},proxy:true}'
+let defaultResult = '{key:"default",fn:function(){return [_v("插槽内容")]},proxy:true}'
+let footerResult = '{key:"footer",fn:function(){return [_v("插槽底部内容")]},proxy:true}'
 ```
 最后，回到`genScopedSlots`方法中，把结果串联起来：
 ```js
@@ -631,6 +631,7 @@ const childRender = `with(this){
 ```
 `_l`函数就是`renderList`方法的简写形式，其代码如下：
 ```js
+export function renderList (
   val: any,
   render: (
     val: any,
