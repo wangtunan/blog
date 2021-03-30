@@ -137,7 +137,10 @@ const vueAnalysisSidebar = [
     collapsable: false,
     children: [
       'vuex/',
-      'vuex/init'
+      'vuex/install',
+      'vuex/init',
+      'vuex/utils',
+      'vuex/api'
     ]
   }
 ]
