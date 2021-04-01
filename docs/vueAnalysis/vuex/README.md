@@ -12,12 +12,11 @@
 在分析`Vuex`源码章节，我们会按照`Vuex`的安装、`Vuex`的初始化、`Vuex`提供的辅助`API`以及`Store`实例`API`这几个模块来进行说明，其中最后几个模块是重点。
 
 **Vuex初始化**：
-1. `Namespaced`命名空间处理。
-2. `State`初始化。
-3. `Mutations`初始化。
-4. `Actions`初始化。
-5. `Getters`初始化。
-6. `Modules`初始化。
+1. `State`初始化。
+2. `Mutations`初始化。
+3. `Actions`初始化。
+4. `Getters`初始化和响应式。
+5. `Modules`初始化。
 
 
 **Vuex**辅助`API`设计：
