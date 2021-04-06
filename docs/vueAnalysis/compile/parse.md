@@ -88,7 +88,7 @@ const FunctionDeclaration = {
           type: 'BinaryExpression',
           left: { type: 'Identifier', name: 'a' },
           operator: '+',
-          right: { type: 'Identifier', name: 'a' }
+          right: { type: 'Identifier', name: 'b' }
         }
       }
     ]

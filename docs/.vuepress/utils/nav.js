@@ -125,7 +125,7 @@ const vueAnalysisSidebar = [
     collapsable: false,
     children: [
       'router/',
-      'router/register',
+      'router/install',
       'router/matcher',
       'router/change',
       'router/components',
