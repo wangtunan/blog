@@ -2,7 +2,7 @@
 
 ## 版本和参考说明
 ::: tip 说明
-本篇博客由慕课网视频[从基础到实战手把手带你掌握新版Webpack4.0](https://coding.imooc.com/class/316.html)阅读整理而来，观看视频请支持正版。
+本篇博客由学习[从基础到实战手把手带你掌握新版Webpack4.0](https://coding.imooc.com/class/316.html)视频整理而来，观看视频请支持正版。
 :::
 ::: warning 注意
 本篇博客 Webpack 版本是`4.0+`，请确保你安装了`Node.js`最新版本。

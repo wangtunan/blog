@@ -232,7 +232,7 @@ root.appendChild(img);
 ![打包结果](../images/webpack/11.png)
 
 #### 自动添加CSS厂商前缀
-当我们在`css`文件中写一些需要处理兼容性的样式的时候，需要我们分别对于不同的浏览器书添加不同的厂商前缀，使用`postcss-loader`可以帮我们在`webpack`打包的时候自动添加这些厂商前缀。
+当我们在`css`文件中写一些需要处理兼容性的样式的时候，需要我们分别对于不同的浏览器添加不同的厂商前缀，使用`postcss-loader`可以帮我们在`webpack`打包的时候自动添加这些厂商前缀。
 ::: tip 安装依赖
 自动添加厂商前缀需要`npm install`安装`postcss-loader`和`autoprefixer`
 :::
