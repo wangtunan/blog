@@ -3,17 +3,17 @@ const webpackSidebar = {
   title: 'Webpack',
   collapsable: false,
   children: [
-    '/webpack/',
-    '/webpack/source.md',
-    '/webpack/install.md',
-    '/webpack/start.md',
-    '/webpack/static.md',
-    '/webpack/core.md',
-    '/webpack/advanced.md',
-    '/webpack/case.md',
-    '/webpack/optimization.md',
-    '/webpack/loader.md',
-    '/webpack/plugin.md'
+    '/webpack/webpack/',
+    '/webpack/webpack/source.md',
+    '/webpack/webpack/install.md',
+    '/webpack/webpack/start.md',
+    '/webpack/webpack/static.md',
+    '/webpack/webpack/core.md',
+    '/webpack/webpack/advanced.md',
+    '/webpack/webpack/case.md',
+    '/webpack/webpack/optimization.md',
+    '/webpack/webpack/loader.md',
+    '/webpack/webpack/plugin.md'
   ]
 }
 

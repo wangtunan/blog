@@ -26,7 +26,7 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ <br/>
 [Vue 应用测试](https://wangtunan.github.io/blog/test/vueTest.html)<br/>
 
 ## Webpack4.0
-[Webpack 基础知识](https://wangtunan.github.io/blog/webpack/)<br/>
+[Webpack 基础知识](https://wangtunan.github.io/blog/webpack/webpack/)<br/>
 
 ## TypeScript
 [TypeScript 基础知识](https://wangtunan.github.io/blog/typescript/)<br/>
