@@ -29,6 +29,8 @@ sidebar: auto
 撰写中....
 ### 加号和减号
 撰写中....
+### as
+撰写中...
 
 ## 初级
 ### Partial(可填)和Required(必填)
@@ -393,9 +395,57 @@ type Includes<T extends any [], U> = U extends T[number] ? true : false
 * `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1|2|3`。
 
 ## 中级
-撰写中...
+### Readony(按需Readonly)
+### DeepReadonly(深度Readonly)
+### TupleToUnion(元组转集合)
+### Chainable(可串联)
+### Last(数组最后一个元素)
+### Pop和Push
+### Shift和Unshift
+### PromiseAll(Promise.all返回类型)
+### LookUp(回顾类型)
+### Trim、TrimLeft以及TrimRight
+### Capitalize(首字母大写)
+### Replace和ReplaceAll
+### AppendArgument(追加参数)
+### Permutation(元素排列)
+### LengthOfString(字符串的长度)
+### Flatten(数组降维)
+### AppendToObject(对象添加新属性)
+### Absolute(绝对值)
+### StringToArray(字符串转数组)
+### StringToUnion(字符串转联合类型)
+### MergeType(类型合并)
+### CamelCase(字符串转小驼峰)
+### KebabCase(字符串转连字符)
+### Diff(类型差异部分)
+### AnyOf(数组元素真值判断)
+### IsNever(是否是Never类型)
+### IsUnion(是否联合类型)
+### ReplaceKeys(类型替换)
+### RemoveIndexSignature(移除索引签名)
+
 ## 困难
-撰写中...
+### UnionToIntersection(元组取交集)
+### Currying(柯里化)
+### RequiredKeys(所有必填字段)
+### GetRequired(必填字段组成的类型)
+### OptionalKeys(所有可选字段)
+### GetOptional(可选字段组成的类型)
+### CapitalizeWords(所有单词首字母大写)
+### CamelCase(字符串转小驼峰)
+### ParsePrintFormat(字符串格式化内容)
+### IsAny和NotAny
+### Get(字符串路径取值)
+### StringToNumber(字符串数字转数字)
+### FilterOut(数组元素过滤)
+### TupleToEnum(元组转枚举)
+### Format(字符串格式化函数类型)
+### LengthOfString(字符串的长度)
+### Join(字符串拼接)
+### DeepPick(深层次Pick)
+### Camelize(类型属性键转小驼峰)
+
 ## 地狱
 撰写中...
 
