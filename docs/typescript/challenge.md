@@ -31,6 +31,8 @@ sidebar: auto
 撰写中....
 ### as
 撰写中...
+### &符号
+撰写中...
 
 ## 初级
 ### Partial(可填)和Required(必填)
@@ -396,7 +398,83 @@ type Includes<T extends any [], U> = U extends T[number] ? true : false
 
 ## 中级
 ### Readony(按需Readonly)
+#### 用法
+不同于初级实现中的`Readonly`，在中级实现的`Readonly`中，如果我们传递了指定的字段，那么`Readonly`会表现为按需实现`readonly`，具体用法如下：
+```ts
+interface Todo {
+  title: string;
+  desc?: string;
+  completed: boolean;
+}
+interface Expected1 {
+  readonly title: string;
+  readonly desc?: string;
+  readonly completed: boolean;
+}
+interface Expected2 {
+  title: string;
+  readonly desc?: string;
+  readonly completed: boolean;
+}
+
+// 结果：Expected1
+type ReadonlyResult1 = Readonly<Todo>
+// 结果：Expected2
+type ReadonlyResult2 = Readonly<Todo, 'desc'|'completed'>
+
+// 测试：
+const obj: ReadonlyResult2 = {
+  title: 'AAA',
+  desc: '23',
+  completed: true
+}
+obj.title = 'aaa'
+obj.desc = '32' // error
+obj.completed = false // error
+```
+#### 使用方式
+```ts
+type Readonly<T, K = any> = T & {
+  readonly [P in keyof T as P extends K ? P : never]: T[P] 
+}
+```
+代码详解：
+* `K=any`：类型默认值，如果不传递`K`，则默认所有字段都变为`readonly`。
+* `as`：`[T as U]`表示对于`T`进行进一步的"加工/判断"，在此处具体表现为：我们只对指定字段进行迭代并添加`readonly`关键词。知识点[as](#as)
+* `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`，那么就丢失一些属性，例如`title`。知识点[&符号](#&符号)
+
 ### DeepReadonly(深度Readonly)
+#### 用法
+`DeepReadonly`用来将一个嵌套类型中所有字段全部添加`readonly`关键词，例如：
+```ts
+// 类型：
+type X = {
+  b: string
+  c: {
+    d: boolean
+    e: undefined,
+    f: null
+  }
+}
+type Y = {
+  readonly b: string
+  readonly c: {
+    readonly d: boolean
+    readonly e: undefined,
+    readonly f: null
+  }
+}
+
+// 结果：Y
+type result = DeepReadonly<X>
+```
+#### 实现方式
+```ts
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends { [key: string]: any } ? DeepReadonly<T[P]> : T[P]
+}
+```
+
 ### TupleToUnion(元组转集合)
 ### Chainable(可串联)
 ### Last(数组最后一个元素)
