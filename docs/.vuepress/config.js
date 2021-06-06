@@ -76,11 +76,29 @@ module.exports = {
       },
       {
         text: 'Webpack',
-        link: '/webpack/'
+        items: [
+          {
+            text: 'Webpack基础&实践',
+            link: '/webpack/webpack/'
+          },
+          {
+            text: 'Tapable事件流插件',
+            link: '/webpack/tapable/'
+          }
+        ]
       },
       {
         text: 'TypeScript',
-        link: '/typescript/'
+        items: [
+          {
+            text: 'TypeScript基础',
+            link: '/typescript/'
+          },
+          {
+            text: 'TypeScript类型挑战',
+            link: '/typescript/challenge'
+          }
+        ]
       },
       {
         text: 'VuePress',
@@ -88,7 +106,7 @@ module.exports = {
       }
     ],
     sidebar: {
-      '/webpack/': [webpackSidebar],
+      '/webpack/webpack/': [webpackSidebar],
       '/vueAnalysis/': vueAnalysisSidebar,
       '/vueNextAnalysis/': vueNextAnalysisSidebar
     }

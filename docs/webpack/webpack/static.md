@@ -64,7 +64,7 @@ root.appendChild(img)
 ```
 #### 打包结果
 
-![打包结果](../images/webpack/9.png)
+![打包结果](../../images/webpack/9.png)
 
 
 #### 运用占位符
@@ -165,7 +165,7 @@ root.appendChild(img);
 
 **打包结果**
 
-![css打包结果](../images/webpack/10.png)
+![css打包结果](../../images/webpack/10.png)
 
 
 #### 打包Scss文件
@@ -229,7 +229,7 @@ root.appendChild(img);
 
 根据上面的配置和代码改写后，再次打包，打包的结果会是下面这个样子
 
-![打包结果](../images/webpack/11.png)
+![打包结果](../../images/webpack/11.png)
 
 #### 自动添加CSS厂商前缀
 当我们在`css`文件中写一些需要处理兼容性的样式的时候，需要我们分别对于不同的浏览器添加不同的厂商前缀，使用`postcss-loader`可以帮我们在`webpack`打包的时候自动添加这些厂商前缀。
@@ -287,7 +287,7 @@ module.exports = {
 
 根据上面的配置，我们再次打包运行，在浏览器中运行`index.html`，它的结果如下图所示
 
-![打包运行结果](../images/webpack/12.png)
+![打包运行结果](../../images/webpack/12.png)
 
 **注意一**：如果`autoprefixer`没有生效，可以在`package.json`中配置目标浏览器，如下：
 ```js
@@ -347,7 +347,7 @@ root.appendChild(img);
 
 **打包运行**
 
-![打包运行](../images/webpack/13.png)
+![打包运行](../../images/webpack/13.png)
 
 我们可以看到，在`createAvatar.js`中，我们写的`img`标签的样式，它受`index-sass.scss`样式文件的影响，如果要消除这种影响，需要我们开启对`css`样式文件的模块化打包。
 
@@ -406,4 +406,4 @@ root.appendChild(img);
 
 打包运行后，我们发现使用`createAvatar.js`创建出来的`img`没有受到样式文件的影响，证明我们的`css`模块化配置已经生效，下图是`css`模块化打包的结果：
 
-![打包结果](../images/webpack/14.png)
+![打包结果](../../images/webpack/14.png)
