@@ -474,12 +474,113 @@ type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends { [key: string]: any } ? DeepReadonly<T[P]> : T[P]
 }
 ```
+代码详解：
+* `T[P] extends { [key: string]: any }`：这段表示`T[P]`是否是一个包含索引签名的字段，如果包含我们认为它是一个嵌套对象，就可以递归调用`DeepReadonly`。
 
 ### TupleToUnion(元组转集合)
+#### 用法
+`TupleToUnion`是用来将一个元组转换成联合类型的，其用法如下：
+```ts
+// 结果：'1' | '2' | '3'
+type result = TupleToUnion<['1', '2', '3']>
+```
+#### 实现方式
+```ts
+// way1: T[number]
+type TupleToUnion<T extends readonly any[]> = T[number]
+
+// way2: 递归
+type TupleToUnion<T extends readonly any[]> = 
+  T extends [infer R, ...infer args]
+    ? R | TupleToUnion<args>
+    : never
+```
+代码详解：
+* `T[number]`：它会自动迭代元组的数字型索引，然后将所以元素组合成一个联华类型。
+* `R | TupleToUnion<args>`：R表示每一次迭代中的第一个元素，它的迭代过程可以用下面伪代码表示：
+```ts
+// 第一次迭代
+const R = '1'
+const args = ['2', '3']
+const result = '1' | TupleToUnion<args>
+
+// 第二次迭代
+const R = '2'
+const args = ['3']
+const result = '1' | '2' | TupleToUnion<args>
+
+// 第三次迭代
+const R = '3'
+const args = ['']
+const result = '1' | '2' | '3'
+```
+
 ### Chainable(可串联)
 ### Last(数组最后一个元素)
+#### 用法
+`Last`是用来获取数组中最后一个元素的，它和我们之前已经实现的`First`很相似。
+```ts
+// 结果：3
+type result = Last<[1, 2, 3]>
+```
+#### 实现方式
+`Last`的实现方式很巧妙，因为它既可以在索引上做文章来实现，也可以用占位的思想来实现。
+```ts
+// way1：处理索引
+type Last<T extends any[]> = [any, ...T][T['length']]
+
+// way2: 后占位
+type Last<T extends any[]> = T extends [...infer R, infer L] ? L : never
+```
+代码详解：
+* `[any, ...T]`：此代码表示我们构建了一个新数组，并添加了一个新元素到第一个位置，然后把原数组`T`中的元素依次扩展到新数组中，可以用以下伪代码表示：
+```ts
+// 原数组
+const T = [1, 2, 3]
+
+// 新数组
+const arr = [any, 1, 2, 3]
+```
+* `T['length']`：这里我们获取到的是原始`T`数组的长度，例如`[1, 2, 3]`，我们获取到的长度值为`3`。而在新数组中，索引为`3`的位置正好是最后一个元素的索引，通过这种方式就能达到我们的目的。
+* `T extends [...infer R, infer L]`：这段代码表示，我们将原数组中最后一个元素使用`L`进行占位，而其它元素我们用一个`R`数组表示。这样，如果数组满足这种格式，就能正确返回最后一个元素的值。
+
 ### Pop和Push
+继续沿用以上处理索引和占位的思想，我们能实现数组`pop`方法和`push`方法
+#### 用法
+```ts
+// Pop结果：[1, 2]
+type popResult = Pop<[1, 2, 3]>
+
+// Push结果：[1, 2, 3, 4]
+type pushResult = Push<[1, 2, 3], 4>
+```
+#### 实现方式
+```ts
+// Pop实现
+type Pop<T extends any[]> = T extends [...infer R, infer L] ? R : never
+
+// Push实现
+type Push<T extends any[], K> = [...T, K]
+```
+
 ### Shift和Unshift
+与`pop`和`push`方法相似的另外一对方法叫`shift`和`unshift`，它们的实现思路是一样的。
+#### 用法
+```ts
+// Shift结果：[2, 3]
+type shiftResult = Shift<[1, 2, 3]>
+
+// Unshift结果：[0, 1, 2, 3]
+type unshiftResult = Unshift<[1, 2, 3], 0>
+```
+#### 使用方式
+```ts
+// Shift实现
+type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
+
+// Unshift实现
+type Unshift<T extends any[], K> = [K, ...T]
+```
 ### PromiseAll(Promise.all返回类型)
 ### LookUp(回顾类型)
 ### Trim、TrimLeft以及TrimRight
