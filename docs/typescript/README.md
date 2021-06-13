@@ -13,7 +13,7 @@ sidebar: auto
 ## 安装
 
 ### Node.js
-你首先需要在[Node.js官网](https://nodejs.org/zh-cn/)按照你电脑的操作系统下载对应的`Node`版本进行按照。
+你首先需要在[Node.js官网](https://nodejs.org/zh-cn/)按照你电脑的操作系统下载对应的`Node`版本进行安装。
 
 ### TypeScript
 你需要使用如下命令全局安装`TypeScript`:
@@ -79,6 +79,9 @@ $ npm install ts-node -g
 $ ts-node -v
 ```
 在`ts-node`安装完毕后，我们先删除`demo.js`文件，随后使用`ts-node`命令来编译并执行我们的代码：
+::: warning
+`ts-node`包有升级更新，如果运行`ts-node`命令报错，请按照`ts-node`最新文档进行处理。
+:::
 ```sh
 # 删除demo.js文件
 $ rm demo.js
@@ -115,7 +118,7 @@ let voidValue2: void = undefined
 ```
 
 #### void、null和undefined
-`void`和`null`与`undefined`是有一定区别的，在`TypeScript`中，`null`和`undefined`是所有类型的子类型，也就是说可以把`undefined`或`null`赋值给`number`类型的变量:
+`void`和`null`与`undefined`是有一定区别的，在`TypeScript`中，`null`和`undefined`是所有类型的子类型，也就是说可以把`undefined`或`null`赋值给`number`等类型的变量:
 ```ts
 let tsNumber1: number = undefined
 let tsNumber2: number = null
@@ -161,7 +164,7 @@ let num2 = 456
 let num3 = 789
 let num4 = num2 + num3
 ```
-根据以上的案例，当我们给一个变量一个明确值的情况下，我们可以省略为其定义类型。当如果在函数参数中，则我们必须为其指定一个类型，如果不指定则默认为`any`:
+根据以上的案例，当我们给一个变量一个明确值的情况下，我们可以省略为其定义类型。但如果在函数参数中，则我们必须为其指定一个类型，如果不指定则默认为`any`:
 ```ts
 function add (num1: number, num2: number): number {
   return num1 + num2
@@ -209,7 +212,7 @@ console.log(tsValue.length) // 编译报错
 ```
 
 ### 接口
-在`TypeScript`中，接口`interface`是一个比较重要的概念，它是对行为的抽象，而具体如何行动需要由类去实现，接口`interface`中的任何代码都不会被最后编译到`JavaScript`中。
+在`TypeScript`中，接口`interface`是一个比较重要的概念，它是对行为的抽象，而具体的行为需要由类去实现，接口`interface`中的任何代码都不会被最后编译到`JavaScript`中。
 
 ```ts
 interface Person {
@@ -221,7 +224,7 @@ let person: Person = {
   age: 23
 }
 ```
-在以上代码中，`person`变量它是`Person`类型的，那么此变量只能接受接口规定的属性且属性值的类型也必须和接口中规定的一直，多一个属性或者少一个属性在`TypeScript`中都不是被允许的。
+在以上代码中，`person`变量它是`Person`类型的，那么此变量只能接受接口规定的属性，且属性值的类型也必须和接口中规定的一致，多一个属性或者少一个属性在`TypeScript`中都不是被允许的。
 ```ts
 interface Person {
   name: string,
@@ -273,7 +276,7 @@ let person2: Person = {
 ```
 
 #### 接口中的只读属性
-最后我们要介绍的在接口中的一个知识是只读属性，一旦在接口中标记了属性为只读的， 那么其不能被赋值。
+最后我们要介绍的知识点是只读属性，一旦在接口中标记了属性为只读的， 那么其不能被赋值。
 ```ts
 interface Person {
   name: string,
@@ -308,7 +311,7 @@ const func3 = () => {
 }
 ```
 
-如果函数有参数，则必须在`TypeScript`中未其定义具体的类型：
+如果函数有参数，则必须在`TypeScript`中为其定义具体的类型：
 ```ts
 function add (x: number, y: number): number {
   return x + y
@@ -383,7 +386,7 @@ getTotal(1, 2, 3, 4,)
 ```
 
 #### 函数重载
-因为在`JavaScript`中，并没有限制函数参数的个数或者类型，因此`JavaScript`没有函数重载的概念，在`TypeScript`中对于函数重载的理解是：只要函数的参数个数或者函数参数的数量不同时，就可以认为这是两个函数。
+因为在`JavaScript`中，并没有限制函数参数的个数或者类型，因此`JavaScript`没有函数重载的概念，在`TypeScript`中对于函数重载的理解是：只要函数参数的类型或者函数参数的数量不同时，就可以认为这是两个函数(重载)。
 ```ts
 // 前两个为函数声明，最后一个才是函数实现
 function add (a: number, b: number): number;
@@ -398,7 +401,7 @@ function add (a: number | string, b: number | string): number | string {
 console.log(add(1, 2))      // 3
 console.log(add('1', '2'))  // 12
 ```
-::: warning
+::: tip
 在有函数重载时，会优先从第一个进行逐一匹配，因此如果重载函数有包含关系，应该将最精准的函数定义写在最前面。
 :::
 
@@ -437,17 +440,17 @@ print(teacher)  // teacher
 
 
 ### 类型别名
-类型别名用`type`关键字来给一个类型起一个新的名字，类型别名常用与联合类型。
+类型别名用`type`关键字来给一个类型起一个新的名字，类型别名常用于联合类型。
 ```ts
 type combineType = number | string
 type typeObj = {
-  age: number,
-  name: string
+  age: number;
+  name: string;
 }
 const value1: combineType = 123
 const obj: typeObj = {
-  age: 123,
-  name: 'why'
+  age: 123;
+  name: 'why';
 }
 
 ```
@@ -490,7 +493,7 @@ let strArray: Array<string> = ['1', '2', '3']
 let tsArray: (number | string) [] = [1, '2', '3']
 ```
 
-我们知道，在数组中不仅可以存储基础数据类型，还可以存储对象类型，如果需要存储对象类型，可以如下方式进行定义：
+我们知道，在数组中不仅可以存储基础数据类型，还可以存储对象类型，如果需要存储对象类型，可以用如下方式进行定义：
 ```ts
 // 只允许存储对象仅有name和age，且name为string类型，age为number类型的对象
 let objArray: ({ name: string, age: number })[] = [
@@ -501,8 +504,8 @@ let objArray: ({ name: string, age: number })[] = [
 ```ts
 // 类型别名
 type person = {
-  name: string,
-  age: number
+  name: string;
+  age: number;
 }
 let objArray: person[] = [
   { name: 'AAA', age: 23 }
@@ -521,7 +524,7 @@ let tuple: [string, number] = ['AAA', 123]
 ```ts
 let tuple: [string, number] = ['AAA', 123]
 console.log(tuple[1]) // 123
-console.log(tuple[2]) // 报
+console.log(tuple[2]) // 报错
 ```
 
 ### 枚举
@@ -816,11 +819,11 @@ console.log(join(1, 2))     // 12
 console.log(join('1', '2')) // 12
 console.log(join(1, '2'))   // 编译报错
 ```
-**注意**：我们在调用`join()`函数并进行传参的时候，`TypeScript`会自动帮我们推断参数的类型，以上三行代码也可以向如下方式进行撰写：
+**注意**：我们在调用`join()`函数并进行传参的时候，`TypeScript`会自动帮我们推断参数的类型，以上三行代码也可以像如下方式进行撰写：
 ```ts
-console.log(join<number, number>(1, 2))     // 12    
-console.log(join<string, string>('1', '2')) // 12
-console.log(join<number, string>(1, '2'))   // 编译报错
+console.log(join<number>(1, 2))     // 12    
+console.log(join<string>('1', '2')) // 12
+console.log(join<number>(1, '2'))   // 编译报错
 ```
 
 ::: tip
