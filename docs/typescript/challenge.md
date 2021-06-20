@@ -31,6 +31,8 @@ sidebar: auto
 撰写中....
 ### as
 撰写中...
+### is
+撰写中...
 ### &符号
 撰写中...
 
@@ -516,6 +518,7 @@ const result = '1' | '2' | '3'
 ```
 
 ### Chainable(可串联)
+
 ### Last(数组最后一个元素)
 #### 用法
 `Last`是用来获取数组中最后一个元素的，它和我们之前已经实现的`First`很相似。
@@ -581,17 +584,143 @@ type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
 // Unshift实现
 type Unshift<T extends any[], K> = [K, ...T]
 ```
+
 ### PromiseAll(Promise.all返回类型)
-### LookUp(回顾类型)
+#### 用法
+`PromiseAll`是用来取`Promise.all()`函数所有返回的类型，其用法如下
+```ts
+// 结果：Promise<[number, number, number]>
+const result = PromiseAll([1, 2, Promise.resolve(3)])
+```
+#### 实现方式
+与之前的例子不同，`PromiseAll`我们申明的是一个`function`而不是`type`。
+```ts
+type PromiseAllType<T> = Promise<{
+  [P in keyof T]: T[P] extends Promise<infer R> ? R : T[P]
+}>
+declare function PromiseAll<T extends any[]>(values: readonly [...T]): PromiseAllType<T>
+```
+代码详解：
+* 因为`Promise.all()`函数接受的是一个数组，因此泛型`T`限制为一个`any[]`类型的数组。
+* `PromiseAllType`的实现思路有点像之前的`PromiseType`，只不过这里多了一层`Promise`的包裹，因为`Promise.all()`的返回类型也是一个`Promise`。
+
 ### Trim、TrimLeft以及TrimRight
-### Capitalize(首字母大写)
-### Replace和ReplaceAll
+#### 用法
+`Trim`、`TrimLeft`以及`TrimRight`这几个工具比较好理解，它们都是用来移除字符串中的空白符的。
+```ts
+const t1 = TrimLeft<' str'>  // 'str'
+const t2 = Trim<' str '>     // 'str'
+const t3 = TrimRight<'str '> // 'str'
+```
+#### 实现方式
+```ts
+type Space = ' ' | '\n' | '\t'
+type TrimLeft<S extends string> = S extends `${Space}${infer R}` ? TrimLeft<R> : S
+type Trim<S extends string> = S extends (`${Space}${infer R}` | `${infer R}${Space}`) ? Trim<R> : S
+type TrimRight<S extends string> = S extends `${infer R}${Space}` ? TrimRight<R> : S
+```
+代码详解：
+* `TrimLeft`和`TrimRight`的实现思路是相同的，区别在于空白符的占位出现在左侧还是右侧。
+* `Trim`的实现就是把`TrimLeft`和`TrimRight`所做的事情结合起来。
+
+### Capitalize(首字母大写)和Uncapatilize(首字母小写)
+
+#### 用法
+`Capitalize`是用来将一个字符串的首字母变成大写的，而`Uncapatilize`所做的事情跟它相反，其用法如下：
+```ts
+type t1 = Capitalize<'hello'>   // 'Hello'
+type t2 = Uncapatilize<'Hello'> // 'hello'
+```
+#### 实现方式
+```ts
+type Capatilize<S extends string> = S extends `${infer char}${infer L}` ? `${Uppercase<char>}${L}` : S
+type Uncapatilize<S extends string> = S extends `${infer char}${infer L}` ? `${Lowercase<char>}${L}` : S
+```
+代码详解：
+* 无论是`Capatilize`还是`Uncapatilize`，它们都依赖内置的工具函数`Uppercase`或者`Lowercase`。对于`Capatilize`而言，我们只需要把首字母隔离出来，然后调用`Uppercase`即可。对于`Uncapatilize`而言，我们把首字母调用`Lowercase`即可。
+
+
+### Replace(替换一次)和ReplaceAll(全部替换)
+#### 用法
+`Replace`是用来将字符串中第一次出现的某段内容，使用指定的字符串进行替换，而`和ReplaceAll`是全部替换，其用法如下：
+```ts
+type t1 = Replace<'foobarbar', 'bar', 'foo'>      // 'foofoobar'
+type t2 = 和ReplaceAll<'foobarbar', 'bar', 'foo'> // 'foofoofoo'
+```
+#### 实现方式
+```ts
+type Replace<
+  S extends string,
+  from extends string,
+  to extends string
+> = S extends `${infer L}${from}${infer R}`
+      ? from extends ''
+        ? S
+        : `${L}${to}${R}`
+      : S
+
+type ReplaceAll<
+  S extends string,
+  from extends string,
+  to extends string
+> = S extends `${infer L}${from}${infer R}`
+      ? from extends ''
+        ? S
+        : ReplaceAll<`${L}${to}${R}`, from, to>
+      : S
+```
 ### AppendArgument(追加参数)
+#### 用法
+`AppendArgument`是用来向一个函数追加一个参数的，其用法如下：
+```ts
+//  结果：(a: number, b: number) => number
+type result = AppendArgument<(a: number) => number, number>
+```
+#### 实现方式
+```ts
+type AppendArgument<Fn, A> = Fn extends (...args: infer R) => infer T ? (...args: [...R, A]) => T : never
+```
+代码详解：
+* 我们首先利用`infer`关键词得到了`Fn`函数的参数类型以及返回类型，然后把新的参数添加到参数列表，并原样返回其函数类型。
+
 ### Permutation(元素排列)
+
 ### LengthOfString(字符串的长度)
+#### 用法
+`LengthOfString`是用来计算一个字符串长度的，其用法如下：
+```ts
+type result = LengthOfString<'Hello'> // 5
+```
+#### 实现方式
+```ts
+type LengthOfString<
+  S extends string,
+  T extends string[] = []
+> = S extends `${infer Char}${infer R}`
+      ? LengthOfString<R, [...T, Char]>
+      : T['length']
+```
+代码详解：
+* 我们通过一个泛型的辅助数组来帮我们计算字符串的长度，在第一次符合条件时，我们将其第一个字符添加到数组中，在后续的递归过程中，如果不符合条件，直接返回`T['length']`，这个过程可以用如下代码表示：
+```ts
+// 第一次递归
+const T = ['H'], S = 'hello', R = 'ello'
+// 第二次递归
+const T = ['H','e'], S = 'ello', R = 'llo'
+// 第三次递归
+const T = ['H','e','l'], S = 'llo', R = 'lo'
+// 第四次递归
+const T = ['H','e','l','l'], S = 'lo', R = 'o'
+// 第五次递归
+const T = ['H','e','l','l', 'o'], S = 'o', R = ''
+```
+
 ### Flatten(数组降维)
+
 ### AppendToObject(对象添加新属性)
+
 ### Absolute(绝对值)
+
 ### StringToArray(字符串转数组)
 ### StringToUnion(字符串转联合类型)
 ### MergeType(类型合并)
