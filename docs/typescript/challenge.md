@@ -47,10 +47,10 @@ type Person = {
 }
 
 // 结果: { name?: string; age?: number; }
-type PartialResult = Partial<Person>
+type PartialResult = MyPartial<Person>
 
 // 结果: { name: string; age: number; }
-type RequiredResult = RequiredResult<Person> 
+type RequiredResult = MyRequired<Person> 
 ```
 #### 实现方式
 ::: tip
@@ -120,7 +120,7 @@ type MyPick<T, K extends keyof T> = {
 }
 ```
 代码详解：
-* `K extends keyof T`：表示`K`是`keyof T`的子类型，如果我们在使用`Pick`的时候传递了不存在于`T`的字段，则会报错，例如：
+* `K extends keyof T`：表示`K`只能是`keyof T`的子类型，如果我们在使用`Pick`的时候传递了不存在于`T`的字段，会报错：
 ```ts
 // 报错：phone无法分配给keyof T
 type result = MyPick<Person, 'name' | 'phone'>

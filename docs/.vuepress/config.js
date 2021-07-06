@@ -75,15 +75,15 @@ module.exports = {
         ]
       },
       {
-        text: 'Webpack',
+        text: '打包工具',
         items: [
           {
-            text: 'Webpack基础&实践',
+            text: 'Webpack',
             link: '/webpack/webpack/'
           },
           {
-            text: 'Tapable事件流插件',
-            link: '/webpack/tapable/'
+            text: 'Rollup',
+            link: '/rollup/'
           }
         ]
       },
