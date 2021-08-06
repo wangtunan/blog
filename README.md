@@ -29,7 +29,7 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ <br/>
 [Webpack 基础知识](https://wangtunan.github.io/blog/webpack/webpack/)<br/>
 
 ## TypeScript
-[TypeScript 基础知识](https://wangtunan.github.io/blog/typescript/)<br/>
-
+[TypeScript 基础知识](https://wangtunan.github.io/blog/typescript/base)<br/>
+[TypeScript 类型挑战](https://wangtunan.github.io/blog/typescript/challenge)<br/>
 ## VuePress
 [VuePress 基础知识](https://wangtunan.github.io/blog/vuepress/)<br/>

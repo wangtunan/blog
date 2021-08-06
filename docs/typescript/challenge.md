@@ -4,7 +4,6 @@ sidebar: auto
 
 # type-Challenges
 
-
 ## 介绍
 在学习完`TypeScript`一些基础知识后，我们已经可以熟练使用一些基本类型定义了，但对于`TypeScript`的高级用法却依旧无法入门，为了更有趣的学习`TypeScript`高级用法，我们选择[Type-Challenges](https://github.com/type-challenges/type-challenges/blob/master/README.zh-CN.md)类型挑战来作为我们学习的目标。
 
@@ -17,27 +16,224 @@ sidebar: auto
 在之后的挑战中，我们会尽力对每道题进行必要的讲解，力争在进行`Type-Challenges`类型挑战时收益最大化。
 
 ## 核心知识点
-### keyof和in
-撰写中....
-### typeof
-撰写中....
-### never
-撰写中....
-### extends
-撰写中....
-### infer
-撰写中....
+
 ### 加号和减号
-撰写中....
-### as
-撰写中...
-### is
-撰写中...
-### &符号
-撰写中...
+::: tip
+加号和减号的用法类似，不赘述，只介绍减号。
+:::
+在一些内置工具中，可能会出现`+`或者`-`这些符号，例如：
+```ts
+type Required<T> = {
+  [P in keyof T]-?: T[P]
+}
+type Person = {
+  name: string;
+  age?: number;
+}
+
+// 结果：{ name: string; age: number; }
+type result = Required<Person>
+```
+观察结果我们可以知道，`-?`是去掉类型中属性后面的`?`，整个`Required`的实际效果是去掉`T`类型中所有属性键后面的`?`，让所有属性变成必填的。
+
+### keyof 和 in
+`keyof`和`in`经常会连在一起使用，当它们连在一起使用时，通常表示一个迭代的过程。
+
+#### keyof
+在`TS`中，`keyof T`这段代码表示获取`T`类型中所有属性键，这些属性键组合成一个联合类型，例如：
+```ts
+type Person = {
+  name: string;
+  age: number;
+}
+// 'name' | 'age'
+type result = keyof Person
+```
+`TS`中的`keyof T`，它有点类似`JavaScript`中的`Object.keys()`，它们的共同点都是获取属性键的集合，只不过`keyof T`得到的结果是一个联合类型，而`Object.keys()`得到的是一个数组。
+
+#### in
+`in`操作符的右侧通常跟一个联合类型，可以使用`in`来迭代这个联合类型，如下：
+```ts
+// 仅演示使用
+in 'name' | 'age' | 'sex'
+'name' // 第一次迭代结果
+'age'  // 第二次迭代结果
+'sex'  // 第三次迭代结果
+```
+`TS`中的`in`操作符原理，跟`JavaScript`中的`for in`遍历有点类似。
+
+根据`keyof`和`in`的特点，我们可以撰写一些辅助工具，这里以`Readonly`为例。
+```ts
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P]
+}
+type Person = {
+  name: string;
+  age: number;
+}
+// 结果：{ readony name: string; readonly age: number; }
+type result = Readonly<Person>
+```
+代码详解：
+
+* `[P in keyof T]`：这段代码表示遍历`T`中的每一个属性键，每次遍历时属性键取名为`P`，这和`JavaScript`中的`for in`非常类似：
+```js
+// ts中的迭代
+P in keyof T
+
+// JavaScript中的迭代
+for (let key in obj) 
+```
+
+### typeof
+`TS`中的`typeof`，可以用来获取一个`JavaScript`变量的类型，通常同于获取一个对象或者一个函数的类型，如下：
+```ts
+const add = (a: number, b: number): number => {
+  return a + b
+}
+const obj = {
+  name: 'AAA',
+  age: 23
+}
+
+// 结果：(a: number, b:number) => number
+type t1  = typeof add
+// 结果：{ name: string; age: number; }
+type t2 = typeof obj
+```
+
+### never
+`never`类型表示永远不会有值的一种类型。
+
+如果一个函数抛出了一个错误，那么这个函数就可以用`never`来表示其返回值，如下：
+```ts
+function handlerError(message: string): never {
+  throw new Error(message)
+}
+```
+
+关于`never`的另外一个知识点是：如果一个联合类型中存在`never`，那么实际的联合类型并不会包含`never`，如下：
+```ts
+// 定义
+type test = 'name' | 'age' | never
+
+// 实际
+type test = 'name' | 'age'
+```
+
+### extends
+`extends`关键词，一般有两种用法：类型约束和条件类型。
+
+#### 类型约束
+类型约束经常和泛型一起使用：
+```ts
+// 类型约束
+U extends keyof T
+```
+`keyof T`是一个整体，它表示一个联合类型。`U extends Union`这一整段表示`U`的类型被收缩在一个联合类型的范围内。
+
+这样做的实际表现为：第二个参数传递的字符串只能是`T`键名中的一个，传递不存在的键名会报错。
+#### 条件类型
+常见的条件类型表现形式如下：
+```ts
+T extends U ? 'Y' : 'N'
+```
+我们发现条件类型有点像`JavaScript`中的三元表达式，事实上它们的工作原理是类似的，例如：
+```ts
+type res1 = true extends boolean ? true : false // true
+type res2 = 'name' extends 'name'|'age' ? true : false // true
+type res3 = [1, 2, 3] extends { length: number; } ? true : false // true
+type res4 = [1, 2, 3] extends Array<number> ? true : false // true
+```
+在条件类型中，有一个特别需要注意的东西就是：**分布式条件类型**，如下：
+```ts
+// 内置工具：交集
+type Extract<T, U> = T extends U ? T : never;
+
+type type1 = 'name'|'age'
+type type2 = 'name'|'address'|'sex'
+
+// 结果：'name'
+type test = Extract<type1, type2>
+
+// 推理步骤
+'name'|'age' extends 'name'|'address'|'sex' ? 'name'|'age' : never
+=> ('name' extends 'name'|'address'|'sex' ? 'name' : never) |
+   ('age' extends 'name'|'address'|'sex' ? 'age' : never)
+=> 'name' | never
+=> 'name'
+```
+代码详解：
+* `T extends U ? T : never`：因为`T`是一个联合类型，所以这里适用于**分布式条件类型**的概念。根据其概念，在实际的过程中会把`T`类型中的每一个子类型进行迭代，如下：
+```ts
+// 第一次迭代：
+'name' extends 'name'|'address'|'sex' ? 'name' : never
+// 第二次迭代：
+'age' extends 'name'|'address'|'sex' ? 'age' : never
+```
+* 在迭代完成之后，会把每次迭代的结果组合成一个新的联合类型(剔除`never`)，如下：
+```ts
+type result = 'name' | never => 'name'
+```
+
+### infer
+
+`infer`关键词的作用是延时推导，它会在类型未推导时进行占位，等到真正推导成功后，它能准确的返回正确的类型。
+
+为了更好的理解infer关键词的用法，我们使用ReturnType这个例子来说明，`ReturnType`是一个用来获取函数返回类型的工具。
+
+```ts
+type ReturnType<T> = T extends (...args: any) => infer R ? R : never
+
+const add = (a: number, b: number): number => {
+  return a + b
+}
+// 结果: number
+type result = ReturnType<typeof add>
+```
+
+代码详解：
+
+* `T extends (...args: any) => infer R`：如果不看`infer R`，这段代码实际表示：`T`是不是一个函数类型。
+* `(...args: any) => infer R`：这段代码实际表示一个函数类型，其中把它的参数使用`args`来表示，把它的返回类型用`R`来进行占位。
+如果`T`满足是一个函数类型，那么我们返回其函数的返回类型，也就是`R`；如果不是一个函数类型，就返回`never`。
+
+
+### & 符号
+在`TS`中有两种类型值得我们关注：**联合类型**和**交叉类型**。
+
+联合类型一般适用于基本类型的"合并"，它使用`|`符号进行连接，如下：
+```ts
+type result = 'name' | 1 | true | null
+```
+
+而交叉类型则适用于对象的"合并"，它使用`&`符号进行连接，如下：
+```ts
+type result = T & U
+```
+`T & U`表示一个新的类型，其中这个类型包含`T`和`U`中所有的键，这和`JavaScript`中的`Object.assign()`函数的作用非常类似。
+
+根据交叉类型的概念，我们可以手动封装一个对象的`merge`函数，如下：
+```ts
+const obj1 = { name: 'AAA' }
+const obj2 = { age: 23 }
+function merge<T, U>(to: T, from: U): T & U {
+  for (let key in from) {
+    ;(to as T & U)[key] = from[key] as any
+  }
+  return to as T & U
+}
+
+// 结果：{ name：'AAA'; age: 23; }
+const resutl = merge(obj1, obj2)
+```
 
 ## 初级
+
 ### Partial(可填)和Required(必填)
+::: tip
+知识点：`keyof`、`in`、`-`
+:::
 #### 用法
 `Partial`和`Required`一个是让所有类型可填、另外一个是让所有类型必填，用法如下：
 ```ts
@@ -53,9 +249,6 @@ type PartialResult = MyPartial<Person>
 type RequiredResult = MyRequired<Person> 
 ```
 #### 实现方式
-::: tip
-知识点：`keyof`、`in`、`-`
-:::
 ```ts
 type MyPartial<T> = {
   [P in keyof T]?: T[P]
@@ -64,13 +257,11 @@ type MyRequired<T> = {
   [P in keyof T]-?: T[P]
 }
 ```
-代码解读：
-* `keyof T`：[keyof和in](#keyof和in)。
-* `P in keyof T`：[keyof和in](#keyof和in)。
-* `T[P]`：属于一个正常的取值操作，在`TypeScript`中，不能通过`T.P`的形式取值，而应该用`T[P]`。
-* `-?`：[加号和减号](#加号和减号)。
 
 ### Readonly(只读)和Mutable(可改)
+::: tip
+知识点：`keyof`、`in`、`-`
+:::
 #### 用法
 `Readonly`和`Mutable`一个是让所有属性变为只读，另外一个是让所有属性变为可改的(移除`readonly`关键词)，其用法为：
 ```ts
@@ -95,10 +286,7 @@ type MyMutable<T> = {
 }
 ```
 代码解读：
-* `keyof T`：[keyof和in](#keyof和in)。
-* `P in keyof T`：[keyof和in](#keyof和in)。
-* `T[P]`：属于一个正常的取值操作，在`TypeScript`中，不能通过`T.P`的形式取值，而应该用`T[P]`。
-* `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的，知识点[加号和减号](#加号和减号)。
+* `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的.
 
 ### Pick(选取)
 #### 用法

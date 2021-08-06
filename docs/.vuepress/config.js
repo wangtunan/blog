@@ -92,7 +92,7 @@ module.exports = {
         items: [
           {
             text: 'TypeScript基础',
-            link: '/typescript/'
+            link: '/typescript/base'
           },
           {
             text: 'TypeScript类型挑战',
