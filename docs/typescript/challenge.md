@@ -231,9 +231,6 @@ const resutl = merge(obj1, obj2)
 ## 初级
 
 ### Partial(可填)和Required(必填)
-::: tip
-知识点：`keyof`、`in`、`-`
-:::
 #### 用法
 `Partial`和`Required`一个是让所有类型可填、另外一个是让所有类型必填，用法如下：
 ```ts
@@ -259,9 +256,6 @@ type MyRequired<T> = {
 ```
 
 ### Readonly(只读)和Mutable(可改)
-::: tip
-知识点：`keyof`、`in`、`-`
-:::
 #### 用法
 `Readonly`和`Mutable`一个是让所有属性变为只读，另外一个是让所有属性变为可改的(移除`readonly`关键词)，其用法为：
 ```ts
@@ -313,7 +307,6 @@ type MyPick<T, K extends keyof T> = {
 // 报错：phone无法分配给keyof T
 type result = MyPick<Person, 'name' | 'phone'>
 ```
-* `P in K`：[keyof和in](#keyof和in)
 
 ### Exclude(排除)
 #### 用法
@@ -326,8 +319,7 @@ type ExcludeResult = Exclude<'name'|'age'|'sex', 'sex'|'address'>
 ```ts
 type MyExclude<T, U> = T extends U ? never : T
 ```
-* `never`：[never](#never)
-* `T extends U`：会从`T`的子类型开始分发，例如：
+* `T extends U`：这段代码会从`T`的子类型开始分发，例如：
 ```ts
 T extends U 
 => 'name'|'age'|'sex' extends 'sex'|'address'
@@ -533,7 +525,6 @@ type PromiseType<T> = T extends Promise<infer R> ? R : never
 ```
 代码详解：
 * `T extends Promise<infer R>`：判断`T`是否是`Promise<infer R>`的子类型，也就是说`T`必须满足`Promise<any>`的形式。
-* `infer R`：[infer](#infer)
 
 ### If(判断)
 #### 用法
@@ -545,7 +536,6 @@ type result1 = If<true, 'a', 'b'>
 type result2 = If<false, 'a', 'b'>
 ```
 根据上案例，我们可以直观的发现`If<C, T, F>`的作用有点类似`JavaScript`中的三元表达式：`C ? T : F`。
-
 #### 实现方式
 ```ts
 type If<C extends boolean, T, F> = C extends true ? T : F
