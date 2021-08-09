@@ -268,7 +268,7 @@ type Person = {
 type ReadonlyResult = Readonly<Person>
 
 // 结果：{ name: string; age: number; }
-type MutableResult = 和Mutable<Person>
+type MutableResult = Mutable<Person>
 ```
 #### 实现方式
 ```ts
@@ -347,18 +347,12 @@ type OmitResult = Omit<Person, 'address'>
 #### 实现方式
 `Omit`可以借助在上面已经实现过的`Pick`和`Exclude`配合来实现，如下：
 ```ts
-// Pick实现
-type MyPick<T, K extends keyof T> = {
-  [P in K]: T[P]
-}
-// Exclude实现
-type MyExclude<T, U> = T extends U ? never : T
 // Omit实现
 type MyOmit<T, K> = MyPick<T, MyExclude<keyof T, K>>
 ```
 代码详解：
-* 使用`MyExclude<keyof T, K>`，我们能从`T`中移除指定的字段，得到一个联合类型，例如：`'name'|'age'`
-* 使用`MyPick<T, 'name'|'age'>`，我们可以从`T`中选取这两个字段组合成一个新的类型。
+* 使用`MyExclude<keyof T, K>`，可以从`T`中移除指定的字段，移除后得到一个新的联合类型：`'name'|'age'`
+* 使用`MyPick<T, 'name'|'age'>`，可以从`T`中选取这两个字段，组合成一个新的类型。
 
 ### Record(构造)
 #### 用法
@@ -392,10 +386,10 @@ type MyRecord<k extends keyof any, T> = {
 代码详解：
 * `k extends keyof any`：此代码表示`K`是`keyof any`任意类型其所有键的子类型，例如：
 ```ts
-// K为 ‘Dog’|'cat'
+// K为 'Dog'|'cat'
 type UnionKeys = 'Dog' | 'Cat'
 
-// K为‘name’|'age'
+// K为'name'|'age'
 type Person = {
   name: string;
   age: number;
@@ -448,8 +442,8 @@ type TupleToObject<T extends readonly any[]> = {
 }
 ```
 代码详解：
-* `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素。我们也可以使用`as readonly`来理解。
-* `T[number]`：表示返回元素所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
+* `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素，可以使用`as readonly`来辅助理解。
+* `T[number]`：表示返回所有数字型索引的元素，形成的一个联合类型，例如：`'msg'|'name'`。
 
 ### First(数组第一个元素)
 #### 用法
@@ -573,8 +567,8 @@ type result2 = Includes<[1, 2, 3], '1'>
 type Includes<T extends any [], U> = U extends T[number] ? true : false
 ```
 代码详解：
-* `T[number]`：它返回数组中所有数字类型键对应的值，将这些值构造成一个联合类型，例如：`1|2|3`。
-* `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1|2|3`。
+* `T[number]`：它返回数组中所有数字类型键对应的值，将这些值构造成一个联合类型，例如：`1 | 2 | 3`。
+* `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1 | 2 | 3`。
 
 ## 中级
 ### Readony(按需Readonly)
