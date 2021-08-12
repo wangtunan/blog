@@ -573,7 +573,7 @@ type Includes<T extends any [], U> = U extends T[number] ? true : false
 ## 中级
 ### Readony(按需Readonly)
 #### 用法
-不同于初级实现中的`Readonly`，在中级实现的`Readonly`中，如果我们传递了指定的字段，那么`Readonly`会表现为按需实现`readonly`，具体用法如下：
+不同于初级实现中的`Readonly`，在中级实现的`Readonly`中，如果我们传递了指定的字段，那么`Readonly`会表现为按需实现`readonly`，用法如下。
 ```ts
 interface Todo {
   title: string;
@@ -608,18 +608,18 @@ obj.completed = false // error
 ```
 #### 使用方式
 ```ts
-type Readonly<T, K = any> = T & {
-  readonly [P in keyof T as P extends K ? P : never]: T[P] 
+type Readonly<T, K extends keyof T = any> = T & {
+  readonly [P in keyof T as P extends K ? P : never]: T[P]
 }
 ```
 代码详解：
-* `K=any`：类型默认值，如果不传递`K`，则默认所有字段都变为`readonly`。
-* `as`：`[T as U]`表示对于`T`进行进一步的"加工/判断"，在此处具体表现为：我们只对指定字段进行迭代并添加`readonly`关键词。知识点[as](#as)
-* `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`，那么就丢失一些属性，例如`title`。知识点[&符号](#&符号)
+* `K extends keyof T = any`：如要传递了`K`，那么只能是`T`中已经存在的属性，不存在则报错；如果不传递，则默认值为`any`，意味着全部属性都添加`readonly`。
+* `as`：`T as U`表示对于`T`进行进一步的**加工/判断**，在此处具体表现为：我们只对指定字段进行迭代并添加`readonly`关键词。
+* `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`，那么就丢失一些属性，例如`title`。
 
 ### DeepReadonly(深度Readonly)
 #### 用法
-`DeepReadonly`用来将一个嵌套类型中所有字段全部添加`readonly`关键词，例如：
+`DeepReadonly`用来将一个嵌套对象类型中所有字段全部添加`readonly`关键词，例如：
 ```ts
 // 类型：
 type X = {
@@ -630,6 +630,7 @@ type X = {
     f: null
   }
 }
+// 结果：
 type Y = {
   readonly b: string
   readonly c: {
@@ -638,9 +639,6 @@ type Y = {
     readonly f: null
   }
 }
-
-// 结果：Y
-type result = DeepReadonly<X>
 ```
 #### 实现方式
 ```ts
@@ -651,7 +649,7 @@ type DeepReadonly<T> = {
 代码详解：
 * `T[P] extends { [key: string]: any }`：这段表示`T[P]`是否是一个包含索引签名的字段，如果包含我们认为它是一个嵌套对象，就可以递归调用`DeepReadonly`。
 
-### TupleToUnion(元组转集合)
+### TupleToUnion(元组转联合类型)
 #### 用法
 `TupleToUnion`是用来将一个元组转换成联合类型的，其用法如下：
 ```ts
@@ -670,7 +668,7 @@ type TupleToUnion<T extends readonly any[]> =
     : never
 ```
 代码详解：
-* `T[number]`：它会自动迭代元组的数字型索引，然后将所以元素组合成一个联华类型。
+* `T[number]`：它会自动迭代元组的数字型索引，然后将所以元素组合成一个联合类型。
 * `R | TupleToUnion<args>`：R表示每一次迭代中的第一个元素，它的迭代过程可以用下面伪代码表示：
 ```ts
 // 第一次迭代
@@ -689,11 +687,9 @@ const args = ['']
 const result = '1' | '2' | '3'
 ```
 
-### Chainable(可串联)
-
 ### Last(数组最后一个元素)
 #### 用法
-`Last`是用来获取数组中最后一个元素的，它和我们之前已经实现的`First`很相似。
+`Last`是用来获取数组中最后一个元素的，它和我们之前已经实现的`First`思路很相似。
 ```ts
 // 结果：3
 type result = Last<[1, 2, 3]>
@@ -701,10 +697,10 @@ type result = Last<[1, 2, 3]>
 #### 实现方式
 `Last`的实现方式很巧妙，因为它既可以在索引上做文章来实现，也可以用占位的思想来实现。
 ```ts
-// way1：处理索引
+// way1：索引思想
 type Last<T extends any[]> = [any, ...T][T['length']]
 
-// way2: 后占位
+// way2: 后占位思想
 type Last<T extends any[]> = T extends [...infer R, infer L] ? L : never
 ```
 代码详解：
@@ -715,12 +711,15 @@ const T = [1, 2, 3]
 
 // 新数组
 const arr = [any, 1, 2, 3]
+
+// 结果: 3
+const result = arr[T['length']]
 ```
-* `T['length']`：这里我们获取到的是原始`T`数组的长度，例如`[1, 2, 3]`，我们获取到的长度值为`3`。而在新数组中，索引为`3`的位置正好是最后一个元素的索引，通过这种方式就能达到我们的目的。
+* `T['length']`：这里我们获取到的是原始`T`数组的长度，例如`[1, 2, 3]`，长度值为`3`。而在新数组中，索引为`3`的位置正好是最后一个元素的索引，通过这种方式就能达到我们的目的。
 * `T extends [...infer R, infer L]`：这段代码表示，我们将原数组中最后一个元素使用`L`进行占位，而其它元素我们用一个`R`数组表示。这样，如果数组满足这种格式，就能正确返回最后一个元素的值。
 
 ### Pop和Push
-继续沿用以上处理索引和占位的思想，我们能实现数组`pop`方法和`push`方法
+继续沿用以上处理索引思想和占位的思想，我们能快速实现数组`pop`方法和`push`方法。
 #### 用法
 ```ts
 // Pop结果：[1, 2]
@@ -757,15 +756,15 @@ type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
 type Unshift<T extends any[], K> = [K, ...T]
 ```
 
-### PromiseAll(Promise.all返回类型)
+### PromiseAll返回类型
 #### 用法
 `PromiseAll`是用来取`Promise.all()`函数所有返回的类型，其用法如下
 ```ts
 // 结果：Promise<[number, number, number]>
-const result = PromiseAll([1, 2, Promise.resolve(3)])
+type result = typeof PromiseAll([1, 2, Promise.resolve(3)])
 ```
 #### 实现方式
-与之前的例子不同，`PromiseAll`我们申明的是一个`function`而不是`type`。
+与之前的例子不同，`PromiseAll`我们声明的是一个`function`而不是`type`。
 ```ts
 type PromiseAllType<T> = Promise<{
   [P in keyof T]: T[P] extends Promise<infer R> ? R : T[P]
@@ -796,7 +795,6 @@ type TrimRight<S extends string> = S extends `${infer R}${Space}` ? TrimRight<R>
 * `Trim`的实现就是把`TrimLeft`和`TrimRight`所做的事情结合起来。
 
 ### Capitalize(首字母大写)和Uncapatilize(首字母小写)
-
 #### 用法
 `Capitalize`是用来将一个字符串的首字母变成大写的，而`Uncapatilize`所做的事情跟它相反，其用法如下：
 ```ts
@@ -812,12 +810,12 @@ type Uncapatilize<S extends string> = S extends `${infer char}${infer L}` ? `${L
 * 无论是`Capatilize`还是`Uncapatilize`，它们都依赖内置的工具函数`Uppercase`或者`Lowercase`。对于`Capatilize`而言，我们只需要把首字母隔离出来，然后调用`Uppercase`即可。对于`Uncapatilize`而言，我们把首字母调用`Lowercase`即可。
 
 
-### Replace(替换一次)和ReplaceAll(全部替换)
+### Replace和ReplaceAll
 #### 用法
 `Replace`是用来将字符串中第一次出现的某段内容，使用指定的字符串进行替换，而`和ReplaceAll`是全部替换，其用法如下：
 ```ts
-type t1 = Replace<'foobarbar', 'bar', 'foo'>      // 'foofoobar'
-type t2 = 和ReplaceAll<'foobarbar', 'bar', 'foo'> // 'foofoofoo'
+type t1 = Replace<'foobarbar', 'bar', 'foo'>    // 'foofoobar'
+type t2 = ReplaceAll<'foobarbar', 'bar', 'foo'> // 'foofoofoo'
 ```
 #### 实现方式
 ```ts
@@ -841,6 +839,7 @@ type ReplaceAll<
         : ReplaceAll<`${L}${to}${R}`, from, to>
       : S
 ```
+
 ### AppendArgument(追加参数)
 #### 用法
 `AppendArgument`是用来向一个函数追加一个参数的，其用法如下：
@@ -854,8 +853,6 @@ type AppendArgument<Fn, A> = Fn extends (...args: infer R) => infer T ? (...args
 ```
 代码详解：
 * 我们首先利用`infer`关键词得到了`Fn`函数的参数类型以及返回类型，然后把新的参数添加到参数列表，并原样返回其函数类型。
-
-### Permutation(元素排列)
 
 ### LengthOfString(字符串的长度)
 #### 用法
@@ -888,11 +885,8 @@ const T = ['H','e','l','l', 'o'], S = 'o', R = ''
 ```
 
 ### Flatten(数组降维)
-
 ### AppendToObject(对象添加新属性)
-
 ### Absolute(绝对值)
-
 ### StringToArray(字符串转数组)
 ### StringToUnion(字符串转联合类型)
 ### MergeType(类型合并)
