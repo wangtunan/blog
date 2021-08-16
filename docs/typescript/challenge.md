@@ -885,16 +885,162 @@ const T = ['H','e','l','l', 'o'], S = 'o', R = ''
 ```
 
 ### Flatten(数组降维)
+#### 用法
+`Flatten`是用来将多维数组进行降维的，其用法如下：
+```ts
+// 结果：[1, 2, 3]
+type result = Flatten<[1, 2, [3]]>
+```
+#### 实现方式
+```ts
+type Flatten<
+  T extends any[]
+> = T extends [infer L, ...infer R]
+      ? L extends any[]
+        ? [...Flatten<L>, ...Flatten<R>]
+        : [L, ...Flatten<R>]
+      : []
+```
+代码详解：`Flatten`数组降维的主要思路是，遍历数组中的每一个元素，判断其是否为一个数组，如果是，则递归调用`Flatten`，进行降维。
+
 ### AppendToObject(对象添加新属性)
+#### 用法
+`AppendToObject`是用来向指定对象添加一个额外的属性(`key/value`)，其用法如下：
+```ts
+// 结果：{ id: number; name: string; }
+type result = AppendToObject<{ id: number; }, 'name', string>
+```
+#### 实现方式
+```ts
+type basicKeyType = string | number | symbol
+type AppendToObject<T, K extends basicKeyType, V> = {
+  [P in keyof T | K]: P extends keyof T ? T[P] : V
+}
+```
+代码详解：
+* `basicKeyType`：在`JavaScript`中，因为一个对象的属性只能是`string`、`number`或者`symbol`这三种类型，所以我们限定`K`必须满足此条件。
+* `keyof T | K`：这里表示`keyof T`的联合类型和`K`，组合成一个新的联合类型。
+
 ### Absolute(绝对值)
+#### 用法
+`Absolute`是用来取一个数的绝对值的，其用法如下：
+```ts
+// 结果："531"
+type result = Absolute<-531>
+```
+#### 实现方式
+```ts
+type NumberLike = number | string
+type Absolute<T extends NumberLike> =  `${T}` extends `-${infer N}` ? N : `${T}`
+```
+代码详解：
+* `NumberLike`：我们认为`'1'`和`1`都是一个合法的数字，所以定义一个辅助的`NumberList`联合类型。
+* `${T}` extends `-${infer N}`：这里判断我们传递的数字是否为负数，如果是则直接取其正数部分，否则直接返回。
+
+**注意**：这里说到的取绝对值，最后的结果之所以是一个字符串类型，是因为`TS`对递归次数有限制。如果你想要真正的数字类型，可以考虑实现一个`MakeArray`辅助方法，使用此方法可以将字符串类型的数字，转换成一个真正的数字类型，如下：
+```ts
+type MakeArray<N extends string, T extends any[] = []> =
+  N extends `${T['length']}`
+  ? T
+  : MakeArray<N, [...T, 0]>
+
+// 结果：3
+type result = MakeArray<'3'>['length']
+```
+
 ### StringToArray(字符串转数组)
+#### 用法
+`StringToArray`是用来将一个字符串转换成一个数组的，其用法如下：
+```ts
+// 结果：['h', 'e', 'l', 'l', 'o']
+type result = StringToArray<'hello'>
+```
+#### 实现方式
+```ts
+type StringToArray<
+  S extends string,
+  U extends any[] = []
+> = S extends `${infer Char}${infer R}`
+      ? StringToArray<R, [...U, Char]>
+      : U
+```
+代码详解：`StringToArray`的实现主要是使用了递归的思想，它每次拿到字符串中一个字符，然后存入一个辅助数组中，当字符串为空时，直接返回这个辅助数组。
+
 ### StringToUnion(字符串转联合类型)
+#### 用法
+在实现`StringToArray`后，我们能够很容易实现`StringToUnion`，其用法如下：
+```ts
+// 结果：'h' | 'e' | 'l' | 'l' | 'o'
+type result = StringToUnion<'hello'>
+```
+#### 实现方式
+```ts
+// way1: 递归思想
+type StringToUnion<
+  S extends string
+> = S extends `${infer Char}${infer R}`
+      ? Char | StringToUnion<R>
+      : never
+// way2: 借用StringToArray
+type StringToUnion<S extends string> = StringToArray<S>[number]
+```
+代码详解：`StringToArray<S>`返回的是一个数组，`T[number]`表示对一个数组进行数字类型索引迭代，其迭代结果是每个元素组合成的一个联合类型。
+
 ### MergeType(类型合并)
+#### 用法
+`MergeType`是用来合并两个类型，如果有重复的字段类型，则第二个的字段类型覆盖第一个的，其用法如下：
+```ts
+type Foo = {
+  a: number;
+  b: string;
+}
+type Bar = {
+  b: number;
+}
+
+// 结果：{ a: number; b: number; }
+type result = MergeType<Foo, Bar>
+```
+#### 实现方式
+```ts
+type MergeType<F, S> = {
+  [P in keyof F]: P extends keyof S ? S[P] : F[P]
+}
+```
+
 ### CamelCase(字符串转小驼峰)
 ### KebabCase(字符串转连字符)
 ### Diff(类型差异部分)
 ### AnyOf(数组元素真值判断)
+#### 用法
+`AnyOf`用来判断数组元素，若果任意值为真，返回true；数组为空或者全部为false，才返回false，其用法如下：
+```ts
+// 结果：true
+type result1 = AnyOf<[0, false, 0, { name: 'name' }]>
+// 结果：false
+type result2 = AnyOf<[0, '', false, [], {}]>
+```
+#### 实现方式
+```ts
+type FalseType = 0 | '' | false | [] | { [key: string]: never }
+type AnyOf<T extends readonly any[]> = T[number] extends FalseType ? false : true
+```
+代码详解：因为我们就是要区分`true/false`，所以我们把所有为`false`的值全部列举出来，然后使用`T[number]`索引迭代，依次去跟`FalseType`比较。
+
 ### IsNever(是否是Never类型)
+#### 用法
+`IsNever`是用来判断是否为`never`类型，其用法如下：
+```ts
+// 结果：false
+type result1 = IsNever<undefined>
+// 结果：true
+type result2 = IsNever<never>
+```
+#### 实现方式
+```ts
+type IsNever<T> = T[] extends never[] ? true : false
+```
+
 ### IsUnion(是否联合类型)
 ### ReplaceKeys(类型替换)
 ### RemoveIndexSignature(移除索引签名)
