@@ -2,7 +2,7 @@
 sidebar: auto
 ---
 
-# type-Challenges
+# Type-Challenges
 
 ## 介绍
 在学习完`TypeScript`一些基础知识后，我们已经可以熟练使用一些基本类型定义了，但对于`TypeScript`的高级用法却依旧无法入门，为了更有趣的学习`TypeScript`高级用法，我们选择[Type-Challenges](https://github.com/type-challenges/type-challenges/blob/master/README.zh-CN.md)类型挑战来作为我们学习的目标。
@@ -1009,8 +1009,88 @@ type MergeType<F, S> = {
 ```
 
 ### CamelCase(字符串转小驼峰)
+#### 用法
+`CamelCase`是用来将连字符字符串转驼峰的，其用法如下：
+```ts
+// 结果：fooBarBaz
+type result = CamelCase<'foo-bar-baz'>
+```
+#### 实现方式
+```ts
+type CamelCase<
+  S extends string
+> = S extends `${infer S1}-${infer S2}`
+      ? S2 extends Capitalize<S2>
+        ? `${S1}-${CamelCase<S2>}` 
+        : `${S1}${CamelCase<Capitalize<S2>>}`
+      : S
+```
+代码详解：`CamelCase`的实现，使用到了递归的思路，以上面例子为例：
+```ts
+type result = CamelCase<'foo-bar-baz'>
+
+// 第一次递归调用 S满足${infer S1}-${infer S2} S2不满足extends Capitalize<S2>
+S = 'foo-bar-baz' S1 = 'foo' S2 = 'bar-baz'
+
+// 第二次递归调用 S满足${infer S1}-${infer S2} S2不满足extends Capitalize<S2>
+S = 'Bar-baz' S1 = 'Bar' S2 = 'baz'
+
+// 第三次递归调用 S不满足${infer S1}-${infer S2}
+S = 'Baz'
+
+// 结果：fooBarBaz
+type result = 'foo' + 'Bar' + 'Baz' => 'fooBarBaz'
+```
+
 ### KebabCase(字符串转连字符)
+#### 用法
+在实现`CamelCase`后，我们很容易能够实现`KebabCase`，它是用来将驼峰形式字符串，转成连字符形式字符串的，其用法如下：
+```ts
+// 结果：foo-bar-baz
+type result = KebabCase<'FooBarBaz'>
+```
+#### 实现方式
+```ts
+type KebabCase<
+  S extends string
+> = S extends `${infer S1}${infer S2}`
+      ? S2 extends Uncapitalize<S2>
+        ? `${Uncapitalize<S1>}${KebabCase<S2>}`
+        : `${Uncapitalize<S1>}-${KebabCase<S2>}`
+      : S
+```
+
 ### Diff(类型差异部分)
+#### 用法
+`Diff`是用来获取两个类型的不同部分的，其用法如下：
+```ts
+type Foo = {
+  id: number;
+  name: string;
+  age: string;
+}
+type Bar = {
+  name: string;
+  age: string;
+  gender: number;
+}
+
+// 结果：{ id: number; gender: number; }
+type result = Diff<Foo, Bar>
+```
+#### 实现方式
+```ts
+type DiffKeys<T, U> = Exclude<keyof T | keyof U, keyof (T | U)>
+type Diff<T, U> = {
+  [k in DiffKeys<T, U>]: k extends keyof T ? T[k] : k extends keyof U ? U[k] : never
+}
+```
+代码详解：
+* `keyof Foo | keyof Bar`：这段代码是把`T`和`U`中的所有属性组合成一个新的联合类型。
+* `keyof (T | U)`：这段代码是取`T`和`U`的公共属性。
+* `Exclude<K1, K2>`：这段代码主要是用来从`K1`中排除`K2`，带入以上例子也就是排除掉所有公共属性。
+* `Diff<T, U>`：在获取到`DiffKeys`后，就可以迭代的方式获取到每个属性`key`，它所对应的类型了。
+
 ### AnyOf(数组元素真值判断)
 #### 用法
 `AnyOf`用来判断数组元素，若果任意值为真，返回true；数组为空或者全部为false，才返回false，其用法如下：
@@ -1042,8 +1122,84 @@ type IsNever<T> = T[] extends never[] ? true : false
 ```
 
 ### IsUnion(是否联合类型)
+#### 用法 
+`IsUnion`是用来判断一个类型是否为联合类型的，其用法如下：
+```ts
+// 结果：true
+type result1 = IsUnion<string|number|boolean>
+// 结果：false
+type result2 = IsUnion<string>
+```
+#### 实现方式
+```ts
+type IsUnion<T, U = T> =
+  T extends T
+  ? [Exclude<U, T>] extends [never]
+    ? false
+    : true
+  : never
+```
+代码详解：上面的实现虽然代码不多，但可能无法一下子就弄明白，为了更好的理解这种实现方式，我们来看如下两个案例分析：
+```ts
+// 案例一
+type T = string | number
+step1: string | number extends string | number
+step2: string extends string | number => [number] extends [never] => true
+step3: number extends string | number => [string] extends [never] => true
+step4: true | true
+result: true
+
+// 案例二
+type T = string
+step1: string extends string
+step2: [never] extends [never] => false
+result: false
+```
+根据之前我们学到的**分布式条件类型**知识，`T extends T`的时候，会把`T`进行子类型分发。
+
+如案例一的`step3`、`step4`，在分发后会把每次迭代的结果联合起来，组合成最终的结果。
+
 ### ReplaceKeys(类型替换)
+#### 用法
+`ReplaceKeys`是用来在一个类型中，使用指定的Y类型来替换已经存在的T类型的，其用法如下：
+```ts
+// 结果：{ id: number; name: boolean; }
+type result = ReplaceKeys<{ id: number; name: string; }, 'name', { name: boolean; }>
+```
+#### 实现方式
+```ts
+type ReplaceKeys<U, T, Y> = {
+  [P in keyof U]:
+    P extends T
+      ? P extends keyof Y
+        ? Y[P]
+        : never
+      : U[P]
+}
+```
+
 ### RemoveIndexSignature(移除索引签名)
+#### 用法
+`RemoveIndexSignature`是用来移除一个类型中的索引签名的，其用法如下：
+```ts
+type Foo = {
+  [key: string]: any;
+  foo(): void;
+}
+
+// 结果：{ foo(): void; }
+type result = RemoveIndexSignature<Foo>
+```
+#### 实现方式
+```ts
+type NeverIndex<P> = string extends P ? never : number extends P ? never : P
+type RemoveIndexSignature<T> = {
+  [P in keyof T as NeverIndex<P>]: T[P]
+}
+```
+代码详解：
+* `NeverIndex`：因为索引签名有一个特点，为`string`或者`number`类型，所以我们通过`string extends P`或者`number extends P`的形式排除此索引签名。
+* `as NeverIndex<P`：在之前的案例中，我们介绍过`as`的用法，在这里有**加工**或**再次断言**的意思。在使用`in`操作符进行迭代时，对每一个`P`再使用`NeverIndex`加工一下，如果是索引签名，这里的结果为`never`，为`never`时表示跳过当前迭代，进而达到排除索引签名的目的。
 
 ## 困难
 ### UnionToIntersection(元组取交集)
