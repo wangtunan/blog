@@ -1202,10 +1202,120 @@ type RemoveIndexSignature<T> = {
 * `as NeverIndex<P`：在之前的案例中，我们介绍过`as`的用法，在这里有**加工**或**再次断言**的意思。在使用`in`操作符进行迭代时，对每一个`P`再使用`NeverIndex`加工一下，如果是索引签名，这里的结果为`never`，为`never`时表示跳过当前迭代，进而达到排除索引签名的目的。
 
 ## 困难
-### UnionToIntersection(元组取交集)
 ### Currying(柯里化)
+、
+### UnionToIntersection(元组取交集)
+在实现`UnionToIntersection`之前，我们先来回顾一下`TS`中`&`符号的作用：
+```ts
+// 结果：never
+type result1 = 1 & 'foo' & true
+// 结果：{ a: number; b: number; c: boolean; }
+type result2 = { a: number; b: number; } & { b: string | number; c: boolean; }
+// 结果：(a: boolean | number) => string
+type result3 = ((a: boolean) => string | number) & ((a: number) => string)
+```
+案例解析：
+* 案例一：因为`1`、`foo`以及`true`，没有交集部分，所以这里结果为`never`。
+* 案例二：对于`a`和`c`属性而言，它们只存在于自身类型，所以交集部分是自身；对于`b`属性而言，它在两个类型中都存在，且其属性的类型存在交集部分，既：`number`。
+* 案例三：对于函数的交叉类型，我们从函数参数、函数返回值这两个部分来说明。对于函数参数而言，取其联合类型；对于函数返回值而言，取其交叉类型。
+
+从以上几个案例中可以看出，`TS`中的`&`符号是取交集的意思，也叫**交叉类型**。
+
+#### 用法
+`UnionToIntersection`所做的事情和`&`符号是一样的，其用法如下：
+```ts
+// 结果：never
+type result1 = UnionToIntersection<1 | 'foo' | true>
+// 结果：{ a: number; b: number; c: boolean; }
+type result2 = UnionToIntersection<{ a: number; b: number; } | { b: string | number; c: boolean; }>
+// 结果：(a: boolean | number) => string
+type result3 = UnionToIntersection<((a: boolean) => string | number) | ((a: number) => string)>
+```
+#### 实现方式
+```ts
+type UnionToIntersection<U> = 
+  (U extends any 
+    ? (x: U) => any 
+    : never
+  ) extends (x: infer V) => any 
+    ? V
+    : never
+```
+代码详解：
+* `U extends any ? X : Y`： 这里把`U`类型处理成`(x: U) => any`的函数类型。
+* `T extends (x: infer V) => any ? V : never`：这里的`T`就是上一步的函数类型，如果`extends`成立，则返回`V`，此时的`V`必然满足`U & V`。
+
 ### RequiredKeys(所有必填字段)
+#### 用法
+`RequiredKeys`是用来返回一个类型中所有必填字段，其用法如下：
+```ts
+type Person = {
+  name: string;
+  age: number;
+  sex?: undefined;
+  address?: string;
+}
+
+// 结果：'name' | 'age'
+type result = RequiredKeys<Person>
+```
+#### 实现方式
+```ts
+type RequiredKeys<T> = {
+  [P in keyof T]: T extends Record<P,T[P]> ? P : never
+}[keyof T]
+```
+代码详解：
+* `T extends Record<P,T[P]>`：`Record`之前已经实现过，这里不在赘述，理解这段代码，可以参考如下案例：
+```ts
+// 第一步 P = 'name'
+T extends { name: string; } => 'name'
+// 第二步 p = 'age'
+T extends { age: number; } => 'age'
+// 第三步 p = 'sex'
+T extends { sex?: undefined; } => never
+// 第四步 p = 'address'
+T extends { address?: string; } => never
+```
+在经过以上四个步骤后，得到的新类型为：
+```ts
+type T = {
+  name: 'name';
+  age: 'age';
+  sex?: never;
+  address?: never;
+}
+```
+* `T[keyof T]`：`keyof T`得到所有的属性，然后根据属性取其类型。
+```ts
+// keyof T的结果
+type P = 'name' | 'age' | 'sex' | 'address'
+
+// T[P]的结果，类型为never自动过滤
+type result = 'name' | 'age' | never | never => 'name' | 'age'
+```
 ### GetRequired(必填字段组成的类型)
+#### 用法
+`GetRequired`是用来取一个类型中那些由必填字段组成的一个新类型的，其用法如下：
+```ts
+type Person = {
+  name?: string;
+  age: number;
+  address?: string;
+  sex: undefined;
+}
+
+// 结果：{ age: number; sex: undefined; }
+type result = GetRequired<Person>
+```
+#### 实现方式
+在`RequiredKeys`的基础上，能够很容易的实现`GetRequired`。
+```ts
+type GetRequired<T> = {
+  [P in RequiredKeys<T>]: T[P]
+}
+```
+
 ### OptionalKeys(所有可选字段)
 ### GetOptional(可选字段组成的类型)
 ### CapitalizeWords(所有单词首字母大写)
@@ -1224,14 +1334,3 @@ type RemoveIndexSignature<T> = {
 
 ## 地狱
 撰写中...
-
-## 内置测试工具
-
-### Equal和NotEqual
-撰写中....
-### isTrue和isFalse
-撰写中....
-### Expect、ExpectTrue和ExpectFalse
-撰写中....
-### IsAny和NotAny
-撰写中....
