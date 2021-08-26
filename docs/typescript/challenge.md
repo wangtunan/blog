@@ -1008,7 +1008,7 @@ type MergeType<F, S> = {
 }
 ```
 
-### CamelCase(字符串转小驼峰)
+### CamelCase(连字符字符串转小驼峰)
 #### 用法
 `CamelCase`是用来将连字符字符串转驼峰的，其用法如下：
 ```ts
@@ -1203,7 +1203,7 @@ type RemoveIndexSignature<T> = {
 
 ## 困难
 ### Currying(柯里化)
-、
+
 ### UnionToIntersection(元组取交集)
 在实现`UnionToIntersection`之前，我们先来回顾一下`TS`中`&`符号的作用：
 ```ts
@@ -1294,6 +1294,7 @@ type P = 'name' | 'age' | 'sex' | 'address'
 // T[P]的结果，类型为never自动过滤
 type result = 'name' | 'age' | never | never => 'name' | 'age'
 ```
+
 ### GetRequired(必填字段组成的类型)
 #### 用法
 `GetRequired`是用来取一个类型中那些由必填字段组成的一个新类型的，其用法如下：
@@ -1317,19 +1318,179 @@ type GetRequired<T> = {
 ```
 
 ### OptionalKeys(所有可选字段)
+`OptionalKeys`和`RequiredKeys`所做的事情相反，其获取的是所有可选字段。
+#### 用法
+```ts
+type Person = {
+  name: string;
+  age: number;
+  sex?: undefined;
+  address?: string;
+}
+
+// 结果：'sex' | 'address'
+type result = OptionalKeys<Person>
+```
+#### 实现方式
+```ts
+type OptionalKeys<T> = {
+  [P in keyof T]: T extends Record<P, T[P]> ? never : P
+}[keyof T]
+```
+代码详解：从上面代码中可以看出，它和`RequiredKeys`实现思路是一样的，区别只是在`extends`关键词后面的处理不同。
+
 ### GetOptional(可选字段组成的类型)
+#### 用法
+在实现了`OptionalKeys`后，我们来实现其对应的`GetOptional`，其对应方法使用方式如下：
+```ts
+type Person = {
+  name: string;
+  age: number;
+  sex?: undefined;
+  address?: string;
+}
+
+// 结果：{ sex?: undefined; address?: string; }
+type result = GetOptional<Person>
+```
+#### 实现方式
+```ts
+type GetOptional<T> = {
+  [P in OptionalKeys<T>]?: T[P]
+}
+```
+
 ### CapitalizeWords(所有单词首字母大写)
-### CamelCase(字符串转小驼峰)
-### ParsePrintFormat(字符串格式化内容)
+#### 用法
+`CapitalizeWords`是用来把一个字符串中所有单词，变为大写字母的，其中这个字符串以固定的分隔符分割，用法如下：
+```ts
+// 结果：'Foobar'
+type t1 = CapitalizeWords<'foobar'>
+// 结果：'Foo Bar.Hello,World'
+type t2 = CapitalizeWords<'foo bar.hello,world'>
+```
+#### 实现方式
+```ts
+type CapitalizeWords<
+  S extends string,
+  R extends string = ''
+> =  S extends `${infer left}${infer split}${infer right}`
+      ? split extends ' ' | '.' | ','
+         ? CapitalizeWords<Capitalize<right>, `${R}${left}${split}`>
+         : CapitalizeWords<right, `${R}${left}${split}`>
+      : Capitalize<`${R}${S}`>
+```
+代码详解：在以上实现方法中，我们借用辅助字符串来实现，以第二个例子为例，详细解析分析如下：
+```ts
+// 第一次迭代
+R = '' left = 'f' split = 'o' right = 'oo bar.hello,world'
+split不满足条件，递归调用
+
+// 第二次迭代
+R = 'fo' left = 'o' split = ' ' right = 'bar.hello,world'
+split满足条件，递归调用
+
+// 第三次迭代
+R = 'foo ' left = 'b' split = 'a' right = 'r.hello,world'
+split不满足条件，递归调用
+
+... 省略
+
+// 最后一次迭代
+R = 'foo Bar.Hello,Worl' S = 'd'
+S不满足条件
+
+最后结果：R + S = Capitalize<'foo Bar.Hello,worl' + 'd'> => 'Foo Bar.hello,world'
+```
+
+### CamelCase(下划线字符串转小驼峰)
+#### 用法
+与**中级**章节实现不同，此章节中`CamelCase`是用来将下划线字符串转小驼峰的，其用法如下：
+```ts
+// 结果：'fooBarHelloWorld'
+type result = CamelCase<'foo_bar_hello_world'>
+```
+#### 实现方式
+```ts
+type CamelCase<
+  S extends string
+> = S extends `${infer left}_${infer char}${infer right}`
+      ? `${Lowercase<left>}${Uppercase<char>}${CamelCase<right>}`
+      : Lowercase<S>
+```
+
+### ParsePrintFormat(获取字符串格式化参数)
+#### 用法
+`ParsePrintFormat`是用来获取字符串格式化参数的，其用法如下：
+```ts
+// 参数映射表
+type ControlMap = {
+  'c': 'char',
+  's': 'string',
+  'd': 'dec',
+  'o': 'oct',
+  'h': 'hex',
+  'f': 'float',
+  'p': 'pointer'
+}
+
+// 结果：['string', 'dec']
+type result = ParsePrintFormat<'Hello %s: score is %d'>
+```
+#### 实现方式
+```ts
+type ControlMap = {
+  'c': 'char',
+  's': 'string',
+  'd': 'dec',
+  'o': 'oct',
+  'h': 'hex',
+  'f': 'float',
+  'p': 'pointer'
+}
+
+type ParsePrintFormat<
+  S extends string,
+  R extends string[] = []
+> = S extends `${infer S1}%${infer Char}${infer S2}`
+    ? Char extends keyof ControlMap
+      ? ParsePrintFormat<S2, [...R, ControlMap[Char]]>
+      : ParsePrintFormat<S2, R>
+    : R
+```
+代码详解：在以上实现方法中，借用了辅助数组的思想，拿上面案例来说，具体迭代分析如下：
+```ts
+// 第一次迭代
+S满足条件 R = [] S1 = 'Hello ' Char = 's' S2 = ': score is %d'
+
+// 第二次迭代
+S满足条件 R = ['string']  S1 = ': score is ' Char = 'd' S2 = ''
+
+// 最后一次迭代
+S不满足条件 R = ['string', 'dec']
+
+// 结果
+result = R = ['string', 'dec']
+```
+
 ### IsAny和NotAny
+
 ### Get(字符串路径取值)
+
 ### StringToNumber(字符串数字转数字)
+
 ### FilterOut(数组元素过滤)
+
 ### TupleToEnum(元组转枚举)
+
 ### Format(字符串格式化函数类型)
+
 ### LengthOfString(字符串的长度)
+
 ### Join(字符串拼接)
+
 ### DeepPick(深层次Pick)
+
 ### Camelize(类型属性键转小驼峰)
 
 ## 地狱
