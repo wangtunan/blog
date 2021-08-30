@@ -1474,14 +1474,218 @@ result = R = ['string', 'dec']
 ```
 
 ### IsAny和NotAny
+#### 用法
+`IsAny`是用来判断一个类型是否为`any`的，`NotAny`和它做的事情相反。
+```ts
+type t1 = IsAny<undefined> // false
+type t2 = IsAny<never>     // false
+type t3 = IsAny<any>       // true
+
+type t4 = NotAny<undefined> // true
+type t5 = NotAny<never>     // true
+type t6 = NotAny<any>       // false
+```
+#### 实现方式
+```ts
+type IsAny<T> = 0 extends (1&T) ? true : false
+type NotAny<T> = true extends IsAny<T> ? false : true
+```
+代码详解：`1 & T`的结果只能是：`1`、`never`或者`any`。当使用`0 extends`这三个结果的时候，只有`any`判断为真。
+```ts
+// 结果：false
+type t1 = 0 extends 1 ? true : false
+// 结果：false
+type t2 = 0 extends never ? true : false
+// 结果：true
+type t3 = 0 extends any ? true : false
+```
 
 ### Get(字符串路径取值)
+#### 用法
+`Get`是用来进行字符串路径取值的，其用法如下：
+```ts
+type Data = {
+  foo: {
+    bar: {
+      value: 'foobar',
+      count: 6,
+    },
+    include: true,
+  },
+  hello: 'world'
+}
+
+// 结果：world
+type t1 = Get<Data, 'hello'>
+// 结果：foobar
+type t2 = Get<Data, 'foo.bar.value'>
+// 结果： never
+type t3 = Get<Data, 'no.exits'>
+```
+#### 实现方式
+```ts
+type Get<T, S extends string> =
+  S extends `${infer S1}.${infer S2}`
+    ? S1 extends keyof T
+      ? Get<T[S1], S2>
+      : never
+    : S extends keyof T
+      ? T[S]
+      : never
+```
+代码详解：对于`Get`的实现，主要分为两部分：含有`.`符号的字符串和不含`.`符号的字符串。
+* 不含有`.`符号的字符串：对于这种情况，我们只需要判断它是否为`T`类型中的某个`key`，如果是则直接取值；如果不是，则返回`never`。
+* 含有`.`符号的字符串：对于这种情况，我们先判断`.`符号左侧部分是否满足为`T`类型的某个`key`，如果满足则递归调用`Get`；如果不满足，则直接返回`never`。
 
 ### StringToNumber(字符串数字转数字)
 
+#### 用法
+`StringToNumber`是用来将字符串形式的数字转换成真正数字类型数字的，其用法如下：
+```ts
+// 结果：123
+type result = StringToNumber<'123'>
+```
+#### 实现方式
+在`JavaScript`中，我们可以很方便的调用`Number()`方法或者`parseInt()`方法来将字符串类型的数字，转换成数字类型的数字。但在`TS`中，并没有这样的方法，需要我们来手动实现。
+
+`StringToNumber`的实现并不容易理解，我们需要将其进行拆分，一步步来完善，其实现思路如下：
+* 第一步：可以很容易获取字符串`'123'`中每一位字符，我们将其存储在辅助数组`T`中，如下：
+```ts
+type StringToNumber<S extends string, T extends any[] = []> = 
+  S extends `${infer S1}${infer S2}`
+    ? StringToNumber<S2, [...T, S1]>
+    : T
+
+// 结果：['1', '2', '3']
+type result = StringToNumber<'123'>
+```
+* 第二步：我们需要将单个字符串类型的数字，转换成真正数字类型的数字，可以借助中间数组来帮忙，例如：
+```ts
+'1' => [0]['length'] => 1
+'2' => [0,0]['length'] => 2
+'3' => [0,0,0]['length'] = 3
+...
+'9' => [0,0,0,0,0,0,0,0,0]['length'] => 9
+```
+根据以上规律，我们封装一个`MakeArray`方法，它的实现代码如下：
+```ts
+type MakeArray<N extends string, T extends any[] = []> = N extends `${T['length']}` ? T : MakeArray<N, [...T, 0]>
+
+type t1 = MakeArray<'1'> // [0]
+type t2 = MakeArray<'2'> // [0, 0]
+type t3 = MakeArray<'3'> // [0, 0, 0]
+```
+* 第三步：现在有了百位，十位和个位的数字，我们应该运用算术把它们按照一定的规律累加起来，如下：
+```js
+const arr = [1, 2, 3]
+let target = 0
+
+// 第一次迭代
+target = 10 * 0 + 1 = 1
+// 第二次迭代
+target = 10 * 1 + 2 = 12
+// 第三次迭代
+target = 10 * 12 + 3 = 123
+// 迭代规律
+target = 10 * target + N
+```
+根据以上思路，我们还需要一个乘十的工具函数，对应到实际需求，就是需要把一个数组`copy`十次，因此我们封装一个`Multiply10`工具，其实现代码如下：
+```ts
+type Multiply10<T extends any[]> = [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+
+type result = Multiply10<[1]> // [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+```
+* 第四步：根据前几步的分析，把所有东西串联起来，`StringToNumber`完整实现代码如下：
+```ts
+type Digital = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
+type Multiply10<T extends any[]> = [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+type MakeArray<N extends string, T extends any[] = []> = N extends `${T['length']}` ? T : MakeArray<N, [...T, 0]>
+
+type StringToNumber<S extends string, T extends any[] = []> = 
+  S extends `${infer S1}${infer S2}`
+    ? S1 extends Digital
+      ? StringToNumber<S2, [...Multiply10<T>, ...MakeArray<S1>]>
+      : never
+    : T['length']
+```
+* 第五步：为了更好的理解递归的过程，我们拆解成如下步骤来说明：
+```ts
+type result = StringToNumber<'123'>
+
+// 第一次递归，S满足${infer S1}${infer S2}， S1满足Digital
+S = '123' S1 = '1' S2 = '23' T = [0] T['length'] = 1
+
+// 第二次递归，S满足${infer S1}${infer S2}， S1满足Digital
+S = '23'  S1 = '2' S2 = '3' T = [0,....0] T['length'] = 10
+
+// 第三次递归，S满足${infer S1}${infer S2}， S1满足Digital
+S = '3'  S1 = '3' S2 = '' T = [0,....0] T['length'] = 120
+
+// 第四次递归，S不满足${infer S1}${infer S2} T['length']取值
+S = '' T = [0,....0] T['length'] = 123
+
+// 结果：
+type result = StringToNumber<'123'> // 123
+```
+
+
 ### FilterOut(数组元素过滤)
+#### 用法
+`FilterOut`是用来从数组中移除指定元素的，其用法如下：
+```ts
+// 结果：[2]
+type result = FilterOut<[1, 'a', 2], 'a' | 1>
+```
+#### 实现方式
+```ts
+type FilterOut<
+  T extends any[],
+  F,
+  K extends any[] = []
+> = T extends [infer R, ...infer args]
+      ? [R] extends [F]
+        ? FilterOut<args, F, [...K]>
+        : FilterOut<args, F, [...K, R]>
+      : K
+```
+代码详解：
+* 第一步：我们借用赋值函数来存放最后的结果。
+* 第二步：迭代数组`T`，拿每一个元素去和指定的`F`进行判断，如果`R`是`F`的子类型，则不添加此元素到结果数组中，反之添加。
+* 第三步：当迭代完毕时，直接返回结果数组`K`。
 
 ### TupleToEnum(元组转枚举)
+#### 用法
+`TupleToEnum`是用来将元组转换为枚举的，其用法如下：
+```ts
+const OperatingSystem = ['macOs', 'Windows', 'Linux'] as const
+type Expected1 = {
+  readonly MacOs: 'macOs';
+  readonly Windows: 'Windows';
+  readonly Linux: 'Linux'
+}
+
+// 结果：Expected1
+type result1 = TupleToEnum<typeof OperatingSystem>
+```
+#### 实现方式
+在实现`TupleToEnum`之前，我们先来实现`TupleKeys`，它是用来获取所有元组索引组合成的联合类型的。
+```ts
+type TupleKeys<
+  T extends readonly any[]
+> = T extends readonly [infer R, ...infer args]
+      ? TupleKeys<args> | args['length']
+      : never
+
+// 结果：0 | 1 | 2
+type keys = TupleKeys<typeof OperatingSystem>
+```
+在有了以上`keys`后，我们就能实现`TupleToEnum`了，如下：
+```ts
+type TupleToEnum<T extends readonly string[]> = {
+  readonly [K in TupleKeys<T> as Capitalize<T[K]>]: T[K]
+}
+```
+
 
 ### Format(字符串格式化函数类型)
 
