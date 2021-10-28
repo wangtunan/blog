@@ -130,7 +130,7 @@ module.exports = {
   }
 }
 ```
-如果你对`Tree Shaking`还不是特别理解，请点击[Tree Shaking](/webpack/#tree-shaking)阅读更多。
+如果你对`Tree Shaking`还不是特别理解，请点击[Tree Shaking](/webpack/webpack/advanced.html#tree-shaking)阅读更多。
 
 ## DllPlugin减少第三方库的编译次数
 对于有些固定的第三方库，因为它是固定的，我们每次打包，Webpack 都会对它们的代码进行分析，然后打包。那么有没有什么办法，让我们只打包一次，后面的打包直接使用第一次的分析结果就行。答案当然是有的，我们可以使用 Webpack 内置的`DllPlugin`来解决这个问题，解决这个问题可以分如下的步骤进行：
