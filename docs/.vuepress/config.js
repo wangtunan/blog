@@ -66,7 +66,10 @@ module.exports = {
       },
       {
         text: 'Vue源码分析',
-        link: '/vueAnalysis/introduction/'
+        items: [
+          { text: 'Vue2.0源码分析', link: '/vueAnalysis/introduction/' },
+          { text: 'Vue3.0源码分析', link: '/vueNextAnalysis/introduction/' }
+        ]
       },
       {
         text: '自动化测试',

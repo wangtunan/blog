@@ -2,7 +2,7 @@
 记录个人博客，见证成长之路 <br/>
 
 Github博客地址：https://wangtunan.github.io/blog/ <br/>
-Gitee国内镜像：http://wangtunan.gitee.io/blog/ <br/>
+Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 
 ## 面试
 [前端面试之道](https://wangtunan.github.io/blog/interview/)

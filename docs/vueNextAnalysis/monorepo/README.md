@@ -1,2 +1,2 @@
 # Monorepo
-lerna monorepo介绍
+monorepo介绍
