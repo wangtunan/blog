@@ -1,11 +1,13 @@
 const nav = require('./utils/nav.js')
+const { ua }  = require('./ua.js')
 const { webpackSidebar, vueAnalysisSidebar, vueNextAnalysisSidebar } = nav
 module.exports = {
   title: '汪图南',
   description: '汪图南的个人博客',
   base: '/blog/',
   head: [
-    ['link', { rel: 'icon', href: '/icon.png' }]
+    ['link', { rel: 'icon', href: '/icon.png' }],
+    [...ua]
   ],
   port: 3000,
   markdown: {
@@ -122,10 +124,5 @@ module.exports = {
         '@components': '../.vuepress/components'
       }
     }
-  },
-  plugins: [
-    "@kaokei/vuepress-plugin-tongji", {
-      hm: '1876f64fd31c9aba1a7a5e157813a075'
-    }
-  ]
+  }
 }

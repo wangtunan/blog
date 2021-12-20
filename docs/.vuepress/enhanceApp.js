@@ -1,12 +1,15 @@
 import Vue from 'vue'
-export default ({
-  Vue,
-  options, 
-  router,
-  siteData
-}) => {
+export default ({router}) => {
   // 把components下的所有.vue文件全局注册
   Register()
+
+  // UA统计
+  router.afterEach(function (to) {
+    const fullPath = router.app.$withBase(to.fullPath);
+    if (typeof _hmt !== 'undefined' && fullPath) {
+      _hmt.push(["_trackPageview", fullPath]);
+    }
+  });
 }
 
 function Register () {

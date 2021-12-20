@@ -13,8 +13,5 @@
   ],
   "dependencies": {
     "element-ui": "^2.10.0"
-  },
-  "devDependencies": {
-    "@kaokei/vuepress-plugin-tongji": "^1.0.2"
   }
 }
