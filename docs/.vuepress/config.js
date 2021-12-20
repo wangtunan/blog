@@ -122,5 +122,10 @@ module.exports = {
         '@components': '../.vuepress/components'
       }
     }
-  }
+  },
+  plugins: [
+    "@kaokei/vuepress-plugin-tongji", {
+      hm: '1876f64fd31c9aba1a7a5e157813a075'
+    }
+  ]
 }
