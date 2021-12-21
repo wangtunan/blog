@@ -4,12 +4,15 @@ export default ({router}) => {
   Register()
 
   // UA统计
-  router.afterEach(function (to) {
-    const fullPath = router.app.$withBase(to.fullPath);
-    if (typeof _hmt !== 'undefined' && fullPath) {
-      _hmt.push(["_trackPageview", fullPath]);
-    }
-  });
+  const isProduction = process.env.NODE_ENV === 'production'
+  if (isProduction) {
+    router.afterEach(function (to) {
+      const fullPath = router.app.$withBase(to.fullPath);
+      if (typeof _hmt !== 'undefined' && fullPath) {
+        _hmt.push(["_trackPageview", fullPath]);
+      }
+    });
+  }
 }
 
 function Register () {
