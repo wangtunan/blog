@@ -379,8 +379,9 @@ module.exports = require('./dist/shared.cjs.js')
 ```json
 {
   "name": "@MyVue/reactivity",
-  "main": "index.js",                // UMD规范导出
-  "module": "dist/reactivity.esm.js" // ESM规范导出
+  "main": "index.js",                 // UMD规范导出
+  "module": "dist/reactivity.esm.js", // ESM规范导出
+  "unpkg": "dist/reactivity.js"       // UMD规范配合CDN
 }
 ```
 在所有`package.json`文件配置好后，此时项目完整目录如下：
