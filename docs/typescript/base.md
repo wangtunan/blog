@@ -449,8 +449,8 @@ type typeObj = {
 }
 const value1: combineType = 123
 const obj: typeObj = {
-  age: 123;
-  name: 'why';
+  age: 123,
+  name: 'why'
 }
 
 ```

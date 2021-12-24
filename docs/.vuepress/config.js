@@ -38,10 +38,6 @@ module.exports = {
                 link: '/books/javascript/know-down'
               },
               {
-                text: 'JavaScript高级程序设计',
-                link: '/books/javascript/red-book'
-              },
-              {
                 text: 'JavaScript数据结构和算法',
                 link: '/books/javascript/algorithm'
               },

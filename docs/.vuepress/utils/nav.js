@@ -167,6 +167,31 @@ const vueNextAnalysisSidebar = [
     title: '源码目录',
     collapsable: false,
     children: ['catalog/']
+  },
+  {
+    title: '响应式原理',
+    collapsable: false,
+    children: [
+      'reactivity/',
+      'reactivity/base',
+      'reactivity/ref',
+      'reactivity/reactive',
+      'reactivity/computed',
+      'reactivity/readonly'
+    ]
+  },
+  {
+    title: '组件化',
+    collapsable: false,
+    children: [
+      'component/',
+      'component/createApp',
+      'component/setup',
+      'component/mount',
+      'component/lifecycle',
+      'component/register',
+      'component/render'
+    ]
   }
 ]
 
