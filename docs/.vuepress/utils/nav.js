@@ -156,7 +156,7 @@ const vueNextAnalysisSidebar = [
     ]
   },
   {
-    title: 'Monorepo和rollup',
+    title: 'Monorepo和Rollup',
     collapsable: false,
     children: [
       'monorepo/',

@@ -7,19 +7,19 @@ sidebar: auto
 ## 介绍
 在学习完`TypeScript`一些基础知识后，我们已经可以熟练使用一些基本类型定义了，但对于`TypeScript`的高级用法却依旧无法入门，为了更有趣的学习`TypeScript`高级用法，我们选择[Type-Challenges](https://github.com/type-challenges/type-challenges/blob/master/README.zh-CN.md)类型挑战来作为我们学习的目标。
 
-在`Type-Challenges`中，我们可以从`简单`、`中等`、`困难`以及`地狱`难度，循序渐进的学习`TypeScript`高级技巧。
+在`Type-Challenges`中，可以从`简单`、`中等`、`困难`以及`地狱`难度，循序渐进的学习`TypeScript`高级技巧。
 
-如果你需要选择其他的方向来深入学习高级技巧，这里也有一些推荐的开源项目：
-* 官方内置：在`lib.es5.d.ts`文件中，官方默认内置的一些辅助工具函数，例如：`Partial`、`Required`、`Pick`以及`Record`等等。
+如果你需要选择其他的方向来深入学习`TypeScript`高级技巧，这里也有一些推荐的开源项目：
+* 官方内置：在`lib.es5.d.ts`文件中，`TypeScript`官方默认内置的一些辅助工具函数，例如：`Partial`、`Required`、`Pick`以及`Record`等等。
 * 非官方开源库：[utility-types](https://github.com/piotrwitek/utility-types)、[ts-toolbelt](https://github.com/millsp/ts-toolbelt)、[SimplyTyped](https://github.com/andnp/SimplyTyped)
 
-在之后的挑战中，我们会尽力对每道题进行必要的讲解，力争在进行`Type-Challenges`类型挑战时收益最大化。
+在之后的挑战中，我们会尽力对每道题进行必要的讲解，力争在进行`Type-Challenges`类型挑战时弄清楚所有涉及到的知识点。
 
 ## 核心知识点
 
 ### 加号和减号
 ::: tip
-加号和减号的用法类似，不赘述，只介绍减号。
+加号和减号的用法类似。
 :::
 在一些内置工具中，可能会出现`+`或者`-`这些符号，例如：
 ```ts
@@ -34,7 +34,7 @@ type Person = {
 // 结果：{ name: string; age: number; }
 type result = Required<Person>
 ```
-观察结果我们可以知道，`-?`是去掉类型中属性后面的`?`，整个`Required`的实际效果是去掉`T`类型中所有属性键后面的`?`，让所有属性变成必填的。
+观察以上结果可以得出结论：`-?`是去掉类型中属性后面的`?`，整个`Required`的实际效果是去掉`T`类型中所有属性键后面的`?`，让所有属性变成必填的。
 
 ### keyof 和 in
 `keyof`和`in`经常会连在一起使用，当它们连在一起使用时，通常表示一个迭代的过程。
@@ -60,7 +60,6 @@ in 'name' | 'age' | 'sex'
 'age'  // 第二次迭代结果
 'sex'  // 第三次迭代结果
 ```
-`TS`中的`in`操作符原理，跟`JavaScript`中的`for in`遍历有点类似。
 
 根据`keyof`和`in`的特点，我们可以撰写一些辅助工具，这里以`Readonly`为例。
 ```ts
@@ -105,9 +104,12 @@ type t2 = typeof obj
 ### never
 `never`类型表示永远不会有值的一种类型。
 
-如果一个函数抛出了一个错误，那么这个函数就可以用`never`来表示其返回值，如下：
+如果一个函数抛出了一个错误，那么这个函数就可以用`never`或者`void`来表示其返回值，如下：
 ```ts
 function handlerError(message: string): never {
+  throw new Error(message)
+}
+function handlerError(message: string): void {
   throw new Error(message)
 }
 ```
@@ -116,7 +118,6 @@ function handlerError(message: string): never {
 ```ts
 // 定义
 type test = 'name' | 'age' | never
-
 // 实际
 type test = 'name' | 'age'
 ```
@@ -132,7 +133,6 @@ U extends keyof T
 ```
 `keyof T`是一个整体，它表示一个联合类型。`U extends Union`这一整段表示`U`的类型被收缩在一个联合类型的范围内。
 
-这样做的实际表现为：第二个参数传递的字符串只能是`T`键名中的一个，传递不存在的键名会报错。
 #### 条件类型
 常见的条件类型表现形式如下：
 ```ts
@@ -140,10 +140,10 @@ T extends U ? 'Y' : 'N'
 ```
 我们发现条件类型有点像`JavaScript`中的三元表达式，事实上它们的工作原理是类似的，例如：
 ```ts
-type res1 = true extends boolean ? true : false // true
-type res2 = 'name' extends 'name'|'age' ? true : false // true
+type res1 = true extends boolean ? true : false                  // true
+type res2 = 'name' extends 'name'|'age' ? true : false           // true
 type res3 = [1, 2, 3] extends { length: number; } ? true : false // true
-type res4 = [1, 2, 3] extends Array<number> ? true : false // true
+type res4 = [1, 2, 3] extends Array<number> ? true : false       // true
 ```
 在条件类型中，有一个特别需要注意的东西就是：**分布式条件类型**，如下：
 ```ts
@@ -157,11 +157,10 @@ type type2 = 'name'|'address'|'sex'
 type test = Extract<type1, type2>
 
 // 推理步骤
-'name'|'age' extends 'name'|'address'|'sex' ? 'name'|'age' : never
-=> ('name' extends 'name'|'address'|'sex' ? 'name' : never) |
-   ('age' extends 'name'|'address'|'sex' ? 'age' : never)
-=> 'name' | never
-=> 'name'
+'name'|'age' extends 'name'|'address'|'sex' ? T : never
+step1： ('name' extends 'name'|'address'|'sex' ? 'name' : never) => 'name'
+step2:  ('age' extends 'name'|'address'|'sex' ? 'age' : never)   => never
+result: 'name' | never => 'name'
 ```
 代码详解：
 * `T extends U ? T : never`：因为`T`是一个联合类型，所以这里适用于**分布式条件类型**的概念。根据其概念，在实际的过程中会把`T`类型中的每一个子类型进行迭代，如下：
@@ -180,7 +179,7 @@ type result = 'name' | never => 'name'
 
 `infer`关键词的作用是延时推导，它会在类型未推导时进行占位，等到真正推导成功后，它能准确的返回正确的类型。
 
-为了更好的理解infer关键词的用法，我们使用ReturnType这个例子来说明，`ReturnType`是一个用来获取函数返回类型的工具。
+为了更好的理解`infer`关键词的用法，我们使用`ReturnType`这个例子来说明，`ReturnType`是一个用来获取函数返回类型的工具。
 
 ```ts
 type ReturnType<T> = T extends (...args: any) => infer R ? R : never
