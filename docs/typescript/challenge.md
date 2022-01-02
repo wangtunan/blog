@@ -231,7 +231,7 @@ const resutl = merge(obj1, obj2)
 
 ### Partial(可填)和Required(必填)
 #### 用法
-`Partial`和`Required`一个是让所有类型可填、另外一个是让所有类型必填，用法如下：
+`Partial`和`Required`一个是让所有属性可填、另外一个是让所有属性必填，用法如下：
 ```ts
 type Person = {
   name: string;
@@ -406,7 +406,7 @@ type Person = {
   address: string;
 }
 
-// 结果：{ age:number;address:string; }
+// 结果：'age'|'address'
 type ExtractResult = Extract<keyof Person, 'age'|'address'|'sex'>
 ```
 #### 实现方式
@@ -430,7 +430,7 @@ T extends U
 #### 用法
 `TupleToObject<T>`是用来把一个元组转换成一个`key/value`相同的对象，例如：
 ```ts
-type tuple = ['msg', 'name'] as const
+const tuple = ['msg', 'name'] as const
 // 结果：{ msg: 'msg'; name: 'name'; }
 type result = TupleToObject<typeof tuple>
 ```
@@ -442,7 +442,7 @@ type TupleToObject<T extends readonly any[]> = {
 ```
 代码详解：
 * `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素，可以使用`as readonly`来辅助理解。
-* `T[number]`：表示返回所有数字型索引的元素，形成的一个联合类型，例如：`'msg'|'name'`。
+* `T[number]`：表示返回所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
 
 ### First(数组第一个元素)
 #### 用法
@@ -455,11 +455,16 @@ type result2 = First<[]>
 ```
 #### 实现方式
 ```ts
+// 索引实现方式
 type First<T extends any[]> = T extends [] ? never : T[0]
+// 占位实现方式
+type First<T extends any[]> = T extends [infer R, ...infer L] ? R : never
 ```
 代码详解：
 * `T extends []`：用来判断`T`是否是一个空数组。
 * `T[0]`：根据下标取数组第一个元素。
+* `infer R`： 表示数组第一个元素的占位。
+* `...infer L`: 表示数组剩余元素的占位。
 
 
 ### Length(元组的长度)
@@ -496,7 +501,7 @@ type ReturnType<T> = T extends (...args: any) => infer R ? R : never
 ```
 代码详解：
 * `T extends (...args: any) => infer R`：判断`T`类型是否是一个函数的子类型，既`T`是不是一个函数。
-* `infer R`：表示待推导的函数返回类型为`R`，后续可以在表达式中使用`R`来代替真正的返回类型，知识点[infer](#infer)
+* `infer R`：表示待推导的函数返回类型为`R`，后续可以在表达式中使用`R`来代替真正的返回类型。
 
 ### PromiseType(promise包裹类型)
 #### 用法
@@ -525,7 +530,7 @@ type PromiseType<T> = T extends Promise<infer R> ? R : never
 ```ts
 // 结果：'a'
 type result1 = If<true, 'a', 'b'>
-// 结果：‘b’
+// 结果：'b'
 type result2 = If<false, 'a', 'b'>
 ```
 根据上案例，我们可以直观的发现`If<C, T, F>`的作用有点类似`JavaScript`中的三元表达式：`C ? T : F`。
@@ -539,7 +544,7 @@ type If<C extends boolean, T, F> = C extends true ? T : F
 
 ### Concat(数组concat方法)
 #### 用法
-`Concat<T, U>`用来实现讲两个数组合并起来，类似实现数组的`concat`方法，使用方式如下：
+`Concat<T, U>`用来将两个数组合并起来，类似实现数组的`concat`方法，使用方式如下：
 ```ts
 // 结果：[1, 2, 3, 4]
 type result = Concat<[1, 2], [3, 4]>
@@ -549,12 +554,12 @@ type result = Concat<[1, 2], [3, 4]>
 type Concat<T extends any[], U extends any[]> = [...T, ...U]
 ```
 代码详解：
-* `T extends any[]`：用来限制`T`是一个数字，如果传递非数组会报错，`U`也是一样的道理。
-* `[...T, ...U]`：我们可以理解成`JavaScript`的扩展运算符`...`。
+* `T extends any[]`：用来限制`T`是一个数组，如果传递非数组会报错，`U`也是一样的道理。
+* `[...T, ...U]`：可以理解成`JavaScript`的扩展运算符`...`。
 
 ### Includes(数组includes方法)
 #### 用法
-`Includes<T, U>`用来判断`U`是否在在数组`T`中，类似实现数组的`includes`方法，用法如下：
+`Includes<T, U>`用来判断`U`是否在数组`T`中，类似实现数组的`includes`方法，用法如下：
 ```ts
 // 结果：true
 type result1 = Includes<[1, 2, 3], 1>
@@ -563,11 +568,24 @@ type result2 = Includes<[1, 2, 3], '1'>
 ```
 #### 实现方式
 ```ts
-type Includes<T extends any [], U> = U extends T[number] ? true : false
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+
+// 简单版
+type MyIncludes<T extends readonly any[], U> = U extends T[number] ? true : false
+// 完善版
+type MyIncludes<T extends readonly any[], U> = 
+  T extends [infer R, ...infer L]
+    ? Equal<R, U> extends true
+      ? true
+      : MyIncludes<L, U>
+    : false
 ```
 代码详解：
 * `T[number]`：它返回数组中所有数字类型键对应的值，将这些值构造成一个联合类型，例如：`1 | 2 | 3`。
 * `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1 | 2 | 3`。
+* `Equal`：是用来判断两个值是否相等的辅助方法。
 
 ## 中级
 ### Readony(按需Readonly)
