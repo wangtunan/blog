@@ -524,6 +524,19 @@ type PromiseType<T> = T extends Promise<infer R> ? R : never
 代码详解：
 * `T extends Promise<infer R>`：判断`T`是否是`Promise<infer R>`的子类型，也就是说`T`必须满足`Promise<any>`的形式。
 
+### Parameters(函数的参数类型)
+#### 用法
+`Parameters`是用来获取一个函数的参数类型的，其中获取的结果是一个元组，用法如下：
+```ts
+const add = (a: number, b: string): void => {}
+// [number, string]
+type result = MyParameters<typeof add>
+```
+#### 实现方式
+```ts
+type MyParameters<T extends (...args: any[]) => any> = T extends (...args: infer R) => any ? R : never
+```
+
 ### If(判断)
 #### 用法
 `If<C, T, F>`用来表示根据`C`的值来返回`T`或者`F`，如果`C`为`true`，则返回`T`；如果`C`为`false`，则返回`F`，例如：
@@ -625,13 +638,12 @@ obj.completed = false // error
 ```
 #### 使用方式
 ```ts
-type Readonly<T, K extends keyof T = any> = T & {
-  readonly [P in keyof T as P extends K ? P : never]: T[P]
+type Readonly<T, K extends keyof T = keyof T> = T & {
+  readonly [P in K]: T[P]
 }
 ```
 代码详解：
-* `K extends keyof T = any`：如要传递了`K`，那么只能是`T`中已经存在的属性，不存在则报错；如果不传递，则默认值为`any`，意味着全部属性都添加`readonly`。
-* `as`：`T as U`表示对于`T`进行进一步的**加工/判断**，在此处具体表现为：我们只对指定字段进行迭代并添加`readonly`关键词。
+* `K extends keyof T = keyof T`：如要传递了`K`，那么只能是`T`中已经存在的属性，不存在则报错；如果不传递，则默认值为`keyof T`，意味着全部属性都添加`readonly`。
 * `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`，那么就丢失一些属性，例如`title`。
 
 ### DeepReadonly(深度Readonly)
