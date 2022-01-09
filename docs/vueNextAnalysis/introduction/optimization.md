@@ -55,7 +55,7 @@
 
 如果你想知道哪些API被废弃了，可以点击[Vue3迁移指南](https://v3.cn.vuejs.org/guide/migration/introduction.html)去了解更多。
 
-在`Vue3`中，其引入了`tree-shaking`技术，它依赖于`ES Model`模块规范，当那些没有使用`import`引入的代码，在打包到正式环境时会被压缩工具剔除掉。例如：如果我们在项目中没有使用`transition`这个内置组件，那么`transition`相关的代码就不会被打包到我们的项目中，这在`Vue2`中是办不到的。
+在`Vue3`中，其引入了`tree-shaking`技术，它依赖于`ES Module`模块规范，当那些没有使用`import`引入的代码，在打包到正式环境时会被压缩工具剔除掉。例如：如果我们在项目中没有使用`transition`这个内置组件，那么`transition`相关的代码就不会被打包到我们的项目中，这在`Vue2`中是办不到的。
 
 ### 数据劫持优化
 数据劫持优化体现在新版`Vue`采用`Proxy`，和`Object.defineProperty()`相比，它有如下几个特点：

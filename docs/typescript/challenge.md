@@ -636,7 +636,7 @@ obj.title = 'aaa'
 obj.desc = '32' // error
 obj.completed = false // error
 ```
-#### 使用方式
+#### 实现方式
 ```ts
 type Readonly<T, K extends keyof T = keyof T> = T & {
   readonly [P in K]: T[P]
