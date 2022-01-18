@@ -228,31 +228,32 @@ const resutl = merge(obj1, obj2)
 ```
 
 ## 初级
-
-### Partial(可填)和Required(必填)
+### Pick(选取)
 #### 用法
-`Partial`和`Required`一个是让所有属性可填、另外一个是让所有属性必填，用法如下：
+`Pick`表示从一个类型中选取指定的几个字段组合成一个新的类型，用法如下：
 ```ts
 type Person = {
   name: string;
-  age?: number;
+  age: number;
+  address: string;
+  sex: number;
 }
-
-// 结果: { name?: string; age?: number; }
-type PartialResult = MyPartial<Person>
-
-// 结果: { name: string; age: number; }
-type RequiredResult = MyRequired<Person> 
+// 结果: { name: string; address: string; }
+type PickResult = Pick<Person, 'name' | 'address'>
 ```
 #### 实现方式
 ```ts
-type MyPartial<T> = {
-  [P in keyof T]?: T[P]
-}
-type MyRequired<T> = {
-  [P in keyof T]-?: T[P]
+type MyPick<T, K extends keyof T> = {
+  [P in K]: T[P]
 }
 ```
+代码详解：
+* `K extends keyof T`：表示`K`只能是`keyof T`的子类型，如果我们在使用`Pick`的时候传递了不存在于`T`的字段，会报错：
+```ts
+// 报错：phone无法分配给keyof T
+type result = MyPick<Person, 'name' | 'phone'>
+```
+
 
 ### Readonly(只读)和Mutable(可改)
 #### 用法
@@ -281,31 +282,62 @@ type MyMutable<T> = {
 代码解读：
 * `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的.
 
-### Pick(选取)
+### TupleToObject(元组转对象)
 #### 用法
-`Pick`表示从一个类型中选取指定的几个字段组合成一个新的类型，用法如下：
+`TupleToObject<T>`是用来把一个元组转换成一个`key/value`相同的对象，例如：
 ```ts
-type Person = {
-  name: string;
-  age: number;
-  address: string;
-  sex: number;
-}
-// 结果: { name: string; address: string; }
-type PickResult = Pick<Person, 'name' | 'address'>
+const tuple = ['msg', 'name'] as const
+// 结果：{ msg: 'msg'; name: 'name'; }
+type result = TupleToObject<typeof tuple>
 ```
 #### 实现方式
 ```ts
-type MyPick<T, K extends keyof T> = {
-  [P in K]: T[P]
+type TupleToObject<T extends readonly any[]> = {
+  [P in T[number]]: P
 }
 ```
 代码详解：
-* `K extends keyof T`：表示`K`只能是`keyof T`的子类型，如果我们在使用`Pick`的时候传递了不存在于`T`的字段，会报错：
+* `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素，可以使用`as readonly`来辅助理解。
+* `T[number]`：表示返回所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
+
+### First(数组第一个元素)
+#### 用法
+`First<T>`用来返回数组的第一个元素，用法如下：
 ```ts
-// 报错：phone无法分配给keyof T
-type result = MyPick<Person, 'name' | 'phone'>
+// 结果：3
+type result1 = First<[3, 2, 1]>
+// 结果：never
+type result2 = First<[]>
 ```
+#### 实现方式
+```ts
+// 索引实现方式
+type First<T extends any[]> = T extends [] ? never : T[0]
+// 占位实现方式
+type First<T extends any[]> = T extends [infer R, ...infer L] ? R : never
+```
+代码详解：
+* `T extends []`：用来判断`T`是否是一个空数组。
+* `T[0]`：根据下标取数组第一个元素。
+* `infer R`： 表示数组第一个元素的占位。
+* `...infer L`: 表示数组剩余元素的占位。
+
+### Length(元组的长度)
+#### 用法
+`Length<T>`用来获取一个数组(包括类数组)的长度，用法如下：
+```ts
+// 结果：3
+type result1 = Length<[1, 2, 3]>
+// 结果：10
+type result2 = Length<{ 5: '5', length: 10 }>
+```
+#### 实现方式
+```ts
+type Length<T extends any> = T extends { length: number; } ? T['length'] : never
+```
+代码详解：
+* `T extends { length: number; }`：判断`T`是否是`{ length: number; }`的子类型，如果是则代表`T`为数组或者类数组。
+* `T['length']`：取`T`对象的`length`属性的值(注意，在`TypeScript`中不能使用`T.length`来取值，而应该使用`T['length']`)。
 
 ### Exclude(排除)
 #### 用法
@@ -330,28 +362,160 @@ T extends U
 => 'name'|'age'
 ```
 
-### Omit(移除)
+### PromiseType(promise包裹类型)
 #### 用法
-`Omit`是移除的意思，它用来在`T`类型中移除指定的字段，用法如下：
+`PromiseType`是用来获取`Promise`包裹类型的，例如：
 ```ts
-type Person = {
-  name?: string;
-  age: number;
-  address: string;
+function getInfo (): Promise<string|number> {
+  return Promise.resolve(1)
 }
-
-// 结果：{ name？: string; age: number; }
-type OmitResult = Omit<Person, 'address'>
+// 结果：(） => Promise<string|number>
+type funcType = typeof getInfo
+// 结果：Promise<string|number>
+type returnResult = ReturnType<funcType>
+// 结果：string|number
+type PromiseResult = PromiseType<returnResult>
 ```
 #### 实现方式
-`Omit`可以借助在上面已经实现过的`Pick`和`Exclude`配合来实现，如下：
 ```ts
-// Omit实现
-type MyOmit<T, K> = MyPick<T, MyExclude<keyof T, K>>
+type PromiseType<T> = T extends Promise<infer R> ? R : never
 ```
 代码详解：
-* 使用`MyExclude<keyof T, K>`，可以从`T`中移除指定的字段，移除后得到一个新的联合类型：`'name'|'age'`
-* 使用`MyPick<T, 'name'|'age'>`，可以从`T`中选取这两个字段，组合成一个新的类型。
+* `T extends Promise<infer R>`：判断`T`是否是`Promise<infer R>`的子类型，也就是说`T`必须满足`Promise<any>`的形式。
+
+### If(判断)
+#### 用法
+`If<C, T, F>`用来表示根据`C`的值来返回`T`或者`F`，如果`C`为`true`，则返回`T`；如果`C`为`false`，则返回`F`，例如：
+```ts
+// 结果：'a'
+type result1 = If<true, 'a', 'b'>
+// 结果：'b'
+type result2 = If<false, 'a', 'b'>
+```
+根据上案例，我们可以直观的发现`If<C, T, F>`的作用有点类似`JavaScript`中的三元表达式：`C ? T : F`。
+#### 实现方式
+```ts
+type If<C extends boolean, T, F> = C extends true ? T : F
+```
+代码详解：
+* `C extends boolean`：表示`C`为`boolean`类型的子类型，既`C`只能为`true`或者`false`，传递其它值报错。
+* `C extends true`：如果用`JavaScript`来表示的话，相当于`C===true`.
+
+### Concat(数组concat方法)
+#### 用法
+`Concat<T, U>`用来将两个数组合并起来，类似实现数组的`concat`方法，使用方式如下：
+```ts
+// 结果：[1, 2, 3, 4]
+type result = Concat<[1, 2], [3, 4]>
+```
+#### 实现方式
+```ts
+type Concat<T extends any[], U extends any[]> = [...T, ...U]
+```
+代码详解：
+* `T extends any[]`：用来限制`T`是一个数组，如果传递非数组会报错，`U`也是一样的道理。
+* `[...T, ...U]`：可以理解成`JavaScript`的扩展运算符`...`。
+
+### Includes(数组includes方法)
+#### 用法
+`Includes<T, U>`用来判断`U`是否在数组`T`中，类似实现数组的`includes`方法，用法如下：
+```ts
+// 结果：true
+type result1 = Includes<[1, 2, 3], 1>
+// 结果：false
+type result2 = Includes<[1, 2, 3], '1'>
+```
+#### 实现方式
+```ts
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+
+// 简单版
+type MyIncludes<T extends readonly any[], U> = U extends T[number] ? true : false
+// 完善版
+type MyIncludes<T extends readonly any[], U> = 
+  T extends [infer R, ...infer L]
+    ? Equal<R, U> extends true
+      ? true
+      : MyIncludes<L, U>
+    : false
+```
+代码详解：
+* `T[number]`：它返回数组中所有数字类型键对应的值，将这些值构造成一个联合类型，例如：`1 | 2 | 3`。
+* `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1 | 2 | 3`。
+* `Equal`：是用来判断两个值是否相等的辅助方法。
+
+### Push(数组push方法)
+#### 用法
+```ts
+// 结果：[1, 2, 3, 4]
+type result = Push<[1, 2, 3], 4>
+```
+
+#### 实现方式
+```ts
+// Push实现
+type Push<T extends any[], K> = [...T, K]
+```
+
+### Shift和Unshift
+与`pop`和`push`方法相似的另外一对方法叫`shift`和`unshift`，它们的实现思路是一样的。
+#### 用法
+```ts
+// Shift结果：[2, 3]
+type shiftResult = Shift<[1, 2, 3]>
+
+// Unshift结果：[0, 1, 2, 3]
+type unshiftResult = Unshift<[1, 2, 3], 0>
+```
+#### 使用方式
+```ts
+// Shift实现
+type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
+
+// Unshift实现
+type Unshift<T extends any[], K> = [K, ...T]
+```
+
+### Parameters(函数的参数类型)
+#### 用法
+`Parameters`是用来获取一个函数的参数类型的，其中获取的结果是一个元组，用法如下：
+```ts
+const add = (a: number, b: string): void => {}
+// [number, string]
+type result = MyParameters<typeof add>
+```
+#### 实现方式
+```ts
+type MyParameters<T extends (...args: any[]) => any> = T extends (...args: infer R) => any ? R : never
+```
+
+### Partial(可填)和Required(必填)
+#### 用法
+`Partial`和`Required`一个是让所有属性可填、另外一个是让所有属性必填，用法如下：
+```ts
+type Person = {
+  name: string;
+  age?: number;
+}
+
+// 结果: { name?: string; age?: number; }
+type PartialResult = MyPartial<Person>
+
+// 结果: { name: string; age: number; }
+type RequiredResult = MyRequired<Person> 
+```
+#### 实现方式
+```ts
+type MyPartial<T> = {
+  [P in keyof T]?: T[P]
+}
+type MyRequired<T> = {
+  [P in keyof T]-?: T[P]
+}
+```
+
 
 ### Record(构造)
 #### 用法
@@ -426,64 +590,24 @@ T extends U
 => 'age'|'address'
 ```
 
-### TupleToObject(元组转对象)
-#### 用法
-`TupleToObject<T>`是用来把一个元组转换成一个`key/value`相同的对象，例如：
-```ts
-const tuple = ['msg', 'name'] as const
-// 结果：{ msg: 'msg'; name: 'name'; }
-type result = TupleToObject<typeof tuple>
-```
-#### 实现方式
-```ts
-type TupleToObject<T extends readonly any[]> = {
-  [P in T[number]]: P
-}
-```
-代码详解：
-* `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素，可以使用`as readonly`来辅助理解。
-* `T[number]`：表示返回所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
-
-### First(数组第一个元素)
-#### 用法
-`First<T>`用来返回数组的第一个元素，用法如下：
-```ts
-// 结果：3
-type result1 = First<[3, 2, 1]>
-// 结果：never
-type result2 = First<[]>
-```
-#### 实现方式
-```ts
-// 索引实现方式
-type First<T extends any[]> = T extends [] ? never : T[0]
-// 占位实现方式
-type First<T extends any[]> = T extends [infer R, ...infer L] ? R : never
-```
-代码详解：
-* `T extends []`：用来判断`T`是否是一个空数组。
-* `T[0]`：根据下标取数组第一个元素。
-* `infer R`： 表示数组第一个元素的占位。
-* `...infer L`: 表示数组剩余元素的占位。
 
 
-### Length(元组的长度)
-#### 用法
-`Length<T>`用来获取一个数组(包括类数组)的长度，用法如下：
-```ts
-// 结果：3
-type result1 = Length<[1, 2, 3]>
-// 结果：10
-type result2 = Length<{ 5: '5', length: 10 }>
-```
-#### 实现方式
-```ts
-type Length<T extends any> = T extends { length: number; } ? T['length'] : never
-```
-代码详解：
-* `T extends { length: number; }`：判断`T`是否是`{ length: number; }`的子类型，如果是则代表`T`为数组或者类数组。
-* `T['length']`：取`T`对象的`length`属性的值(注意，在`TypeScript`中不能使用`T.length`来取值，而应该使用`T['length']`)。
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 中级
 
 ### ReturnType(函数返回类型)
 #### 用法
@@ -503,104 +627,30 @@ type ReturnType<T> = T extends (...args: any) => infer R ? R : never
 * `T extends (...args: any) => infer R`：判断`T`类型是否是一个函数的子类型，既`T`是不是一个函数。
 * `infer R`：表示待推导的函数返回类型为`R`，后续可以在表达式中使用`R`来代替真正的返回类型。
 
-### PromiseType(promise包裹类型)
+### Omit(移除)
 #### 用法
-`PromiseType`是用来获取`Promise`包裹类型的，例如：
+`Omit`是移除的意思，它用来在`T`类型中移除指定的字段，用法如下：
 ```ts
-function getInfo (): Promise<string|number> {
-  return Promise.resolve(1)
+type Person = {
+  name?: string;
+  age: number;
+  address: string;
 }
-// 结果：(） => Promise<string|number>
-type funcType = typeof getInfo
-// 结果：Promise<string|number>
-type returnResult = ReturnType<funcType>
-// 结果：string|number
-type PromiseResult = PromiseType<returnResult>
+
+// 结果：{ name？: string; age: number; }
+type OmitResult = Omit<Person, 'address'>
 ```
 #### 实现方式
+`Omit`可以借助在上面已经实现过的`Pick`和`Exclude`配合来实现，如下：
 ```ts
-type PromiseType<T> = T extends Promise<infer R> ? R : never
+// Omit实现
+type MyOmit<T, K> = MyPick<T, MyExclude<keyof T, K>>
 ```
 代码详解：
-* `T extends Promise<infer R>`：判断`T`是否是`Promise<infer R>`的子类型，也就是说`T`必须满足`Promise<any>`的形式。
+* 使用`MyExclude<keyof T, K>`，可以从`T`中移除指定的字段，移除后得到一个新的联合类型：`'name'|'age'`
+* 使用`MyPick<T, 'name'|'age'>`，可以从`T`中选取这两个字段，组合成一个新的类型。
 
-### Parameters(函数的参数类型)
-#### 用法
-`Parameters`是用来获取一个函数的参数类型的，其中获取的结果是一个元组，用法如下：
-```ts
-const add = (a: number, b: string): void => {}
-// [number, string]
-type result = MyParameters<typeof add>
-```
-#### 实现方式
-```ts
-type MyParameters<T extends (...args: any[]) => any> = T extends (...args: infer R) => any ? R : never
-```
 
-### If(判断)
-#### 用法
-`If<C, T, F>`用来表示根据`C`的值来返回`T`或者`F`，如果`C`为`true`，则返回`T`；如果`C`为`false`，则返回`F`，例如：
-```ts
-// 结果：'a'
-type result1 = If<true, 'a', 'b'>
-// 结果：'b'
-type result2 = If<false, 'a', 'b'>
-```
-根据上案例，我们可以直观的发现`If<C, T, F>`的作用有点类似`JavaScript`中的三元表达式：`C ? T : F`。
-#### 实现方式
-```ts
-type If<C extends boolean, T, F> = C extends true ? T : F
-```
-代码详解：
-* `C extends boolean`：表示`C`为`boolean`类型的子类型，既`C`只能为`true`或者`false`，传递其它值报错。
-* `C extends true`：如果用`JavaScript`来表示的话，相当于`C===true`.
-
-### Concat(数组concat方法)
-#### 用法
-`Concat<T, U>`用来将两个数组合并起来，类似实现数组的`concat`方法，使用方式如下：
-```ts
-// 结果：[1, 2, 3, 4]
-type result = Concat<[1, 2], [3, 4]>
-```
-#### 实现方式
-```ts
-type Concat<T extends any[], U extends any[]> = [...T, ...U]
-```
-代码详解：
-* `T extends any[]`：用来限制`T`是一个数组，如果传递非数组会报错，`U`也是一样的道理。
-* `[...T, ...U]`：可以理解成`JavaScript`的扩展运算符`...`。
-
-### Includes(数组includes方法)
-#### 用法
-`Includes<T, U>`用来判断`U`是否在数组`T`中，类似实现数组的`includes`方法，用法如下：
-```ts
-// 结果：true
-type result1 = Includes<[1, 2, 3], 1>
-// 结果：false
-type result2 = Includes<[1, 2, 3], '1'>
-```
-#### 实现方式
-```ts
-type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends
-  (<T>() => T extends Y ? 1 : 2) ? true : false
-
-// 简单版
-type MyIncludes<T extends readonly any[], U> = U extends T[number] ? true : false
-// 完善版
-type MyIncludes<T extends readonly any[], U> = 
-  T extends [infer R, ...infer L]
-    ? Equal<R, U> extends true
-      ? true
-      : MyIncludes<L, U>
-    : false
-```
-代码详解：
-* `T[number]`：它返回数组中所有数字类型键对应的值，将这些值构造成一个联合类型，例如：`1 | 2 | 3`。
-* `U extends T[number]`：判断`U`是否是某个联合类型的子类型，例如：`1 extends 1 | 2 | 3`。
-* `Equal`：是用来判断两个值是否相等的辅助方法。
-
-## 中级
 ### Readony(按需Readonly)
 #### 用法
 不同于初级实现中的`Readonly`，在中级实现的`Readonly`中，如果我们传递了指定的字段，那么`Readonly`会表现为按需实现`readonly`，用法如下。
@@ -716,6 +766,10 @@ const args = ['']
 const result = '1' | '2' | '3'
 ```
 
+### Chainable(可串联构造器)
+#### 用法
+#### 实现方式
+
 ### Last(数组最后一个元素)
 #### 用法
 `Last`是用来获取数组中最后一个元素的，它和我们之前已经实现的`First`思路很相似。
@@ -747,42 +801,22 @@ const result = arr[T['length']]
 * `T['length']`：这里我们获取到的是原始`T`数组的长度，例如`[1, 2, 3]`，长度值为`3`。而在新数组中，索引为`3`的位置正好是最后一个元素的索引，通过这种方式就能达到我们的目的。
 * `T extends [...infer R, infer L]`：这段代码表示，我们将原数组中最后一个元素使用`L`进行占位，而其它元素我们用一个`R`数组表示。这样，如果数组满足这种格式，就能正确返回最后一个元素的值。
 
-### Pop和Push
-继续沿用以上处理索引思想和占位的思想，我们能快速实现数组`pop`方法和`push`方法。
+### Pop
+继续沿用以上处理索引思想和占位的思想，我们能快速实现数组`pop`方法。
 #### 用法
 ```ts
-// Pop结果：[1, 2]
-type popResult = Pop<[1, 2, 3]>
-
-// Push结果：[1, 2, 3, 4]
-type pushResult = Push<[1, 2, 3], 4>
+// 结果：[1, 2]
+type result = Pop<[1, 2, 3]>
 ```
 #### 实现方式
 ```ts
 // Pop实现
-type Pop<T extends any[]> = T extends [...infer R, infer L] ? R : never
-
-// Push实现
-type Push<T extends any[], K> = [...T, K]
-```
-
-### Shift和Unshift
-与`pop`和`push`方法相似的另外一对方法叫`shift`和`unshift`，它们的实现思路是一样的。
-#### 用法
-```ts
-// Shift结果：[2, 3]
-type shiftResult = Shift<[1, 2, 3]>
-
-// Unshift结果：[0, 1, 2, 3]
-type unshiftResult = Unshift<[1, 2, 3], 0>
-```
-#### 使用方式
-```ts
-// Shift实现
-type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
-
-// Unshift实现
-type Unshift<T extends any[], K> = [K, ...T]
+type Pop<T extends any[]> =
+  T extends []
+    ? []
+    : T extends [...infer Rest, infer L]
+      ? Rest
+      : never
 ```
 
 ### PromiseAll返回类型
@@ -803,6 +837,7 @@ declare function PromiseAll<T extends any[]>(values: readonly [...T]): PromiseAl
 代码详解：
 * 因为`Promise.all()`函数接受的是一个数组，因此泛型`T`限制为一个`any[]`类型的数组。
 * `PromiseAllType`的实现思路有点像之前的`PromiseType`，只不过这里多了一层`Promise`的包裹，因为`Promise.all()`的返回类型也是一个`Promise`。
+
 
 ### Trim、TrimLeft以及TrimRight
 #### 用法
@@ -882,6 +917,10 @@ type AppendArgument<Fn, A> = Fn extends (...args: infer R) => infer T ? (...args
 ```
 代码详解：
 * 我们首先利用`infer`关键词得到了`Fn`函数的参数类型以及返回类型，然后把新的参数添加到参数列表，并原样返回其函数类型。
+
+### Permutation(排列组合)
+#### 用法
+#### 实现方式
 
 ### LengthOfString(字符串的长度)
 #### 用法
@@ -1230,7 +1269,132 @@ type RemoveIndexSignature<T> = {
 * `NeverIndex`：因为索引签名有一个特点，为`string`或者`number`类型，所以我们通过`string extends P`或者`number extends P`的形式排除此索引签名。
 * `as NeverIndex<P`：在之前的案例中，我们介绍过`as`的用法，在这里有**加工**或**再次断言**的意思。在使用`in`操作符进行迭代时，对每一个`P`再使用`NeverIndex`加工一下，如果是索引签名，这里的结果为`never`，为`never`时表示跳过当前迭代，进而达到排除索引签名的目的。
 
+### PercentageParser(百分比解析)
+#### 用法
+#### 实现方式
+
+### DropChar(移除字符)
+#### 用法
+#### 实现方式
+
+### MinusOne(减一)
+#### 用法
+#### 实现方式
+
+### PickByType(根据类型选取)
+#### 用法
+#### 实现方式
+
+### StartsWith
+#### 用法
+#### 实现方式
+
+### EndsWith
+#### 用法
+#### 实现方式
+
+### PartialByKeys(按需可选)
+#### 用法
+#### 实现方式
+
+### RequiredByKeys(按需必填)
+#### 用法
+#### 实现方式
+
+### OmitByType(按类型移除)
+#### 用法
+#### 实现方式
+
+### ObjectEntries
+#### 用法
+#### 实现方式
+
+### TupleToNestedObject(元组转嵌套对象)
+#### 用法
+#### 实现方式
+
+### Reverse
+#### 用法
+#### 实现方式
+
+### FlipArguments(反转参数)
+#### 用法
+#### 实现方式
+
+### FlattenDepth(数组按深度降维)
+#### 用法
+#### 实现方式
+
+### BEM
+#### 用法
+#### 实现方式
+
+### InorderTraversal(中序遍历)
+#### 用法
+#### 实现方式
+
+### FlipObject(对象键值交换)
+#### 用法
+#### 实现方式
+
+### Fibonacci(斐波那契)
+#### 用法
+#### 实现方式
+
+### AllCombinations(全排列)
+#### 用法
+#### 实现方式
+
+### GreaterThan(大于)
+#### 用法
+#### 实现方式
+
+### IsTuple(是否为元组)
+#### 用法
+#### 实现方式
+
+### Chunk(分割数组)
+#### 用法
+#### 实现方式
+
+### Fill(数组fill方法)
+#### 用法
+#### 实现方式
+
+### Without(移除)
+#### 用法
+#### 实现方式
+
+### Trunc(取整)
+#### 用法
+#### 实现方式
+
+### IndexOf(数组indexOf方法)
+#### 用法
+#### 实现方式
+
+### Join(数组join方法)
+#### 用法
+#### 实现方式
+
+### LastIndexOf(数组lastIndexOf方法)
+#### 用法
+#### 实现方式
+
+### Unique(数组去重)
+#### 用法
+#### 实现方式
+
+### MapTypes(类型转换)
+#### 用法
+#### 实现方式
+
 ## 困难
+
+### SimpleVue
+#### 用法
+#### 实现方式 
+
 ### Currying(柯里化)
 
 ### UnionToIntersection(元组取交集)
