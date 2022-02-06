@@ -123,7 +123,7 @@ type test = 'name' | 'age'
 ```
 
 ### extends
-`extends`关键词，一般有两种用法：类型约束和条件类型。
+`extends`关键词，一般有两种用法：**类型约束**和**条件类型**。
 
 #### 类型约束
 类型约束经常和泛型一起使用：
@@ -149,7 +149,6 @@ type res4 = [1, 2, 3] extends Array<number> ? true : false       // true
 ```ts
 // 内置工具：交集
 type Extract<T, U> = T extends U ? T : never;
-
 type type1 = 'name'|'age'
 type type2 = 'name'|'address'|'sex'
 
@@ -170,7 +169,7 @@ result: 'name' | never => 'name'
 // 第二次迭代：
 'age' extends 'name'|'address'|'sex' ? 'age' : never
 ```
-* 在迭代完成之后，会把每次迭代的结果组合成一个新的联合类型(剔除`never`)，如下：
+* 在迭代完成之后，会把每次迭代的结果组合成一个新的联合类型(根据`never`类型的特点，最后的结果会剔除掉`never`)，如下：
 ```ts
 type result = 'name' | never => 'name'
 ```
@@ -199,23 +198,21 @@ type result = ReturnType<typeof add>
 
 
 ### & 符号
-在`TS`中有两种类型值得我们关注：**联合类型**和**交叉类型**。
+在`TS`中有两种类型值得我们重点关注：**联合类型**和**交叉类型**。
 
 联合类型一般适用于基本类型的"合并"，它使用`|`符号进行连接，如下：
 ```ts
 type result = 'name' | 1 | true | null
 ```
 
-而交叉类型则适用于对象的"合并"，它使用`&`符号进行连接，如下：
+而交叉类型则适用于对象或者函数的"合并"，它使用`&`符号进行连接，如下：
 ```ts
 type result = T & U
 ```
 `T & U`表示一个新的类型，其中这个类型包含`T`和`U`中所有的键，这和`JavaScript`中的`Object.assign()`函数的作用非常类似。
 
-根据交叉类型的概念，我们可以手动封装一个对象的`merge`函数，如下：
+根据交叉类型的概念，我们可以封装一个合并对象的`merge`函数，如下：
 ```ts
-const obj1 = { name: 'AAA' }
-const obj2 = { age: 23 }
 function merge<T, U>(to: T, from: U): T & U {
   for (let key in from) {
     ;(to as T & U)[key] = from[key] as any
@@ -223,12 +220,14 @@ function merge<T, U>(to: T, from: U): T & U {
   return to as T & U
 }
 
+const obj1 = { name: 'AAA' }
+const obj2 = { age: 23 }
 // 结果：{ name：'AAA'; age: 23; }
 const resutl = merge(obj1, obj2)
 ```
 
 ## 初级
-### Pick(选取)
+### 内置Pick(选取)
 #### 用法
 `Pick`表示从一个类型中选取指定的几个字段组合成一个新的类型，用法如下：
 ```ts
@@ -255,9 +254,9 @@ type result = MyPick<Person, 'name' | 'phone'>
 ```
 
 
-### Readonly(只读)和Mutable(可改)
+### 内置Readonly(只读)
 #### 用法
-`Readonly`和`Mutable`一个是让所有属性变为只读，另外一个是让所有属性变为可改的(移除`readonly`关键词)，其用法为：
+`Readonly`是用来让所有属性变为只读，其用法为：
 ```ts
 type Person = {
   readonly name: string;
@@ -265,22 +264,14 @@ type Person = {
 }
 
 // 结果：{ readonly name: string; readonly age: number; }
-type ReadonlyResult = Readonly<Person>
-
-// 结果：{ name: string; age: number; }
-type MutableResult = Mutable<Person>
+type ReadonlyResult = MyReadonly<Person>
 ```
 #### 实现方式
 ```ts
 type MyReadonly<T> = {
   readonly [P in keyof T]: T[P]
 }
-type MyMutable<T> = {
-  -readonly [P in keyof T]: T[P]
-}
 ```
-代码解读：
-* `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的.
 
 ### TupleToObject(元组转对象)
 #### 用法
@@ -339,7 +330,7 @@ type Length<T extends any> = T extends { length: number; } ? T['length'] : never
 * `T extends { length: number; }`：判断`T`是否是`{ length: number; }`的子类型，如果是则代表`T`为数组或者类数组。
 * `T['length']`：取`T`对象的`length`属性的值(注意，在`TypeScript`中不能使用`T.length`来取值，而应该使用`T['length']`)。
 
-### Exclude(排除)
+### 内置Exclude(排除)
 #### 用法
 `Exclude`是排除的意思，它从`T`类型中排除属于`U`类型的子集，可以理解成取`T`对于`U`的差集，用法如下：
 ```ts
@@ -378,7 +369,12 @@ type PromiseResult = PromiseType<returnResult>
 ```
 #### 实现方式
 ```ts
-type PromiseType<T> = T extends Promise<infer R> ? R : never
+type PromiseType<T> =
+  T extends Promise<infer R>
+    ? R extends Promise<any>
+      ? PromiseType<R>
+      : R
+    : never
 ```
 代码详解：
 * `T extends Promise<infer R>`：判断`T`是否是`Promise<infer R>`的子类型，也就是说`T`必须满足`Promise<any>`的形式。
@@ -478,7 +474,7 @@ type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
 type Unshift<T extends any[], K> = [K, ...T]
 ```
 
-### Parameters(函数的参数类型)
+### 内置Parameters(函数的参数类型)
 #### 用法
 `Parameters`是用来获取一个函数的参数类型的，其中获取的结果是一个元组，用法如下：
 ```ts
@@ -491,7 +487,7 @@ type result = MyParameters<typeof add>
 type MyParameters<T extends (...args: any[]) => any> = T extends (...args: infer R) => any ? R : never
 ```
 
-### Partial(可填)和Required(必填)
+### 内置Partial(可填)和内置Required(必填)
 #### 用法
 `Partial`和`Required`一个是让所有属性可填、另外一个是让所有属性必填，用法如下：
 ```ts
@@ -517,7 +513,7 @@ type MyRequired<T> = {
 ```
 
 
-### Record(构造)
+### 内置Record(构造)
 #### 用法
 `Record<K, T>`用来将`K`的每一个键(`k`)指定为`T`类型，这样由多个`k/T`组合成了一个新的类型，用法如下：
 ```ts
@@ -560,7 +556,7 @@ type Person = {
 type TypeKeys = keyof Person
 ```
 
-### Extract(交集)
+### 内置Extract(交集)
 #### 用法
 `Extract<T, U>`用来取联合类型`T`和`U`的交集，用法如下：
 ```ts
@@ -609,7 +605,7 @@ T extends U
 
 ## 中级
 
-### ReturnType(函数返回类型)
+### 内置ReturnType(函数返回类型)
 #### 用法
 `ReturnType<T>`是用来获取一个函数的返回类型的，例如：
 ```js
@@ -627,7 +623,7 @@ type ReturnType<T> = T extends (...args: any) => infer R ? R : never
 * `T extends (...args: any) => infer R`：判断`T`类型是否是一个函数的子类型，既`T`是不是一个函数。
 * `infer R`：表示待推导的函数返回类型为`R`，后续可以在表达式中使用`R`来代替真正的返回类型。
 
-### Omit(移除)
+### 内置Omit(移除)
 #### 用法
 `Omit`是移除的意思，它用来在`T`类型中移除指定的字段，用法如下：
 ```ts
@@ -688,7 +684,12 @@ obj.completed = false // error
 ```
 #### 实现方式
 ```ts
+// ts v4.4+版本可直接用
 type Readonly<T, K extends keyof T = keyof T> = T & {
+  readonly [P in K]: T[P]
+}
+// ts v4.5+版本必须用
+type Readonly<T, K extends keyof T = keyof T> = Omit<T, K> & {
   readonly [P in K]: T[P]
 }
 ```
@@ -739,7 +740,6 @@ type result = TupleToUnion<['1', '2', '3']>
 ```ts
 // way1: T[number]
 type TupleToUnion<T extends readonly any[]> = T[number]
-
 // way2: 递归
 type TupleToUnion<T extends readonly any[]> = 
   T extends [infer R, ...infer args]
@@ -768,7 +768,34 @@ const result = '1' | '2' | '3'
 
 ### Chainable(可串联构造器)
 #### 用法
+`Chainable`是用来让一个对象可以进行链式调用的，用法如下：
+```ts
+type Expected = {
+  foo: number
+  bar: {
+    value: string
+  }
+  name: string
+}
+declare const obj: Chainable<{}>
+// 结果：Expected
+const result = obj
+  .options('foo', 123)
+  .options('bar', { value: 'Hello' })
+  .options('name', 'TypeScript')
+  .get()
+```
 #### 实现方式
+```ts
+type Chainable<T> = {
+  options<K extends string, V>(key: K, value: V): Chainable<T & {[k in K]: V}>
+  get(): T
+}
+```
+代码详解：
+* `{[k in K]: V}`：每次调用`options`时，把`key/value`构造成一个对象，例如：`{ foo: 123 }`。
+* `T & U`：此处使用到`&`关键词，用来合并`T`和`U`两个对象中的所有`key`。
+* `Chainable<>`：递归调用`Chainable`，赋予新对象以链式调用的能力。
 
 ### Last(数组最后一个元素)
 #### 用法
@@ -782,7 +809,6 @@ type result = Last<[1, 2, 3]>
 ```ts
 // way1：索引思想
 type Last<T extends any[]> = [any, ...T][T['length']]
-
 // way2: 后占位思想
 type Last<T extends any[]> = T extends [...infer R, infer L] ? L : never
 ```
@@ -791,18 +817,16 @@ type Last<T extends any[]> = T extends [...infer R, infer L] ? L : never
 ```ts
 // 原数组
 const T = [1, 2, 3]
-
 // 新数组
 const arr = [any, 1, 2, 3]
-
 // 结果: 3
 const result = arr[T['length']]
 ```
 * `T['length']`：这里我们获取到的是原始`T`数组的长度，例如`[1, 2, 3]`，长度值为`3`。而在新数组中，索引为`3`的位置正好是最后一个元素的索引，通过这种方式就能达到我们的目的。
 * `T extends [...infer R, infer L]`：这段代码表示，我们将原数组中最后一个元素使用`L`进行占位，而其它元素我们用一个`R`数组表示。这样，如果数组满足这种格式，就能正确返回最后一个元素的值。
 
-### Pop
-继续沿用以上处理索引思想和占位的思想，我们能快速实现数组`pop`方法。
+### Pop(数组Pop方法)
+继续沿用以上处理索引思想或占位的思想，我们能快速实现数组`pop`方法。
 #### 用法
 ```ts
 // 结果：[1, 2]
@@ -838,6 +862,33 @@ declare function PromiseAll<T extends any[]>(values: readonly [...T]): PromiseAl
 * 因为`Promise.all()`函数接受的是一个数组，因此泛型`T`限制为一个`any[]`类型的数组。
 * `PromiseAllType`的实现思路有点像之前的`PromiseType`，只不过这里多了一层`Promise`的包裹，因为`Promise.all()`的返回类型也是一个`Promise`。
 
+
+### LookUp(查找)
+#### 用法
+`LookUp`是用来根据类型值查找类型的，其用法如下：
+```ts
+interface Cat {
+  type: 'cat'
+  color: 'black' | 'orange' | 'gray'
+}
+interface Dog {
+  type: 'dog'
+  color: 'white'
+  name: 'wang'
+}
+
+// 结果：Dog
+type result = LookUp<Cat | Dog, 'dog'>
+```
+#### 实现方式
+```ts
+type LookUp<
+  U extends { type: string; },
+  T extends string
+> = U extends { type: T } ? U : never
+```
+代码详解：
+* ` U extends { type: string; }`：这段代码限制`U`的类型必须是具有属性为`type`的对象。
 
 ### Trim、TrimLeft以及TrimRight
 #### 用法
@@ -878,8 +929,8 @@ type Uncapatilize<S extends string> = S extends `${infer char}${infer L}` ? `${L
 #### 用法
 `Replace`是用来将字符串中第一次出现的某段内容，使用指定的字符串进行替换，而`和ReplaceAll`是全部替换，其用法如下：
 ```ts
-type t1 = Replace<'foobarbar', 'bar', 'foo'>    // 'foofoobar'
-type t2 = ReplaceAll<'foobarbar', 'bar', 'foo'> // 'foofoofoo'
+// 结果：'foofoobar'
+type t = Replace<'foobarbar', 'bar', 'foo'>
 ```
 #### 实现方式
 ```ts
@@ -892,16 +943,26 @@ type Replace<
         ? S
         : `${L}${to}${R}`
       : S
+```
 
+### ReplaceAll
+#### 用法
+`ReplaceAll`是用来将字符串中指定字符全部替换的，其用法如下：
+```ts
+// 结果：'foofoofoo'
+type t = ReplaceAll<'foobarbar', 'bar', 'foo'> 
+```
+#### 实现方式
+```ts
 type ReplaceAll<
   S extends string,
   from extends string,
   to extends string
 > = S extends `${infer L}${from}${infer R}`
-      ? from extends ''
-        ? S
-        : ReplaceAll<`${L}${to}${R}`, from, to>
-      : S
+              ? from extends ''
+                ? S
+                : `${ReplaceAll<L, from, to>}${to}${ReplaceAll<R, from, to>}`
+              : S
 ```
 
 ### AppendArgument(追加参数)
@@ -1300,6 +1361,26 @@ type RemoveIndexSignature<T> = {
 ### RequiredByKeys(按需必填)
 #### 用法
 #### 实现方式
+
+### Mutable(可改)
+#### 用法
+`Mutable`是用来让所有属性变为可改的(移除`readonly`关键词)，其用法为：
+```ts
+type Person = {
+  readonly name: string;
+  age: number;
+}
+// 结果：{ name: string; age: number; }
+type MutableResult = MyMutable<Person>
+```
+#### 实现方式
+```ts
+type MyMutable<T> = {
+  -readonly [P in keyof T]: T[P]
+}
+```
+代码解读：
+* `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的。
 
 ### OmitByType(按类型移除)
 #### 用法
