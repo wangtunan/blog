@@ -981,7 +981,25 @@ type AppendArgument<Fn, A> = Fn extends (...args: infer R) => infer T ? (...args
 
 ### Permutation(排列组合)
 #### 用法
+`Permutation`是用来将联合类型中的每一个类型进行排列组合，其用法如下：
+```ts
+// 结果：['A', 'B'] | ['B', 'A']
+type result = Permutation<'A' | 'B'>
+```
 #### 实现方式
+```ts
+type Permutation<T, U = T> = 
+  [T] extends [never]
+    ? []
+    : T extends T
+      ? [T, ...Permutation<Exclude<U, T>>]
+      : never
+```
+
+代码详解：
+* `[T] extends [never]`：这段代码主要是为了处理联合类型为空的情况。
+* `T extends T`：这段代码主要是需要使用**分布式条件类型**这个知识点，当`T extends T`成立时，在其后的判断语句中，`T`代表当前迭代的类型。
+* `<Exclude<U, T>`：因为此时的`T`代表当前迭代的类型，所以我们从原始联合类型中排除当前类型，然后递归调用`Permutation`。当`T`为`A`时，递归调用`Permutation<'B' | 'C'>`, 此时结果为`['A']` + `['B', 'C']` 或 `['A']` + `['C', 'B']`。
 
 ### LengthOfString(字符串的长度)
 #### 用法
@@ -999,7 +1017,7 @@ type LengthOfString<
       : T['length']
 ```
 代码详解：
-* 我们通过一个泛型的辅助数组来帮我们计算字符串的长度，在第一次符合条件时，我们将其第一个字符添加到数组中，在后续的递归过程中，如果不符合条件，直接返回`T['length']`，这个过程可以用如下代码表示：
+* 我们通过一个泛型的辅助数组来帮计算字符串的长度，在第一次符合条件时，将其第一个字符添加到数组中，在后续的递归过程中，如果不符合条件，直接返回`T['length']`，这个过程可以用如下代码表示：
 ```ts
 // 第一次递归
 const T = ['H'], S = 'hello', R = 'ello'
@@ -1115,9 +1133,9 @@ type StringToUnion<S extends string> = StringToArray<S>[number]
 ```
 代码详解：`StringToArray<S>`返回的是一个数组，`T[number]`表示对一个数组进行数字类型索引迭代，其迭代结果是每个元素组合成的一个联合类型。
 
-### MergeType(类型合并)
+### Merge(类型合并)
 #### 用法
-`MergeType`是用来合并两个类型，如果有重复的字段类型，则第二个的字段类型覆盖第一个的，其用法如下：
+`Merge`是用来合并两个类型，如果有重复的字段类型，则第二个的字段类型覆盖第一个的，其用法如下：
 ```ts
 type Foo = {
   a: number;
@@ -1125,17 +1143,21 @@ type Foo = {
 }
 type Bar = {
   b: number;
+  c: boolean;
 }
 
-// 结果：{ a: number; b: number; }
-type result = MergeType<Foo, Bar>
+// 结果：{ a: number; b: number; c: boolean; }
+type result = Merge<Foo, Bar>
 ```
 #### 实现方式
 ```ts
-type MergeType<F, S> = {
-  [P in keyof F]: P extends keyof S ? S[P] : F[P]
+type Merge<F, S> = {
+  [P in keyof F | keyof S]: P extends keyof S ? S[P] : P extends keyof F ? F[P] : never
 }
 ```
+代码详解：
+* `keyof F | keyof S`：这段代码的含义是将`F`和`S`这两个对象的键组合成一个新的联合类型。
+* `P extends`：这里进行了两次`extends`判断，其中第二次不能直接写成`F[P]`，而应该多判断一次，当满足条件时才使用`F[P]`，这是因为`P`的类型判断无法作用于`:`符号后面。
 
 ### CamelCase(连字符字符串转小驼峰)
 #### 用法
@@ -1222,7 +1244,7 @@ type Diff<T, U> = {
 
 ### AnyOf(数组元素真值判断)
 #### 用法
-`AnyOf`用来判断数组元素，若果任意值为真，返回true；数组为空或者全部为false，才返回false，其用法如下：
+`AnyOf`用来判断数组元素，如果任意值为真，返回true；数组为空或者全部为false，才返回false，其用法如下：
 ```ts
 // 结果：true
 type result1 = AnyOf<[0, false, 0, { name: 'name' }]>
