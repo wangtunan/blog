@@ -882,11 +882,11 @@ var arr2 = [4,5,6,7];
 console.log(Array.from(new Set(arr1)));
 
 // 并集：输出1,2,3,4,5,6,7
-var union = Array.from(new Set([...set1,...set2]));
+var union = Array.from(new Set([...arr1,...arr2]));
 console.log(union);  
 
 // 交集：输出4,5
-var intec = Array.from(new Set(arr.filter(x => arr1.includes(x))));
+var intec = Array.from(new Set(arr1.filter(x => arr2.includes(x))));
 console.log(intec);
 
 // 差集
