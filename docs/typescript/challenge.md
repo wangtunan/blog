@@ -1354,27 +1354,122 @@ type RemoveIndexSignature<T> = {
 
 ### PercentageParser(百分比解析)
 #### 用法
+`PercentageParser`是用来解析百分比字符串的，其用法如下：
+```ts
+type result1 = PercentageParser<'+85%'> // ['+', '85', '%']
+type result2 = PercentageParser<'-85%'> // ['-', '85', '%']
+type result3 = PercentageParser<'85'>   // ['', '85', '']
+```
+
 #### 实现方式
+```ts
+type CheckPrefix<S extends string> = S extends '+' | '-' ? S : never
+type CheckSuffix<S extends string> = S extends `${infer L}%` ? [L, '%'] : [S, '']
+
+type PercentageParser<S extends string> = 
+  S extends `${CheckPrefix<infer L>}${infer R}`
+    ? [L, ...CheckSuffix<R>]
+    : ['', ...CheckSuffix<S>]
+```
+
+代码详解：
+* `CheckPrefix`是用来处理百分比字符串前面的符号的，如果存在`+`或者`-`，则原样返回，如果不存在则返回`never`，表示没有符号。
+* `CheckSuffix`是用来处理百分比字符串后面的百分比符号的，如果存在，则返回一个数组(最后一项固定为百分比符号)；如果不存在，则返回的数组最后一个元素固定为空字符串。
 
 ### DropChar(移除字符)
 #### 用法
+`DropChar`是用来在字符串中移除指定字符的，其用法如下：
+```ts
+// 结果：butterfly!
+type result = DropChar<' b u t t e r f l y ! ', ' '>
+```
 #### 实现方式
+```ts
+type DropChar<
+  S extends string,
+  C extends string
+> = C extends ''
+  ? S
+  : S extends `${infer L}${C}${infer R}`
+    ? DropChar<`${L}${R}`, C>
+    : S
+```
+代码详解：`DropChar`和`ReplaceAll`的实现思路非常相似，首先需要判断待移除的字符是不是空字符串，如果是，则直接返回原始字符串；如果不是，先判断字符串中是否包含待移除的字符，包含则递归调用；不包含则直接返回原始字符串。
 
 ### MinusOne(减一)
+`MinusOne`是用来实现数字减一的，其用法如下：
 #### 用法
+```ts
+// 结果：99
+type result = MinusOne<100>
+```
+
 #### 实现方式
+```ts
+type MinusOne<
+  N extends number,
+  T extends any[] = []
+> = N extends T['length']
+  ? T extends [infer F, ...infer Rest]
+    ? Rest['length']
+    : never
+  : MinusOne<N, [0, ...T]>
+```
+
+代码详解：在实现`MinusOne`的时候，借用了一个空数组，首先判断数组的长度是否等于传递的数字`N`，如果相等则从数组中随意移除一位，然后返回剩下数组的长度即可；如果不相等，则往数组中添加一个元素，再递归调用`MinusOne`。
+
+**注意**：由于`TS`在递归调用时存在最大递归调用次数，所以对于比较大的数字会提示错误。
 
 ### PickByType(根据类型选取)
 #### 用法
+`PickByType`是用来根据类型选取属性的，其用法如下：
+```ts
+interface Model {
+  name: string
+  count: number
+  isReadonly: boolean
+  isEnable: boolean
+}
+// 结果：{ isReadonly: boolean, isEnable: boolean }
+type result = PickByType<Model, boolean>
+```
 #### 实现方式
+```ts
+type PickByType<T, U> = {
+  [P in keyof T as T[P] extends U ? P : never]: T[P]
+}
+```
+代码详解：`PickByType`的实现，可以使用`as`进行第二次断言，当类型满足时就返回当前迭代的`P`，不满足类型时就返回`never`，因为`never`最后会被排除，所以最后的迭代结果只有满足类型的键。
 
-### StartsWith
+### StartsWith(字符串startsWith方法)
 #### 用法
+`StartsWith`是用来实现`JavaScript`中字符串的`startsWith`功能，其用法如下：
+```ts
+// 结果：true
+type result = StartsWith<'abc', 'ab'>
+```
 #### 实现方式
+```ts
+type StartsWith<
+  S extends string,
+  C extends string
+> = S extends `${C}${string}` ? true : false
+```
 
-### EndsWith
+### EndsWith(字符串endsWith方法)
 #### 用法
+`EndsWith`是用来实现`JavaScript`中字符串的`endsWith`功能，其用法如下：
+```ts
+// 结果：true
+type result = endsWith<'abc', 'bc'>
+```
 #### 实现方式
+```ts
+type EndsWith<
+  S extends string,
+  C extends string
+> = S extends `${string}${C}` ? true : false
+```
 
 ### PartialByKeys(按需可选)
 #### 用法
