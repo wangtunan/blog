@@ -1473,11 +1473,73 @@ type EndsWith<
 
 ### PartialByKeys(按需可选)
 #### 用法
+`PartialByKeys`是用来实现按需可选的，其用法如下：
+```ts
+interface User {
+  name: string
+  age: number
+  address: string
+}
+interface UserPartialName {
+  name?: string,
+  age: number
+  address: string 
+}
+
+// 结果：UserPartialName
+type result = PartialByKeys<User, 'name'>
+```
 #### 实现方式
+```ts
+type CopyKeys<T> = {
+  [P in keyof T]: T[P]
+}
+type PartialByKeys<
+  T,
+  K extends keyof any = keyof T
+> = CopyKeys<Partial<Pick<T, Extract<keyof T, K>>> & Omit<T, K>>
+```
+代码详解：
+* `Pick`部分：首先取`keyof T`和`K`的交集，然后使用`Pick`从`T`中选取交集的`key`组成一个新类型，最后给新类型添加可选。
+* `Omit`部分：根据之前介绍的`Omit`的知识，`Omit<T, K>`表示从`T`中剔除含有`K`的类型。
+* `CopyKeys`部分：如果不使用`CopyKeys`，最后的结果为`T & U`形式，它实际上与使用`CopyKeys`的结果是一样的。这里使用`CopyKeys`，很大程度上是为了测试。
+```ts
+// 使用CopyKeys，结果为true；不使用，结果为false
+type result1 = Equal<PartialByKeys<User, 'name'>, UserPartialName>
+```
 
 ### RequiredByKeys(按需必填)
+在实现`PartialByKeys`后，很容易按照相同的思路去实现`RequiredByKeys`。
 #### 用法
+`RequiredByKeys`是用来实现按需必填的，其用法如下：
+```ts
+interface User {
+  name?: string
+  age?: number
+  address?: string
+}
+
+interface UserRequiredName {
+  name: string
+  age?: number
+  address?: string 
+}
+
+// 结果：UserRequiredName
+type result = RequiredByKeys<User, 'name'>
+```
+
 #### 实现方式
+```ts
+type CopyKeys<T> = {
+  [P in keyof T]: T[P]
+}
+type RequiredByKeys<
+  T,
+  K extends keyof any = keyof T
+> = CopyKeys<Required<Pick<T, Extract<keyof T, K>>> & Omit<T, K>>
+```
+代码详解：实现思路参考`PartialByKeys`。
 
 ### Mutable(可改)
 #### 用法
@@ -1500,8 +1562,32 @@ type MyMutable<T> = {
 * `-readonly`：表示把`readonly`关键词去掉，去掉之后此字段变为可改的。
 
 ### OmitByType(按类型移除)
+`OmitByType`的实现思路和`PickByType`类似。
 #### 用法
+`OmitByType`是用来按照类型移除的，其用法如下：
+```ts
+interface Model {
+  name: string
+  count: number
+  isReadonly: boolean
+  isEnable: boolean
+}
+interface ModelOmitBoolean {
+  name: string;
+  count: number
+}
+
+// 结果：ModelOmitBoolean
+type result = OmitByType<Model, boolean>
+```
+
 #### 实现方式
+```ts
+type OmitByType<T, U> = {
+  [P in keyof T as U extends T[P] ? never : P]: T[P]
+}
+```
+代码解析：实现思路参考`PickByType`。
 
 ### ObjectEntries
 #### 用法
