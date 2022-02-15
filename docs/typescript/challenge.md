@@ -1591,23 +1591,96 @@ type OmitByType<T, U> = {
 
 ### ObjectEntries
 #### 用法
+`ObjectEntries`是用来实现`JavaScript`中的`Object.entries()`方法，其用法如下：
+```ts
+interface Model {
+  name: string;
+  age: number;
+  locations?: string[] | null;
+}
+type ModelEntries = ['name', string] | ['age', number] | ['locations', string[] | null];
+
+// 结果：ModelEntries
+type result = ObjectEntries<Model>
+```
 #### 实现方式
+```ts
+type ObjectEntries<T, U = Required<T>> = {
+  [P in keyof U]: [P, U[P]]
+}[keyof U]
+```
+代码详解：借助`U`类型，然后对其`Required`是为了去掉可选类型，`U[keyof U]`表示取出`U`中键的类型组成的联合类型。
 
 ### TupleToNestedObject(元组转嵌套对象)
 #### 用法
+`TupleToNestedObject`是用来将元组转成嵌套对象的，其用法如下：
+```ts
+// 结果：{ a: { b: string; } }
+type result = TupleToNestedObject<['a', 'b'], string>
+```
 #### 实现方式
+```ts
+type TupleToNestedObject<T extends any[], U> =
+  T extends [infer F, ...infer R]
+    ? F extends string
+      ? { [P in F]: TupleToNestedObject<R, U> }
+      : never
+    : U
+```
 
 ### Reverse
 #### 用法
+`Reverse`是用来实现数组的`reverse()`方法的，其用法如下：
+```ts
+// 结果：['b', 'a']
+type result = Reverse<['a', 'b']>
+```
 #### 实现方式
+```ts
+type Reverse<T extends any[]> =
+  T extends [...infer R, infer L]
+    ? [L, ...Reverse<R>]
+    : []
+```
 
-### FlipArguments(反转参数)
+### FlipArguments(反转函数参数)
+借助上面的`Reverse`方法，可以很容易实现函数参数的反转。
 #### 用法
+`FlipArguments`是用来实现函数参数反转的，其用法如下：
+```ts
+// 结果：(a: number, b: string) => string | number
+type result = FlipArguments<(a: string, b: number) => string | number>
+```
 #### 实现方式
+```ts
+type FlipArguments<T> = 
+  T extends (...args: infer A) => infer R
+    ? (...args: Reverse<A>) => R
+    : never
+```
 
 ### FlattenDepth(数组按深度降维)
 #### 用法
+`FlattenDepth`是用来按深度进行数组降维的，其用法如下：
+```ts
+// 结果：
+type result = FlattenDepth<[1, 2, [3, 4], [[[5]]]], 2>
+```
 #### 实现方式
+```ts
+type FlattenDepth<
+  T extends any[],
+  D extends number = 1,
+  U extends any[] = []
+> = T extends [infer F, ...infer R]
+  ? U['length'] extends D
+    ? T
+    : F extends any[]
+      ? [...FlattenDepth<F, D, [0, ...U]>, ...FlattenDepth<R, D>]
+      : [F, ...FlattenDepth<R, D, U>]
+    : T
+```
+代码详解：`FlattenDepth`的实现思路和`Flatten`基本一直，区别是按深度降维时需要一个数组去记录降维的次数。
 
 ### BEM
 #### 用法
