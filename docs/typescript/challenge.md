@@ -1684,15 +1684,97 @@ type FlattenDepth<
 
 ### BEM
 #### 用法
+`BEM`是用来将字符串连接成CSS BEM格式的，其用法如下：
+```ts
+// 结果：'btn--price__small' | 'btn--price__mini' 
+type result = BEM<'btn', ['price'], ['small', 'mini']>
+```
 #### 实现方式
+```ts
+type ArrayToString<
+  T extends any[],
+  P extends string
+> = T extends [] ? '' : `${P}${T[number]}`
+type BEM<
+  B extends string,
+  E extends string[],
+  M extends string[]
+> = `${B}${ArrayToString<E, '__'>}${ArrayToString<M, '--'>}`
+```
+代码详解：实现`BEM`的思路并不复杂，只需要记住如下两个知识点：
+* 判断是一个空数组，可以使用`T extends []`或者`T['length'] extends 0`。
+* `T[number]`会自动迭代数组，例如：
+```ts
+// 结果: 'A_B' | 'A_C' | 'A_D'
+type result = `A__${['B', 'C', 'D'][number]}`
+```
 
-### InorderTraversal(中序遍历)
+### InOrderTraversal(中序遍历)
+**先序遍历**：先访问根节点，然后访问左节点，最后访问右节点。
+**中序遍历**：先访问左节点，然后访问根节点，最后访问右节点。
+**后序遍历**：先访问左节点，然后访问右节点，最后访问根节点。
 #### 用法
+`InOrderTraversal`是用来实现二叉树中序遍历的，其用法如下：
+```ts
+const tree = {
+  val: 1,
+  left: null,
+  right: {
+    val: 2,
+    left: {
+      val: 3,
+      left: null,
+      right: null,
+    },
+    right: null,
+  },
+}
+
+// 结果: [1, 3, 2]
+type result = InOrderTraversal<typeof tree>
+```
 #### 实现方式
+```ts
+// 一个二叉树节点
+interface TreeNode {
+  val: number;
+  left: TreeNode | null;
+  right: TreeNode | null;
+}
+// way1:
+type InOrderTraversal<
+  T extends TreeNode | null,
+  U extends TreeNode = NonNullable<T>
+> = T extends TreeNode
+  ? [...InOrderTraversal<U['left']>, U['val'], ...InOrderTraversal<U['right']>]
+  : []
+
+// way2:
+type InOrderTraversal<T extends TreeNode | null> = 
+  T extends TreeNode
+    ? T['left'] extends TreeNode
+      ? [...InOrderTraversal<T['left']>, T['val'], ...InOrderTraversal<T['right']>]
+      : T['right'] extends TreeNode
+        ? [T['val'], ...InOrderTraversal<T['right']>]
+        : [T['val']]
+    : []
+```
+**注意**：如果以上代码在编辑器中提示**类型实例化过深，且可能无限**这是正常现象，因为`TypeScript`对于递归的次数是有限制的。
 
 ### FlipObject(对象键值交换)
 #### 用法
+`FlipObject`是用来将对象的键值交换的，其用法如下：
+```ts
+// 结果：{ pi: 'a' }
+type result = FlipObject<{ a: 'pi' }>
+```
 #### 实现方式
+```ts
+type BasicType = string | number | boolean
+type FlipObject<T extends Record<string, BasicType>> = {
+  [P in keyof T as `${T[P]}`]: P
+}
+```
 
 ### Fibonacci(斐波那契)
 #### 用法
