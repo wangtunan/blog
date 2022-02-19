@@ -1776,25 +1776,165 @@ type FlipObject<T extends Record<string, BasicType>> = {
 }
 ```
 
-### Fibonacci(斐波那契)
+### Fibonacci(斐波那契数列)
+**菲波那切数列**：1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
 #### 用法
+`Fibonacci`是用来实现菲波那切数列的，用法如下：
+```ts
+type result = Fibonacci<5>
+```
 #### 实现方式
+```ts
+type Fibonacci<
+  T extends number,
+  Index extends any[] = [1],
+  Prev extends any[] = [],
+  Current extends any[] = [1]
+> = Index['length'] extends T
+  ? Current['length']
+  : Fibonacci<T, [...Index, 1], Current, [...Prev, ...Current]>
+```
 
 ### AllCombinations(全排列)
 #### 用法
+`ALlCombitation`是用来列举全部排列组合可能性的，其用法如下：
+```ts
+// 结果：'' | 'A' | 'AB' | 'B' | 'BA'
+type result = AllCombination<'AB'>
+```
 #### 实现方式
+```ts
+type StringToUnion<S extends string> =
+  S extends `${infer F}${infer R}`
+    ? F | StringToUnion<R>
+    : never
+type Combination<
+  S extends string,
+  U extends string = '',
+  K = S
+> = [S] extends [never]
+  ? U
+  : K extends S
+    ? Combination<Exclude<S, K>, U | `${U}${K}`>
+    : U
+type AllCombination<S extends string> = Combination<StringToUnion<S>>
+```
+代码详解：
+* `StringToUnion`是用来将字符串变成一个联合类型的，例如：
+```ts
+// 结果： 'A' | 'B'
+type result = StringToUnion<'AB'>
+```
+* `Combination`是用来将联合类型进行排列组合的，以以上`'A' | 'B'`这个联合类型为例，步骤如下：
+```ts
+// 第一步：从'A' | 'B这个联合类型中排除当前迭代的字符'A'
+K = 'A' S = 'A' | 'B'  => Exclude<'A' | 'B', 'A'>
+// 第一步子递归：
+Combination<'B', '' | 'A'> => '' | 'A' | `${'' | 'A'}B` => '' | 'A' | 'B' | 'AB'
+
+// 第二步：从'A' | 'B'这个联合类型中排除当前迭代的字符'B'
+K = 'B' S = 'A' | 'B' => Exclude<'A' | 'B', 'B'>
+// 第二步子递归：
+Combination<'A', '' | 'B'> => '' | 'B' | `${'' | 'B'}A` => '' | 'B' | 'A' | 'BA'
+
+// 结果：剔除相同元素
+result = '' | 'A' | 'AB' | 'B' | 'BA' 
+```
 
 ### GreaterThan(大于)
 #### 用法
+`GreaterThan<T, N>`是来用判断正整数T是否大于正整数N的，其用法如下：
+```ts
+// 结果：true
+type result = GreaterThan<2, 1>
+```
 #### 实现方式
+```ts
+type GreaterThan<
+  T extends Number,
+  N extends Number,
+  R extends any[] = []
+> = T extends R['length']
+    ? false
+    : N extends R['length']
+      ? true
+      : GreaterThan<T, N, [...R, 0]>
+```
+代码详解：使用一个空数组来辅助，每次递归添加一个元素，如果正整数`T`先等于这个数组的长度，则为`false`；如果正整数`N`先等于这个数组的长度，则为`true`。
+
+### Zip(按位置匹配)
+#### 用法
+`Zip`是用来将两个元组按照相同索引位置组合成一个新数组的，用法如下：
+```ts
+// 结果：[[1, true], [2, false]]
+type result = Zip<[1, 2], [true, false]>
+```
+#### 实现方式
+```ts
+type Zip<
+  T extends readonly any[],
+  U extends readonly any[]
+> = T extends [infer First, ...infer Rest]
+    ? U extends [infer Head, ...infer Tail]
+      ? [[First, Head], ...Zip<Rest, Tail>]
+      : []
+    : []
+```
 
 ### IsTuple(是否为元组)
 #### 用法
+`IsTuple`是用来判断是否为一个元组的，用法如下：
+```ts
+// 结果：true
+type result = IsTuple<[number]>
+```
 #### 实现方式
+```ts
+type IsTuple<T> =
+  [T] extends [never]
+    ? false
+    : T extends readonly any[]
+      ? number extends T['length']
+        ? false
+        : true
+      : false
+```
+代码解析：以上代码中，比较关键的代码是`number extends T['length']`，这里不能写成`T['length'] extends number`，如下：
+```ts
+// 第一种方式
+number extends T['length']
+=> number extends 1
+=> false
 
-### Chunk(分割数组)
+// 第二种方式
+T['length'] extends number
+=> 1 extends number
+=> true
+```
+
+### Chunk(lodash分割数组)
+[Lodash Chunk](https://www.lodashjs.com/docs/lodash.chunk): 将一个数组分割成长度为N的多个小数组。
 #### 用法
+```ts
+// 结果：[[1, 2], [3, 4]]
+type result = Chunk<[1, 2, 3, 4], 2>
+```
 #### 实现方式
+```ts
+type Chunk<
+  T extends any[],
+  Size extends number,
+  R extends any[] = []
+> = R['length'] extends Size
+  ? [R, ...Chunk<T, Size>]
+  : T extends [infer F, ...infer L]
+    ? Chunk<L, Size, [...R, F]>
+    : R['length'] extends 0
+      ? []
+      : [R]
+```
+代码详解：实现`Chunk`大体思路是：借助一个辅助空数组，在遍历数组时往这个辅助数组中添加元素，一直到等于指定长度，然后进行下一次相同操作。
+
 
 ### Fill(数组fill方法)
 #### 用法
@@ -1835,6 +1975,8 @@ type FlipObject<T extends Record<string, BasicType>> = {
 #### 实现方式 
 
 ### Currying(柯里化)
+#### 用法
+#### 实现方式
 
 ### UnionToIntersection(元组取交集)
 在实现`UnionToIntersection`之前，我们先来回顾一下`TS`中`&`符号的作用：
@@ -2170,7 +2312,6 @@ type Get<T, S extends string> =
 * 含有`.`符号的字符串：对于这种情况，我们先判断`.`符号左侧部分是否满足为`T`类型的某个`key`，如果满足则递归调用`Get`；如果不满足，则直接返回`never`。
 
 ### StringToNumber(字符串数字转数字)
-
 #### 用法
 `StringToNumber`是用来将字符串形式的数字转换成真正数字类型数字的，其用法如下：
 ```ts
@@ -2320,14 +2461,24 @@ type TupleToEnum<T extends readonly string[]> = {
 
 
 ### Format(字符串格式化函数类型)
+#### 用法
+#### 实现方式
 
 ### LengthOfString(字符串的长度)
+#### 用法
+#### 实现方式
 
 ### Join(字符串拼接)
+#### 用法
+#### 实现方式
 
 ### DeepPick(深层次Pick)
+#### 用法
+#### 实现方式
 
 ### Camelize(类型属性键转小驼峰)
+#### 用法
+#### 实现方式
 
 ## 地狱
 撰写中...
