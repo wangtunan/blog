@@ -1937,36 +1937,172 @@ type Chunk<
 
 
 ### Fill(数组fill方法)
+实现`Fill`时，不考虑索引，全部替换。
 #### 用法
+```ts
+// 解雇：[true, true, true]
+type result = Fill<[1, 2, 3], true>
+```
 #### 实现方式
+```ts
+type Fill<
+  T extends any[],
+  U
+> = T extends [any, ...infer Rest]
+    ? [U, ...Fill<Rest, U>]
+    : []
+```
 
 ### Without(移除)
+`Without<T, F>`，其中`T`需要是数组形式，`F`可以是一个数字或者一个数组。
 #### 用法
+`Without`是用来从数组中移除指定元素的，其用法如下：
+```ts
+// 结果：
+type result = Without<[1, 2, 1, 2, 3], [1, 2]>
+```
 #### 实现方式
+```ts
+type ToUnion<T> = T extends any[] ? T[number] : T
+type Without<
+  T extends any[],
+  F,
+  U = ToUnion<F>,
+  R extends any[] = []
+> = T extends [infer First, ...infer Rest]
+    ? First extends U
+      ? Without<Rest, F, U, [...R]>
+      : Without<Rest, F, U, [...R, First]>
+    : R
+```
+代码详解：因为`F`支持单数字和数组，所以定义一个`ToUion`来统一处理成联合类型。随后直接遍历数组，如果当前迭代的元素在联合类型中，则直接跳过进行下一次迭代；否则，把当前迭代元素添加到`R`辅助数组中。
 
-### Trunc(取整)
+### Trunc(数学trunc取整)
 #### 用法
+`Trunc`是用来实现`Math.trunc()`方法的，其用法如下：
+```ts
+// 结果：100
+type result = Trunc<100.32>
+```
 #### 实现方式
+```ts
+type Trunc<T extends number | string> = `${T}` extends `${infer L}.${string}` ? L : `${T}`
+```
 
 ### IndexOf(数组indexOf方法)
 #### 用法
+`IndexOf`是用来实现数组`indexOf`方法的，其用法如下：
+```ts
+// 结果：2
+type result = IndexOf<[1, 2, 3, 4], 3>
+```
 #### 实现方式
+```ts
+type IndexOf<
+  T extends any[],
+  U,
+  Index extends any[] = []
+> = T extends [infer First, ...infer Rest]
+    ? First extends U
+      ? Index['length']
+      : IndexOf<Rest, U, [...Index, 0]>
+    : -1
+```
 
 ### Join(数组join方法)
 #### 用法
+`Join`是用来实现数组`join`方法的，其用法如下：
+```ts
+// 结果：'a-p-p-l-e'
+type result = Join<['a', 'p', 'p', 'l', 'e'], '-'>
+```
 #### 实现方式
+```ts
+type Join<
+  T extends any[],
+  U extends string | number,
+  R extends string = ''
+> = T extends [infer First, ...infer Rest]
+    ? Rest['length'] extends 0
+      ? `${R extends '' ? '' : `${R}${U}`}${First&string}`
+      : Join<Rest, U, `${R extends '' ? '' : `${R}${U}`}${First&string}`>
+    : R
+```
 
 ### LastIndexOf(数组lastIndexOf方法)
 #### 用法
+`LastIndexOf`是用来实现数组`lastIndexOf`方法的，其用法如下：
+```ts
+// 结果：3
+type result = LastIndexOf<[1, 2, 3, 4, 5], 4>
+```
 #### 实现方式
+```ts
+type Pop<T extends any[]> = T extends [...infer Rest, any] ? Rest : never
+type LastIndexOf<
+  T extends any[],
+  U,
+  Index extends any[] = Pop<T>
+> = T extends [...infer Rest, infer Last]
+    ? Last extends U
+      ? Index['length']
+      : LastIndexOf<Rest, U, Pop<Index>>
+    : -1
+```
 
 ### Unique(数组去重)
 #### 用法
+`Unique`是用来实现数组去重的，其用法如下：
+```ts
+// 结果：[1, 2, 3]
+type result = Unique<[1, 1, 2, 2, 3, 3]>
+```
 #### 实现方式
+```ts
+type Unique<
+  T extends any[],
+  R extends any[] = []
+> = T extends [infer First, ...infer Rest]
+    ? First extends R[number]
+      ? Unique<Rest, [...R]>
+      : Unique<Rest, [...R, First]>
+    : R
+```
 
 ### MapTypes(类型转换)
 #### 用法
+`MapTypes`是用来根据指定类型进行替换的，其用法如下：
+```ts
+// 结果：{ type: number; age: number; }
+type result = MapTypes<{ type: string; age: number; }, { mapFrom: string;mapTo: number; }>
+```
 #### 实现方式
+```ts
+type GetMapType<
+  T, 
+  R,
+  Type = R extends { mapFrom: T, mapTo: infer To } ? To : never
+> = [Type] extends [never] ? T : Type
+type MapTypes<T, R> = {
+  [P in keyof T]: GetMapType<T[P], R>
+}
+```
+代码详解：在以上的实现中，最核心的代码是获取`Type`类型。
+* `R extends { mapFrom: T, mapTo: infer To }`：这段代码表示，`R`是不是右边的子类型，我们以以上案例来说明：
+```ts
+// 当P = 'type'时，
+T[P] = string, R = { mapFrom: string;mapTo: number; }
+=> { mapFrom: string; mapTo: number; } extends { mapFrom: string, mapTo: infer To }
+=> To = number
+=> { type: number }
+
+// 当P = 'age'时
+T[P] = number, R = { mapFrom: string;mapTo: number; }
+=> { mapFrom: string; mapTo: number; } extends { mapFrom: number, mapTo: infer To }
+=> never
+=> GetMapType<T[P], R> = number
+=> { age: number } 
+```
 
 ## 困难
 
