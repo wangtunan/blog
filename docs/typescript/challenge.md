@@ -2106,13 +2106,32 @@ T[P] = number, R = { mapFrom: string;mapTo: number; }
 
 ## 困难
 
-### SimpleVue
-#### 用法
-#### 实现方式 
-
 ### Currying(柯里化)
+在`JavaScript`中`Currying`是用来实现函数柯里化的，其用法如下：
+```js
+const add = (a: number, b: number) => a + b
+const three = add(1, 2)
+
+const curriedAdd = Currying(add)
+const five = curriedAdd(2)(3)
+```
 #### 用法
+`Currying`是用来实现`JavaScript`中的柯里化的，其用法如下：
+```js
+const func = Currying((a: number, b: string, c: boolean) => true)
+// (a: string) => (a: number) => (a: boolean) => true
+type funcType = typeof func
+```
 #### 实现方式
+```js
+type Curry<P, R> =
+  P extends []
+    ? () => R
+    : P extends [infer First, ...infer Rest]
+      ? (a: First) => Rest['length'] extends 0 ? R : Curry<Rest, R>
+      : R
+declare function Currying<F>(fn: F): F extends (...args: infer P) => infer R ? Curry<P, R> : never
+```
 
 ### UnionToIntersection(元组取交集)
 在实现`UnionToIntersection`之前，我们先来回顾一下`TS`中`&`符号的作用：
