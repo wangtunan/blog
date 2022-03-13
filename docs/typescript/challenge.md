@@ -2591,9 +2591,16 @@ type Expected1 = {
   readonly Windows: 'Windows';
   readonly Linux: 'Linux'
 }
+type Expected2 = {
+  readonly MacOs: 0;
+  readonly Windows: 1;
+  readonly Linux: 2
+}
 
 // 结果：Expected1
 type result1 = TupleToEnum<typeof OperatingSystem>
+// 结果：Expected2
+type result2 = TupleToEnum<typeof OperatingSystem, true>
 ```
 #### 实现方式
 在实现`TupleToEnum`之前，我们先来实现`TupleKeys`，它是用来获取所有元组索引组合成的联合类型的。
@@ -2607,20 +2614,76 @@ type TupleKeys<
 // 结果：0 | 1 | 2
 type keys = TupleKeys<typeof OperatingSystem>
 ```
-在有了以上`keys`后，我们就能实现`TupleToEnum`了，如下：
+在有了以上`keys`后，就能很容易实现`TupleToEnum`了，如下：
 ```ts
-type TupleToEnum<T extends readonly string[]> = {
-  readonly [K in TupleKeys<T> as Capitalize<T[K]>]: T[K]
+type TupleToEnum<
+  T extends readonly string[],
+  N extends boolean = false
+> = {
+  readonly [K in TupleKeys<T> as Capitalize<T[K]>]: N extends true ? K : T[K]
 }
 ```
 
-
 ### Format(字符串格式化函数类型)
+`%s`表示格式化为`(x: string) => any`形式，`%d`表示格式化为`(x: number) => any`形式。
 #### 用法
+`Format`是将字符串格式化为指定函数类型的，用法如下：
+```ts
+// 结果1：(x: string) => string
+type result1 = Format<'a%sbc'>
+// 结果2：(x: number) => string
+type result2 = Format<'a%dbc'>
+// 结果3：(x: number) => (x: string) => string>
+type result3 = Format<'a%dbc%s'>
+```
 #### 实现方式
+```ts
+type FormatMaps = {
+  's': string;
+  'd': number;
+}
+type Format<
+  S extends string
+> = S extends `${infer S1}%${infer P}${infer S2}`
+      ? P extends keyof FormatMaps
+        ? (x: FormatMaps[P]) => Format<S2>
+        : string
+      : string
+```
 
 ### LengthOfString(字符串的长度)
+我们之前在**中级**大章节中已经实现过`LengthOfString`，但它面临的问题是，如果字符有上百个，由于`TS`对于递归的次数存在限制，会提示嵌套过深。
 #### 用法
+```ts
+// 结果：91
+type result = LengthOfString<'1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901'>
+```
+#### 实现方式
+```ts
+type LengthOfString<
+  S extends string,
+  R extends any[] = []
+> = S extends `${infer S0}${infer S1}${infer S2}${infer S3}${infer S4}${infer S5}${infer S6}${infer S7}${infer S8}${infer S9}${infer Rest}`
+      ? LengthOfString<Rest, [...R, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]>
+      : S extends `${infer S1}${infer S2}`
+          ? LengthOfString<S2, [...R, S1]>
+          : R['length']
+```
+代码解析：这里我们巧妙的使用占位的思想，`S extends ${infer S1}${infer S2}${infer S3}`，如果`S`满足这个占位形式，则表示`S`的长度至少为`2`，带入到上面的例子，解析步骤如下：
+```ts
+// 第一次递归
+S满足至少10个字符的长度，R = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+// 第二弟递归
+S满足至少10个字符的长度，R = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+// 省略
+// 最后一次递归
+S = '1'不满足至少10个字符的长度，R = [1, ....., 1]
+// 最后结果
+R['length'] = 91
+```
+
+### UnionToTuple(联合类型转元组)
+### 用法
 #### 实现方式
 
 ### Join(字符串拼接)
@@ -2631,7 +2694,47 @@ type TupleToEnum<T extends readonly string[]> = {
 #### 用法
 #### 实现方式
 
+### Pinia(实现Pinia类型)
+#### 用法
+#### 实现方式
+
 ### Camelize(类型属性键转小驼峰)
+#### 用法
+#### 实现方式
+
+### DropString(移除子字符串)
+#### 用法
+#### 实现方式
+
+### Split(字符串Split方法)
+#### 用法
+#### 实现方式
+
+### ClassPublicKeys(类的公共属性)
+#### 用法
+#### 实现方式
+
+### IsRequredKeys(是否为必填key)
+#### 用法
+#### 实现方式
+
+### ObjectEntries(对象的entries方法)
+#### 用法
+#### 实现方式
+
+### IsPalindrome(是否为回文)
+#### 用法
+#### 实现方式
+
+### MutableKeys(所有可写键)
+#### 用法
+#### 实现方式
+
+### Intersection(交集)
+#### 用法
+#### 实现方式
+
+### BinaryToDecimal(二进制转十进制)
 #### 用法
 #### 实现方式
 
