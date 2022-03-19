@@ -2684,15 +2684,146 @@ R['length'] = 91
 
 ### UnionToTuple(联合类型转元组)
 ### 用法
+`UnionToTuple`是用来将联合类型转成元组的，用法如下：
+```ts
+// 结果1：['a', 'b']
+type result1 = UnionToTuple<'a'>
+// 结果2：['a', 'b']
+type result2 = UnionToTuple<'a' | 'b'>
+// 结果3：['a', 'b']
+type result3 = UnionToTuple<'a' | 'b' | never>
+
+```
 #### 实现方式
+```ts
+type UnionToIntersection<U> = (
+  U extends any 
+  ? (x: U) => any 
+  : never
+) extends (x: infer R) => any 
+  ? R
+  : never
+
+type LastUnion<U> = UnionToIntersection<
+  U extends any
+    ? (x: U) => 0
+    : never
+> extends (x: infer R) => 0
+  ? R
+  : never
+
+type UnionToTuple<
+  T,
+  Last = LastUnion<T>
+> = [T] extends [never]
+  ? []
+  : [...UnionToTuple<Exclude<T, Last>>, Last] 
+```
+代码详解：
+* `UnionToIntersection`: 联合类型取交集，在之前已经实现过，这里不再赘述。主要理解以下案例：
+```ts
+type f1 = (x: 1) => 0
+type f2 = (x: 2) => 0
+
+// 函数重载结果
+// function (x: 1): 0;
+// function (x: 2): 0;
+type result = UnionToIntersection<f1 | f2>
+
+```
+对于函数参数的交集而言，不是简单的把参数取交集，而是"联合"起来，也就是构造一个新的函数类型，即：**函数重载**
+* `LastUnion`: 取联合类型最后的一个元素，如果一个函数存在重载的情况，`TS`会取最后一个函数签名，例如：
+```ts
+type f1 = (x: 1) => 0
+type f2 = (x: 2) => 0
+
+// 结果1：2
+type result1 = f1 & f2 extends (x: infer R) => 0 ? R : never
+// 结果2：1
+type result2 = f2 & f1 extends (x: infer R) => 0 ? R : never
+```
 
 ### Join(字符串拼接)
 #### 用法
+`Join`是用来实现拼接字符串的，用法如下：
+```ts
+// 结果1： ''
+const Expected1 = join('-')();
+// 结果2： 'a'
+const Expected2 = join('-')('a');
+// 结果3： 'abc'
+const Expected3 = join('')('a', 'b', 'c');
+// 结果4： 'a-b-c'
+const Expected4 = join('-')('a', 'b', 'c');
+```
 #### 实现方式
+```ts
+type Tail<T extends string[]> = T extends [any, ...infer Rest] ? Rest : []
+type StringJoin<
+  D extends string,
+  P extends string[] = []
+> = P extends []
+    ? ''
+    : P extends [infer Only]
+      ? Only
+      : `${P[0]}${D}${StringJoin<D, Tail<P>>}`
+
+declare function join<D extends string>(delimiter: D): <P extends string[] = []>(...parts: P) => StringJoin<D, P>;
+```
 
 ### DeepPick(深层次Pick)
 #### 用法
+`DeepPick`是用来深层次获取属性值的，用法如下：
+```ts
+type Obj = {
+  a: number,
+  b: string,
+  c:  boolean,
+  obj: {
+    d: number,
+    e: string,
+    f:  boolean,
+    obj2: {
+      g: number,
+      h: string,
+      i: boolean,
+    }
+  }
+}
+// 结果1：Obj
+type result1 = DeepPick<Obj, ''>
+// 结果2：{ a: number; }
+type result2 = DeepPick<Obj, 'a'>
+// 结果3：{ a: number; } & { obj: { d: number; } }
+type result3 = DeepPick<Obj, 'a', 'obj.d'>
+```
 #### 实现方式
+在之前，我们实现过根据属性路径取值`Get`，根据其思路我们很容易实现`DeepPick`，如下：
+```ts
+type UnionToIntersection<U> = 
+  (U extends any 
+    ? (x: U) => any 
+    : never
+  ) extends (x: infer V) => any 
+    ? V
+    : never
+
+type GetType<T, S> = 
+  S extends `${infer S1}.${infer S2}`
+    ? S1 extends keyof T
+      ? { [K in S1]: GetType<T[S1], S2> }
+      : never
+    : S extends keyof T
+      ? { [K in S]: T[K] }
+      : never
+
+type DeepPick<
+  T,
+  U extends string
+> = UnionToIntersection<
+  U extends infer keys ? GetType<T, keys> : never
+>
+```
 
 ### Pinia(实现Pinia类型)
 #### 用法
