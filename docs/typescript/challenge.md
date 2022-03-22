@@ -2683,7 +2683,7 @@ R['length'] = 91
 ```
 
 ### UnionToTuple(联合类型转元组)
-### 用法
+#### 用法
 `UnionToTuple`是用来将联合类型转成元组的，用法如下：
 ```ts
 // 结果1：['a', 'b']
@@ -2825,29 +2825,128 @@ type DeepPick<
 >
 ```
 
-### Pinia(实现Pinia类型)
+### Camelize(对象属性键转小驼峰)
 #### 用法
-#### 实现方式
+`Camelize`是用来将对象中的`key`全部转换为小驼峰的，用法如下：
+```ts
+type Person = {
+  some_PROP: string;
+  prop: {
+    another_prop: string;
+  };
+  array: [
+    { snake_case: string; }
+  ]
+}
+type Expected = {
+  someProp: string;
+  prop: { 
+    anotherProp: string;
+  };
+  array: [
+    { snakeCase: string; }
+  ]
+}
 
-### Camelize(类型属性键转小驼峰)
-#### 用法
+// 结果：Expected
+type result = Camelize<Person>
+```
 #### 实现方式
+```ts
+type CamelCase<S> = 
+  S extends `${infer S1}_${infer S2}`
+    ? `${Lowercase<S1>}${CamelCase<Capitalize<Lowercase<S2>>>}`
+    : S
 
-### DropString(移除子字符串)
+type Camelize<T> = {
+  [K in keyof T as CamelCase<K>]: 
+    T[K] extends [infer R]
+      ? [Camelize<R>]
+      : T[K] extends Object
+        ? Camelize<T[K]>
+        : T[K]
+}
+```
+代码详解：`CamelCase`的实现可以分为两个部分，第一部分来自于处理属性`key`转小驼峰的情况，第二部分来自于嵌套对象的情况。
+* 处理属性`key`：根据之前介绍过的`as`用法，我们可以在`in`迭代过程中使用`as`来进一步**加工或者处理**属性`key`，也就是`CamelCase`的部分。
+* 处理嵌套对象：对于`T[P]`而言，我们考虑嵌套对象为数组和普通对象的情况，首先判断是否为数组类型，如果是则迭代数组递归调用`Camelize`；如果是普通对象，则直接调用`Camelize`；如果都不是，则直接返回`T[P]`即可。
+
+### DropString(移除全部字符)
 #### 用法
+`DropString`是用来移除全部字符的，用法如下：
+```ts
+// 结果：'ooar!'
+type result = DropString<'foobar!', 'fb'>
+```
 #### 实现方式
+```ts
+type StrngToUnion<S extends string> = 
+  S extends `${infer S1}${infer S2}`
+    ? S1 | StrngToUnion<S2>
+    : S
+
+type DropString<
+  S extends string,
+  R extends string,
+  U = StrngToUnion<R>
+> = S extends `${infer S1}${infer S2}`
+    ? S1 extends U
+      ? DropString<S2, R>
+      : `${S1}${DropString<S2, R>}`
+    : S
+```
+代码详解：实现`DropString`的核心是将指定的字符串转换为联合类型，转换之后只需要迭代字符串，判断当前迭代的字符是不是在联合类型中，如果是则直接丢弃，不是则原样保留。
 
 ### Split(字符串Split方法)
 #### 用法
+`Split`是用来实现字符串`split`方法的，其用法如下：
+```ts
+// 结果：["Hi!", "How", "are", "you?"]
+type result = Split<'Hi! How are you?', ' '>
+```
 #### 实现方式
-
-### ClassPublicKeys(类的公共属性)
-#### 用法
-#### 实现方式
+```ts
+type Split<
+  S extends string,
+  SEP extends string,
+  R extends any[] = []
+> = S extends `${infer _}`
+      ? S extends `${infer S1}${SEP}${infer S2}`
+        ? Split<S2, SEP, [...R, S1]>
+        : S extends ''
+          ? SEP extends ''
+            ? R
+            : [...R, S]
+          : [...R, S]
+      : string[]
+```
 
 ### IsRequredKeys(是否为必填key)
 #### 用法
+`IsRequredKeys`是用来判断是否为必填`key`的，其用法如下：
+```ts
+type Obj = {
+  a: number,
+  b?: string
+}
+// 结果1：true
+type result1 = IsRequredKeys<Obj, 'a'>
+// 结果2：false
+type result2 = IsRequredKeys<Obj, 'b'>
+```
 #### 实现方式
+```ts
+type IsRequiredKey<T, K extends keyof T> = T extends Record<K, T[K]> ? true : false
+```
+根据`IsRequiredKey`的实现思路，我们可以很容易实现`IsOptionalKey`，如下：
+```ts
+type IsOptionalKey<T, K extends keyof T> = {} extends { [P in K]: T[P] } ? true : false
+
+// 结果1：false
+type result1 = IsOptionalKey<Obj, 'a'>
+// 结果2：true
+type result2 = IsOptionalKey<Obj, 'b'>
+```
 
 ### ObjectEntries(对象的entries方法)
 #### 用法
