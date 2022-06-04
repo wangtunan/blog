@@ -10,7 +10,7 @@ sidebar: auto
 在`Type-Challenges`中，可以从`简单`、`中等`、`困难`以及`地狱`难度，循序渐进的学习`TypeScript`高级技巧。
 
 如果你需要选择其他的方向来深入学习`TypeScript`高级技巧，这里也有一些推荐的开源项目：
-* 官方内置：在`lib.es5.d.ts`文件中，`TypeScript`官方默认内置的一些辅助工具函数，例如：`Partial`、`Required`、`Pick`以及`Record`等等。
+* 官方内置：在`lib.es5.d.ts`文件中，`TypeScript`官方默认内置了一些辅助工具函数，例如：`Partial`、`Required`、`Pick`以及`Record`等等。
 * 非官方开源库：[utility-types](https://github.com/piotrwitek/utility-types)、[ts-toolbelt](https://github.com/millsp/ts-toolbelt)、[SimplyTyped](https://github.com/andnp/SimplyTyped)
 
 在之后的挑战中，我们会尽力对每道题进行必要的讲解，力争在进行`Type-Challenges`类型挑战时弄清楚所有涉及到的知识点。
@@ -85,7 +85,7 @@ for (let key in obj)
 ```
 
 ### typeof
-`TS`中的`typeof`，可以用来获取一个`JavaScript`变量的类型，通常同于获取一个对象或者一个函数的类型，如下：
+`TS`中的`typeof`，可以用来获取一个`JavaScript`变量的类型，通常用于获取一个普通对象或者一个函数的类型，如下：
 ```ts
 const add = (a: number, b: number): number => {
   return a + b
@@ -104,7 +104,7 @@ type t2 = typeof obj
 ### never
 `never`类型表示永远不会有值的一种类型。
 
-如果一个函数抛出了一个错误，那么这个函数就可以用`never`或者`void`来表示其返回值，如下：
+例如，如果一个函数抛出一个错误，那么这个函数就可以用`never`或者`void`来表示其返回值，如下：
 ```ts
 function handlerError(message: string): never {
   throw new Error(message)
