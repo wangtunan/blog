@@ -33,3 +33,9 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 
 ## VuePress
 [VuePress 基础知识](https://wangtunan.github.io/blog/vuepress/)<br/>
+
+## 鼓励作者
+如果你觉得博客写得还不错，可以帮忙点个star或者打赏犒劳一下
+
+![打赏](./donate.jpg)
+

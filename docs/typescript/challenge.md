@@ -695,7 +695,7 @@ type Readonly<T, K extends keyof T = keyof T> = Omit<T, K> & {
 ```
 代码详解：
 * `K extends keyof T = keyof T`：如要传递了`K`，那么只能是`T`中已经存在的属性，不存在则报错；如果不传递，则默认值为`keyof T`，意味着全部属性都添加`readonly`。
-* `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`，那么就丢失一些属性，例如`title`。
+* `T & U`：在本例中表示将`T`和`U`中的字段结合起来，如果没有`&`会丢失一些属性，例如`title`。
 
 ### DeepReadonly(深度Readonly)
 #### 用法
@@ -747,8 +747,8 @@ type TupleToUnion<T extends readonly any[]> =
     : never
 ```
 代码详解：
-* `T[number]`：它会自动迭代元组的数字型索引，然后将所以元素组合成一个联合类型。
-* `R | TupleToUnion<args>`：R表示每一次迭代中的第一个元素，它的迭代过程可以用下面伪代码表示：
+* `T[number]`：它会自动迭代元组的数字型索引，然后将所有元素组合成一个联合类型。
+* `R | TupleToUnion<args>`：`R`表示每一次迭代中的第一个元素，它的迭代过程可以用下面伪代码表示：
 ```ts
 // 第一次迭代
 const R = '1'
@@ -894,9 +894,9 @@ type LookUp<
 #### 用法
 `Trim`、`TrimLeft`以及`TrimRight`这几个工具比较好理解，它们都是用来移除字符串中的空白符的。
 ```ts
-const t1 = TrimLeft<' str'>  // 'str'
-const t2 = Trim<' str '>     // 'str'
-const t3 = TrimRight<'str '> // 'str'
+type t1 = TrimLeft<' str'>  // 'str'
+type t2 = Trim<' str '>     // 'str'
+type t3 = TrimRight<'str '> // 'str'
 ```
 #### 实现方式
 ```ts

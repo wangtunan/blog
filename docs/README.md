@@ -14,3 +14,8 @@ features:
   details: 记录个人博客，见证成长之路。
 footer: Copyright © 2019-present Wangtunan
 ---
+
+## 鼓励作者
+如果你觉得博客写得还不错，可以帮忙点个star或者打赏犒劳一下
+
+![打赏](/donate.jpg)
