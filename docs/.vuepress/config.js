@@ -102,6 +102,19 @@ module.exports = {
         ]
       },
       {
+        text: 'CSS预编译器',
+        items: [
+          {
+            text: 'SCSS',
+            link: '/cssPrecompiler/SCSS/'
+          },
+          {
+            text: 'Sass-Loader源码分析',
+            link: '/cssPrecompiler/sassLoader/'
+          }
+        ]
+      },
+      {
         text: 'VuePress',
         link: '/vuepress/'
       }
