@@ -105,8 +105,8 @@ module.exports = {
         text: 'CSS预编译器',
         items: [
           {
-            text: 'SCSS',
-            link: '/cssPrecompiler/SCSS/'
+            text: 'SASS',
+            link: '/cssPrecompiler/SASS/'
           },
           {
             text: 'Sass-Loader源码分析',
