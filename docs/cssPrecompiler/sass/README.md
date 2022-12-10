@@ -306,18 +306,151 @@ console.log(vars.themeColor)  // '#4093ff'
 ```
 
 ## 差值语法
+差值语法，格式是：`#{expresssion}`，它几乎可以用在`SASS`中任何地方，例如：
+1. 样式规则的选择器
+2. 属性名称
+3. 变量
+4. 注释
+5. 其它
+
+
+
+```scss
+@mixin position($name, $position, $topOrBottom, $leftOrRight) {
+  #{$name}.is-#{$position} {
+    position: $position;
+    #{$topOrBottom}: 0;
+    #{$leftOrRight}: 0;
+  }
+}
+
+@include position('.box', 'absolute', 'top', 'left');
+```
+以上代码编译成：
+```scss
+.box.is-absolute {
+  position: "absolute";
+  top: 0;
+  left: 0;
+}
+```
 
 ## @规则
+### @debug、@error和@warn
+::: tip
+`SASS`中的`@debug`、`@error`、`@warn`分别和`JavaScript`中的`console.log()`、`console.error()`、`console.warn()`类似。
+:::
+
+`@debug`可以打印一些信息，在这调试一些表达式或变量值的时候非常有用。其打印的格式为：`fileName:lineNumber Debug: xxxxx`。其中`fileName`代表当前样式表的文件名，`lineNumber`表示当前打印的行数，`xxxx`内容表示我们想要打印的值，例如：
+```scss
+@mixin position($name, $position, $topOrBottom, $leftOrRight) {
+  @debug $name, $position;
+  #{$name}.is-#{$position} {
+    position: $position;
+    #{$topOrBottom}: 0;
+    #{$leftOrRight}: 0;
+  }
+}
+@include position('.box', 'absolute', 'top', 'left');
+
+// 打印内容
+index.scss:2 Debug: ".box", "absolute"
+```
+`@warn`和`@error`通常用来对外部传入的值进行校验，看是否符合规范，如果不符合咋提示警告信息和报错信息，例如：
+```scss
+@mixin position($name, $position, $topOrBottom, $leftOrRight) {
+  @if $position != 'relative' and $position != 'absolute' {
+    @warn 'position must be relative or absolute'
+  };
+  @if $topOrBottom != 'top' and $topOrBottom != 'bottom' {
+    @error 'topOrBottom must be left or right'
+  };
+  #{$name}.is-#{$position} {
+    position: $position;
+    #{$topOrBottom}: 0;
+    #{$leftOrRight}: 0;
+  }
+}
+@include position('.box', 'fixed', 'top1', 'left');
+
+// 警告内容
+Warning: position must be relative or absolute
+// 报错内容
+Error: "topOrBottom must be left or right"
+```
+### @if和@else
+`SASS`中的`@if/@else`和`JavaScript`中的`if/else`规则是一样的，例如：
+```scss
+@mixin triangle($size, $color, $direction) {
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: calc($size / 2);
+
+  @if $direction == 'top' {
+    border-top-color: $color;
+  } @else if ($direction == 'bottom') {
+    border-bottom-color: $color;
+  } @else if ($direction == 'left') {
+    border-left-color: $color;
+  } @else if ($direction == 'right') {
+    border-right-color: $color;
+  } @else {
+    @warn 'direction must be top, bottom, left or right'
+  }
+};
+
+.box {
+  @include triangle(10px, '#f60', 'right');
+}
+```
+`@if`和`@else if`也能使用`SASS`中的`not`、`or`和`and`，例如：
+```scss
+@mixin triangle($size, $color, $direction) {
+  $directions: top, bottom, left, right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: calc($size / 2);
+
+  @if not index($directions, $direction) {
+    @warn 'direction must be top, bottom, left or right'
+  } @else {
+    border-#{$direction}-color: $color;
+  }
+};
+
+.box {
+  @include triangle(10px, '#f60', 'right');
+}
+```
+以上代码编译结果均为：
+```scss
+.box {
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-right-color: "#f60";
+}
+```
+
+### @each和@for
+### @mixin和@include
+### @extend
+### @function
+
+### @import
 ### @use
 ### @forward
-### @import
-### @mixin和@include
-### @function
-### @extend
+
+
+
 ### @at-root
-### @if和@else
-### @each和@for
-### @debug、@error和@warn
+
 
 ## 值类型
 ### Numbers
