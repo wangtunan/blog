@@ -869,13 +869,244 @@ $defaultLine: 2;
 
 
 ## 内置模块
-### color
-### list
-### map
+`SASS`内置了许多有用的函数，它们同样也是`SASS`中的一部分，在内置模块这个章节，我们只介绍常用的内置函数，其它函数可以通过点击每个章节后面提供的链接进行学习。
 ### math
+::: tip
+可以使用`@use 'sass:math'`来引用内置的`math`模块。
+:::
+常用的变量有：
+```scss
+@use 'sass:math';
+
+@debug math.$pi;   // 数学中的π 3.1415926536
+@debug math.$e;    // 数学中的e 2.7182818285
+```
+
+常用的函数有：
+* `ceil($number) => number`：向上取整函数，全局函数。
+* `floor($number) => number`：向下取整函数，全局函数。
+* `round($number) => number`：四舍五入函数，全局函数。
+* `max($numbers...) => number`：最大值比较函数，全局函数。
+* `min($numbers...) => number`：最小值比较函数，全局函数。
+* `random() => number`：取`0-1`之间随机数函数，全局函数。
+```scss
+@debug ceil(4.2);       // 5
+@debug floor(4.2);      // 4
+@debug round(4.2);      // 4
+@debug max(10px, 1px);  // 10px
+@debug min(10px, 1px);  // 1px
+@debug random();        // 随机 0.7768899209
+```
+其它变量和函数，请点击[Math内置变量和函数](https://sass-lang.com/documentation/modules/math)
+
+### list
+::: tip
+可以使用`@use 'sass:list'`来引用内置的`list`模块(注意，map可以看做是一个特殊的list，所以map也可以使用以下函数)。
+:::
+
+常用的`list`内置函数有：
+* `append($list, $val, $separator: auto) => list`：向`list`列表中添加一个新元素，其中`$separator`为可选参数，有三种取值(`space`空格， `comma`逗号，`slash`斜杠)，全局函数用。
+* `index($list, $val) => index | null`: 返回`list`列表中，`$val`元素的索引位置(从1开始，而不是0)，没有则返回`null`，全局函数。
+* `join($list1, $list2, $separator: auto, $bracketed: auto) => list`: 把`list1`列表和`list2`列表联合起来，返回一个新的列表，全局函数。
+* `length($list) => number`: 返回`list`列表的长度，全局函数。
+* `nth($list, $index)`: 在`list`列表中按索引取值`index`取值，全局函数。
+* `set-nth($list, $index, $value)`: 在`list`列表中按索引设置值，全局函数。
+
+```scss
+$list1: 10px, 20px;
+$list2: 20px, 30px;
+@debug append($list1, 30px);                    // 10px, 20px, 30px
+@debug append($list1, 30px, 'slash');           // 10px / 20px / 30px
+@debug index($list1, 10px);                     // 1
+@debug index($list1, 21px);                     // null
+@debug join($list1, $list2, $bracketed: true);  // [10px, 20px, 20px, 30px]
+@debug length($list1);                          // 2
+@debug nth($list1, 1);                          // 10px
+@debug set-nth($list1, 2, 200px);               // 10px, 200px
+```
+
+其它函数，请点击[List内置函数](https://sass-lang.com/documentation/modules/list)
+
+### map
+::: tip
+可以使用`@use 'sass:map'`来引用内置的`map`模块。
+:::
+
+常用的`map`内置函数有：
+* `get($map, $key, $keys...)`: 通过`key`获取`value`，其中`key`支持传递多个，既可以深层次获取`value`，全局访问通过`map-get()`，命名空间通过`map.get()`。
+* `set($map, $key, $keys..., $value) => map`: 通过`key`设置`value`，其中`key`支持传递多个，既可以深层次设置`key`，非全局函数只能通过命名空间`map.set()`。
+* `keys($map) => list`: 获取`map`的键，返回是由所有`key`组成的`list`，全局访问通过`map-keys()`，命名空间通过`map.keys()`。
+* `values($map) => list`: 获取`map`的值，返回是由所有`value`组成的`list`，全局访问通过`map-values()`，命名空间通过`map.values()`。
+* `has-key($map, $key, $keys...) => boolean`：判断`map`是否包含某个键，支持深层次判断，全局访问通过`map-has-key()`，命名空间通过`map.has-key()`。
+* `remove($map, $keys...) => map`: 在`map`中移除一个或者多个`key`，全局访问通过`map-remove()`，命名空间通过`map.remove()`。
+* `deep-remove($map, $key, $keys...) => map`: 在`map`中深层次移除`key`，只能通过命名空间`map.deep-remove()`。
+* `merge($map1, $map2) => map`: 浅层合并`map1`和`map2`，相同的键，以`map2`的值为准，全局访问通过`map-merge()`，命名空间通过`map.merge()`。
+* `deep-merge($map1, $map2) => map`: 深层次合并两个`map`，只能通过命名空间`map.deep-merge()`。
+
+```scss
+@use 'sass:map';
+$map1: (
+  name: 'a',
+  age: 18,
+  sex: 1,
+  job: (
+    name: 'FE',
+    salary: 1000,
+    city: 'shanghai'
+  )
+);
+$map2: (
+  name: 'b',
+  age: 23,
+  address: 'shanghai',
+  job: (
+    name: 'BE',
+    salary: 1000,
+    email: 'admin@gmail.com'
+  )
+);
+@debug map-get($map1, 'name');                                // 'a'
+@debug map-get($map1, 'job', 'name');                         // 'FE'
+@debug map.set($map1, 'name', 'A');                           // (name: 'A' ....)
+@debug map-keys($map1);                                       // name, age, sex, job
+@debug map-values($map1);                                     // 'a', 18, 1, ....
+@debug map-has-key($map1, 'name');                            // true
+@debug map-has-key($map1, 'job', 'name');                     // true
+@debug map-remove($map1, 'name', 'job');                      // { age: 18..... }
+@debug map.deep-remove($map1, 'job', 'name');                 // ....
+@debug map-merge((name: 'A', age: 18), (name: 'B', sex: 1));  // (name: 'B', age: 18, sex: 1)
+@debug map.deep-merge($map1, $map2);                          // ...
+```
+其它函数，请点击[Map内置函数](https://sass-lang.com/documentation/modules/map)
+
 ### meta
+::: tip
+可以使用`@use 'sass:meta'`来使用内置的`meta`模块。
+:::
+常用的`meta`内置函数有：
+* `type-of($value)`: 返回值的类型，全局函数。
+
+| Type | Result |
+| --- | --- |
+| Argument list | "arglist" |
+| Boolean | "bool" |
+| Calculation | "calculation" |
+| Color | "color" |
+| Function | "function" |
+| List | "list" |
+| Map | "map" |
+| Null | "null" |
+| Number | "number" |
+| String | "string" |
+
+* `content-exists() => boolean`: 判断在调用`mixin`的时候，是否撰写了`content`内容，全局函数。
+* `function-exists($name, $module: null) => boolean`: 判断某个模块或者当前样式表是否存在某个`function`，全局函数。
+* `mixin-exists($name, $module: null) => boolean`: 判断某个模块或者当前样式表是否存在某个`mixin`，全局函数。
+* `global-variable-exists($name, $module: null) => boolean`: 判断某个模块或者当前样式表是否存在某个全局变量，全局函数。
+* `variable-exists($name) => boolean`: 判断当前作用域中是否存在某个变量，全局函数。
+```scss
+@use 'sass:meta';
+
+$theme-color: #409Eff;
+@function sum($numbers...) {
+  $result: 0;
+  @each $number in $numbers {
+    $result: $result + $number;
+  }
+  @return $result;
+}
+@mixin ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@debug type-of(10px);                         // number
+@debug type-of(calc(100% + 10px));            // calculation
+@debug type-of((10px, 20px, 30px));           // list
+@debug function-exists('sum');                // true
+@debug mixin-exists('ellipsis');              // true
+@debug global-variable-exists('theme-color'); // true
+@debug variable-exists('name');               // false
+```
+
+其它函数，请点击[Meta内置函数](https://sass-lang.com/documentation/modules/meta)
+
 ### selector
+::: tip
+可以使用`@use 'sass:selector'`来引用内置的`selector`模块。
+:::
+
+常用的`selector`内置函数有：
+* `append($selectors...) => selector`: 把选择器联合成一个，全局访问通过`selector-append`。
+* `nest($selectors...) => selector`: 把选择器进行嵌套，全局访问通过`selector-nest`。
+* `replace($selector, $original, $replacement) => selector`: 将选择器中的指定选择器，替换成另外一个，全局访问通过`selector-replace`。
+* `unify($selector1, $selector2) => selector || null`: 返回两个选择器公共匹配的部分，全局访问通过`selector-unify`。
+* `simple-selectors($selector) => list`: 将选择器拆分成一系列选择器组成的`list`列表，全局函数。
+
+```scss
+@use 'sass:selector';
+
+@debug selector.append('a', '.disabled');            // a.disabled
+@debug selector.append('.accordion', '__copy');      // .accordion__copy
+@debug selector.nest('ul', 'li');                    // ul li
+@debug selector.nest('.alert, .warning', 'p');       // .alert p, .warning p
+@debug selector.nest('.alert', '&:hover');           // .alert:hover
+@debug selector.replace('a.disabled', 'a', '.link'); // .link.disabled
+@debug selector.unify('a', '.disabled');             // a.disabled
+@debug selector.unify('a.disabled', 'a.outgoing');   // a.disabled.outgoing
+@debug simple-selectors('main.blog:after');          // main, .blog, :after
+```
+
+其它函数，请点击[Selector内置函数](https://sass-lang.com/documentation/modules/selector)
+
 ### string
+::: tip
+可以使用`@use 'sass:string'`来引用内置的`string`模块。
+:::
+
+常用的`string`内置函数有：
+* `index($string, $substring) => number`: 返回子字符串所在位置的索引(索引从1开始，而不是0)，全局访问通过`str-index`。
+* `insert($string, $insert, $index) => string`: 向字符串指定索引位置插入一个字符串，全局访问通过`str-insert`。
+* `length($string) => number`: 返回字符串的长度，全局访问通过`str-length`。
+* `slice($string, $start, $end: -1) => string`: 通过指定开始位置和结束位置截取字符串，全局访问通过`str-slice`。
+* `to-upper-case($string) => string`: 将字符串转换成大写形式，全局函数。
+* `to-lower-case($string) => string`: 将字符串转换成小写形式，全局函数。
+* `unique-id() => string`: 随机生成一个在当前编译环境下唯一的一个字符串，全局函数。
+* `unquote($string) => string`: 移除字符串引号，全局函数。
+* `quote($string) => string`: 添加字符串引号，全局函数。
+
+```scss
+@use 'sass:string';
+
+@debug str-index('abc', 'a');     // 1
+@debug str-insert('abc', 'b', 2); // abbc
+@debug str-length('abc ef');      // 6
+@debug str-slice('abcd', 2, 4);   // bcd
+@debug to-upper-case('abcd');     // ABCD
+@debug to-lower-case('ABCD');     // abcd
+@debug unique-id();               // 随机 uxxxxxx
+@debug unquote('abcd');           // abcd
+@debug quote(abcd);               // 'abcd'
+```
+
+其它函数，请点击[String内置函数](https://sass-lang.com/documentation/modules/string)
+
+### color
+* `mix($color1, $color2, $weight: 50%) => color`: 表示将两种颜色进行混合，`$color1`的比重为`$weight`，`$color2`的比重为`100% - $weigth`，全局函数。
+* `opacify($color, $amount) => color`: 设置颜色拓透明度，全局函数。
+* `opacity() => number`: 获取颜色透明度，全局函数。
+
+```scss
+@use 'sass:color';
+
+@debug mix(#409EFF, #fff, 10%);         // #ecf5ff 更接近白色
+@debug mix(#409EFF, #fff, 90%);         // #53a8ff 更接近蓝色
+@debug opacify(rgba(#036, 0.7), 0.2);   // rgba(#036, 0.9)
+@debug opacity(rgba(#036, 0.7));        // 0.7
+```
+
+其它函数，请点击[Color内置函数](https://sass-lang.com/documentation/modules/color)
 
 ## 实践案例
 
