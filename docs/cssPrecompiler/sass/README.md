@@ -1111,7 +1111,117 @@ $theme-color: #409Eff;
 ## 实践案例
 
 ### 封装实用的mixins
-### 实现响应式函数
+```scss
+// 单行折叠省略
+@mixin ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+// 多行折叠省略
+@mixin multline-ellipsis($line: 2) {
+  @if type-of($line) != 'number' {
+    @error '$line must be number'
+  }
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $line;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+// 取消滚动条
+@mixin no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    width: 0!important;
+  }
+}
+// 扩展可点击区域
+@mixin extend-click($extend: -5px) {
+  &::after {
+    content: '';
+    position: absolute;
+    @each $direction in (top, right, bottom, left) {
+      #{$direction}: $extend;
+    };
+  }
+}
+// 添加浏览器前缀
+@mixin prefix($property, $value, $prefixes: ('webkit', 'moz', 'ms', 'o')) {
+  @each $prefix in $prefixes {
+    -#{$prefix}-#{$property}: $value;
+  };
+  #{$property}: $value;
+}
+// 清除浮动
+@mixin clearfix {
+  $selector: &;
+
+  @at-root {
+    #{$selector}::before,
+    #{$selector}::after {
+      display: table;
+      content: "";
+    }
+    #{$selector}::after {
+      clear: both
+    }
+  }
+}
+
+```
+### 响应式设计和屏幕断点
+```scss
+// 屏幕断点
+$breakpoints: (
+  'medium': (min-width: 800px),
+  'large': (min-width: 1000px),
+  'huge': (min-width: 1200px),
+);
+
+// 响应式mixin
+@mixin response-to ($key, $map: $breakpoints) {
+  @if map-has-key($map, $key) {
+    @media only screen and #{inspect(map-get($map, $key))} {
+      @content;
+    }
+  } @else {
+    @warn "undefeined points: `#{$key}`";
+  }
+}
+
+.box {
+  @include response-to('medium') {
+    width: 100px;
+  }
+  @include response-to('large') {
+    width: 200px;
+  }
+  @include response-to('huge') {
+    width: 300px;
+  }
+}
+```
+编译结果：
+```scss
+@media only screen and (min-width: 800px) {
+  .box {
+    width: 100px;
+  }
+}
+@media only screen and (min-width: 1000px) {
+  .box {
+    width: 200px;
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .box {
+    width: 300px;
+  }
+}
+```
+
 ### element组件库BEM解析和实现
 
 ## 在js中编译SASS
