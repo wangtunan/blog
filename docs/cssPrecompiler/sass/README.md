@@ -36,11 +36,11 @@ $ npm install sass
 紧接着，在`package.json`文件中添加两个命令，如下：
 ```json
 // dev为本地开发命令，--watch是监听文件变化，自动编译
-// build为正式打包命令
+// build为正式打包命令，--style为打包风格，compressed为压缩模式，expanded为展开模式
 {
   "scripts": {
     "dev": "npx sass index.scss output.css --watch",
-    "build": "npx sass index.scss index.css"
+    "build": "npx sass index.scss index.css --style=compressed"
   }
 }
 ```
@@ -80,7 +80,7 @@ $ npm run dev
     outline: none
     border: 1px solid #ccc
 ```
-所以叫`scss`还是`sass`其实都一样，具体如何使用根据个人喜好而言。
+所以叫`scss`还是`sass`其实都一样，具体如何使用根据个人喜好即可。
 
 ## 基本语法
 
@@ -285,18 +285,19 @@ $theme-color:#4093ff;
 
 ### list变量
 `SASS`中的列表表示一系列值的集合，且定义列表的形式多种多样，如下：
-1. 可以使用逗号或空格进行分隔：
 ```scss
+// 通过逗号分隔
 $themes: primary, warning, danger;
+// 通过空格分隔
 $themes: primary warning danger;
-```
-2. 使用括号，中括号包裹，甚至不用包裹：
-```scss
+// 通过中括号包裹
 $themes: [primary, warning, danger];
+// 通过括号包裹
 $themes: (primary warning danger);
 ```
-`list`列表可以使用`@each`进行迭代遍历，例如：
+`list`变量通常使用`@each`进行迭代遍历，例如：
 ```scss
+// $theme为每一次迭代的值，命名自定义
 @each $theme in $themes {
   .button.is-#{$theme} {
     background: #58a;
@@ -316,7 +317,7 @@ $themes: (primary warning danger);
 ```
 
 ### map变量
-`SASS`中的`map`和`list`列表有些相似，但在定义上有些区别，其格式如下：`(<key>: <value>, <key>: <value> ...)`，其中`key`必须唯一，且外部必须用括号包裹起来。
+`SASS`中的`map`和`list`变量有些相似，但在定义上有些区别，其格式如下：`(<key>: <value>, <key>: <value> ...)`，其中`key`必须唯一，且外部必须用括号包裹起来。
 
 `map`同样可以通过`@each`来遍历，甚至可以进行解构：
 ```scss
@@ -356,7 +357,7 @@ $theme-color:#4093ff;
   themeColor: $theme-color;
 }
 ```
-需要`webpack`等打包工具的`loader`支持，例如`node-sass`和`sass-loder`，支持以后就可以直接使用：
+需要`webpack`等打包工具的`sass-loader`支持，支持以后就可以直接在`JavaScript`中使用：
 ```js
 import vars from 'variables.scss';
 
@@ -364,8 +365,8 @@ console.log(vars.fontSize)    // '14px'
 console.log(vars.themeColor)  // '#4093ff'
 ```
 
-## 差值语法
-差值语法，格式是：`#{expresssion}`，它几乎可以用在`SASS`中任何地方，例如：
+## 插值语法
+插值语法，格式是：`#{expresssion}`，它几乎可以用在`SASS`中任何地方，例如：
 1. 样式规则的选择器
 2. 属性名称
 3. 变量
@@ -398,7 +399,7 @@ console.log(vars.themeColor)  // '#4093ff'
 `SASS`中的`@debug`、`@error`、`@warn`分别和`JavaScript`中的`console.log()`、`console.error()`、`console.warn()`类似。
 :::
 
-`@debug`可以打印一些信息，在这调试一些表达式或变量值的时候非常有用。其打印的格式为：`fileName:lineNumber Debug: xxxxx`。其中`fileName`代表当前样式表的文件名，`lineNumber`表示当前打印的行数，`xxxx`表示我们想要打印的值，例如：
+`@debug`可以打印一些信息，在这调试一些表达式或变量值的时候非常有用，如下：
 ```scss
 @mixin position($name, $position, $topOrBottom, $leftOrRight) {
   @debug $name, $position;
@@ -431,7 +432,7 @@ index.scss:2 Debug: ".box", "absolute"
 @include position('.box', 'fixed', 'top1', 'left');
 
 // 警告内容
-Warning: position must be relative or absolute
+Warning: "position must be relative or absolute"
 // 报错内容
 Error: "topOrBottom must be top or bottom"
 ```
@@ -473,6 +474,7 @@ Error: "topOrBottom must be top or bottom"
   border-style: solid;
   border-width: calc($size / 2);
 
+  // index为全局内置函数，判断$direction是否在$directions值的集合中，是则返回索引，否则返回null
   @if not index($directions, $direction) {
     @warn 'direction must be top, bottom, left or right'
   } @else {
@@ -589,6 +591,9 @@ $statusList:
 ```
 
 ### @for
+::: tip
+`SASS`中的索引从`1`开始而不是`0`。
+:::
 `SASS`中的`@for`同样可以用来迭代，但它只能限制在一定的范围内，通常用来重复生成相同或者类似的样式，其公式有如下两种：
 1. `@for <variable> from <expression> to <expression>`，不包含最后一个值，类似于`[)`。
 2. `@for <variable> from <expression> through <expression>`，包含最后一个值，类似于`[]`。
@@ -644,13 +649,17 @@ $statusList:
   width: $width;
 }
 
+// 使用参数默认值
 .box1 {
-  // 使用参数默认值
   @include pc-center;
 }
+// 自定义参数
 .box2 {
-  // 自定义参数
   @include pc-center(10px, 1000px);
+}
+// 显示传值：显示给$width传递值，而$margin依旧使用参数默认值
+.box3 {
+  @include pc-center($width: 1000px);
 }
 ```
 在`@mixin`中，也可以接收外部的内容，用`@content`来表示，例如：
@@ -810,40 +819,19 @@ $defaultLine: 2;
 ### @at-root
 `@at-root`的作用通常使用来把样式置顶到当前样式表文档的根部，这在一些嵌套样式中有时候非常有用，例如：
 ```scss
-@mixin parent-root($child) {
-  @at-root .box-#{$child} {
-    @content;
-  }
-}
-@mixin parent($child) {
-  .box-#{$child} {
-    @content;
-  }
-}
-
-// 使用at-root
 .wrapper {
   .box {
-    @include parent-root("input") {
+    // 使用at-root，把.box-input样式置顶到最外层
+    @at-root .box-input {
       font-size: 14px;
     }
-    @include parent-root("select") {
-      font-size: 16px;
+    // 不使用at-root，遵循嵌套规则
+    .box-input {
+      font-size: 14px;
     }
   }
 }
 
-// 不使用at-root
-.wrapper {
-  .box {
-    @include parent("input") {
-      font-size: 14px;
-    }
-    @include parent("select") {
-      font-size: 16px;
-    }
-  }
-}
 ```
 以上代码编译结果为：
 ```scss
@@ -851,29 +839,16 @@ $defaultLine: 2;
 .box-input {
   font-size: 14px;
 }
-.box-select {
-  font-size: 16px;
-}
 
 // 不使用at-root编译结果
 .wrapper .box .box-input {
   font-size: 14px;
 }
-.wrapper .box .box-select {
-  font-size: 16px;
-}
 ```
-
-
-
-
 
 ## 内置模块
 `SASS`内置了许多有用的函数，它们同样也是`SASS`中的一部分，在内置模块这个章节，我们只介绍常用的内置函数，其它函数可以通过点击每个章节后面提供的链接进行学习。
 ### math
-::: tip
-可以使用`@use 'sass:math'`来引用内置的`math`模块。
-:::
 常用的变量有：
 ```scss
 @use 'sass:math';
@@ -900,9 +875,6 @@ $defaultLine: 2;
 其它变量和函数，请点击[Math内置变量和函数](https://sass-lang.com/documentation/modules/math)
 
 ### list
-::: tip
-可以使用`@use 'sass:list'`来引用内置的`list`模块(注意，map可以看做是一个特殊的list，所以map也可以使用以下函数)。
-:::
 
 常用的`list`内置函数有：
 * `append($list, $val, $separator: auto) => list`：向`list`列表中添加一个新元素，其中`$separator`为可选参数，有三种取值(`space`空格， `comma`逗号，`slash`斜杠)，全局函数用。
@@ -928,9 +900,6 @@ $list2: 20px, 30px;
 其它函数，请点击[List内置函数](https://sass-lang.com/documentation/modules/list)
 
 ### map
-::: tip
-可以使用`@use 'sass:map'`来引用内置的`map`模块。
-:::
 
 常用的`map`内置函数有：
 * `get($map, $key, $keys...)`: 通过`key`获取`value`，其中`key`支持传递多个，既可以深层次获取`value`，全局访问通过`map-get()`，命名空间通过`map.get()`。
@@ -980,9 +949,6 @@ $map2: (
 其它函数，请点击[Map内置函数](https://sass-lang.com/documentation/modules/map)
 
 ### meta
-::: tip
-可以使用`@use 'sass:meta'`来使用内置的`meta`模块。
-:::
 常用的`meta`内置函数有：
 * `type-of($value)`: 返回值的类型，全局函数。
 
@@ -1033,10 +999,6 @@ $theme-color: #409Eff;
 其它函数，请点击[Meta内置函数](https://sass-lang.com/documentation/modules/meta)
 
 ### selector
-::: tip
-可以使用`@use 'sass:selector'`来引用内置的`selector`模块。
-:::
-
 常用的`selector`内置函数有：
 * `append($selectors...) => selector`: 把选择器联合成一个，全局访问通过`selector-append`。
 * `nest($selectors...) => selector`: 把选择器进行嵌套，全局访问通过`selector-nest`。
@@ -1061,9 +1023,6 @@ $theme-color: #409Eff;
 其它函数，请点击[Selector内置函数](https://sass-lang.com/documentation/modules/selector)
 
 ### string
-::: tip
-可以使用`@use 'sass:string'`来引用内置的`string`模块。
-:::
 
 常用的`string`内置函数有：
 * `index($string, $substring) => number`: 返回子字符串所在位置的索引(索引从1开始，而不是0)，全局访问通过`str-index`。
@@ -1171,6 +1130,7 @@ $theme-color: #409Eff;
 }
 
 ```
+
 ### 响应式设计和屏幕断点
 ```scss
 // 屏幕断点
@@ -1221,10 +1181,3 @@ $breakpoints: (
   }
 }
 ```
-
-### element组件库BEM解析和实现
-
-## 在js中编译SASS
-
-## SASS命令行指令
-
