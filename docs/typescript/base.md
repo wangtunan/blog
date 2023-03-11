@@ -3,7 +3,7 @@ sidebar: auto
 ---
 # TypeScript
 
-`TypeScript`是`JavaScript`的一个超集，主要提供了**类型系统**和对**ES6**的支持，它与2012年10月正式发布第一个版本。
+`TypeScript`是`JavaScript`的一个超集，主要提供了**类型系统**和对**ES6**的支持，它于2012年10月正式发布第一个版本。
 
 优势：
 * 能在开发过程中更快的发现潜在问题。
