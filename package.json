@@ -12,6 +12,7 @@
     "汪图南"
   ],
   "dependencies": {
-    "element-ui": "^2.10.0"
+    "element-ui": "^2.10.0",
+    "vuepress": "^1.9.9"
   }
 }
