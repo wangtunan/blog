@@ -14,6 +14,12 @@ jobs:
       # 拉取代码
       - name: Checkout
         uses: actions/checkout@v3
+      
+      # 设置node版本
+      - name: Set Node Version
+        uses: actions/setup-node@v3
+        with: 
+          node-version: 16
         
       # 打包
       - name: Build
