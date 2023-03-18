@@ -240,7 +240,7 @@ for(let i = 0; i < numbers.length; i++) {
 | includes  | 如果数组中存在某个元素，则返回`true`，否则返回`false` |
 
 ## 栈
-栈是一种遵从后进先出(`LIFO`)原则的邮箱有序集合，新添加或待删除的元素都保存在栈的同一端，称之为栈顶，另一端叫栈底。
+栈是一种遵从后进先出(`LIFO`)原则的有序集合，新添加或待删除的元素都保存在栈的同一端，称之为栈顶，另一端叫栈底。
 
 ### 创建一个基于数组的栈结构
 在前面我们已经发现，数组因为有了`push()`和`pop()`方法，非常适合用来表示栈结构，因此我们将创建一个基于数组的类来表示栈：
@@ -287,7 +287,7 @@ class Stack {
 ```
 
 #### 使用Stack类
-在完善完`Stack`类以后，我们需要写一点代码来测试一下：
+在完善`Stack`类以后，我们需要写一点代码来测试一下：
 ```js
 const stack = new Stack()
 console.log(stack.isEmpty())  // true
@@ -339,14 +339,13 @@ class Stack {
     return this.count
   }
   isEmpty () {
-    return this.size() === 0
+    return this.count === 0
   }
   pop () {
     if (this.isEmpty()) {
       return undefined
     }
-    this.count--
-    const result = this.items[this.count]
+    const result = this.items[this.count--]
     delete this.items[this.count]
     return result
   }
@@ -361,11 +360,11 @@ class Stack {
     if (this.isEmpty()) {
       return ''
     }
-    let str = this.items['0']
+    let result = this.items['0']
     for(let i = 1; i < this.count; i++) {
-      str = `${str},${this.items[i]}`
+      result = `${result},${this.items[i]}`
     }
-    return str
+    return result
   }
 }
 ```
@@ -426,8 +425,16 @@ console.log(stack.isEmpty())  // true
 ### 用栈解决实际问题
 栈的实际应用非常广泛，在回溯问题中，它可以用来存储访问过的任务或路径、撤销等操作。
 
-#### 十进制到二进制
+#### 十进制转二进制
 **技巧**：要把十进制转换成二进制，我们可以将该十进制除以2并对商取整，直到结果为0。<br/>
+```js
+// 十进制10，转二进制案例
+// step1: 10 / 2 => 商5，余数0
+// step2: 5 / 2  => 商2，余数1
+// step3: 2 / 2  => 商1, 余数0
+// step4: 1 / 2  => 商0，余数1
+// result：使用栈结构(先进后出)，结果为：1010
+```
 
 使用`JavaScript`对象版的`Stack`：
 ```js
@@ -437,9 +444,9 @@ function decimalToBinary (decNumber) {
   let rem 
   let binaryString = ''
   while (number > 0) {
-    rem = Math.floor(number % 2)
+    rem = Math.floor(number % 2)    // 获取余数
+    number = Math.floor(number / 2) // 获取商
     stack.push(rem)
-    number = Math.floor(number / 2)
   }
   while (!stack.isEmpty()) {
     binaryString += stack.pop().toString()
@@ -469,21 +476,21 @@ console.log(decimalToBinary(1000))  // 1111101000
 随后根据栈结构后进先出的原则，我们将栈结构拼接在一起，就得到了十进制`10`转换为二进制后的结果，即：`1010`。
 
 #### 通用进制转换算法
-根据以上的思路，我们可以不仅可以把十进制转换为二进制，还可以把十进制转换成基数为`2~36`的任意进制。
+根据以上的思路，我们不仅可以把十进制转换为二进制，还可以把十进制转换成基数为`2~36`的任意进制。
 ```js
 function baseConverter (decNumber, base) {
+  if (base < 2 || base > 36) {
+    return ''
+  }
   const stack = new Stack()
   const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   let number = decNumber
   let rem
   let baseString = ''
-  if (!(base >= 2 && base <= 36)) {
-    return ''
-  }
   while (number > 0) {
     rem = Math.floor(number % base)
-    stack.push(rem)
     number = Math.floor(number / base)
+    stack.push(rem)
   }
   while (!stack.isEmpty()) {
     baseString += digits[stack.pop()]
@@ -495,7 +502,11 @@ console.log(baseConverter(100, 8))  // 144
 console.log(baseConverter(100, 16)) // 64
 console.log(baseConverter(100, 32)) // 34
 ```
-代码分析：在将十进制转换为二进制时，余数为0或1；在将十进制转换八进制时，余数为`0~7`；在将十进制转换为十六进制时，余数为`0~9`+ `A、B、C、D、E、F`(分别对应10、11、12、13、14、15)。
+代码分析：
+* 在将十进制转换为二进制时，余数为0或1;
+* 在将十进制转换八进制时，余数为`0~7`；
+* 在将十进制转换为十六进制时，余数为`0~9,A(10),B(11),C(12),D(13),E(14),F(15)`。
+* 其它依次类推。
 
 ## 队列和双端队列
 队列是一种遵循先进先出(`FIFO`)原则的一组有序的项，队列在尾部添加新元素，并从顶部移除元素，而双端队列是一种将栈的原则和队列的原则混合在一起的数据结构。
