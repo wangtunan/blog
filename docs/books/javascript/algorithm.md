@@ -620,7 +620,7 @@ class Deque {
 * `peekBack()`：返回双端队列后端的第一个元素。
 
 ```js
-class Deque {
+class Dequeue {
   constructor () {
     this.count = 0
     this.lowestCount = 0
@@ -648,21 +648,10 @@ class Deque {
     return strObj
   }
   addFront (element) {
-    // 1.添加之前没有数据
-    // 2.lowestCount > 0
-    // 3.lowestCount = 0
     if (this.isEmpty()) {
       this.addBack(element)
-    } else if (this.lowestCount > 0) {
-      this.lowestCount--
-      this.items[this.lowestCount] = element
     } else {
-      for (let i = this.count; i > 0; i--) {
-        this.items[i] = this.items[i - 1]
-      }
-      this.count++
-      this.lowestCount = 0
-      this.items[0] = element
+      this.items[--this.lowestCount] = element
     }
   }
   addBack (element) {
@@ -709,22 +698,22 @@ class Deque {
 
 在撰写完双端队里的实现代码后，我们需要写一点代码来测试:
 ```js
-const deque = new Deque()
-console.log(deque.isEmpty())  // true
-deque.addBack('AAA')
-deque.addBack('BBB')
-console.log(deque.toString()) // AAA,BBB
-deque.addBack('CCC')
-console.log(deque.toString()) // AAA,BBB,CCC
-console.log(deque.size())     // 3
-deque.removeFront() 
-console.log(deque.toString()) // BBB,CCC
-deque.removeBack()
-console.log(deque.toString()) // BBB
-deque.addFront('DDD')
-console.log(deque.peekFront())// DDD
-console.log(deque.peekBack()) // BBB
-console.log(deque.toString()) // DDD,BBB
+const dequeue = new Dequeue()
+console.log(dequeue.isEmpty())  // true
+dequeue.addBack('AAA')
+dequeue.addBack('BBB')
+console.log(dequeue.toString()) // AAA,BBB
+dequeue.addBack('CCC')
+console.log(dequeue.toString()) // AAA,BBB,CCC
+console.log(dequeue.size())     // 3
+dequeue.removeFront() 
+console.log(dequeue.toString()) // BBB,CCC
+dequeue.removeBack()
+console.log(dequeue.toString()) // BBB
+dequeue.addFront('DDD')
+console.log(dequeue.peekFront())// DDD
+console.log(dequeue.peekBack()) // BBB
+console.log(dequeue.toString()) // DDD,BBB
 ```
 
 ### 使用队列和双端队列解决实际问题
@@ -735,7 +724,7 @@ console.log(deque.toString()) // DDD,BBB
 ```js
 function hotPotato (elementList, num) {
   const queue = new Queue()
-  const elimitatedList = []
+  const eliminatedList = []
   for (let i = 0; i < elementList.length; i++) {
     queue.enqueue(elementList[i])
   }
@@ -743,10 +732,10 @@ function hotPotato (elementList, num) {
     for (let i = 0; i < num; i++) {
       queue.enqueue(queue.dequeue())
     }
-    elimitatedList.push(queue.dequeue())
+    eliminatedList.push(queue.dequeue())
   }
   return {
-    elimitated: elimitatedList,
+    eliminated: eliminatedList,
     winner: queue.dequeue()
   }
 }
@@ -763,8 +752,8 @@ function hotPotato (elementList, num) {
 ```js
 const names = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
 const result = hotPotato(names, 7)
-for (let i = 0; i < result.elimitated.length; i++) {
-  console.log(`${result.elimitated[i]}在击鼓传花游戏中被淘汰。`)
+for (let i = 0; i < result.eliminated.length; i++) {
+  console.log(`${result.eliminated[i]}在击鼓传花游戏中被淘汰。`)
 }
 console.log(`胜利者：${result.winner}`)
 // CCC在击鼓传花游戏中被淘汰。
@@ -784,16 +773,16 @@ function palindromeChecker (str) {
   if (str === undefined || str === null || (str !== null && str.length === 0)) {
     return false
   }
-  const deque = new Deque()
+  const dequeue = new Dequeue()
   const lowerStr = str.toLowerCase().split('').join('')
   let isEqual = true
   let firstChar, lastChar
   for (let i = 0; i < lowerStr.length; i++) {
-    deque.addBack(lowerStr.charAt(i))
+    dequeue.addBack(lowerStr.charAt(i))
   }
-  while (deque.size() > 1 && isEqual) {
-    firstChar = deque.removeFront()
-    lastChar = deque.removeBack()
+  while (dequeue.size() > 1 && isEqual) {
+    firstChar = dequeue.removeFront()
+    lastChar = dequeue.removeBack()
     if (firstChar !== lastChar) {
       isEqual = false
     }
@@ -803,7 +792,7 @@ function palindromeChecker (str) {
 ```
 代码分析：
 1. 在我们检查是否回文之前，需要先对传入的字符串做一些校验，如果传递的是`undefined`，`null`或者空字符串直接返回`false`。
-2. 随后我们实例化了一个我们在之前写好的双端队列`Deque`类。
+2. 随后我们实例化了一个我们在之前写好的双端队列`Dequeue`类。
 3. 为了避免字符串大小写的问题，我们统一把传入的字符串转换成小写的形式。
 4. 遍历字符串，并把字符串中的每一个字符依次添加到双端队列的末尾。
 5. 循环在双端队列的前端和后端移除一个元素，并比较这两个元素，如果相等则进行下一次循环，如果不相等则结束循环。
