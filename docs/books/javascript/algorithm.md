@@ -827,7 +827,7 @@ class LinkedList {
 代码分析：
 * `count`：我们使用`count`来记录链表中的总数。
 * `head`：由于链表数据结构是动态的，因此我们需要将第一个元素的引用保存下来。
-* `equalsFn()`：如果我们要在链表中遍历，判断当前节点是否是我们需要的节点，而链表中的节点不仅仅是值类型还可能是引用类型，因此需要我们提供一个比较方法，当没有这个方法的时候我们则使用默认的`defaultEquals()`方法，因为它可能会在其它数据结构中也使用到，因此我们把它提取到`utils.js`文件中：
+* `equalsFn()`：如果我们要在链表中遍历，判断当前节点是否是我们需要的节点，而链表中的节点不仅仅是值类型还可能是引用类型，因此需要我们提供一个比较方法，当没有这个方法的时候则使用默认的`defaultEquals()`方法，因为它可能会在其它数据结构中也使用到，所以我们把它提取到`utils.js`文件中：
 ```js
 // utils.js
 function defaultEquals (a, b) {
@@ -850,11 +850,11 @@ class Node {
 
 在搭建好`LinkedList`类的骨架后，我们需要实现一些方法，如下：
 * `push(element)`：向链表尾部添加一个新元素。
-* `insert(element,position)`：在链表指定位置插入一个新元素。
+* `insert(element,index)`：在链表指定位置插入一个新元素。
 * `getElementAt(index)`：返回链表中特定位置的元素，如果没有则返回`undefined`。
 * `remove(element)`：从链表中移除一个元素。
 * `indexOf(element)`：返回元素在链表中的索引，如果没有则返回`-1`。
-* `removeAt(position)`：从链表指定位置移除一个元素。
+* `removeAt(index)`：从链表指定位置移除一个元素。
 * `isEmpty()`：如果链表中不包含任何元素，则返回`true`，否则返回`false`。
 * `size()`：返回链表包含的元素个数。
 * `getHead()`：返回链表的第一个元素。
@@ -896,7 +896,7 @@ getElementAt (index) {
   return undefined
 }
 ```
-代码分析：为了保证我们能够迭代链表直到找到一个合法的位置，因此我们需要对传入的`index`参数进行合法性验证，然后迭代整个链表直到我们需要的位置位置。
+代码分析：为了保证我们能够迭代链表直到找到一个合法的位置，因此我们需要对传入的`index`参数进行合法性验证，然后迭代整个链表直到需要的位置。
 
 #### 从链表中移除指定位置元素
 从链表中移除元素由两种场景：第一种是移除第一个元素，第二种是移除第一个元素之外的其它元素。
@@ -944,7 +944,7 @@ insert (element, index) {
 ```
 代码分析：
 * 与`removeAt()`方法类似，我们需要判断参数`index`是否合法，不合法则直接返回`false`。
-* 与`removeAt()`直接跳过`current`不同的时，`insert`时需要我们先将`previous`和`node`链接起来，既：`node.next = current`，随后再将`previous`和`node`链接起来，既：`previous.next=node`。
+* 与`removeAt()`直接跳过`current`不同的是，`insert`时需要我们先将`previous`和`node`链接起来，既：`node.next = current`，随后再将`previous`和`node`链接起来，既：`previous.next=node`。
 
 
 #### 返回一个元素的位置
@@ -963,14 +963,14 @@ indexOf (element) {
 ```
 
 #### 从链表中移除元素
-`remove()`方法区别于`removeAt()`方法，对于前者而言我们并不知道改在什么地方移除，因此需要遍历一次链表以得到具体的索引位置，而对于后者而言由于接受的参数就是`index`，所以比`remove()`方法要简单一些，由于我们在上面已经实现了`indexOf()`方法和`removeAt()`方法，因此我们可以直接借用它们：
+`remove()`方法区别于`removeAt()`方法，对于前者而言我们并不知道该在什么地方移除，因此需要遍历一次链表以得到具体的索引位置，而对于后者而言由于接受的参数就是`index`，所以比`remove()`方法要简单一些，由于我们在上面已经实现了`indexOf()`方法和`removeAt()`方法，因此可以直接借用它们：
 ```js
 remove (element) {
   let index = this.indexOf(element)
   return this.removeAt(index)
 }
 ```
-注意：我们并不关心`index`是否为-1，因为在`removeAt()`方法中已经检查了`index`参数的合法性，因此这里并不需要额外判断`index`等于-1的情况。
+注意：我们并不关心`index`是否为-1，因为在`removeAt()`方法中已经检查了`index`参数的合法性，所以这里并不需要额外判断`index`等于-1的情况。
 
 
 #### 链表剩余方法
