@@ -774,7 +774,8 @@ function palindromeChecker (str) {
     return false
   }
   const dequeue = new Dequeue()
-  const lowerStr = str.toLowerCase().split('').join('')
+  // 转换为小写，并移除所有空格
+  const lowerStr = str.toLowerCase().replace(/\s/g, '')
   let isEqual = true
   let firstChar, lastChar
   for (let i = 0; i < lowerStr.length; i++) {
