@@ -986,14 +986,15 @@ getHead () {
   return this.head === null ? undefined : this.head.element
 }
 toString () {
-  if (this.count === 0) {
+  if (this.isEmpty()) {
     return ''
   }
-  let str = `${this.head.element}`
-  let current = this.head.next
-  for (let index = 1; index < this.count && current != null; index++) {
-    str = `${str},${current.element}`
+  let str = this.head.element
+  let current = this.head
+  
+  while(current.next !== null) {
     current = current.next
+    str = `${str},${current.element}`
   }
   return str
 }
@@ -1017,7 +1018,7 @@ console.log(linkedList.indexOf(5))      // 3
 console.log(linkedList.indexOf(8))      // -1
 console.log(linkedList.insert(9, 1))    // true
 console.log(linkedList.toString())      // 1,9,3,2,5
-console.log(linkedList.remove(2))       // true
+console.log(linkedList.remove(2))       // 2
 console.log(linkedList.toString())      // 1,9,3,5
 console.log(linkedList.removeAt(2))     // 3
 console.log(linkedList.toString())      // 1,9,5
