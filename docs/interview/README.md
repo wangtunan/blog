@@ -434,7 +434,7 @@ console.log(newObj.sayHello());// 报错
 ```js
 function deepClone(obj) {
   function isObject(o) {
-    return (typeof o === 'object' || typeof o === 'function') && o !== null;
+    return typeof o === 'object' && o !== null;
   }
   if(!isObject(obj)) {
     throw new Error('非对象');

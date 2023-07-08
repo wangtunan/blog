@@ -1256,7 +1256,7 @@ removeAt (index) {
     } else {
       const previous = this.getElementAt(index - 1)
       current = previous.next
-      previous.next = previous.next
+      previous.next = current.next
     }
     this.count--
     return current.element
