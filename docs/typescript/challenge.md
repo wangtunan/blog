@@ -7,9 +7,9 @@ sidebar: auto
 ## 介绍
 在学习完`TypeScript`一些基础知识后，我们已经可以熟练使用一些基本类型定义了，但对于`TypeScript`的高级用法却依旧无法入门，为了更有趣的学习`TypeScript`高级用法，我们选择[Type-Challenges](https://github.com/type-challenges/type-challenges/blob/master/README.zh-CN.md)类型挑战来作为我们学习的目标。
 
-在`Type-Challenges`中，可以从`简单(easy)`、`中等(medium)`、`困难(hard)`以及`地狱(extreme)`难度，循序渐进的学习`TypeScript`高级技巧。
+在`Type-Challenges`中，可以从简单(`easy`)、中等(`medium`)、困难(`hard`)以及地狱(`extreme`)难度，循序渐进的学习`TypeScript`高级技巧。
 
-如果你需要选择其他的方向来深入学习`TypeScript`高级技巧，这里也有一些推荐的开源项目：
+如果你需要选择其它的方向来深入学习`TypeScript`高级技巧，这里也有一些推荐的开源项目：
 * 官方内置：在`lib.es5.d.ts`文件中，`TypeScript`官方默认内置了一些辅助工具函数，例如：`Partial`、`Required`、`Pick`以及`Record`等等。
 * 其它开源库：[utility-types](https://github.com/piotrwitek/utility-types)、[ts-toolbelt](https://github.com/millsp/ts-toolbelt)、[SimplyTyped](https://github.com/andnp/SimplyTyped)
 
@@ -46,7 +46,7 @@ type Person = {
   name: string;
   age: number;
 }
-// 'name' | 'age'
+// 结果：'name' | 'age'
 type result = keyof Person
 ```
 `TS`中的`keyof T`，它有点类似`JavaScript`中的`Object.keys()`，它们的共同点都是获取属性键的集合，只不过`keyof T`得到的结果是一个联合类型，而`Object.keys()`得到的是一个数组。
@@ -224,17 +224,27 @@ type result = T & U
 
 根据交叉类型的概念，我们可以封装一个合并对象的`merge`函数，如下：
 ```ts
-function merge<T, U>(to: T, from: U): T & U {
+// ts v4.8.4以上版本
+function merge<T, U, K extends T & U>(to: T, from: U): K {
   for (let key in from) {
-    ;(to as T & U)[key] = from[key] as any
+    ;(to as unknown as K)[key] = from[key] as any
   }
-  return to as T & U
+  return to as unknown as K
+}
+
+// ts v4.8.4以下版本
+function merge<T, U, K extends T & U>(to: T, from: U): K  {
+  for (let key in from) {
+    ;(to as K)[key] = from[key] as any
+  }
+  return to as K
 }
 
 const obj1 = { name: 'AAA' }
 const obj2 = { age: 23 }
-// 结果：{ name：'AAA'; age: 23; }
-const resutl = merge(obj1, obj2)
+// js结果：{ name：'AAA'; age: 23; }
+// ts结果：{ name: string; age: number; }
+const result = merge(obj1, obj2)
 ```
 
 ## 初级
@@ -275,7 +285,7 @@ type Person = {
 }
 
 // 结果：{ readonly name: string; readonly age: number; }
-type ReadonlyResult = MyReadonly<Person>
+type result = MyReadonly<Person>
 ```
 #### 实现方式
 ```ts
@@ -288,6 +298,7 @@ type MyReadonly<T> = {
 #### 用法
 `TupleToObject<T>`是用来把一个元组转换成一个`key/value`相同的对象，例如：
 ```ts
+// 类型：readonly ['msg', 'name']
 const tuple = ['msg', 'name'] as const
 // 结果：{ msg: 'msg'; name: 'name'; }
 type result = TupleToObject<typeof tuple>
@@ -300,7 +311,7 @@ type TupleToObject<T extends readonly any[]> = {
 ```
 代码详解：
 * `as const`：常用来进行常量断言，在此处表示将`['msg','name']`推导常量元组，表示其不能新增、删除、修改元素，可以使用`as readonly`来辅助理解。
-* `T[number]`：表示返回所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
+* `T[number]`：表示返回数组中所有数字型索引的元素，形成一个联合类型，例如：`'msg'|'name'`。
 
 ### First(数组第一个元素)
 #### 用法
