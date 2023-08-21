@@ -2750,7 +2750,7 @@ ajax(url).then(data => {
 #### XSS防御
 ::: tip
 1. 将由用户输入的内容，进行必要的标签转义，包括`<`、`>`、`/`等
-2. 再服务端设置`cookit`属性`httpOnly`防止客户端通过`document.cookie`读取
+2. 再服务端设置`cookie`属性`httpOnly`防止客户端通过`document.cookie`读取
 3. 过滤一些危险属性或者方法，例如`onerror`方法、`href`属性、`src`属性等
 :::
 
@@ -2783,7 +2783,7 @@ CSRF防御有如下几种方式：
 :::
 
 #### 防御手段
-设置HTTP响应头`X-FRAME-OPTIONS`，它可以设置`DENY`、`SAMEORIGIN`、`ALLOW-FROM`分别表示不允许`iframe`展示、只允许永远`iframe`展示、表示页面可以在指定来源的`iframe`中展示。
+设置HTTP响应头`X-FRAME-OPTIONS`，它可以设置`DENY`、`SAMEORIGIN`、`ALLOW-FROM`分别表示不允许`iframe`展示、只允许同源`iframe`展示、表示页面可以在指定来源的`iframe`中展示。
 
 
 ### 中间人攻击
