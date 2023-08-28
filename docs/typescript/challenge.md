@@ -560,12 +560,12 @@ type RecordResult = Record<keys, Animal>
 ```
 #### 实现方式
 ```ts
-type MyRecord<k extends keyof any, T> = {
+type MyRecord<K extends keyof any, T> = {
   [P in K]: T
 }
 ```
 代码详解：
-* `k extends keyof any`：此代码表示`K`是`keyof any`任意类型其所有键的子类型，例如：
+* `K extends keyof any`：此代码表示`K`是`keyof any`任意类型其所有键的子类型，例如：
 ```ts
 // K为 'Dog'|'cat'
 type UnionKeys = 'Dog' | 'Cat'
