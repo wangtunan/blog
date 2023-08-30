@@ -669,7 +669,7 @@ type MyOmit<T, K> = MyPick<T, MyExclude<keyof T, K>>
 * 使用`MyPick<T, 'name'|'age'>`，可以从`T`中选取这两个字段，组合成一个新的类型。
 
 
-### Readony(按需Readonly)
+### Readonly(按需Readonly)
 #### 用法
 不同于初级实现中的`Readonly`，在中级实现的`Readonly`中，如果我们传递了指定的字段，那么`Readonly`会表现为按需实现`readonly`，用法如下。
 ```ts
@@ -764,7 +764,7 @@ type result = TupleToUnion<['1', '2', '3']>
 type TupleToUnion<T extends readonly any[]> = T[number]
 // way2: 递归
 type TupleToUnion<T extends readonly any[]> = 
-  T extends [infer R, ...infer args]
+  T extends readonly [infer R, ...infer args]
     ? R | TupleToUnion<args>
     : never
 ```
@@ -851,8 +851,10 @@ const result = arr[T['length']]
 继续沿用以上处理索引思想或占位的思想，我们能快速实现数组`pop`方法。
 #### 用法
 ```ts
-// 结果：[1, 2]
-type result = Pop<[1, 2, 3]>
+// 结果1：[1, 2]
+type result1 = Pop<[1, 2, 3]>
+// 结果2：[]
+type result2 = Pop<[]>
 ```
 #### 实现方式
 ```ts
@@ -869,14 +871,26 @@ type Pop<T extends any[]> =
 #### 用法
 `PromiseAll`是用来取`Promise.all()`函数所有返回的类型，其用法如下
 ```ts
-// 结果：Promise<[number, number, number]>
-type result = typeof PromiseAll([1, 2, Promise.resolve(3)])
+const result1 = PromiseAll([1, 2, 3] as const)
+const result2 = PromiseAll([1, 2, Promise.resolve(3)] as const)
+const result3 = PromiseAll([1, 2, Promise.resolve(3)])
+const result4 = PromiseAll<Array<number | Promise<number>>>([1, 2, 3])
+
+// 结果1： Promise<[1, 2, 3]>
+type t1 = typeof result1
+// 结果2： Promise<[1, 2, number]>
+type t2 = typeof result2
+// 结果3： Promise<[number, number, number]>
+type t3 = typeof result3
+// 结果4： Promise<number[]>
+type t4 = typeof result4
 ```
 #### 实现方式
 与之前的例子不同，`PromiseAll`我们声明的是一个`function`而不是`type`。
 ```ts
+// Awaited为内置类型
 type PromiseAllType<T> = Promise<{
-  [P in keyof T]: T[P] extends Promise<infer R> ? R : T[P]
+  [P in keyof T]: Awaited<T[P]>
 }>
 declare function PromiseAll<T extends any[]>(values: readonly [...T]): PromiseAllType<T>
 ```
@@ -887,7 +901,7 @@ declare function PromiseAll<T extends any[]>(values: readonly [...T]): PromiseAl
 
 ### LookUp(查找)
 #### 用法
-`LookUp`是用来根据类型值查找类型的，其用法如下：
+`LookUp`是用来根据类型值查`type`找类型的，其用法如下：
 ```ts
 interface Cat {
   type: 'cat'
@@ -910,7 +924,8 @@ type LookUp<
 > = U extends { type: T } ? U : never
 ```
 代码详解：
-* ` U extends { type: string; }`：这段代码限制`U`的类型必须是具有属性为`type`的对象。
+* `U extends { type: string; }`：这段代码限制`U`的类型必须是具有属性为`type`的对象。
+* `U extends { type: T }`：如果把`T`的值实际带入，为`U extends { type: 'dog' }`，表示判断`U`中的`type`值是不是`dog`，是则返回`U`。
 
 ### Trim、TrimLeft以及TrimRight
 #### 用法
@@ -931,28 +946,30 @@ type TrimRight<S extends string> = S extends `${infer R}${Space}` ? TrimRight<R>
 * `TrimLeft`和`TrimRight`的实现思路是相同的，区别在于空白符的占位出现在左侧还是右侧。
 * `Trim`的实现就是把`TrimLeft`和`TrimRight`所做的事情结合起来。
 
-### Capitalize(首字母大写)和Uncapatilize(首字母小写)
+### Capitalize(首字母大写)和UnCapitalize(首字母小写)
 #### 用法
-`Capitalize`是用来将一个字符串的首字母变成大写的，而`Uncapatilize`所做的事情跟它相反，其用法如下：
+`Capitalize`是用来将一个字符串的首字母变成大写的，而`UnCapitalize`所做的事情跟它相反，其用法如下：
 ```ts
 type t1 = Capitalize<'hello'>   // 'Hello'
-type t2 = Uncapatilize<'Hello'> // 'hello'
+type t2 = UnCapitalize<'Hello'> // 'hello'
 ```
 #### 实现方式
 ```ts
-type Capatilize<S extends string> = S extends `${infer char}${infer L}` ? `${Uppercase<char>}${L}` : S
-type Uncapatilize<S extends string> = S extends `${infer char}${infer L}` ? `${Lowercase<char>}${L}` : S
+type Capitalize<S extends string> = S extends `${infer char}${infer L}` ? `${Uppercase<char>}${L}` : S
+type UnCapitalize<S extends string> = S extends `${infer char}${infer L}` ? `${Lowercase<char>}${L}` : S
 ```
 代码详解：
-* 无论是`Capatilize`还是`Uncapatilize`，它们都依赖内置的工具函数`Uppercase`或者`Lowercase`。对于`Capatilize`而言，我们只需要把首字母隔离出来，然后调用`Uppercase`即可。对于`Uncapatilize`而言，我们把首字母调用`Lowercase`即可。
+* 无论是`Capitalize`还是`UnCapitalize`，它们都依赖内置的工具函数`Uppercase`或者`Lowercase`。对于`Capitalize`而言，我们只需要把首字母隔离出来，然后调用`Uppercase`即可。对于`UnCapitalize`而言，我们把首字母调用`Lowercase`即可。
 
 
 ### Replace和ReplaceAll
 #### 用法
-`Replace`是用来将字符串中第一次出现的某段内容，使用指定的字符串进行替换，而`和ReplaceAll`是全部替换，其用法如下：
+`Replace`是用来将字符串中第一次出现的某段内容，使用指定的字符串进行替换，而`ReplaceAll`是全部替换，其用法如下：
 ```ts
-// 结果：'foofoobar'
-type t = Replace<'foobarbar', 'bar', 'foo'>
+// 结果1：'foofoobar'
+type t1 = Replace<'foobarbar', 'bar', 'foo'>
+// 结果2： foobarbar
+type t2 = Replace<'foobarbar', '', 'foo'>
 ```
 #### 实现方式
 ```ts
@@ -981,10 +998,10 @@ type ReplaceAll<
   from extends string,
   to extends string
 > = S extends `${infer L}${from}${infer R}`
-              ? from extends ''
-                ? S
-                : `${ReplaceAll<L, from, to>}${to}${ReplaceAll<R, from, to>}`
-              : S
+      ? from extends ''
+        ? S
+        : `${ReplaceAll<L, from, to>}${to}${ReplaceAll<R, from, to>}`
+      : S
 ```
 
 ### AppendArgument(追加参数)
