@@ -1022,22 +1022,24 @@ type AppendArgument<Fn, A> = Fn extends (...args: infer R) => infer T ? (...args
 #### 用法
 `Permutation`是用来将联合类型中的每一个类型进行排列组合，其用法如下：
 ```ts
-// 结果：['A', 'B'] | ['B', 'A']
-type result = Permutation<'A' | 'B'>
+// 结果1：['A', 'B'] | ['B', 'A']
+type result1 = Permutation<'A' | 'B'>
+// 结果2：['A', 'B', 'C'] | ['A', 'C', 'B'] | ['B', 'A', 'C'] | ['B', 'C', 'A'] | ['C', 'A', 'B'] | ['C', 'B', 'A']
+type result2 = Permutation<'A' | 'B' | 'C'>
 ```
 #### 实现方式
 ```ts
 type Permutation<T, U = T> = 
   [T] extends [never]
     ? []
-    : T extends T
+    : T extends U
       ? [T, ...Permutation<Exclude<U, T>>]
       : never
 ```
 
 代码详解：
 * `[T] extends [never]`：这段代码主要是为了处理联合类型为空的情况。
-* `T extends T`：这段代码主要是需要使用**分布式条件类型**这个知识点，当`T extends T`成立时，在其后的判断语句中，`T`代表当前迭代的类型。
+* `T extends U`：这段代码主要是需要使用**分布式条件类型**这个知识点，当`T extends U`成立时，在其后的判断语句中，`T`代表当前迭代的类型。
 * `<Exclude<U, T>`：因为此时的`T`代表当前迭代的类型，所以我们从原始联合类型中排除当前类型，然后递归调用`Permutation`。当`T`为`A`时，递归调用`Permutation<'B' | 'C'>`, 此时结果为`['A']` + `['B', 'C']` 或 `['A']` + `['C', 'B']`。
 
 ### LengthOfString(字符串的长度)
@@ -1111,12 +1113,14 @@ type AppendToObject<T, K extends basicKeyType, V> = {
 #### 用法
 `Absolute`是用来取一个数的绝对值的，其用法如下：
 ```ts
-// 结果："531"
-type result = Absolute<-531>
+// 结果1："531"
+type result1 = Absolute<-531>
+// 结果2："9999"
+type result2 = Absolute<9_999n>
 ```
 #### 实现方式
 ```ts
-type NumberLike = number | string
+type NumberLike = number | string | bigint
 type Absolute<T extends NumberLike> =  `${T}` extends `-${infer N}` ? N : `${T}`
 ```
 代码详解：
@@ -1198,43 +1202,10 @@ type Merge<F, S> = {
 * `keyof F | keyof S`：这段代码的含义是将`F`和`S`这两个对象的键组合成一个新的联合类型。
 * `P extends`：这里进行了两次`extends`判断，其中第二次不能直接写成`F[P]`，而应该多判断一次，当满足条件时才使用`F[P]`，这是因为`P`的类型判断无法作用于`:`符号后面。
 
-### CamelCase(连字符字符串转小驼峰)
-#### 用法
-`CamelCase`是用来将连字符字符串转驼峰的，其用法如下：
-```ts
-// 结果：fooBarBaz
-type result = CamelCase<'foo-bar-baz'>
-```
-#### 实现方式
-```ts
-type CamelCase<
-  S extends string
-> = S extends `${infer S1}-${infer S2}`
-      ? S2 extends Capitalize<S2>
-        ? `${S1}-${CamelCase<S2>}` 
-        : `${S1}${CamelCase<Capitalize<S2>>}`
-      : S
-```
-代码详解：`CamelCase`的实现，使用到了递归的思路，以上面例子为例：
-```ts
-type result = CamelCase<'foo-bar-baz'>
-
-// 第一次递归调用 S满足${infer S1}-${infer S2} S2不满足extends Capitalize<S2>
-S = 'foo-bar-baz' S1 = 'foo' S2 = 'bar-baz'
-
-// 第二次递归调用 S满足${infer S1}-${infer S2} S2不满足extends Capitalize<S2>
-S = 'Bar-baz' S1 = 'Bar' S2 = 'baz'
-
-// 第三次递归调用 S不满足${infer S1}-${infer S2}
-S = 'Baz'
-
-// 结果：fooBarBaz
-type result = 'foo' + 'Bar' + 'Baz' => 'fooBarBaz'
-```
 
 ### KebabCase(字符串转连字符)
 #### 用法
-在实现`CamelCase`后，我们很容易能够实现`KebabCase`，它是用来将驼峰形式字符串，转成连字符形式字符串的，其用法如下：
+`KebabCase`是用来将驼峰形式字符串，转成连字符形式字符串的，其用法如下：
 ```ts
 // 结果：foo-bar-baz
 type result = KebabCase<'FooBarBaz'>
@@ -1272,7 +1243,7 @@ type result = Diff<Foo, Bar>
 ```ts
 type DiffKeys<T, U> = Exclude<keyof T | keyof U, keyof (T | U)>
 type Diff<T, U> = {
-  [k in DiffKeys<T, U>]: k extends keyof T ? T[k] : k extends keyof U ? U[k] : never
+  [K in DiffKeys<T, U>]: K extends keyof T ? T[K] : K extends keyof U ? U[K] : never
 }
 ```
 代码详解：
@@ -1280,54 +1251,79 @@ type Diff<T, U> = {
 * `keyof (T | U)`：这段代码是取`T`和`U`的公共属性。
 * `Exclude<K1, K2>`：这段代码主要是用来从`K1`中排除`K2`，带入以上例子也就是排除掉所有公共属性。
 * `Diff<T, U>`：在获取到`DiffKeys`后，就可以迭代的方式获取到每个属性`key`，它所对应的类型了。
+* `K extends keyof U`：额外再判断一次，是因为`K`不能在三元表达式右侧使用。
 
 ### AnyOf(数组元素真值判断)
 #### 用法
-`AnyOf`用来判断数组元素，如果任意值为真，返回true；数组为空或者全部为false，才返回false，其用法如下：
+`AnyOf`用来判断数组元素真假值的，如果任一值为真，返回`true`；数组为空或者全部为`false`，才返回`false`，其用法如下：
 ```ts
-// 结果：true
+// 结果1：true
 type result1 = AnyOf<[0, false, 0, { name: 'name' }]>
-// 结果：false
+// 结果2：false
 type result2 = AnyOf<[0, '', false, [], {}]>
 ```
 #### 实现方式
 ```ts
-type FalseType = 0 | '' | false | [] | { [key: string]: never }
-type AnyOf<T extends readonly any[]> = T[number] extends FalseType ? false : true
+type FalsyType = 0 | '' | false | undefined | null | [] | { [key: string]: never }
+type AnyOf<T extends readonly any[]> = T[number] extends FalsyType ? false : true
 ```
-代码详解：因为我们就是要区分`true/false`，所以我们把所有为`false`的值全部列举出来，然后使用`T[number]`索引迭代，依次去跟`FalseType`比较。
+代码详解：因为我们就是要区分`true/false`，所以我们把所有为`false`的值全部列举出来，然后使用`T[number]`索引迭代，依次去跟`FalsyType`比较，其中`{ [key: string]: never }`表示空对象`{}`。
 
 ### IsNever(是否是Never类型)
 #### 用法
 `IsNever`是用来判断是否为`never`类型，其用法如下：
 ```ts
-// 结果：false
+// 结果1：false
 type result1 = IsNever<undefined>
-// 结果：true
+// 结果2：true
 type result2 = IsNever<never>
+// 结果3：false
+type result3 = IsNever<never | string>
 ```
 #### 实现方式
 ```ts
+export type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+
+// way1: 类型数组
 type IsNever<T> = T[] extends never[] ? true : false
+// way2: 数组值
+type IsNever<T> = [T] extends [never] ? true : false
+// way3: 值比较
+type IsNever<T> = Equal<T, never>
 ```
 
 ### IsUnion(是否联合类型)
 #### 用法 
 `IsUnion`是用来判断一个类型是否为联合类型的，其用法如下：
 ```ts
-// 结果：true
+// 结果1：true
 type result1 = IsUnion<string|number|boolean>
-// 结果：false
+// 结果2：false
 type result2 = IsUnion<string>
+// 结果3：false
+type result2 = IsUnion<never>
 ```
 #### 实现方式
 ```ts
+// way1: 排除法
 type IsUnion<T, U = T> =
-  T extends T
-  ? [Exclude<U, T>] extends [never]
+  [T] extends [never]
     ? false
-    : true
-  : never
+    : T extends U
+      ? [Exclude<U, T>] extends [never]
+        ? false
+        : true
+      : false
+// way2: 正反对比法
+type IsUnion<T, U = T> = 
+  (T extends U
+    ? U extends T
+      ? true
+      : unknown
+    : false
+  ) extends true ? false : true
 ```
 代码详解：上面的实现虽然代码不多，但可能无法一下子就弄明白，为了更好的理解这种实现方式，我们来看如下两个案例分析：
 ```ts
@@ -1345,7 +1341,7 @@ step1: string extends string
 step2: [never] extends [never] => false
 result: false
 ```
-根据之前我们学到的**分布式条件类型**知识，`T extends T`的时候，会把`T`进行子类型分发。
+根据之前我们学到的**分布式条件类型**知识，`T extends U`的时候，会把`T`进行子类型分发。
 
 如案例一的`step3`、`step4`，在分发后会把每次迭代的结果联合起来，组合成最终的结果。
 
