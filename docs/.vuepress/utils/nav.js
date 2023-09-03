@@ -212,30 +212,12 @@ const tsChallengesSidebar = [
     ]
   },
   {
-    title: '简单',
-    collapsable: false,
+    title: '类型挑战',
+    collapsable: true,
     children: [
-      'easy/'
-    ]
-  },
-  {
-    title: '中等',
-    collapsable: false,
-    children: [
-      'medium/'
-    ]
-  },
-  {
-    title: '困难',
-    collapsable: false,
-    children: [
-      'hard/'
-    ]
-  },
-  {
-    title: '地狱',
-    collapsable: false,
-    children: [
+      'easy/',
+      'medium/',
+      'hard/',
       'extreme/'
     ]
   }
