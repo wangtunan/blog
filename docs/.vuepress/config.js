@@ -1,6 +1,11 @@
 const nav = require('./utils/nav.js')
 const { ua }  = require('./ua.js')
-const { webpackSidebar, vueAnalysisSidebar, vueNextAnalysisSidebar } = nav
+const {
+  webpackSidebar,
+  vueAnalysisSidebar,
+  vueNextAnalysisSidebar,
+  tsChallengesSidebar
+} = nav
 module.exports = {
   title: '汪图南',
   description: '汪图南的个人博客',
@@ -93,11 +98,11 @@ module.exports = {
         items: [
           {
             text: 'TypeScript基础',
-            link: '/typescript/base'
+            link: '/typescript/base/'
           },
           {
             text: 'TypeScript类型挑战',
-            link: '/typescript/challenge'
+            link: '/typescript/challenges/introduction/'
           }
         ]
       },
@@ -122,7 +127,8 @@ module.exports = {
     sidebar: {
       '/webpack/webpack/': [webpackSidebar],
       '/vueAnalysis/': vueAnalysisSidebar,
-      '/vueNextAnalysis/': vueNextAnalysisSidebar
+      '/vueNextAnalysis/': vueNextAnalysisSidebar,
+      '/typescript/challenges/': tsChallengesSidebar
     }
   },
   configureWebpack: {

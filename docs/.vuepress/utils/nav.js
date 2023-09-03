@@ -195,8 +195,55 @@ const vueNextAnalysisSidebar = [
   }
 ]
 
+// ts-challenges目录结构
+const tsChallengesSidebar = [
+  {
+    title: '介绍',
+    collapsable: false,
+    children: [
+      'introduction/'
+    ]
+  },
+  {
+    title: '核心知识点',
+    collapsable: false,
+    children: [
+      'core/'
+    ]
+  },
+  {
+    title: '简单',
+    collapsable: false,
+    children: [
+      'easy/'
+    ]
+  },
+  {
+    title: '中等',
+    collapsable: false,
+    children: [
+      'medium/'
+    ]
+  },
+  {
+    title: '困难',
+    collapsable: false,
+    children: [
+      'hard/'
+    ]
+  },
+  {
+    title: '地狱',
+    collapsable: false,
+    children: [
+      'extreme/'
+    ]
+  }
+]
+
 module.exports = {
   webpackSidebar,
   vueAnalysisSidebar,
-  vueNextAnalysisSidebar
+  vueNextAnalysisSidebar,
+  tsChallengesSidebar
 }
