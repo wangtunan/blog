@@ -1463,14 +1463,50 @@ type result = RemoveIndexSignature<Foo>
 ```
 #### 实现方式
 ```ts
-type NeverIndex<P> = string extends P ? never : number extends P ? never : P
-type RemoveIndexSignature<T> = {
-  [P in keyof T as NeverIndex<P>]: T[P]
+type CheckIndexSignature<T, P> = P extends T ? true : false
+type RemoveIndexSignature<T, K = PropertyKey> = {
+  [P in keyof T as (CheckIndexSignature<P, K> extends false ? P : never)] : T[P]
 }
 ```
 代码详解：
-* `NeverIndex`：因为索引签名有一个特点，为`string`或者`number`类型，所以我们通过`string extends P`或者`number extends P`的形式排除此索引签名。
-* `as NeverIndex<P`：在之前的案例中，我们介绍过`as`的用法，在这里有**加工**或**再次断言**的意思。在使用`in`操作符进行迭代时，对每一个`P`再使用`NeverIndex`加工一下，如果是索引签名，这里的结果为`never`，为`never`时表示跳过当前迭代，进而达到排除索引签名的目的。
+* `CheckIndexSignature`：因为索引签名有一个特点，为`string | number | symbol`，所以我们通过`P extends T ? true : false`形式排除此索引签名。其原理如下：
+```ts
+type FooKeys = string | 'foo'
+
+// 第一次迭代
+example1: T = 'foo', P = string | number | symbol
+step1: (string | number | symbol) extends 'foo' ? true : false
+step2: (string extends 'foo' ? true : false) |
+       (number extends 'foo' ? true : false) |
+       (symbol extends 'foo' ? true : false) |
+step3: false | false | false
+step4: false
+
+// 第二次迭代
+example2: T = string, P = string | number | symbol
+step1: (string | number | symbol) extends string ? true : false
+step2: (string extends string ? true : false) |
+       (number extends string ? true : false) |
+       (symbol extends string ? true : false) |
+step3: true | false | false
+step4: true | false
+step5: boolean
+```
+* `as xxx`：在之前的案例中，我们介绍过`as`的用法，在这里有**加工**或**再次断言**的意思。在使用`in`操作符进行迭代时，对每一个`P`再使用`CheckIndexSignature`加工一下，如果是索引签名，这里的结果为`never`，为`never`时表示跳过当前迭代，进而达到排除索引签名的目的。
+```ts
+// 第一次迭代 P = 'foo'
+   CheckIndexSignature<P, K> extends false ? P : never
+=> false extends false ? P : never
+=> P
+
+// 第二次迭代 P = string
+   CheckIndexSignature<P, K> extends false ? P : never
+=> boolean extends false ? P : never
+=> never
+
+// 最终结果
+type result = { foo(): void; }
+```
 
 ### PercentageParser(百分比解析)
 <link-and-solution num="1978" />
