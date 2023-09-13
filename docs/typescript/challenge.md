@@ -1666,11 +1666,12 @@ type CopyKeys<T> = {
 }
 type PartialByKeys<
   T,
-  K extends keyof any = keyof T
-> = CopyKeys<Partial<Pick<T, Extract<keyof T, K>>> & Omit<T, K>>
+  K extends keyof T = keyof T
+> = CopyKeys<Omit<T, K> & {
+  [P in K]?: T[P]
+}>
 ```
 代码详解：
-* `Pick`部分：首先取`keyof T`和`K`的交集，然后使用`Pick`从`T`中选取交集的`key`组成一个新类型，最后给新类型添加可选。
 * `Omit`部分：根据之前介绍的`Omit`的知识，`Omit<T, K>`表示从`T`中剔除含有`K`的类型。
 * `CopyKeys`部分：如果不使用`CopyKeys`，最后的结果为`T & U`形式，它实际上与使用`CopyKeys`的结果是一样的。这里使用`CopyKeys`，很大程度上是为了测试。
 ```ts
@@ -1708,8 +1709,10 @@ type CopyKeys<T> = {
 }
 type RequiredByKeys<
   T,
-  K extends keyof any = keyof T
-> = CopyKeys<Required<Pick<T, Extract<keyof T, K>>> & Omit<T, K>>
+  K extends keyof T = keyof T
+> = CopyKeys<Omit<T, K> & {
+  [P in K]-?: T[P]
+}>
 ```
 代码详解：实现思路参考`PartialByKeys`。
 
@@ -1783,15 +1786,23 @@ type result = ObjectEntries<Model>
 ```
 #### 实现方式
 ```ts
-type ObjectEntries<T, U = Required<T>> = {
-  [P in keyof U]: [P, U[P]]
-}[keyof U]
+type RemoveUndefined<T> = [T] extends [undefined] ? T : Exclude<T, undefined>
+type ObjectEntries<T> = {
+  [P in keyof T]-?: {} extends Pick<T, P> ? [P, RemoveUndefined<T[P]>] : [P, T[P]]
+}[keyof T]
 ```
-代码详解：借助`U`类型，然后对其`Required`是为了去掉可选类型，`U[keyof U]`表示取出`U`中键的类型组成的联合类型。
-
-<link-and-solution num="3060" />
-
-与`pop`和`push`方法相似的另外一对方法叫`shift`和`unshift`，它们的实现思路是一样的。
+代码详解：
+* `RemoveUndefined`：当`T`仅为`undefined`，表示原始类型就是`undefined`; 当`T`为联合类型时，移除联合类型中的`undefined`。
+* `[P in keyof T]-?`:  表示移除可选属性。
+* `{} extends Pick<T, P>`: 判断当前的`P`是否为可选属性，是的话就是使用`RemoveUndefined`移除其中的`undefined`，否则取原始类型。
+```ts
+type Person = {
+  name?: string 
+}
+// 结果都为true
+type result1 = {} extends Person ? true : false
+type result2 = { name: string; } extends Person ? true : false
+```
 
 ### Shift(数组shift方法)
 <link-and-solution num="3062" />
@@ -1804,7 +1815,7 @@ type shiftResult = Shift<[1, 2, 3]>
 #### 实现方式
 ```ts
 // Shift实现
-type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : never
+type Shift<T extends any[]> = T extends [infer F, ...infer R] ? R : []
 ```
 
 ### TupleToNestedObject(元组转嵌套对象)
