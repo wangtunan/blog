@@ -9,7 +9,7 @@
     <a :href="solutionHref" target="_blank">
       <img
         src="https://img.shields.io/badge/-Check%20out%20Solutions-de5a77?logo=awesome-lists&logoColor=white"
-        alt="Take the Challenge"
+        alt="Check Out Solutions"
       >
     </a>
   </p>
