@@ -1831,10 +1831,13 @@ type result = TupleToNestedObject<['a', 'b'], string>
 ```ts
 type TupleToNestedObject<T extends any[], U> =
   T extends [infer F, ...infer R]
-    ? F extends string
-      ? { [P in F]: TupleToNestedObject<R, U> }
-      : never
+    ? { [P in F & string]: TupleToNestedObject<R, U> }
     : U
+```
+代码详解：
+* `F & string`: 等价于如下代码：
+```ts
+F & string = F extends string ? F : never
 ```
 
 ### Reverse
@@ -1854,19 +1857,19 @@ type Reverse<T extends any[]> =
     : []
 ```
 
-### FlipArguments(反转函数参数)
+### FlipArguments(反转函数参数类型)
 <link-and-solution num="3196" />
 
 借助上面的`Reverse`方法，可以很容易实现函数参数的反转。
 #### 用法
-`FlipArguments`是用来实现函数参数反转的，其用法如下：
+`FlipArguments`是用来实现反转函数参数类型的，其用法如下：
 ```ts
 // 结果：(a: number, b: string) => string | number
 type result = FlipArguments<(a: string, b: number) => string | number>
 ```
 #### 实现方式
 ```ts
-type FlipArguments<T> = 
+type FlipArguments<T extends (...args: any) => any> = 
   T extends (...args: infer A) => infer R
     ? (...args: Reverse<A>) => R
     : never
@@ -1878,7 +1881,7 @@ type FlipArguments<T> =
 #### 用法
 `FlattenDepth`是用来按深度进行数组降维的，其用法如下：
 ```ts
-// 结果：
+// 结果：[1, 2, 3, 4, [5]]
 type result = FlattenDepth<[1, 2, [3, 4], [[[5]]]], 2>
 ```
 #### 实现方式
@@ -1893,9 +1896,9 @@ type FlattenDepth<
     : F extends any[]
       ? [...FlattenDepth<F, D, [0, ...U]>, ...FlattenDepth<R, D>]
       : [F, ...FlattenDepth<R, D, U>]
-    : T
+  : T
 ```
-代码详解：`FlattenDepth`的实现思路和`Flatten`基本一直，区别是按深度降维时需要一个数组去记录降维的次数。
+代码详解：`FlattenDepth`的实现思路和`Flatten`基本一致，区别是按深度降维时需要一个数组去记录降维的次数(深度)。
 
 ### BEM
 <link-and-solution num="3326" />
@@ -1903,8 +1906,8 @@ type FlattenDepth<
 #### 用法
 `BEM`是用来将字符串连接成CSS BEM格式的，其用法如下：
 ```ts
-// 结果：'btn--price__small' | 'btn--price__mini' 
-type result = BEM<'btn', ['price'], ['small', 'mini']>
+// 结果：'btn__primary--small' | 'btn__primary--mini' 
+type result = BEM<'btn', ['primary'], ['small', 'mini']>
 ```
 #### 实现方式
 ```ts
@@ -1912,25 +1915,26 @@ type ArrayToString<
   T extends any[],
   P extends string
 > = T extends [] ? '' : `${P}${T[number]}`
+
 type BEM<
   B extends string,
   E extends string[],
   M extends string[]
-> = `${B}${ArrayToString<E, '__'>}${ArrayToString<M, '--'>}`
+> = `${B}${ArrayToString<E, '--'>}${ArrayToString<M, '__'>}`
 ```
 代码详解：实现`BEM`的思路并不复杂，只需要记住如下两个知识点：
 * 判断是一个空数组，可以使用`T extends []`或者`T['length'] extends 0`。
 * `T[number]`会自动迭代数组，例如：
 ```ts
-// 结果: 'A_B' | 'A_C' | 'A_D'
+// 结果: 'A__B' | 'A__C' | 'A__D'
 type result = `A__${['B', 'C', 'D'][number]}`
 ```
 
 ### InOrderTraversal(中序遍历)
 <link-and-solution num="3376" />
 
-**先序遍历**：先访问根节点，然后访问左节点，最后访问右节点。
-**中序遍历**：先访问左节点，然后访问根节点，最后访问右节点。
+**先序遍历**：先访问根节点，然后访问左节点，最后访问右节点。<br/>
+**中序遍历**：先访问左节点，然后访问根节点，最后访问右节点。<br/>
 **后序遍历**：先访问左节点，然后访问右节点，最后访问根节点。
 #### 用法
 `InOrderTraversal`是用来实现二叉树中序遍历的，其用法如下：
