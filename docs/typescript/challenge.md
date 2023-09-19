@@ -1933,9 +1933,9 @@ type result = `A__${['B', 'C', 'D'][number]}`
 ### InOrderTraversal(中序遍历)
 <link-and-solution num="3376" />
 
-**先序遍历**：先访问根节点，然后访问左节点，最后访问右节点。<br/>
-**中序遍历**：先访问左节点，然后访问根节点，最后访问右节点。<br/>
-**后序遍历**：先访问左节点，然后访问右节点，最后访问根节点。
+**先序遍历**：`PreOrderTraversal`先访问根节点，然后访问左节点，最后访问右节点。<br/>
+**中序遍历**：`InOrderTraversal`先访问左节点，然后访问根节点，最后访问右节点。<br/>
+**后序遍历**：`PostOrderTraversal`先访问左节点，然后访问右节点，最后访问根节点。
 #### 用法
 `InOrderTraversal`是用来实现二叉树中序遍历的，其用法如下：
 ```ts
@@ -1964,25 +1964,33 @@ interface TreeNode {
   left: TreeNode | null;
   right: TreeNode | null;
 }
-// way1:
-type InOrderTraversal<
-  T extends TreeNode | null,
-  U extends TreeNode = NonNullable<T>
-> = T extends TreeNode
-  ? [...InOrderTraversal<U['left']>, U['val'], ...InOrderTraversal<U['right']>]
+// 先序遍历实现
+type PreOrderTraversal<
+  T extends TreeNode | null
+> = [T] extends [TreeNode]
+  ? [T['val'], ...PreOrderTraversal<T['left']>, ...PreOrderTraversal<T['right']>]
   : []
-
-// way2:
-type InOrderTraversal<T extends TreeNode | null> = 
-  T extends TreeNode
-    ? T['left'] extends TreeNode
-      ? [...InOrderTraversal<T['left']>, T['val'], ...InOrderTraversal<T['right']>]
-      : T['right'] extends TreeNode
-        ? [T['val'], ...InOrderTraversal<T['right']>]
-        : [T['val']]
-    : []
+// 中序遍历实现
+type InOrderTraversal<
+  T extends TreeNode | null
+> = [T] extends [TreeNode]
+  ? [...InOrderTraversal<T['left']>, T['val'], ...InOrderTraversal<T['right']>]
+  : []
+// 后序遍历实现
+type PostOrderTraversal<
+  T extends TreeNode | null
+> = [T] extends [TreeNode]
+  ? [...PostOrderTraversal<T['left']>, ...PostOrderTraversal<T['right']>, T['val']]
+  : []
 ```
-**注意**：如果以上代码在编辑器中提示**类型实例化过深，且可能无限**这是正常现象，因为`TypeScript`对于递归的次数是有限制的。
+代码详解：
+* `[T] extends [TreeNode]`: 使用此形式而不用`T extends TreeNode`，这是因为`T`是一个`TreeNode | null`，在左侧会进行分布式条件类型，判断两次：
+```ts
+// 如果Tree嵌套比较深的话，ts会报错
+TreeNode extends TreeNode |
+null extends TreeNode
+```
+* 遍历方式：根据先序遍历`PreOrderTraversal`、中序遍历`InOrderTraversal`、后序遍历`PostOrderTraversal`的定义，只需要在递归的时候处理其访问顺序即可。
 
 ### FlipObject(对象键值交换)
 <link-and-solution num="4179" />
@@ -2006,21 +2014,25 @@ type FlipObject<T extends Record<string, BasicType>> = {
 
 **菲波那切数列**：1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
 #### 用法
-`Fibonacci`是用来实现菲波那切数列的，用法如下：
+`Fibonacci`是用来实现斐波那契数列的，用法如下：
 ```ts
 type result = Fibonacci<5>
 ```
 #### 实现方式
 ```ts
 type Fibonacci<
-  T extends number,
+  N extends number,
   Index extends any[] = [1],
   Prev extends any[] = [],
   Current extends any[] = [1]
-> = Index['length'] extends T
+> = Index['length'] extends N
   ? Current['length']
-  : Fibonacci<T, [...Index, 1], Current, [...Prev, ...Current]>
+  : Fibonacci<N, [...Index, 1], Current, [...Prev, ...Current]>
 ```
+代码详解：
+* `Index`：标记当前数列是第几项，从1开始。
+* `Prev`：存储数列上一次计算的值，从0开始。
+* `Current`: 标记当前数列的值，根据数列的特点，第N项的值，等于`N - 1`项 + `N - 2`项的值，即：`Current = [...Prev, ...Current]`
 
 ### AllCombination(全排列)
 <link-and-solution num="4260" />
