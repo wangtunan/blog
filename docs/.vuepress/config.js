@@ -85,6 +85,10 @@ module.exports = {
           {
             text: 'Rollup',
             link: '/rollup/'
+          },
+          {
+            text: 'Vite',
+            link: '/vite/'
           }
         ]
       },
