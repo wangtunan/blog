@@ -2034,14 +2034,14 @@ type Fibonacci<
 * `Prev`：存储数列上一次计算的值，从0开始。
 * `Current`: 标记当前数列的值，根据数列的特点，第N项的值，等于`N - 1`项 + `N - 2`项的值，即：`Current = [...Prev, ...Current]`
 
-### AllCombination(全排列)
+### AllCombinations(全排列)
 <link-and-solution num="4260" />
 
 #### 用法
-`AllCombination`是用来列举全部排列组合可能性的，其用法如下：
+`AllCombinations`是用来列举全部排列组合可能性的，其用法如下：
 ```ts
 // 结果：'' | 'A' | 'AB' | 'B' | 'BA'
-type result = AllCombination<'AB'>
+type result = AllCombinations<'AB'>
 ```
 #### 实现方式
 ```ts
@@ -2058,7 +2058,7 @@ type Combination<
   : K extends S
     ? Combination<Exclude<S, K>, U | `${U}${K}`>
     : U
-type AllCombination<S extends string> = Combination<StringToUnion<S>>
+type AllCombinations<S extends string> = Combination<StringToUnion<S>>
 ```
 代码详解：
 * `StringToUnion`是用来将字符串变成一个联合类型的，例如：
@@ -2093,6 +2093,7 @@ type result = GreaterThan<2, 1>
 ```
 #### 实现方式
 ```ts
+// 如果比较的数比较大，会提示：Type instantiation is excessively deep and possibly infinite
 type GreaterThan<
   T extends Number,
   N extends Number,
@@ -2148,15 +2149,20 @@ type IsTuple<T> =
 ```
 代码解析：以上代码中，比较关键的代码是`number extends T['length']`，这里不能写成`T['length'] extends number`，如下：
 ```ts
-// 第一种方式
-number extends T['length']
-=> number extends 1
-=> false
+// case1：需要返回false，因为它不定长，违反了元组的定义
+type result1 = IsTuple<number[]>
+// case2：需要返回true，因为它定长，只不过长度为0
+type result2 = IsTuple<[]>
 
-// 第二种方式
-T['length'] extends number
-=> 1 extends number
+// case1计算逻辑，T['length']返回的是number，不是一个确定的值
+number extends T['length']
+=> number extends number
 => true
+
+// case2计算逻辑，T['length']返回的是0
+number extends T['length']
+=> number extends 0
+=> false
 ```
 
 ### Chunk(lodash分割数组)
@@ -2188,30 +2194,55 @@ type Chunk<
 ### Fill(数组fill方法)
 <link-and-solution num="4518" />
 
-实现`Fill`时，不考虑索引，全部替换。
 #### 用法
+`Fill`是用来在一个数组中，用指定元素，替换开始索引和结束索引元素的。
 ```ts
-// 解雇：[true, true, true]
-type result = Fill<[1, 2, 3], true>
+// 结果：[1, true, true]
+type result = Fill<[1, 2, 3], true, 1, 3>
 ```
 #### 实现方式
 ```ts
 type Fill<
-  T extends any[],
-  U
-> = T extends [any, ...infer Rest]
-    ? [U, ...Fill<Rest, U>]
-    : []
+  T extends unknown[],
+  N extends number,
+  Start extends number = 0,
+  End extends number = T['length'],
+  Count extends any[] = [],
+  Flag extends boolean = Count['length'] extends Start ? true : false
+> = Count['length'] extends End
+  ? T
+  : T extends [infer F, ...infer L]
+    ? Flag extends false
+      ? [F, ...Fill<L, N, Start, End, [...Count, 0]>]
+      : [N, ...Fill<L, N, Start, End, [...Count, 0], true>]
+    : T
+```
+代码详解：
+* `Count`: 遍历标志位，从数组第一项开始，当等于`End`时，结束替换。
+* `Flag`：遍历标志位，从数组第一项开始，当等于`Start`是，开始替换。
+```ts
+// 结果：[1, true, true]
+type result = Fill<[1, 2, 3], true, 1, 3>
+
+// 第一次遍历 Count = [], Flag = false, T = [1, 2, 3]
+// 满足Flag extends false条件，Count = [0]
+
+// 第二次遍历 Count = [0], Flag = true(计算而言)，T = [1, 2, 3]
+// 不满足Flag extends false条件，开始替换，Count = [0, 0], T = [1, true, 3]
+
+// 第三次遍历 Count = [0, 0], Flag = true(主动传递), T =[1, true, 3]
+// 不满足Flag extends false条件，开始替换，Count = [0, 0, 0], T = [1, true, true]
+
+// 最后一次判断 Count = [0, 0, 0]，长度等于End，结束，T = [1, true, true]
 ```
 
 ### Without(移除)
 <link-and-solution num="5117" />
 
-`Without<T, F>`，其中`T`需要是数组形式，`F`可以是一个数字或者一个数组。
 #### 用法
 `Without`是用来从数组中移除指定元素的，其用法如下：
 ```ts
-// 结果：
+// 结果：[3]
 type result = Without<[1, 2, 1, 2, 3], [1, 2]>
 ```
 #### 实现方式
