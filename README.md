@@ -16,9 +16,6 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 [深入理解 ES6](https://wangtunan.github.io/blog/books/javascript/es6.html)<br/>
 [JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/) <br/>
 [JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html) <br/>
-<!-- [JavaScript 高级程序设计](https://wangtunan.github.io/blog/books/javascript/red-book.html)<br/> -->
-[JavaScript 设计模式与开发实践](https://wangtunan.github.io/blog/designPattern/) <br/>
-[JavaScript 数据结构和算法](https://wangtunan.github.io/blog/books/javascript/algorithm.html)<br/>
 
 ## Vue 源码分析
 [Vue2.0 源码分析](https://wangtunan.github.io/blog/vueAnalysis/introduction/)<br/>
@@ -27,12 +24,17 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 ## 自动化测试
 [Vue 应用测试](https://wangtunan.github.io/blog/test/vueTest.html)<br/>
 
-## Webpack4.0
-[Webpack 基础知识](https://wangtunan.github.io/blog/webpack/webpack/)<br/>
+## 打包工具
+[Webpack4 基础知识](https://wangtunan.github.io/blog/webpack/webpack/)<br/>
+[Rollup 基础知识](https://wangtunan.github.io/blog/rollup/)<br/>
+[Vite 基础知识](https://wangtunan.github.io/blog/vite/)<br/>
 
 ## TypeScript
 [TypeScript 基础知识](https://wangtunan.github.io/blog/typescript/base)<br/>
 [TypeScript 类型挑战](https://wangtunan.github.io/blog/typescript/challenge)<br/>
+
+## CSS预编译器
+[SASS 基础知识](https://wangtunan.github.io/blog/cssPrecompiler/sass/)<br/>
 
 ## VuePress
 [VuePress 基础知识](https://wangtunan.github.io/blog/vuepress/)<br/>
