@@ -2267,12 +2267,20 @@ type Without<
 #### 用法
 `Trunc`是用来实现`Math.trunc()`方法的，其用法如下：
 ```ts
-// 结果：100
-type result = Trunc<100.32>
+// 结果1：100
+type result1 = Trunc<100.32>
+// 结果2：0
+type result2 = Trunc<.3>
 ```
 #### 实现方式
 ```ts
-type Trunc<T extends number | string> = `${T}` extends `${infer L}.${string}` ? L : `${T}`
+type Trunc<
+  T extends number | string
+> =`${T}` extends `${infer L}.${string}`
+  ? L extends ''
+    ? '0'
+    : L
+  : `${T}`
 ```
 
 ### IndexOf(数组indexOf方法)
@@ -2286,15 +2294,24 @@ type result = IndexOf<[1, 2, 3, 4], 3>
 ```
 #### 实现方式
 ```ts
+type IsEqual<X, Y> = 
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+
 type IndexOf<
   T extends any[],
   U,
   Index extends any[] = []
 > = T extends [infer First, ...infer Rest]
-    ? First extends U
-      ? Index['length']
-      : IndexOf<Rest, U, [...Index, 0]>
-    : -1
+  ? IsEqual<U, First> extends true
+    ? Index['length']
+    : IndexOf<Rest, U, [...Index, 0]>
+  : -1
+```
+代码详解：需要借助`IsEqual`来判断两个值是否相等，原因考虑如下案例：
+```ts
+type result1 = IsEqual<1, number> // false
+type result2 = IsEqual<'a', string> // false
 ```
 
 ### Join(数组join方法)
@@ -2322,6 +2339,7 @@ type Join<
 ### LastIndexOf(数组lastIndexOf方法)
 <link-and-solution num="5317" />
 
+借助`IndexOf`的实现思路，很容易实现`lastIndexOf`方法。
 #### 用法
 `LastIndexOf`是用来实现数组`lastIndexOf`方法的，其用法如下：
 ```ts
@@ -2330,16 +2348,17 @@ type result = LastIndexOf<[1, 2, 3, 4, 5], 4>
 ```
 #### 实现方式
 ```ts
-type Pop<T extends any[]> = T extends [...infer Rest, any] ? Rest : never
+type IsEqual<X, Y> = 
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
 type LastIndexOf<
-  T extends any[],
-  U,
-  Index extends any[] = Pop<T>
+  T extends any[], 
+  U
 > = T extends [...infer Rest, infer Last]
-    ? Last extends U
-      ? Index['length']
-      : LastIndexOf<Rest, U, Pop<Index>>
-    : -1
+  ? IsEqual<Last, U> extends true
+    ? Rest['length']
+    : LastIndexOf<Rest, U>
+  : -1
 ```
 
 ### Unique(数组去重)
