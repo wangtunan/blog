@@ -14,5 +14,8 @@
   "dependencies": {
     "element-ui": "^2.10.0",
     "vuepress": "^1.9.9"
+  },
+  "devDependencies": {
+    "@vuepress/plugin-medium-zoom": "^1.9.10"
   }
 }

@@ -137,5 +137,8 @@ module.exports = {
         '@components': '../.vuepress/components'
       }
     }
-  }
+  },
+  plugins: [
+    '@vuepress/medium-zoom'
+  ]
 }
