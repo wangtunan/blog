@@ -1,18 +1,27 @@
-.page
-  .theme-default-content
-    code
+.page {
+  .theme-default-content {
+    code {
       background-color: #fff5f5;
       color: #ff502c;
-.customer-page-class
+    }
+  }
+}
+  
+.customer-page-class {
   color: #fb3;
   background-color: #333;
-.navbar
+}
+
+.navbar {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1)
-.theme-bg
+}
+
+.theme-bg {
   padding: 10px 20px;
   background-color: #282c34;
   color: #fb3;
   border-radius: 5px;
+}
 
 @media (min-width: 1200px) {
   .page {

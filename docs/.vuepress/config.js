@@ -1,7 +1,18 @@
+import { mediumZoomPlugin } from '@vuepress/plugin-medium-zoom'
+import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+import { getDirname, path } from '@vuepress/utils'
+import { defaultTheme  } from 'vuepress'
+
 const nav = require('./utils/nav.js')
 const { ua }  = require('./ua.js')
-const { webpackSidebar, vueAnalysisSidebar, vueNextAnalysisSidebar } = nav
-module.exports = {
+const {
+  webpackSidebar,
+  vueAnalysisSidebar,
+  vueNextAnalysisSidebar
+} = nav
+const __dirname = getDirname(import.meta.url)
+
+export default  {
   title: '汪图南',
   description: '汪图南的个人博客',
   base: '/blog/',
@@ -11,24 +22,27 @@ module.exports = {
   ],
   port: 3000,
   markdown: {
-    lineNumbers: false
+    code: {
+      lineNumbers: false
+    }
   },
-  themeConfig: {
-    lastUpdated: '最后更新时间',
-    sidebar: 'auto',
+  theme: defaultTheme({
+    editLinkText: '编辑此页面',
+    contributorsText: '贡献者',
+    lastUpdatedText: '最后更新时间',
     repo: 'https://github.com/wangtunan/blog',
     repoLabel: 'Github',
-    nav: [
+    navbar: [
       {
         text: '前端面试之道',
         link: '/interview/'
       },
       {
         text: '前端书籍',
-        items: [
+        children: [
           {
             text: 'JavaScript书籍',
-            items: [
+            children: [
               {
                 text: '你不知道的JavaScript(上)',
                 link: '/books/javascript/know-up'
@@ -53,7 +67,7 @@ module.exports = {
           },
           {
             text: 'Git书籍',
-            items: [
+            children: [
               {
                 text: '精通Git',
                 link: '/books/git/'
@@ -64,20 +78,20 @@ module.exports = {
       },
       {
         text: 'Vue源码分析',
-        items: [
+        children: [
           { text: 'Vue2.0源码分析', link: '/vueAnalysis/introduction/' },
           { text: 'Vue3.0源码分析', link: '/vueNextAnalysis/introduction/' }
         ]
       },
       {
         text: '自动化测试',
-        items: [
+        children: [
           { text: 'Vue应用测试', link: '/test/vueTest' }
         ]
       },
       {
         text: '打包工具',
-        items: [
+        children: [
           {
             text: 'Webpack',
             link: '/webpack/webpack/'
@@ -94,7 +108,7 @@ module.exports = {
       },
       {
         text: 'TypeScript',
-        items: [
+        children: [
           {
             text: 'TypeScript基础',
             link: '/typescript/base'
@@ -107,7 +121,7 @@ module.exports = {
       },
       {
         text: 'CSS预编译器',
-        items: [
+        children: [
           {
             text: 'SASS',
             link: '/cssPrecompiler/sass/'
@@ -128,7 +142,7 @@ module.exports = {
       '/vueAnalysis/': vueAnalysisSidebar,
       '/vueNextAnalysis/': vueNextAnalysisSidebar
     }
-  },
+  }),
   configureWebpack: {
     resolve: {
       alias: {
@@ -139,6 +153,14 @@ module.exports = {
     }
   },
   plugins: [
-    '@vuepress/medium-zoom'
+    mediumZoomPlugin({
+      margin: 50,
+      background: 'black'
+    }),
+    registerComponentsPlugin({
+      components: {
+        LinkAndSolution: path.resolve(__dirname, './components/linkAndSolution.vue'),
+      },
+    }),
   ]
 }

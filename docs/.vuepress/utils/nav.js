@@ -1,6 +1,6 @@
 // webpack目录结构
 const webpackSidebar = {
-  title: 'Webpack',
+  text: 'Webpack',
   collapsable: false,
   children: [
     '/webpack/webpack/',
@@ -20,127 +20,131 @@ const webpackSidebar = {
 // Vue源码分析目录结构
 const vueAnalysisSidebar = [
   {
-    title: '介绍',
-    collapsable: false,
-    children: ['introduction/']
-  },
-  {
-    title: '源码目录设计和架构设计',
-    collapsable: false,
-    children: ['design/']
-  },
-  {
-    title: 'Rollup构建版本',
+    text: '介绍',
     collapsable: false,
     children: [
-      'rollup/',
-      'rollup/vue'
+      '/vueAnalysis/introduction/'
     ]
   },
   {
-    title: '从入口到构造函数整体流程',
+    text: '源码目录设计和架构设计',
     collapsable: false,
     children: [
-      'entry/',
-      'entry/global',
-      'entry/init',
-      'entry/state',
-      'entry/events',
-      'entry/lifecycle',
-      'entry/render'
+      '/vueAnalysis/design/'
     ]
   },
   {
-    title: '响应式原理',
+    text: 'Rollup构建版本',
     collapsable: false,
     children: [
-      'reactive/',
-      'reactive/prepare',
-      'reactive/props',
-      'reactive/methods',
-      'reactive/data',
-      'reactive/computed',
-      'reactive/watch',
-      'reactive/reactive',
-      'reactive/dep',
-      'reactive/notify',
-      'reactive/nexttick',
-      'reactive/problem',
-      'reactive/api'
+      '/vueAnalysis/rollup/',
+      '/vueAnalysis/rollup/vue'
     ]
   },
   {
-    title: '虚拟DOM和VNode',
+    text: '从入口到构造函数整体流程',
     collapsable: false,
     children: [
-      'dom/',
-      'dom/vnode',
-      'dom/diff'
+      '/vueAnalysis/entry/',
+      '/vueAnalysis/entry/global',
+      '/vueAnalysis/entry/init',
+      '/vueAnalysis/entry/state',
+      '/vueAnalysis/entry/events',
+      '/vueAnalysis/entry/lifecycle',
+      '/vueAnalysis/entry/render'
     ]
   },
   {
-    title: '组件化',
+    text: '响应式原理',
     collapsable: false,
     children: [
-      'component/',
-      'component/mount',
-      'component/render',
-      'component/createElement',
-      'component/createComponent',
-      'component/merge',
-      'component/patch',
-      'component/lifecycle',
-      'component/register'
+      '/vueAnalysis/reactive/',
+      '/vueAnalysis/reactive/prepare',
+      '/vueAnalysis/reactive/props',
+      '/vueAnalysis/reactive/methods',
+      '/vueAnalysis/reactive/data',
+      '/vueAnalysis/reactive/computed',
+      '/vueAnalysis/reactive/watch',
+      '/vueAnalysis/reactive/reactive',
+      '/vueAnalysis/reactive/dep',
+      '/vueAnalysis/reactive/notify',
+      '/vueAnalysis/reactive/nexttick',
+      '/vueAnalysis/reactive/problem',
+      '/vueAnalysis/reactive/api'
     ]
   },
   {
-    title: '编译原理',
+    text: '虚拟DOM和VNode',
     collapsable: false,
     children: [
-      'compile/',
-      'compile/compileToFunctions',
-      'compile/parse',
-      'compile/optimize',
-      'compile/codegen'
+      '/vueAnalysis/dom/',
+      '/vueAnalysis/dom/vnode',
+      '/vueAnalysis/dom/diff'
     ]
   },
   {
-    title: '扩展',
+    text: '组件化',
     collapsable: false,
     children: [
-      'expand/',
-      'expand/directive',
-      'expand/filter',
-      'expand/event',
-      'expand/vmodel',
-      'expand/slot',
-      'expand/keep-alive',
-      'expand/transition',
-      'expand/transition-group',
-      'expand/plugin'
+      '/vueAnalysis/component/',
+      '/vueAnalysis/component/mount',
+      '/vueAnalysis/component/render',
+      '/vueAnalysis/component/createElement',
+      '/vueAnalysis/component/createComponent',
+      '/vueAnalysis/component/merge',
+      '/vueAnalysis/component/patch',
+      '/vueAnalysis/component/lifecycle',
+      '/vueAnalysis/component/register'
     ]
   },
   {
-    title: 'Vue-Router',
+    text: '编译原理',
     collapsable: false,
     children: [
-      'router/',
-      'router/install',
-      'router/matcher',
-      'router/change',
-      'router/components',
-      'router/hooks'
+      '/vueAnalysis/compile/',
+      '/vueAnalysis/compile/compileToFunctions',
+      '/vueAnalysis/compile/parse',
+      '/vueAnalysis/compile/optimize',
+      '/vueAnalysis/compile/codegen'
     ]
   },
   {
-    title: 'Vuex',
+    text: '扩展',
     collapsable: false,
     children: [
-      'vuex/',
-      'vuex/install',
-      'vuex/init',
-      'vuex/utils',
-      'vuex/api'
+      '/vueAnalysis/expand/',
+      '/vueAnalysis/expand/directive',
+      '/vueAnalysis/expand/filter',
+      '/vueAnalysis/expand/event',
+      '/vueAnalysis/expand/vmodel',
+      '/vueAnalysis/expand/slot',
+      '/vueAnalysis/expand/keep-alive',
+      '/vueAnalysis/expand/transition',
+      '/vueAnalysis/expand/transition-group',
+      '/vueAnalysis/expand/plugin'
+    ]
+  },
+  {
+    text: 'Vue-Router',
+    collapsable: false,
+    children: [
+      '/vueAnalysis/router/',
+      '/vueAnalysis/router/install',
+      '/vueAnalysis/router/matcher',
+      '/vueAnalysis/router/change',
+      '/vueAnalysis/router/components',
+      '/vueAnalysis/router/hooks'
+    ]
+  },
+  {
+    text: 'Vuex',
+    collapsable: false,
+    children: [
+      '/vueAnalysis/vuex/',
+      '/vueAnalysis/vuex/install',
+      '/vueAnalysis/vuex/init',
+      '/vueAnalysis/vuex/utils',
+      '/vueAnalysis/vuex/api'
     ]
   }
 ]
@@ -148,49 +152,51 @@ const vueAnalysisSidebar = [
 // Vue3.0源码分析目录结构
 const vueNextAnalysisSidebar = [
   {
-    title: '介绍',
+    text: '介绍',
     collapsable: false,
     children: [
-      'introduction/',
-      'introduction/optimization.md'
+      '/vueNextAnalysis/introduction/',
+      '/vueNextAnalysis/introduction/optimization.md'
     ]
   },
   {
-    title: 'Monorepo和Rollup',
+    text: 'Monorepo和Rollup',
     collapsable: false,
     children: [
-      'monorepo/',
-      'rollup/'
+      '/vueNextAnalysis/monorepo/',
+      '/vueNextAnalysis/rollup/'
     ]
   },
   {
-    title: '源码目录',
-    collapsable: false,
-    children: ['catalog/']
-  },
-  {
-    title: '响应式原理',
+    text: '源码目录',
     collapsable: false,
     children: [
-      'reactivity/',
-      'reactivity/base',
-      'reactivity/ref',
-      'reactivity/reactive',
-      'reactivity/computed',
-      'reactivity/readonly'
+      '/vueNextAnalysis/catalog/'
     ]
   },
   {
-    title: '组件化',
+    text: '响应式原理',
     collapsable: false,
     children: [
-      'component/',
-      'component/createApp',
-      'component/setup',
-      'component/mount',
-      'component/lifecycle',
-      'component/register',
-      'component/render'
+      '/vueNextAnalysis/reactivity/',
+      '/vueNextAnalysis/reactivity/base',
+      '/vueNextAnalysis/reactivity/ref',
+      '/vueNextAnalysis/reactivity/reactive',
+      '/vueNextAnalysis/reactivity/computed',
+      '/vueNextAnalysis/reactivity/readonly'
+    ]
+  },
+  {
+    text: '组件化',
+    collapsable: false,
+    children: [
+      '/vueNextAnalysis/component/',
+      '/vueNextAnalysis/component/createApp',
+      '/vueNextAnalysis/component/setup',
+      '/vueNextAnalysis/component/mount',
+      '/vueNextAnalysis/component/lifecycle',
+      '/vueNextAnalysis/component/register',
+      '/vueNextAnalysis/component/render'
     ]
   }
 ]
