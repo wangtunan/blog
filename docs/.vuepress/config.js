@@ -1,10 +1,10 @@
-import { mediumZoomPlugin } from '@vuepress/plugin-medium-zoom'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+import { commentPlugin } from 'vuepress-plugin-comment2'
 import { getDirname, path } from '@vuepress/utils'
-import { defaultTheme  } from 'vuepress'
+import { defaultTheme } from 'vuepress'
 
 const nav = require('./utils/nav.js')
-const { ua }  = require('./ua.js')
+const { ua } = require('./ua.js')
 const {
   webpackSidebar,
   vueAnalysisSidebar,
@@ -12,10 +12,11 @@ const {
 } = nav
 const __dirname = getDirname(import.meta.url)
 
-export default  {
+export default {
   title: '汪图南',
   description: '汪图南的个人博客',
   base: '/blog/',
+  lang: 'zh-CN',
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }],
     [...ua]
@@ -27,7 +28,7 @@ export default  {
     }
   },
   theme: defaultTheme({
-    editLinkText: '编辑此页面',
+    editLink: false,
     contributorsText: '贡献者',
     lastUpdatedText: '最后更新时间',
     repo: 'https://github.com/wangtunan/blog',
@@ -153,14 +154,17 @@ export default  {
     }
   },
   plugins: [
-    mediumZoomPlugin({
-      margin: 50,
-      background: 'black'
-    }),
     registerComponentsPlugin({
-      components: {
-        LinkAndSolution: path.resolve(__dirname, './components/linkAndSolution.vue'),
-      },
+      componentsDir: path.resolve(__dirname, './components')
     }),
+    commentPlugin({
+      provider: "Giscus",
+      repo: 'wangtunan/blog',
+      repoId: 'MDEwOlJlcG9zaXRvcnkxNzcyMzkwNDg=',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOCpB0CM4CZkha',
+      mapping: "pathname",
+      lang: 'zh-CN'
+    })
   ]
 }

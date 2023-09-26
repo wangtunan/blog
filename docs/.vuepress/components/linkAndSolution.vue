@@ -1,5 +1,5 @@
 <template>
-  <p>
+  <p class="link-and-solution">
     <a :href="challengeHref" target="_blank">
       <img
         src="https://img.shields.io/badge/-Take%20the%20Challenge-3178c6?logo=typescript&logoColor=white"
@@ -33,3 +33,10 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+  .link-and-solution {
+    a {
+      margin-right: 10px;
+    }
+  }
+</style>

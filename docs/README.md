@@ -18,4 +18,4 @@ footer: Copyright © 2019-present Wangtunan
 ## 鼓励作者
 如果你觉得博客写得还不错，可以帮忙点个star或者打赏犒劳一下
 
-![打赏](/blog/donate.jpg)
+![打赏](https://wangtunan.github.io/blog/donate.jpg)
