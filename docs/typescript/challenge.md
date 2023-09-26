@@ -2371,15 +2371,28 @@ type LastIndexOf<
 type result = Unique<[1, 1, 2, 2, 3, 3]>
 ```
 #### 实现方式
+借助`IsEqual`和`Includes`，很容易实现`Unique`数组去重。
 ```ts
+type IsEqual<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+type Includes<
+  T extends any[],
+  U
+> = T extends [infer First, ...infer Last]
+  ? IsEqual<First, U> extends true
+    ? true
+    : Includes<Last, U>
+  : false
+
 type Unique<
   T extends any[],
   R extends any[] = []
-> = T extends [infer First, ...infer Rest]
-    ? First extends R[number]
-      ? Unique<Rest, [...R]>
-      : Unique<Rest, [...R, First]>
-    : R
+> = T extends [infer First, ...infer Last]
+  ? Includes<R, First> extends true
+    ? Unique<Last, R>
+    : Unique<Last, [...R, First]>
+  : R
 ```
 
 ### MapTypes(类型转换)
