@@ -2418,32 +2418,74 @@ T[P] = number, R = { mapFrom: string;mapTo: number; }
 => GetMapType<T[P], R> = number
 => { age: number } 
 ```
-'
-'
 
 ### ConstructTuple(构造元组)
 <link-and-solution num="7544" />
 
 #### 用法
+`ConstructTuple`是用来构造指定长度的元组的，其用法如下：
+```ts
+// 结果：[unknown, unknown]
+type result = ConstructTuple<2>
+```
 #### 实现方式
+```ts
+type ConstructTuple<
+  L extends number,
+  R extends any[] = []
+> = R['length'] extends L
+  ? R
+  : ConstructTuple<L, [...R, unknown]>
+```
 
 ### NumberRange(限定范围数字)
 <link-and-solution num="8640" />
 
 #### 用法
+`NumberRange`是用来返回指定范围内的数字的，其返回的是一个联合类型，用法如下：
+```ts
+// 结果：2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+type result = NumberRange<2, 9>
+```
 #### 实现方式
-
-### Combination(元素组合)
-<link-and-solution num="8767" />
-
-#### 用法
-#### 实现方式
+实现思路参考：数组`Fill`方法。
+```ts
+type NumberRange<
+  L, 
+  H,
+  I extends any[] = [],
+  F = I['length'] extends L ? true : false
+> = I['length'] extends H
+  ? I[number] | H
+  : F extends false
+    ? NumberRange<L, H, [...I, never]>
+    : NumberRange<L, H, [...I, I['length']], true>
+```
 
 ### Subsequence(元组子序列)
 <link-and-solution num="8987" />
 
 #### 用法
+`Subsequence`是用来根据指定数组生成元组子序列的，其用法如下：
+```ts
+// 结果：[] | [1] | [2] | [1, 2]
+type result = Subsequence<[1, 2]>
+```
 #### 实现方式
+```ts
+type Subsequence<
+  T extends any[],
+  R extends any[] = []
+> = T extends [infer First, ...infer Last]
+  ? Subsequence<Last, R | [...R, First]>
+  : R
+```
+代码详解：
+* `R | [...R, First]`: 在一个数组中，对一个联合类型的数组使用`...`扩展时，会自动进行元素分发，例如：
+```ts
+// 结果：['a', 'b'] | ['a', 'c']
+type result = ['a', ...(['b'] | ['c'])]
+```
 
 ### CheckRepeatedChars(是否包含相同字符)
 <link-and-solution num="9142" />
