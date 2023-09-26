@@ -6,7 +6,7 @@ export default defineClientConfig({
     const isProduction = process.env.NODE_ENV === 'production'
     if (isProduction) {
       router.afterEach(function (to) {
-        const fullPath = router.app.$withBase(to.fullPath);
+        const { fullPath } = to
         if (typeof _hmt !== 'undefined' && fullPath) {
           _hmt.push(["_trackPageview", fullPath]);
         }

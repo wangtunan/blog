@@ -1,8 +1,8 @@
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
 import { commentPlugin } from 'vuepress-plugin-comment2'
 import { getDirname, path } from '@vuepress/utils'
-import { defaultTheme } from 'vuepress'
-
+import { viteBundler  } from '@vuepress/bundler-vite'
+import { defaultTheme, defineUserConfig } from 'vuepress'
 const nav = require('./utils/nav.js')
 const { ua } = require('./ua.js')
 const {
@@ -12,7 +12,7 @@ const {
 } = nav
 const __dirname = getDirname(import.meta.url)
 
-export default {
+export default defineUserConfig({
   title: '汪图南',
   description: '汪图南的个人博客',
   base: '/blog/',
@@ -144,15 +144,18 @@ export default {
       '/vueNextAnalysis/': vueNextAnalysisSidebar
     }
   }),
-  configureWebpack: {
-    resolve: {
-      alias: {
-        '@images': '../images',
-        '@vuepress': '../images/vuepress',
-        '@components': '../.vuepress/components'
+  bundler: viteBundler({
+    viteOptions: {
+      resolve: {
+        alias: {
+          '@images': path.resolve(__dirname, '../images')
+        }
+      },
+      ssr: {
+        noExternal: ["vuepress-shared"],
       }
     }
-  },
+  }),
   plugins: [
     registerComponentsPlugin({
       componentsDir: path.resolve(__dirname, './components')
@@ -167,4 +170,4 @@ export default {
       lang: 'zh-CN'
     })
   ]
-}
+})
