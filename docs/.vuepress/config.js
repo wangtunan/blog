@@ -18,7 +18,7 @@ export default defineUserConfig({
   base: '/blog/',
   lang: 'zh-CN',
   head: [
-    ['link', { rel: 'icon', href: '/icon.png' }],
+    ['link', { rel: 'icon', href: '/blog/icon.png' }],
     [...ua]
   ],
   port: 3000,

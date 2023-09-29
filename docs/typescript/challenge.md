@@ -2504,19 +2504,92 @@ type result = ['a', ...(['b'] | ['c'])]
 <link-and-solution num="9142" />
 
 #### 用法
+`CheckRepeatedChars`是用来检查字符串中是否存在重复字符的，其用法如下：
+```ts
+// 结果1：false 
+type result1 = CheckRepeatedChars<'abc'>
+// 结果2：true
+type result2 = CheckRepeatedChars<'abb'>
+```
+
 #### 实现方式
+```ts
+type CheckRepeatedChars<
+  S extends string
+> = S extends `${infer First}${infer Last}`
+  ? Last extends `${string}${First}${string}`
+    ? true
+    : CheckRepeatedChars<Last>
+  : false
+```
+代码详解：
+* `${string}${First}${string}`：表示字符串包含`First`，也可以用`infer`来代替：`${infer Left}${First}${infer Right}`。
 
 ### FirstUniqueCharIndex(字符串中第一个唯一字符)
 <link-and-solution num="9286" />
 
 #### 用法
+`FirstUniqueCharIndex`是用来获取字符串中第一个唯一字符的索引的，其用法如下：
+```ts
+// 结果1： 0(字符l)
+type result1 = FirstUniqueCharIndex<'leetcode'>
+// 结果2： 2(字符v)
+type result2 = FirstUniqueCharIndex<'loveleetcode'>
+```
+
 #### 实现方式
+借助`CheckRepeatedChars`的实现思路，很容易实现`FirstUniqueCharIndex`。
+```ts
+type FirstUniqueCharIndex<
+  S extends string,
+  R extends any[] = []
+> = S extends ''
+  ? -1
+  : S extends `${infer First}${infer Last}`
+    ? First extends R[number]
+      ? FirstUniqueCharIndex<Last, [...R, First]>
+      : Last extends `${string}${First}${string}`
+        ? FirstUniqueCharIndex<Last, [...R, First]>
+        : R['length']
+    : -1
+```
+代码详解：此题的实现思路和`FirstUniqueCharIndex`类似，只是多了一层判断，以上面案例为例：
+```ts
+// 结果： 2(字符v)
+type result = FirstUniqueCharIndex<'loveleetcode'>
+
+// 第一次迭代时：S = loveleetcode R = [] R[number] = never First = l
+=> 'l' extends never 不满足，'oveleetcode' extends `${string}l${string}`满足
+
+// 第二次迭代时：S = oveleetcode R = ['l'] R[number] = 'l' First = o
+=> 'o' extends 'l' 不满足，'veleetcode' extends `${string}o${string}`满足
+
+// 第三次迭代时：S = veleetcode R = ['l', '0'] R[number] = 'l' | 'o' First = v
+=> 'v' extends 'l' | 'o' 不满足，'eleetcode' extends `${string}v${string}`不满足
+
+// 结果：R['length']
+=> 2
+```
 
 ### ParseUrlParams(解析url路径参数)
 <link-and-solution num="9616" />
 
 #### 用法
+`ParseUrlParams`是用来解析`url`上参数名的，其用法如下：
+```ts
+// 结果：'id' | 'user'
+type result = ParseUrlParams<'posts/:id/:user'>
+```
 #### 实现方式
+```ts
+type ParseUrlParams<
+  S extends string
+> = S extends `${string}:${infer Last}`
+  ? Last extends `${infer Left}/${infer Right}`
+    ? Left | ParseUrlParams<Right>
+    : Last
+  : never
+```
 
 ### GetMiddleElement(数组中位数)
 <link-and-solution num="9896" />
