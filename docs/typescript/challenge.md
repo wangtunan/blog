@@ -2595,52 +2595,127 @@ type ParseUrlParams<
 <link-and-solution num="9896" />
 
 #### 用法
+`GetMiddleElement`是用来取数组中位数的，其用法如下：
+```ts
+// 结果1： [2]
+type result1 = GetMiddleElement<[1, 2, 3]>
+// 结果2： [2, 3]
+type result2 = GetMiddleElement<[1, 2, 3, 4]>
+```
 #### 实现方式
+```ts
+type GetMiddleElement<
+  T extends any[]
+> = T['length'] extends 0 | 1 | 2
+  ? T
+  : T extends [any, ...infer Middle, any]
+    ? GetMiddleElement<Middle>
+    : never
+```
+代码详解：
+* `T['length'] extends 0 | 1 | 2`：当数组长度小于等于而时，其中位数就是自身。
+* `T extends [any, ...infer Middle, any]`: 当长度大于2时，每次迭代去掉首、尾元素，直至数组长度小于等于2，返回。
 
-### FindEles(数组只出现一次的元素)
-<link-and-solution num="9898 " />
+### FindOnlyElements(数组只出现一次的元素)
+<link-and-solution num="9898" />
 
 #### 用法
+`FindOnlyElements`是用来获取数组中只出现一次的元素，其用法如下：
+```ts
+// 结果1： [1, 2, 3]
+type result1 = FindOnlyElements<[1, 2, 3]>
+// 结果2： [1]
+type result2 = FindOnlyElements<[1, 2, 3, 2, 3]>
+```
 #### 实现方式
+```ts
+type FindOnlyElements<
+  T extends any[],
+  U extends any[] = [],
+  R extends any[] = []
+> = T extends [infer First, ...infer Last]
+  ? First extends [...U, ...Last][number]
+    ? FindOnlyElements<Last, [...U, First], R>
+    : FindOnlyElements<Last, [...U, First], [...R, First]>
+  : R
+```
 
-### CountElementNumberToObject(计数元素出现的次数)
-<link-and-solution num="9989 " />
+### CountArrayElement(计数数组中元素出现的次数)
+<link-and-solution num="9989" />
 
 #### 用法
+`CountArrayElement`是用来实现计算数组中元素出现次数的，其用法如下：
+```ts
+// 结果1: { 1: 1, 2: 1, 3: 1 }
+type result1 = CountArrayElement<[1, 2, 3]>
+// 结果2: { 1: 2, 2: 2, 3: 1 }
+type result2 = CountArrayElement<[1, 2, 2, 1, 3]>
+```
 #### 实现方式
+```ts
+type Flatten<
+  T extends any[],
+  R extends any[] = []
+> = T extends [infer First, ...infer Last]
+  ? [First] extends [never]
+    ? Flatten<Last, R> 
+    : First extends any[]
+      ? Flatten<Last, [...R, ...Flatten<First>]>
+      : Flatten<Last, [...R, First]>
+  : R
+
+type ObjectCount<
+  T extends any[],
+  R extends Record<string | number, any[]> = {}
+> = T extends [infer First extends string | number, ...infer Last]
+  ? First extends keyof R
+    ? ObjectCount<Last, Omit<R, First> & Record<First, [...R[First], 0]>>
+    : ObjectCount<Last, Omit<R, First> & Record<First, [0]>>
+  : {
+    [P in keyof R]: R[P]['length']
+  }
+
+type CountArrayElement<
+  T extends any[]
+> = ObjectCount<Flatten<T>>
+```
+代码详解：
+* `Flatten`：实现`Flatten`，用来处理传递多维数组的情况，例如：`CountArrayElement<[1, [1, 2], 3, [4, [5]]]>`
+* `First extends keyof R`: 如果当前数组的遍历项是`R`对象中的一个键，则表明需要计数加一；如果不是，则代表是新项，需要计数为1；
+* `[P in keyof R]: R[P]['length']`: 因为最后结果需要返回数组，而非数组，所以迭代`R`对象，返回其每个属性的数组长度即可。
 
 ### Integer(数字整数)
-<link-and-solution num="9989 " />
+<link-and-solution num="10969" />
 
 #### 用法
 #### 实现方式
 
 ### ToPrimitive(转化基本类型)
-<link-and-solution num="16259 " />
+<link-and-solution num="16259" />
 
 #### 用法
 #### 实现方式
 
 ### DeepMutable(深度Mutable)
-<link-and-solution num="17973 " />
+<link-and-solution num="17973" />
 
 #### 用法
 #### 实现方式
 
 ### All(数组元素是否于给定元素相同)
-<link-and-solution num="18142 " />
+<link-and-solution num="18142" />
 
 #### 用法
 #### 实现方式
 
 ### Filter(数组过滤)
-<link-and-solution num="18220 " />
+<link-and-solution num="18220" />
 
 #### 用法
 #### 实现方式
 
 ### FindAllIndex(查找数组中给定元素所有索引)
-<link-and-solution num="21104 " />
+<link-and-solution num="21104" />
 
 #### 用法
 #### 实现方式
