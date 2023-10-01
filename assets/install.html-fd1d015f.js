@@ -1,0 +1,1 @@
+import{_ as t,o as a,c as s,a as e,b as c}from"./app-d94a41f1.js";const n={},o=e("h1",{id:"路由安装",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#路由安装","aria-hidden":"true"},"#"),c(" 路由安装")],-1),r=e("p",null,"路由安装",-1),_=[o,r];function l(d,i){return a(),s("div",null,_)}const f=t(n,[["render",l],["__file","install.html.vue"]]);export{f as default};
