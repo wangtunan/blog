@@ -2688,25 +2688,156 @@ type CountArrayElement<
 <link-and-solution num="10969" />
 
 #### 用法
+`Integer`是用来返回数字的整数部分的，如果传入的数子包含小数，则返回`never`，其用法如下：
+```ts
+// 结果1：1
+type result1 = Integer<1>
+// 结果2：never
+type result1 = Integer<1.1>
+```
 #### 实现方式
+根据`JavaScript`中[BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt)的用法，其不能包含小数。所以实现方式如下：
+```ts
+type Integer<T extends number> = `${T}` extends `${bigint}` ? T : never
+```
+代码详解：
+* `${T}` extends `${bigint}`：这里转成字符串形式比较，不能直接比较，因为`number`和`bigint`是两个不同的类型。
+```ts
+// 结果：都是false
+type result1 = number extends bigint ? true : false
+type result2 = bigint extends number ? true : false
+```
+
 
 ### ToPrimitive(转化基本类型)
 <link-and-solution num="16259" />
 
 #### 用法
+`ToPrimitive`是用来返回一个对象的类型的，其用法如下：
+```ts
+type PersonInfo = {
+  name: 'Tom'
+  age: 30
+  married: false
+  addr: {
+    home: '123456'
+    phone: '13111111111'
+  }
+  hobbies: ['sing', 'dance']
+  readonlyArr: readonly ['test']
+  fn: () => any
+}
+
+type Expected = {
+  name: string
+  age: number
+  married: boolean
+  addr: {
+    home: string
+    phone: string
+  }
+  hobbies: [string, string]
+  readonlyArr: readonly [string]
+  fn: Function
+}
+
+// 结果：Expected
+type result = ToPrimitive<PersonInfo>
+```
 #### 实现方式
+```ts
+type ToPrimitive<
+  T
+> = T extends object
+  ? T extends (...args: any[]) => any
+    ? Function
+    : { [P in keyof T]: ToPrimitive<T[P]> }
+  : T extends { valueOf: () => infer R } ? R : T
+```
+代码详解：
+* 对于函数来说：当满足`T extends (...args: any[]) => any`条件时，直接返回`Function`。
+* 对于嵌套对象来说，递归调用`ToPrimitive`即可。
+* 对于普通类型来说，判断其是否满足`T extends { valueOf: () => infer R }`，是则返回其类型。
+```ts
+// ts中的valueOf是js中的valueOf一样
+const num = 123
+console.log(num.valueOf()) // 123
+```
 
 ### DeepMutable(深度Mutable)
 <link-and-solution num="17973" />
 
 #### 用法
-#### 实现方式
+`DeepMutable`是用来深度移除属性`readonly`修饰符的，其用法如下：
+```ts
+interface Test {
+  readonly title: string
+  readonly description: string
+  readonly completed: boolean
+  readonly meta: {
+    readonly author: string
+  }
+}
 
-### All(数组元素是否于给定元素相同)
+interface Expected {
+  title: string
+  description: string
+  completed: boolean
+  meta: {
+    author: string
+  }
+}
+
+// 结果：Expected
+type result = DeepMutable<Test>
+```
+#### 实现方式
+```ts
+type DeepMutable<
+  T
+> = T extends (...args: any[]) => any
+  ? T
+  : { - readonly [P in keyof T]: DeepMutable<T[P]> }
+```
+
+### AllMatch(数组元素是否与给定元素完全相同)
 <link-and-solution num="18142" />
 
 #### 用法
+`AllMatch`是用来判断，数组元素是否与给定元素完全相同的，其用法如下：
+```ts
+// 结果1：true
+type result1 = AllMatch<[1, 1, 1], 1>
+// 结果2：false
+type result2 = AllMatch<[1, 1, 2], 1>
+```
 #### 实现方式
+```ts
+// 不考虑边界情况，简易实现方法
+type errTest1 = AllMatch<[any], unknown> // false
+type errTest2 = AllMatch<[unknown], any> // false
+type errTest3 = AllMatch<[1, 2], 1 | 2>  // false
+type AllMatch<
+  T extends any[],
+  U
+> = T[number] extends U
+? true
+: false;
+
+// 考虑边界情况：完整实现
+type IsEqual<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false
+
+type AllMatch<
+  T extends any[],
+  U
+> = T extends [infer First, ...infer Rest]
+  ? IsEqual<First, U> extends true
+    ? AllMatch<Rest, U>
+    : false
+  : true
+```
 
 ### Filter(数组过滤)
 <link-and-solution num="18220" />
