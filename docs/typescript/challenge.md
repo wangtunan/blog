@@ -2843,13 +2843,98 @@ type AllMatch<
 <link-and-solution num="18220" />
 
 #### 用法
+`Filter`是用来实现数组过滤方法的，其用法如下：
+```ts
+// 结果1：[2]
+type result1 = Filter<[0, 1, 2], 2>
+// 结果2：[1, 2]
+type result2 = Filter<[0, 1, 2], 1 | 2>
+```
 #### 实现方式
+```ts
+type Filter<
+  T extends any[],
+  P
+> = T extends [infer First, ...infer Rest]
+  ? First extends P
+    ? [First, ...Filter<Rest, P>]
+    : Filter<Rest, P>
+  : []
+```
 
 ### FindAllIndex(查找数组中给定元素所有索引)
 <link-and-solution num="21104" />
 
 #### 用法
+`FindAllIndex`是用来返回字符串中所有匹配索引的，其用法如下：
+```ts
+// 结果1：[11]
+type result1 = FindAllIndex<'TypeScript type challenges', 'type'>
+// 结果2：[2, 13]
+type result2 = FindAllIndex<'TypeScript type challenges', 'pe'>
+// 结果3：[]
+type result3 = FindAllIndex<'TypeScript type challenges', ''>
+```
 #### 实现方式
+```ts
+type FindAll<
+  T extends string,
+  P extends string,
+  R extends any[] = [],
+  I extends any[] = []
+> = P extends ''
+  ? []
+  : T extends `${string}${infer Last}`
+    ? T extends `${P}${string}`
+      ? FindAll<Last, P, [...R, I['length']], [...I, 0]>
+      : FindAll<Last, P, R, [...I, 0]>
+    : R
+```
+代码详解：
+* `I extends any[] = []`: 设置索引，字符串每迭代移除，`I`数组长度增加一。
+* `T extends ${P}${string}`: 当满足条件时，向结果数组`R`中添加当前索引即可。
+
+### CombKeys(组合键)
+<link-and-solution num="21106" />
+
+#### 用法
+`CombKeys`是用来实现组合键的，其用法如下：
+```ts
+// 结果：'cmd ctrl' | 'cmd opt' | 'cmd fn' | 'ctrl opt' | 'ctrl fn' | 'opt fn'
+type result = CombKeys<['cmd', 'ctrl', 'opt', 'fn']>
+```
+
+#### 实现方式
+```ts
+type CombKeys<
+  T extends any[]
+> = T extends [infer First extends string, ...infer Last extends string[]]
+  ? `${First} ${Last[number]}` | CombKeys<Last>
+  : never
+```
+
+### ReplaceFirst(替换元组中第一个匹配项)
+<link-and-solution num="25170" />
+
+#### 用法
+`ReplaceFirst`是用来替换元组中第一个匹配项，其用法如下：
+```ts
+// 结果：[1, 2, 4]
+type result = ReplaceFirst<[1, 2, 3], 3, 4>
+```
+
+#### 实现方式
+```ts
+type ReplaceFirst<
+  T extends readonly unknown[],
+  From,
+  To
+> = T extends [infer First, ...infer Rest]
+  ? First extends From
+    ? [To, ...Rest]
+    : [First, ...ReplaceFirst<Rest, From, To>]
+  : T
+```
 
 ## 困难
 
