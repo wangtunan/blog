@@ -1,1 +1,0 @@
-import{_ as t,o,c as n,a as e,b as a}from"./app-d94a41f1.js";const c={},s=e("h1",{id:"mount",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#mount","aria-hidden":"true"},"#"),a(" $mount")],-1),r=e("p",null,"$mount方法介绍",-1),_=[s,r];function d(u,i){return o(),n("div",null,_)}const m=t(c,[["render",d],["__file","mount.html.vue"]]);export{m as default};
