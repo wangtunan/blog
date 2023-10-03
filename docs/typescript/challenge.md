@@ -2938,7 +2938,14 @@ type ReplaceFirst<
 
 ## 困难
 
+### SimpleVue(简单Vue类型)
+<link-and-solution num="6" />
+#### 用法
+#### 实现方式
+
 ### Currying(柯里化)
+<link-and-solution num="17" />
+
 在`JavaScript`中`Currying`是用来实现函数柯里化的，其用法如下：
 ```js
 const add = (a: number, b: number) => a + b
@@ -2949,23 +2956,36 @@ const five = curriedAdd(2)(3)
 ```
 #### 用法
 `Currying`是用来实现`JavaScript`中的柯里化的，其用法如下：
-```js
+```ts
 const func = Currying((a: number, b: string, c: boolean) => true)
-// (a: string) => (a: number) => (a: boolean) => true
+// 结果：(a: string) => (a: number) => (a: boolean) => true
 type funcType = typeof func
 ```
 #### 实现方式
-```js
-type Curry<P, R> =
-  P extends []
-    ? () => R
-    : P extends [infer First, ...infer Rest]
-      ? (a: First) => Rest['length'] extends 0 ? R : Curry<Rest, R>
-      : R
-declare function Currying<F>(fn: F): F extends (...args: infer P) => infer R ? Curry<P, R> : never
+```ts
+type CurryFunction<
+  P extends any[],
+  R
+> = P extends []
+  ? () => R
+  : P extends [infer First, ...infer Rest]
+    ? Rest['length'] extends 0
+      ? (a: First) => R
+      : (a: First) => CurryFunction<Rest, R>
+    : R
+
+declare function Currying<F>(fn: F):
+  F extends (...args: infer P) => infer R
+  ? CurryFunction<P, R>
+  : never
 ```
+代码详解：
+* `P`：`P`为调用`Currying`函数时传递函数参数的参数数组，以上面为例，其值为：`[number, string, boolean]`。
+* `P extends [infer First, ...infer Rest]`: 遍历参数列表，依次返回一个函数即可。
 
 ### UnionToIntersection(元组取交集)
+<link-and-solution num="55" />
+
 在实现`UnionToIntersection`之前，我们先来回顾一下`TS`中`&`符号的作用：
 ```ts
 // 结果：never
@@ -3007,6 +3027,8 @@ type UnionToIntersection<U> =
 * `T extends (x: infer V) => any ? V : never`：这里的`T`就是上一步的函数类型，如果`extends`成立，则返回`V`，此时的`V`必然满足`U & V`。
 
 ### RequiredKeys(所有必填字段)
+<link-and-solution num="89" />
+
 #### 用法
 `RequiredKeys`是用来返回一个类型中所有必填字段，其用法如下：
 ```ts
@@ -3057,6 +3079,8 @@ type result = 'name' | 'age' | never | never => 'name' | 'age'
 ```
 
 ### GetRequired(必填字段组成的类型)
+<link-and-solution num="57" />
+
 #### 用法
 `GetRequired`是用来取一个类型中那些由必填字段组成的一个新类型的，其用法如下：
 ```ts
@@ -3079,6 +3103,8 @@ type GetRequired<T> = {
 ```
 
 ### OptionalKeys(所有可选字段)
+<link-and-solution num="90" />
+
 `OptionalKeys`和`RequiredKeys`所做的事情相反，其获取的是所有可选字段。
 #### 用法
 ```ts
@@ -3101,6 +3127,8 @@ type OptionalKeys<T> = {
 代码详解：从上面代码中可以看出，它和`RequiredKeys`实现思路是一样的，区别只是在`extends`关键词后面的处理不同。
 
 ### GetOptional(可选字段组成的类型)
+<link-and-solution num="59" />
+
 #### 用法
 在实现了`OptionalKeys`后，我们来实现其对应的`GetOptional`，其对应方法使用方式如下：
 ```ts
@@ -3122,6 +3150,8 @@ type GetOptional<T> = {
 ```
 
 ### CapitalizeWords(所有单词首字母大写)
+<link-and-solution num="112" />
+
 #### 用法
 `CapitalizeWords`是用来把一个字符串中所有单词，变为大写字母的，其中这个字符串以固定的分隔符分割，用法如下：
 ```ts
@@ -3165,6 +3195,8 @@ S不满足条件
 ```
 
 ### CamelCase(下划线字符串转小驼峰)
+<link-and-solution num="114" />
+
 #### 用法
 与**中级**章节实现不同，此章节中`CamelCase`是用来将下划线字符串转小驼峰的，其用法如下：
 ```ts
@@ -3181,6 +3213,8 @@ type CamelCase<
 ```
 
 ### ParsePrintFormat(获取字符串格式化参数)
+<link-and-solution num="147" />
+
 #### 用法
 `ParsePrintFormat`是用来获取字符串格式化参数的，其用法如下：
 ```ts
@@ -3234,7 +3268,15 @@ S不满足条件 R = ['string', 'dec']
 result = R = ['string', 'dec']
 ```
 
+
+### VueBasicProps(Vue的Props类型)
+<link-and-solution num="213" />
+#### 用法
+#### 实现方式
+
 ### IsAny和NotAny
+<link-and-solution num="223" />
+
 #### 用法
 `IsAny`是用来判断一个类型是否为`any`的，`NotAny`和它做的事情相反。
 ```ts
@@ -3262,6 +3304,8 @@ type t3 = 0 extends any ? true : false
 ```
 
 ### Get(字符串路径取值)
+<link-and-solution num="270" />
+
 #### 用法
 `Get`是用来进行字符串路径取值的，其用法如下：
 ```ts
@@ -3299,6 +3343,8 @@ type Get<T, S extends string> =
 * 含有`.`符号的字符串：对于这种情况，我们先判断`.`符号左侧部分是否满足为`T`类型的某个`key`，如果满足则递归调用`Get`；如果不满足，则直接返回`never`。
 
 ### StringToNumber(字符串数字转数字)
+<link-and-solution num="300" />
+
 #### 用法
 `StringToNumber`是用来将字符串形式的数字转换成真正数字类型数字的，其用法如下：
 ```ts
@@ -3390,6 +3436,8 @@ type result = StringToNumber<'123'> // 123
 
 
 ### FilterOut(数组元素过滤)
+<link-and-solution num="399" />
+
 #### 用法
 `FilterOut`是用来从数组中移除指定元素的，其用法如下：
 ```ts
@@ -3414,6 +3462,8 @@ type FilterOut<
 * 第三步：当迭代完毕时，直接返回结果数组`K`。
 
 ### TupleToEnum(元组转枚举)
+<link-and-solution num="472" />
+
 #### 用法
 `TupleToEnum`是用来将元组转换为枚举的，其用法如下：
 ```ts
@@ -3457,6 +3507,8 @@ type TupleToEnum<
 ```
 
 ### Format(字符串格式化函数类型)
+<link-and-solution num="545" />
+
 `%s`表示格式化为`(x: string) => any`形式，`%d`表示格式化为`(x: number) => any`形式。
 #### 用法
 `Format`是将字符串格式化为指定函数类型的，用法如下：
@@ -3484,6 +3536,8 @@ type Format<
 ```
 
 ### LengthOfString(字符串的长度)
+<link-and-solution num="651" />
+
 我们之前在**中级**大章节中已经实现过`LengthOfString`，但它面临的问题是，如果字符有上百个，由于`TS`对于递归的次数存在限制，会提示嵌套过深。
 #### 用法
 ```ts
@@ -3515,6 +3569,8 @@ R['length'] = 91
 ```
 
 ### UnionToTuple(联合类型转元组)
+<link-and-solution num="730" />
+
 #### 用法
 `UnionToTuple`是用来将联合类型转成元组的，用法如下：
 ```ts
@@ -3576,6 +3632,8 @@ type result2 = f2 & f1 extends (x: infer R) => 0 ? R : never
 ```
 
 ### Join(字符串拼接)
+<link-and-solution num="847" />
+
 #### 用法
 `Join`是用来实现拼接字符串的，用法如下：
 ```ts
@@ -3604,6 +3662,8 @@ declare function join<D extends string>(delimiter: D): <P extends string[] = []>
 ```
 
 ### DeepPick(深层次Pick)
+<link-and-solution num="956" />
+
 #### 用法
 `DeepPick`是用来深层次获取属性值的，用法如下：
 ```ts
@@ -3658,6 +3718,8 @@ type DeepPick<
 ```
 
 ### Camelize(对象属性键转小驼峰)
+<link-and-solution num="1383" />
+
 #### 用法
 `Camelize`是用来将对象中的`key`全部转换为小驼峰的，用法如下：
 ```ts
@@ -3704,6 +3766,8 @@ type Camelize<T> = {
 * 处理嵌套对象：对于`T[P]`而言，我们考虑嵌套对象为数组和普通对象的情况，首先判断是否为数组类型，如果是则迭代数组递归调用`Camelize`；如果是普通对象，则直接调用`Camelize`；如果都不是，则直接返回`T[P]`即可。
 
 ### DropString(移除全部字符)
+<link-and-solution num="2059" />
+
 #### 用法
 `DropString`是用来移除全部字符的，用法如下：
 ```ts
@@ -3730,6 +3794,8 @@ type DropString<
 代码详解：实现`DropString`的核心是将指定的字符串转换为联合类型，转换之后只需要迭代字符串，判断当前迭代的字符是不是在联合类型中，如果是则直接丢弃，不是则原样保留。
 
 ### Split(字符串Split方法)
+<link-and-solution num="2822" />
+
 #### 用法
 `Split`是用来实现字符串`split`方法的，其用法如下：
 ```ts
@@ -3753,18 +3819,25 @@ type Split<
       : string[]
 ```
 
-### IsRequiredKeys(是否为必填key)
+### ClassPublicKeys(类的公共键)
+<link-and-solution num="2828" />
 #### 用法
-`IsRequredKeys`是用来判断是否为必填`key`的，其用法如下：
+#### 实现方式
+
+### IsRequiredKeys(是否为必填key)
+<link-and-solution num="2857" />
+
+#### 用法
+`IsRequiredKeys`是用来判断是否为必填`key`的，其用法如下：
 ```ts
 type Obj = {
   a: number,
   b?: string
 }
 // 结果1：true
-type result1 = IsRequredKeys<Obj, 'a'>
+type result1 = IsRequiredKeys<Obj, 'a'>
 // 结果2：false
-type result2 = IsRequredKeys<Obj, 'b'>
+type result2 = IsRequiredKeys<Obj, 'b'>
 ```
 #### 实现方式
 ```ts
@@ -3780,23 +3853,93 @@ type result1 = IsOptionalKey<Obj, 'a'>
 type result2 = IsOptionalKey<Obj, 'b'>
 ```
 
-### ObjectEntries(对象的entries方法)
+### ObjectEntries(对象Object.entries方法)
+<link-and-solution num="2949" />
 #### 用法
 #### 实现方式
 
 ### IsPalindrome(是否为回文)
+<link-and-solution num="4037" />
 #### 用法
 #### 实现方式
 
 ### MutableKeys(所有可写键)
+<link-and-solution num="5181" />
 #### 用法
 #### 实现方式
 
 ### Intersection(交集)
+<link-and-solution num="5423" />
 #### 用法
 #### 实现方式
 
 ### BinaryToDecimal(二进制转十进制)
+<link-and-solution num="6141" />
+#### 用法
+#### 实现方式
+
+### ObjectKeyPaths(对象属性键路径)
+<link-and-solution num="7258" />
+#### 用法
+#### 实现方式
+
+### TwoSum(LeetCode两数之和)
+<link-and-solution num="8804" />
+#### 用法
+#### 实现方式
+
+### ValidDate(校验是否为合法日期)
+<link-and-solution num="9155" />
+#### 用法
+#### 实现方式
+
+### Assign(对象Object.assign方法)
+<link-and-solution num="9160" />
+#### 用法
+#### 实现方式
+
+### Maximum(数字中的最大值)
+<link-and-solution num="9384" />
+#### 用法
+#### 实现方式
+
+### DeepCapitalize(深度首字母大写)
+<link-and-solution num="9775" />
+#### 用法
+#### 实现方式
+
+### UnionReplace(联合类型替换)
+<link-and-solution num="13580" />
+#### 用法
+#### 实现方式
+
+### FizzBuzz(Fizz和Buzz输出问题)
+<link-and-solution num="14080" />
+#### 用法
+#### 实现方式
+
+### RLE(运行长度编码)
+<link-and-solution num="14188" />
+#### 用法
+#### 实现方式
+
+### ObjectPathArray(对象键路径数组)
+<link-and-solution num="15260" />
+#### 用法
+#### 实现方式
+
+### SnakeCase(字符串下划线连接)
+<link-and-solution num="19458" />
+#### 用法
+#### 实现方式
+
+### IsNegativeNumber(是否为负数)
+<link-and-solution num="25747" />
+#### 用法
+#### 实现方式
+
+### OptionalUndefined(按需转换为可选属性)
+<link-and-solution num="28143" />
 #### 用法
 #### 实现方式
 
