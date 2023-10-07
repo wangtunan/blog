@@ -3044,38 +3044,15 @@ type result = RequiredKeys<Person>
 ```
 #### 实现方式
 ```ts
-type RequiredKeys<T> = {
-  [P in keyof T]: T extends Record<P,T[P]> ? P : never
-}[keyof T]
-```
-代码详解：
-* `T extends Record<P,T[P]>`：`Record`之前已经实现过，这里不在赘述，理解这段代码，可以参考如下案例：
-```ts
-// 第一步 P = 'name'
-T extends { name: string; } => 'name'
-// 第二步 p = 'age'
-T extends { age: number; } => 'age'
-// 第三步 p = 'sex'
-T extends { sex?: undefined; } => never
-// 第四步 p = 'address'
-T extends { address?: string; } => never
-```
-在经过以上四个步骤后，得到的新类型为：
-```ts
-type T = {
-  name: 'name';
-  age: 'age';
-  sex?: never;
-  address?: never;
+type RequiredKeys<T> = keyof {
+  [P in keyof T as ({} extends Pick<T, P> ? never : P)]: P
 }
 ```
-* `T[keyof T]`：`keyof T`得到所有的属性，然后根据属性取其类型。
+代码详解：
+* `{} extends Pick<T, P> ? never : P`：是用来判断当前遍历键是否可选键的。
 ```ts
-// keyof T的结果
-type P = 'name' | 'age' | 'sex' | 'address'
-
-// T[P]的结果，类型为never自动过滤
-type result = 'name' | 'age' | never | never => 'name' | 'age'
+// never
+type result = {} extends {} | { sex: undefined } ? never : 'sex'
 ```
 
 ### GetRequired(必填字段组成的类型)
@@ -3095,11 +3072,20 @@ type Person = {
 type result = GetRequired<Person>
 ```
 #### 实现方式
-在`RequiredKeys`的基础上，能够很容易的实现`GetRequired`。
+按照`RequiredKeys`的实现思路，能够很容易的实现`GetRequired`。
 ```ts
 type GetRequired<T> = {
-  [P in RequiredKeys<T>]: T[P]
+  [P in keyof T as (T[P] extends Required<T>[P] ? P : never)]: T[P]
 }
+```
+代码详解：
+* `T[P] extends Required<T>[P] ? P : never`：用来判断当前遍历键的类型是否一致，一致则是必填类型。
+```ts
+// P为name时
+type result1 = string | undefined extends string ? 'name' : never
+
+// P为age时
+type result2 = number extends number ? 'age' : never
 ```
 
 ### OptionalKeys(所有可选字段)
@@ -3120,9 +3106,9 @@ type result = OptionalKeys<Person>
 ```
 #### 实现方式
 ```ts
-type OptionalKeys<T> = {
-  [P in keyof T]: T extends Record<P, T[P]> ? never : P
-}[keyof T]
+type OptionalKeys<T> = keyof {
+  [P in keyof T as ({} extends Pick<T, P> ? P : never)]: P
+}
 ```
 代码详解：从上面代码中可以看出，它和`RequiredKeys`实现思路是一样的，区别只是在`extends`关键词后面的处理不同。
 
@@ -3130,7 +3116,7 @@ type OptionalKeys<T> = {
 <link-and-solution num="59" />
 
 #### 用法
-在实现了`OptionalKeys`后，我们来实现其对应的`GetOptional`，其对应方法使用方式如下：
+按照`OptionalKeys`的实现思路，能够很容易的实现`GetOptional`。
 ```ts
 type Person = {
   name: string;
@@ -3145,7 +3131,7 @@ type result = GetOptional<Person>
 #### 实现方式
 ```ts
 type GetOptional<T> = {
-  [P in OptionalKeys<T>]?: T[P]
+  [P in keyof T as (T[P] extends Required<T>[P] ? never : P)]: T[P]
 }
 ```
 
