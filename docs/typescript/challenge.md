@@ -3151,33 +3151,21 @@ type t2 = CapitalizeWords<'foo bar.hello,world'>
 type CapitalizeWords<
   S extends string,
   R extends string = ''
-> =  S extends `${infer left}${infer split}${infer right}`
-      ? split extends ' ' | '.' | ','
-         ? CapitalizeWords<Capitalize<right>, `${R}${left}${split}`>
-         : CapitalizeWords<right, `${R}${left}${split}`>
-      : Capitalize<`${R}${S}`>
+> = S extends `${infer First}${infer Rest}`
+  ? Uppercase<First> extends Lowercase<First>
+    ? `${Capitalize<`${R}${First}`>}${CapitalizeWords<Rest>}`
+    : CapitalizeWords<Rest, `${R}${First}`>
+  : Capitalize<R>
 ```
-代码详解：在以上实现方法中，我们借用辅助字符串来实现，以第二个例子为例，详细解析分析如下：
+代码详解：
+* `Uppercase<First> extends Lowercase<First>`：为了找到连串的大写字符串，例如：
 ```ts
-// 第一次迭代
-R = '' left = 'f' split = 'o' right = 'oo bar.hello,world'
-split不满足条件，递归调用
-
-// 第二次迭代
-R = 'fo' left = 'o' split = ' ' right = 'bar.hello,world'
-split满足条件，递归调用
-
-// 第三次迭代
-R = 'foo ' left = 'b' split = 'a' right = 'r.hello,world'
-split不满足条件，递归调用
-
-... 省略
-
-// 最后一次迭代
-R = 'foo Bar.Hello,Worl' S = 'd'
-S不满足条件
-
-最后结果：R + S = Capitalize<'foo Bar.Hello,worl' + 'd'> => 'Foo Bar.hello,world'
+// S = foo bar.hello,world
+R = 'foo' First = ' ' Rest = 'bar.hello,world'
+=> `${Capitalize<`foo `>}${CapitalizeWords<'bar.hello,world'>}`
+=> `Foo ${CapitalizeWords<'bar.hello,world'}`
+=> ...
+=> 'Foo Bar.Hello,World'
 ```
 
 ### CamelCase(下划线字符串转小驼峰)
@@ -3191,12 +3179,28 @@ type result = CamelCase<'foo_bar_hello_world'>
 ```
 #### 实现方式
 ```ts
+type IsLetter<S extends string> = Uppercase<S> extends Lowercase<S> ? false : true
 type CamelCase<
-  S extends string
-> = S extends `${infer left}_${infer char}${infer right}`
-      ? `${Lowercase<left>}${Uppercase<char>}${CamelCase<right>}`
-      : Lowercase<S>
+  S extends string,
+  R extends string = ''
+> = S extends `${infer First}${infer Rest}`
+  ? CamelCase<
+      Rest,
+      IsLetter<First> extends true
+      ? R extends `${infer P}_`
+        ? `${P}${Uppercase<First>}`
+        : `${R}${Lowercase<First>}`
+      : `${R}${First}`
+    >
+  : R
 ```
+代码详解：
+* `IsLetter`: 用来判断是否为字母的。
+```ts
+type result1 = IsLetter<'$'> // false
+type result2 = IsLetter<'A'> // true
+```
+* `IsLetter<L> extends true`: 如果是字母的话，则根据是否以下划线结尾，如果是，则只需要紧邻下划线的字母`L`大写即可，否小写。
 
 ### ParsePrintFormat(获取字符串格式化参数)
 <link-and-solution num="147" />
