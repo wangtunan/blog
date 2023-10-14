@@ -201,8 +201,53 @@ const vueNextAnalysisSidebar = [
   }
 ]
 
+// 数据结构和算法目录结构
+const algorithmBaseSidebar = [
+  {
+    text: '介绍',
+    collapsable: false,
+    children: [
+      '/algorithm/base/introduction/'
+    ]
+  },
+  {
+    text: '推荐',
+    collapsable: false,
+    children: [
+      '/algorithm/base/recommend/'
+    ]
+  },
+  {
+    text: '算法基础',
+    collapsable: false,
+    children: [
+      '/algorithm/base/complexity/',
+    ]
+  }
+]
+
+// LeetCode刷题目录结构
+const algorithmLeetCodeSidebar = [
+  {
+    text: '介绍',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/introduction/'
+    ]
+  },
+  {
+    text: '推荐',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/recommend/'
+    ]
+  }
+]
+
 module.exports = {
   webpackSidebar,
   vueAnalysisSidebar,
-  vueNextAnalysisSidebar
+  vueNextAnalysisSidebar,
+  algorithmBaseSidebar,
+  algorithmLeetCodeSidebar
 }

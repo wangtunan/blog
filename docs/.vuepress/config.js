@@ -8,7 +8,9 @@ const { ua } = require('./ua.js')
 const {
   webpackSidebar,
   vueAnalysisSidebar,
-  vueNextAnalysisSidebar
+  vueNextAnalysisSidebar,
+  algorithmBaseSidebar,
+  algorithmLeetCodeSidebar
 } = nav
 const __dirname = getDirname(import.meta.url)
 
@@ -85,9 +87,16 @@ export default defineUserConfig({
         ]
       },
       {
-        text: '自动化测试',
+        text: '算法',
         children: [
-          { text: 'Vue应用测试', link: '/test/vueTest' }
+          {
+            text: '数据结构和算法(基础)',
+            link: '/algorithm/base/introduction/'
+          },
+          {
+            text: 'LeetCode(刷题)',
+            link: '/algorithm/leetcode/introduction'
+          }
         ]
       },
       {
@@ -134,6 +143,12 @@ export default defineUserConfig({
         ]
       },
       {
+        text: '自动化测试',
+        children: [
+          { text: 'Vue应用测试', link: '/test/vueTest' }
+        ]
+      },
+      {
         text: 'VuePress',
         link: '/vuepress/'
       }
@@ -141,7 +156,9 @@ export default defineUserConfig({
     sidebar: {
       '/webpack/webpack/': [webpackSidebar],
       '/vueAnalysis/': vueAnalysisSidebar,
-      '/vueNextAnalysis/': vueNextAnalysisSidebar
+      '/vueNextAnalysis/': vueNextAnalysisSidebar,
+      '/algorithm/base/': algorithmBaseSidebar,
+      '/algorithm/leetcode/': algorithmLeetCodeSidebar
     }
   }),
   bundler: viteBundler({
