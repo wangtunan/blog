@@ -3234,6 +3234,7 @@ type ControlMap = {
   'p': 'pointer'
 }
 
+// way1: 借助辅助数组
 type ParsePrintFormat<
   S extends string,
   R extends string[] = []
@@ -3242,6 +3243,15 @@ type ParsePrintFormat<
       ? ParsePrintFormat<S2, [...R, ControlMap[Char]]>
       : ParsePrintFormat<S2, R>
     : R
+
+// way2: 不借助辅助数组
+type ParsePrintFormat<
+  S extends string
+> = S extends `${string}%${infer Char}${infer Rest}`
+  ? Char extends keyof ControlsMap
+    ? [ControlsMap[Char], ...ParsePrintFormat<Rest>]
+    : ParsePrintFormat<Rest>
+  : []
 ```
 代码详解：在以上实现方法中，借用了辅助数组的思想，拿上面案例来说，具体迭代分析如下：
 ```ts
@@ -3280,7 +3290,7 @@ type t6 = NotAny<any>       // false
 ```
 #### 实现方式
 ```ts
-type IsAny<T> = 0 extends (1&T) ? true : false
+type IsAny<T> = 0 extends (1 & T) ? true : false
 type NotAny<T> = true extends IsAny<T> ? false : true
 ```
 代码详解：`1 & T`的结果只能是：`1`、`never`或者`any`。当使用`0 extends`这三个结果的时候，只有`any`判断为真。
@@ -3307,6 +3317,7 @@ type Data = {
     },
     include: true,
   },
+  'foo.baz': false
   hello: 'world'
 }
 
@@ -3314,23 +3325,37 @@ type Data = {
 type t1 = Get<Data, 'hello'>
 // 结果：foobar
 type t2 = Get<Data, 'foo.bar.value'>
-// 结果： never
-type t3 = Get<Data, 'no.exits'>
+// 结果：false
+type t3 = Get<Data, 'foo.baz'>
+// 结果：never
+type t4 = Get<Data, 'no.exits'>
 ```
 #### 实现方式
 ```ts
-type Get<T, S extends string> =
-  S extends `${infer S1}.${infer S2}`
-    ? S1 extends keyof T
-      ? Get<T[S1], S2>
-      : never
-    : S extends keyof T
-      ? T[S]
-      : never
+type Get<
+  T,
+  K extends string
+> = K extends keyof T
+  ? T[K]
+  : K extends `${infer S1}.${infer S2}`
+    ? Get<T[S1 & keyof T], S2>
+    : T[K & keyof T]
 ```
 代码详解：对于`Get`的实现，主要分为两部分：含有`.`符号的字符串和不含`.`符号的字符串。
-* 不含有`.`符号的字符串：对于这种情况，我们只需要判断它是否为`T`类型中的某个`key`，如果是则直接取值；如果不是，则返回`never`。
-* 含有`.`符号的字符串：对于这种情况，我们先判断`.`符号左侧部分是否满足为`T`类型的某个`key`，如果满足则递归调用`Get`；如果不满足，则直接返回`never`。
+* 含有`.`符号的字符串：对于这种情况，我们先判断`.`符号左侧部分是否满足为`T`类型的某个`key`，如果满足，则递归调用`Get`；如果不满足，则直接返回`never`。
+```ts
+// S1如果是T的属性键，则返回S1；如果不是，则返回never
+Get<T[S1 & keyof T], S2>
+// 等价于
+S1 extends keyof T ? Get<T[S1], S2> : never
+```
+* 不含有`.`符号的字符串：对于这种情况，我们只需要判断它是否为`T`类型中的某个`key`，如果是，则直接取值；如果不是，则返回`never`。
+```ts
+// K如果是T的属性键，则返回K；如果不是，则返回never
+T[K & keyof T]
+// 等价于
+S extends keyof T ? T[S] : never
+```
 
 ### StringToNumber(字符串数字转数字)
 <link-and-solution num="300" />
