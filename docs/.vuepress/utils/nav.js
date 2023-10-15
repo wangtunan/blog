@@ -222,6 +222,7 @@ const algorithmBaseSidebar = [
     collapsable: false,
     children: [
       '/algorithm/base/complexity/',
+      '/algorithm/base/linkedList/'
     ]
   }
 ]
