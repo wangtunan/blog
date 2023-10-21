@@ -1218,7 +1218,7 @@ insert (element, index) {
         node.next = this.head
       } else {
         node.next = current
-        current = this.getElementAt(this.count)
+        current = this.getElementAt(this.count - 1)
         current.next = node
         this.head = node
       }
@@ -1244,7 +1244,7 @@ removeAt (index) {
   if (index >= 0 && index < this.count) {
     let current = this.head
     if (index === 0) {
-      if (this.count === 0) {
+      if (this.count === 1) {
         this.head = null
       } else {
         const removed = this.head
