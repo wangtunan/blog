@@ -1108,7 +1108,7 @@ removeAt (index) {
       this.tail = current.prev
       this.tail.next = null
     } else {
-      current = this.getElementAt(index - 1)
+      current = this.getElementAt(index)
       const previous = current.prev
       previous.next = current.next
       current.next.prev = previous
@@ -1126,7 +1126,7 @@ removeAt (index) {
 
 
 #### 在双向链表尾部添加新元素
-在双向链表的尾部添加新元素同样和普通(单向)链表非常相似，却别任然是我们需要多维护一个`tail`指针。
+在双向链表的尾部添加新元素同样和普通(单向)链表非常相似，区别任然是我们需要多维护一个`tail`指针。
 ```js
 push (element) {
   const node = new DoublyNode(element)
@@ -1143,7 +1143,7 @@ push (element) {
 ```
 
 #### 其它方法
-除了以上几种方法，我们还需要为双线链表重写一下几种方法：
+除了以上几种方法，我们还需要为双向链表重写以下几种方法：
 ```js
 clear () {
   super.clear()
@@ -1218,7 +1218,7 @@ insert (element, index) {
         node.next = this.head
       } else {
         node.next = current
-        current = this.getElementAt(this.count)
+        current = this.getElementAt(this.count - 1)
         current.next = node
         this.head = node
       }
@@ -1244,7 +1244,7 @@ removeAt (index) {
   if (index >= 0 && index < this.count) {
     let current = this.head
     if (index === 0) {
-      if (this.count === 0) {
+      if (this.count === 1) {
         this.head = null
       } else {
         const removed = this.head
