@@ -1,0 +1,1 @@
+import{_ as t,o as c,c as o,a as e,b as a}from"./app-ca231e44.js";const d={},s=e("h1",{id:"computed",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#computed","aria-hidden":"true"},"#"),a(" computed")],-1),n=e("p",null,"computed介绍",-1),r=[s,n];function _(u,i){return c(),o("div",null,r)}const m=t(d,[["render",_],["__file","computed.html.vue"]]);export{m as default};
