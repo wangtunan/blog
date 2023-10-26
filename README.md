@@ -2,7 +2,7 @@
 记录个人博客，见证成长之路 <br/>
 
 Github博客地址：https://wangtunan.github.io/blog/ <br/>
-Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
+~~Gitee国内镜像：http://wangtunan.gitee.io/blog/~~，已废弃<br/>
 
 ## 仓库活跃度
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/d13add3751990882fb078ce20d5b32a1a93e5407.svg)
@@ -21,8 +21,9 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 [Vue2.0 源码分析](https://wangtunan.github.io/blog/vueAnalysis/introduction/)<br/>
 [Vue3.0 源码分析](https://wangtunan.github.io/blog/vueNextAnalysis/introduction/)<br/>
 
-## 自动化测试
-[Vue 应用测试](https://wangtunan.github.io/blog/test/vueTest.html)<br/>
+## 算法
+[数据结构和算法基础](https://wangtunan.github.io/blog/algorithm/base/introduction/)<br/>
+[LeetCode刷题](https://wangtunan.github.io/blog/algorithm/leetcode/introduction/)<br/>
 
 ## 打包工具
 [Webpack4 基础知识](https://wangtunan.github.io/blog/webpack/webpack/)<br/>
@@ -36,6 +37,9 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 ## CSS预编译器
 [SASS 基础知识](https://wangtunan.github.io/blog/cssPrecompiler/sass/)<br/>
 
+## 自动化测试
+[Vue 应用测试](https://wangtunan.github.io/blog/test/vueTest.html)<br/>
+
 ## VuePress
 [VuePress 基础知识](https://wangtunan.github.io/blog/vuepress/)<br/>
 
@@ -43,4 +47,3 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/ (已废弃) <br/>
 如果你觉得博客写得还不错，可以帮忙点个star或者打赏犒劳一下
 
 ![打赏](https://wangtunan.github.io/blog/donate.jpg)
-
