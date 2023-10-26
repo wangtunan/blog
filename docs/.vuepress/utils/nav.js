@@ -242,6 +242,16 @@ const algorithmLeetCodeSidebar = [
     children: [
       '/algorithm/leetcode/recommend/'
     ]
+  },
+  {
+    text: '链表',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/linkedList/menu/',
+      '/algorithm/leetcode/linkedList/easy/',
+      '/algorithm/leetcode/linkedList/medium/',
+      '/algorithm/leetcode/linkedList/hard/'
+    ]
   }
 ]
 
