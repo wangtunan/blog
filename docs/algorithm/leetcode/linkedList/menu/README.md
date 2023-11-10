@@ -11,4 +11,4 @@
 | [24.两两交互链表中的节点](https://leetcode.cn/problems/swap-nodes-in-pairs/)  | 中等 |
 | [138.随机链表的复制](https://leetcode.cn/problems/copy-list-with-random-pointer/)  | 中等 |
 | [142.环形链表Ⅱ](https://leetcode.cn/problems/linked-list-cycle-ii/)  | 中等 |
- 
+| [146.LRU缓存](https://leetcode.cn/problems/lru-cache)  | 中等 |

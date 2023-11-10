@@ -179,6 +179,7 @@ var swapPairs = function(head) {
   return dummy.next
 }
 ```
+
 ## 138.随机链表的复制
 ::: tip
 **要求**：给你一个长度为n的链表，每个节点包含一个额外增加的随机指针random，该指针可以指向链表中的任何节点或空节点，请构造这个链表的深拷贝。    
@@ -213,6 +214,7 @@ var copyRandomList = function(head) {
   return map.get(head)
 }
 ```
+
 ## 142.环形链表Ⅱ
 ::: tip
 **要求**：给你一个长度为n的链表，每个节点包含一个额外增加的随机指针random，该指针可以指向链表中的任何节点或空节点，请构造这个链表的深拷贝。    
@@ -267,5 +269,43 @@ var detectCycle = function(head) {
   return fast
 }
 ```
+
 ## 146.LRU缓存
+::: tip
+**要求**：实现一个满足LRU缓存约束的数据结构。    
+**说明**：[LRU解释](https://baike.baidu.com/item/LRU)    
+**原题链接**：[146.LRU缓存](https://leetcode.cn/problems/lru-cache) 
+:::
+```js
+var LRUCache = function(capacity) {
+  this.capacity = capacity
+  this.keys = new Set()
+  this.cache = Object.create(null)
+};
+LRUCache.prototype.get = function(key) {
+  if (this.keys.has(key)) {
+    this.keys.delete(key)
+    this.keys.add(key)
+    return this.cache[key]
+  }
+  return -1
+};
+LRUCache.prototype.put = function(key, value) {
+  if (this.keys.has(key)) {
+    this.keys.delete(key)
+    this.keys.add(key)
+    this.cache[key] = value
+  } else {
+    this.keys.add(key)
+    this.cache[key] = value
+    if (this.capacity && this.keys.size > this.capacity) {
+      const deleteKey = Array.from(this.keys)[0]
+      delete this.cache[deleteKey]
+      this.keys.delete(deleteKey)
+    }
+  }
+  return null
+};
+```
+
 ## 148.排序链表
