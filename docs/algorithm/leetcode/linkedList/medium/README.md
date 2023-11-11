@@ -309,3 +309,48 @@ LRUCache.prototype.put = function(key, value) {
 ```
 
 ## 148.排序链表
+::: tip
+**要求**：给你链表的头结点head，请将其按升序排列并返回排序后的链表。    
+**输入**：head = [4, 2, 1, 3]     
+**输出**：[1,2,3,4]  
+**原题链接**：[148.排序链表](https://leetcode.cn/problems/sort-list) 
+:::
+方法一：归并排序(递归)
+```js
+// n为链表的长度
+// 时间复杂度：O(nlogn)
+// 空间复杂度：O(logn)，取决于递归调用栈空间的开销
+var sortList = function(head) {
+  if (head === null || head.next === null) {
+    return head
+  }
+
+  let slow = head
+  let fast = head
+  while(fast.next !== null && fast.next.next !== null) {
+    slow = slow.next
+    fast = fast.next.next
+  }
+
+  let mid = slow.next
+  slow.next = null
+  
+  const dummy = new ListNode(0)
+  let curr = dummy
+  let left = sortList(head)
+  let right = sortList(mid)
+  while(left !== null && right !== null) {
+    if (left.val <= right.val) {
+      curr.next = left
+      left = left.next
+    } else {
+      curr.next = right
+      right = right.next
+    }
+    curr = curr.next
+  }
+  curr.next = left !== null ? left : right
+  
+  return dummy.next
+};
+```

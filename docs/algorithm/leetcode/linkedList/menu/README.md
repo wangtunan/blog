@@ -12,3 +12,6 @@
 | [138.随机链表的复制](https://leetcode.cn/problems/copy-list-with-random-pointer/)  | 中等 |
 | [142.环形链表Ⅱ](https://leetcode.cn/problems/linked-list-cycle-ii/)  | 中等 |
 | [146.LRU缓存](https://leetcode.cn/problems/lru-cache)  | 中等 |
+| [148.排序链表](https://leetcode.cn/problems/sort-list)  | 中等 |
+| [23.合并K个升序链表](https://leetcode.cn/problems/merge-k-sorted-lists)  | 困难 |
+| [25.K个一组翻转链表](https://leetcode.cn/problems/reverse-nodes-in-k-group)  | 困难 |
