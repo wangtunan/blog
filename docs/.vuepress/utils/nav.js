@@ -222,7 +222,13 @@ const algorithmBaseSidebar = [
     collapsable: false,
     children: [
       '/algorithm/base/complexity/',
-      '/algorithm/base/linkedList/'
+      '/algorithm/base/linkedList/',
+      '/algorithm/base/stackAndQueue/',
+      '/algorithm/base/hashMap/',
+      '/algorithm/base/tree/',
+      '/algorithm/base/graph/',
+      '/algorithm/base/search/',
+      '/algorithm/base/sort/'
     ]
   }
 ]
@@ -251,6 +257,26 @@ const algorithmLeetCodeSidebar = [
       '/algorithm/leetcode/linkedList/easy/',
       '/algorithm/leetcode/linkedList/medium/',
       '/algorithm/leetcode/linkedList/hard/'
+    ]
+  },
+  {
+    text: '栈',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/stack/menu/',
+      '/algorithm/leetcode/stack/easy/',
+      '/algorithm/leetcode/stack/medium/',
+      '/algorithm/leetcode/stack/hard/',
+    ]
+  },
+  {
+    text: '队列',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/queue/menu/',
+      '/algorithm/leetcode/queue/easy/',
+      '/algorithm/leetcode/queue/medium/',
+      '/algorithm/leetcode/queue/hard/'
     ]
   }
 ]
