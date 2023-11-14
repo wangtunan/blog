@@ -1,0 +1,1 @@
+import{_ as t,o as a,c,a as e,b as r}from"./app-5af3d44d.js";const o={},s=e("h1",{id:"createapp",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#createapp","aria-hidden":"true"},"#"),r(" createApp")],-1),n=e("p",null,"createApp介绍",-1),_=[s,n];function p(d,i){return a(),c("div",null,_)}const h=t(o,[["render",p],["__file","createApp.html.vue"]]);export{h as default};
