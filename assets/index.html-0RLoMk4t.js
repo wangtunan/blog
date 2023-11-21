@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-0df18b8e","path":"/algorithm/leetcode/queue/easy/","title":"简单","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1700583440000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"algorithm/leetcode/queue/easy/README.md"}');export{e as data};
