@@ -86,3 +86,6 @@
 ### 双端队列链表实现
 
 ### 双端队列典型应用
+
+## 参考
+* [Hello 算法 栈和队列](https://www.hello-algo.com/chapter_stack_and_queue/)
