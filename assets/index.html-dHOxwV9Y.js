@@ -1,1 +1,0 @@
-import{_ as a,o as t,c,a as e,b as n}from"./app-iICYEmPT.js";const o={},s=e("h1",{id:"tapable事件流插件",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#tapable事件流插件","aria-hidden":"true"},"#"),n(" Tapable事件流插件")],-1),r=e("p",null,"Tapable事件流插件",-1),_=[s,r];function d(l,i){return t(),c("div",null,_)}const p=a(o,[["render",d],["__file","index.html.vue"]]);export{p as default};

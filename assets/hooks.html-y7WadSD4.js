@@ -1,0 +1,1 @@
+import{_ as o,o as s,c as t,a as e,b as a}from"./app-5br5jqyI.js";const c={},n=e("h1",{id:"路由hooks钩子函数",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#路由hooks钩子函数","aria-hidden":"true"},"#"),a(" 路由hooks钩子函数")],-1),r=e("p",null,"路由hooks钩子函数",-1),_=[n,r];function h(d,i){return s(),t("div",null,_)}const f=o(c,[["render",h],["__file","hooks.html.vue"]]);export{f as default};
