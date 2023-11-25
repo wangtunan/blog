@@ -80,12 +80,27 @@
 * **各类待办事项**：任何需要实现“先来后到”功能的场景，例如打印机的任务队列、餐厅的出餐队列等。队列在这些场景中可以有效地维护处理顺序。
 
 ## 双端队列
+在队列`Queue`中，我们仅能在队首删除元素，队尾添加元素。为了增加灵活性，双端队列`Dequeue`允许我们在队首和队尾添加和删除元素。
+![双端队列](https://www.hello-algo.com/chapter_stack_and_queue/deque.assets/deque_operations.png)
+
+根据双端队列的特性，一般双端队列有如下几种常见操作：
+1. 队首入队`pushFirst`，时间复杂度`O(1)`。
+2. 队尾入队`pushLast`，时间复杂度`O(1)`。
+3. 队首出队`popFirst`，时间复杂度`O(1)`。
+4. 队尾出队`popLast`，时间复杂度`O(1)`。
+5. 访问队首元素`peekFirst`，时间复杂度`O(1)`。
+6. 访问队尾元素`peekLast`，时间复杂度`O(1)`。
 
 ### 双端队列数组实现
+双端队列的数组实现，请参考[ArrayDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/arrayDequeue.js)
 
 ### 双端队列链表实现
+双端队列的链表实现，请参考[LinkedListDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedListDequeue.js)
 
 ### 双端队列典型应用
+双向队列兼具栈与队列的逻辑，因此它可以实现这两者的所有应用场景，同时提供更高的自由度。
+
+许多软件的**撤销**功能通常使用栈来实现：系统每次将更改操作`push`到栈中，然后通过`pop`实现撤销。然而实际场景下，会考虑到系统资源占用情况，例如只存储50次更改操作。超过时，需要在栈底(队首)执行删除操作，但栈是无法做到在栈底执行删除操作的，所以需要使用**双端队列**来实现。
 
 ## 参考
 * [Hello 算法 栈和队列](https://www.hello-algo.com/chapter_stack_and_queue/)
