@@ -1,0 +1,1 @@
+import{_ as r,o as n,c as t,a as e,b as a}from"./app-whhss94l.js";const c={},d=e("h1",{id:"render",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#render","aria-hidden":"true"},"#"),a(" render")],-1),o=e("p",null,"render介绍",-1),s=[d,o];function _(i,l){return n(),t("div",null,s)}const f=r(c,[["render",_],["__file","render.html.vue"]]);export{f as default};
