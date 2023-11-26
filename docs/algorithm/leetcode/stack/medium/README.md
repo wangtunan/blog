@@ -1,5 +1,44 @@
 # 中等
 
+## 150.逆波兰表达式求值
+::: tip
+**要求**：给你一个字符串数组tokens，表示一个根据逆波兰表示法表示的算术表达式，请你计算该表达式，返回一个表示表达式值的整数。  
+**输入**：tokens = ["2","1","+","3","*"]    
+**输出**：9  
+**解释**：该算式转化为常见的中缀算术表达式为：((2 + 1) * 3) = 9  
+**说明**：[逆波兰表达式](https://baike.baidu.com/item/%E9%80%86%E6%B3%A2%E5%85%B0%E5%BC%8F)   
+**原题链接**：[150.逆波兰表达式求值](https://leetcode.cn/problems/evaluate-reverse-polish-notation) 
+:::
+```js
+// n为tokens字符串的长度
+// 时间复杂度：O(n)，需要完整遍历一遍tokens字符串
+// 空间复杂度：O(n)，栈存储的开销
+var isNumber = function (token) {
+  return !['+', '-', '*', '/'].includes(token);
+}
+var calculateMap = {
+  '+': (num1, num2) => num1 + num2,
+  '-': (num1, num2) => num1 - num2,
+  '*': (num1, num2) => num1 * num2,
+  '/': (num1, num2) => num1 / num2 > 0 ? Math.floor(num1 / num2) : Math.ceil(num1 / num2)
+}
+var evalRPN = function (tokens) {
+  const stack = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (isNumber(token)) {
+      stack.push(parseInt(token, 10));
+    } else {
+      const num2 = stack.pop();
+      const num1 = stack.pop();
+      const num = calculateMap[token](num1, num2);
+      stack.push(num);
+    }
+  }
+  return stack.pop();
+};
+```
+
 ## 155.最小栈
 ::: tip
 **要求**：设计一个支持push，pop，top操作，并能在常数时间内检索到最小元素的栈。  
@@ -44,7 +83,7 @@ MinStack.prototype.getMin = function() {
 // 空间复杂度：O(n)，两个栈数组的开销
 var decodeString = function(s) {
   const numStack = [];
-  const strStacck = [];
+  const strStack = [];
   let res = '';
   let num = 0;
   for(const char of s) {
@@ -52,11 +91,11 @@ var decodeString = function(s) {
       num = num * 10 + Number(char, 10);
     } else if (char === '[') {
       numStack.push(num);
-      strStacck.push(res);
+      strStack.push(res);
       num = 0;
       res = '';
     } else if (char === ']') {
-      res = strStacck.pop() + res.repeat(numStack.pop());
+      res = strStack.pop() + res.repeat(numStack.pop());
     } else {
       res += char;
     }

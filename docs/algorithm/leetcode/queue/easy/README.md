@@ -15,16 +15,16 @@ inputs = [[3], [1], [10], [3], [5]]
 // 时间复杂度：O(1)，next时往数组尾部添加元素，时间复杂度O(1)
 // 空间复杂度：O(n)，队列数组的内存开销
 var MovingAverage = function(size) {
-  this.queue = []
-  this.size = size
-  this.sum = 0
+  this.queue = [];
+  this.size = size;
+  this.sum = 0;
 };
 MovingAverage.prototype.next = function(val) {
   if (this.queue.length >= this.size) {
-    this.sum -= this.queue.shift()
+    this.sum -= this.queue.shift();
   }
-  this.sum += val
-  this.queue.push(val)
-  return this.sum / this.queue.length
+  this.sum += val;
+  this.queue.push(val);
+  return this.sum / this.queue.length;
 };
 ```
