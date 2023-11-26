@@ -1,11 +1,8 @@
 # 困难
 ## 23.合并K个升序链表
-::: tip
-**要求**：给你一个链表数组，每个链表都已经按升序排列，请你将所有链表合并到一个升序链表中，返回合并后的链表。      
-**输入**：lists = [[1, 4, 5], [1, 3, 4], [2, 6]]      
-**输出**：[1, 1, 2, 3, 4, 4, 5, 6]  
-**原题链接**：[23.合并K个升序链表](https://leetcode.cn/problems/merge-k-sorted-lists) 
-:::
+<leetcode-link title="23.合并K个升序链表" link="https://leetcode.cn/problems/merge-k-sorted-lists" />
+
+
 基础：合并两个有序链表。
 ```js
 var mergeTwoLists = function(list1, list2) {
@@ -65,13 +62,10 @@ var mergeKLists = function(lists) {
   return merge(lists, 0, lists.length - 1)
 }
 ```
+
 ## 25.K个一组翻转链表
-::: tip
-**要求**：给你链表的头节点head，每k个节点一组进行翻转，请你返回修改后的链表。    
-**输入**：head = [1, 2, 3, 4, 5], k = 2    
-**输出**：[2, 1, 4, 3, 5]  
-**原题链接**：[25.K个一组翻转链表](https://leetcode.cn/problems/reverse-nodes-in-k-group) 
-:::
+<leetcode-link title="25.K个一组翻转链表" link="https://leetcode.cn/problems/reverse-nodes-in-k-group" />
+
 ```js
 // n为链表的长度
 // 时间复杂度：O(n)，需要(n/k)次迭代。

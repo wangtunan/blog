@@ -1,11 +1,6 @@
 # 简单
 ## 21.合并两个有序链表
-::: tip
-**要求**：将两个升序链表合并为一个新的升序链表并返回。  
-**输入**：list1 = [1, 2, 4], list2 = [1, 3, 4]  
-**输出**：[1, 1, 2, 3, 4, 4]  
-**原题链接**：[21.合并两个有序链表](https://leetcode.cn/problems/merge-two-sorted-lists/) 
-::: 
+<leetcode-link title="21.合并两个有序链表" link="https://leetcode.cn/problems/merge-two-sorted-lists/" />
 
 方法一：递归
 ```js
@@ -53,12 +48,7 @@ var mergeTwoLists = function(list1, list2) {
 ```
 
 ## 141.环形链表
-::: tip
-**要求**：给你一个链表的头节点head，判断链表中是否有环。  
-**输入**：head = [3,2,0,-4], pos = 1(pos为1表示尾结点和链表中第二个节点相连)  
-**输出**：true   
-**原题链接**：[141.环形链表](https://leetcode.cn/problems/linked-list-cycle/) 
-::: 
+<leetcode-link title="141.环形链表" link="https://leetcode.cn/problems/linked-list-cycle/" />
 
 方法一：哈希表
 ```js
@@ -108,12 +98,8 @@ var hasCycle = function(head) {
 
 
 ## 160.相交链表
-::: tip
-**要求**：给你两个单链表的头节点headA和headB ，请你找出并返回两个单链表相交的起始节点。如果不存在相交节点，返回 null。  
-**输入**：listA = [1,9,1,2,4], listB = [3,2,4]    
-**输出**：2   
-**原题链接**：[160.相交链表](https://leetcode.cn/problems/intersection-of-two-linked-lists/) 
-:::
+<leetcode-link title="160.相交链表" link="https://leetcode.cn/problems/intersection-of-two-linked-lists/" />
+
 
 方法一：哈希表
 ```js
@@ -163,12 +149,8 @@ var getIntersectionNode = function(headA, headB) {
 ```
 
 ## 206.反转链表
-::: tip
-**要求**：给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。    
-**输入**：head = [1,2,3,4,5]  
-**输出**：[5,4,3,2,1]    
-**原题链接**：[206.反转链表](https://leetcode.cn/problems/reverse-linked-list/) 
-:::
+<leetcode-link title="206.反转链表" link="https://leetcode.cn/problems/reverse-linked-list/" />
+
 
 方法一：双指针
 ```js
@@ -189,12 +171,7 @@ var reverseList = function(head) {
 ```
 
 ## 234.回文链表
-::: tip
-**要求**：给你一个单链表的头节点head，请你判断该链表是否为回文链表。      
-**输入**：head = [1,2,2,1]  
-**输出**：true    
-**原题链接**：[234.回文链表](https://leetcode.cn/problems/palindrome-linked-list/) 
-:::
+<leetcode-link title="234.回文链表" link="https://leetcode.cn/problems/palindrome-linked-list/" />
 
 方法一：数组 + 双指针
 ```js

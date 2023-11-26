@@ -1,12 +1,7 @@
 # 简单
-
 ## 20.有效括号
-::: tip
-**要求**：给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串 s ，判断字符串是否有效闭合。  
-**输入**：s = "()[]{}"  
-**输出**：true  
-**原题链接**：[20.有效括号](https://leetcode.cn/problems/valid-parentheses) 
-:::
+<leetcode-link title="20.有效括号" link="https://leetcode.cn/problems/valid-parentheses" />
+
 ```js
 // n为字符串的长度
 // 时间复杂度：O(n)，需要遍历一遍字符串
