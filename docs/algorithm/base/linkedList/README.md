@@ -29,10 +29,6 @@ export default class ListNode {
 ![链表类型](https://www.hello-algo.com/chapter_array_and_linkedlist/linked_list.assets/linkedlist_common_types.png)
 
 ## 单向链表
-::: tip
-完整代码：[单向链表完整实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedList.js)
-:::
-
 **单向链表**：由`ListNode`节点组成，通常只有一个`val`(节点的值)、`next`(下个节点的引用)组成。单向链表是实现双向链表、循环链表的基础。
 对单向链表而言，其一般有如下属性或方法：
 * `_size`: 内部属性，链表的长度。
@@ -121,12 +117,9 @@ export default class LinkedList {
   }
 }
 ```
-**提示**：其它方法实现，请参考[单向链表完整实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedList.js)
+**提示**：其它方法实现，请参考[单向链表完整实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/linkedList/linkedList.js)
 
 ## 双向链表
-::: tip
-完整代码：[双向链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/doublyLinkedList.js)
-:::
 
 双向链表是在单向链表的基础上实现的，它和单向链表的最大区别是：每个节点会保存上一个节点的引用`prev`，新增一个`_tail`表示尾结点。
 
@@ -216,12 +209,9 @@ export default class DoublyLinkedList extends LinkedList {
 }
 ```
 
-**提示**：其它方法实现，请参考[双向链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/doublyLinkedList.js)
+**提示**：其它方法实现，请参考[双向链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/linkedList/doublyLinkedList.js)
 
 ## 循环链表
-::: tip
-完整代码：[循环链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/circularLinkedList.js)
-:::
 
 循环链表是在单向链表的基础上实现的，它和单向链表的最大区别是：尾结点指向的地址非`null`，而是指向头结点。
 
@@ -289,7 +279,7 @@ export default class CircularLinkedList extends LinkedList {
   }
 }
 ```
-**提示**：其它方法实现，请参考[循环链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/circularLinkedList.js)
+**提示**：其它方法实现，请参考[循环链表实现代码](https://github.com/wangtunan/js-algorithm/blob/master/src/linkedList/circularLinkedList.js)
 
 
 ## 链表典型应用

@@ -26,10 +26,10 @@
 * `toArray()`：返回栈数组结构。
 
 ### 栈数组实现
-栈的数组实现，请参考[ArrayStack](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/arrayStack.js)
+栈的数组实现，请参考[ArrayStack](https://github.com/wangtunan/js-algorithm/blob/master/src/stack/arrayStack.js)
 
 ### 栈的链表实现
-栈的链表实现，请参考[LinkedListStack](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedListStack.js)
+栈的链表实现，请参考[LinkedListStack](https://github.com/wangtunan/js-algorithm/blob/master/src/stack/linkedListStack.js)
 
 ### 两种实现方式对比
 **时间效率**：
@@ -70,10 +70,10 @@
 * `toArray()`：返回队列数组结构。
 
 ### 队列数组实现
-队列的数组实现，请参考[ArrayQueue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/arrayQueue.js)
+队列的数组实现，请参考[ArrayQueue](https://github.com/wangtunan/js-algorithm/blob/master/src/queue/arrayQueue.js)
 
 ### 队列链表实现
-队列的链表实现，请参考[LinkedListQueue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedListQueue.js)
+队列的链表实现，请参考[LinkedListQueue](https://github.com/wangtunan/js-algorithm/blob/master/src/queue/linkedListQueue.js)
 
 ### 队列典型应用
 * **购物商城订单**：购物者下单后，订单将加入队列中，系统随后会根据顺序依次处理队列中的订单。
@@ -92,10 +92,10 @@
 6. 访问队尾元素`peekLast`，时间复杂度`O(1)`。
 
 ### 双端队列数组实现
-双端队列的数组实现，请参考[ArrayDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/arrayDequeue.js)
+双端队列的数组实现，请参考[ArrayDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/queue/arrayDequeue.js)
 
 ### 双端队列链表实现
-双端队列的链表实现，请参考[LinkedListDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/utils/linkedListDequeue.js)
+双端队列的链表实现，请参考[LinkedListDequeue](https://github.com/wangtunan/js-algorithm/blob/master/src/queue/linkedListDequeue.js)
 
 ### 双端队列典型应用
 双向队列兼具栈与队列的逻辑，因此它可以实现这两者的所有应用场景，同时提供更高的自由度。
