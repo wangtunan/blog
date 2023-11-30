@@ -278,6 +278,16 @@ const algorithmLeetCodeSidebar = [
       '/algorithm/leetcode/queue/medium/',
       '/algorithm/leetcode/queue/hard/'
     ]
+  },
+  {
+    text: '哈希表',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/hashMap/menu/',
+      '/algorithm/leetcode/hashMap/easy/',
+      '/algorithm/leetcode/hashMap/medium/',
+      '/algorithm/leetcode/hashMap/hard/'
+    ]
   }
 ]
 
