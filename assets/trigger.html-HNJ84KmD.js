@@ -1,1 +1,0 @@
-import{_ as r,o as t,c as a,a as e,b as c}from"./app-xQXRLTZo.js";const o={},s=e("h1",{id:"trigger派发更新",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#trigger派发更新","aria-hidden":"true"},"#"),c(" Trigger派发更新")],-1),i=e("p",null,"Trigger派发更新介绍",-1),n=[s,i];function _(d,g){return t(),a("div",null,n)}const h=r(o,[["render",_],["__file","trigger.html.vue"]]);export{h as default};
