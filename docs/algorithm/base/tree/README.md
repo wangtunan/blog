@@ -148,6 +148,29 @@ let tree = [1, 2, 3, 4, null, 6, 7, 8, 9, null, null, 12, null, null, 15];
 * 当二叉树中存在大量空节点时，数组中包含的节点数据比重较低，空间利用率较低(缺)。
 
 ## 二叉搜索树
+**二叉搜索树**需要满足如下几个特点：
+1. 对于根节点，左子树中所有节点的值 < 根节点的值 < 右子树中所有节点的值。
+2. 任意节点的左、右子树也是二叉搜索树，即满足条件一。
+
+![二叉搜索树](https://www.hello-algo.com/chapter_tree/binary_search_tree.assets/binary_search_tree.png)
+
+### 二叉搜索树的实现
+根据二叉搜索树的特性，需要实现如下几个方法：
+* `search(val)`: 在二叉树中根据值查找节点。
+* `insert(val)`: 在二叉树中插入一个新节点，如果已经存在则不执行插入操作。
+* `remove(val)`: 在二叉树中删除一个节点，如果节点不存在则不执行删除操作。
+* `levelOrder()`：层序遍历，根据层序遍历的特点和二叉搜索树的特性，层序遍历返回的节点是**升序**的。
+* `preOrder()`：先序遍历。
+* `inOrder()`：中序遍历。
+* `postOrder()`：后序遍历。
+* `minNode()`：最小值节点。
+* `maxNode()`：最大值节点。
+
+二叉搜索树的完整实现，请参考[二叉搜索树的实现](https://github.com/wangtunan/js-algorithm/blob/master/src/tree/binarySearchTree.js)
+
+### 二叉搜索树的效率
+
+### 二叉搜索树的应用
 
 ## AVL树
 
