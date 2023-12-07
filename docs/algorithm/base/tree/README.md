@@ -169,8 +169,21 @@ let tree = [1, 2, 3, 4, null, 6, 7, 8, 9, null, null, 12, null, null, 15];
 二叉搜索树的完整实现，请参考[二叉搜索树的实现](https://github.com/wangtunan/js-algorithm/blob/master/src/tree/binarySearchTree.js)
 
 ### 二叉搜索树的效率
+基于二叉搜索树的特性，其各项操作的时间复杂度都是对数阶，具有稳定且高效的性能。它和数组的效率对比如下：
+| 操作 | 数组 | 二叉树 |
+| --- | ---- | ---- |
+| 查找元素 | O(n) | O(logn) |
+| 插入元素 | O(1) | O(logn) |
+| 删除元素 | O(n) | O(logn) |
+
+在理想情况下，二叉搜索树是**平衡的**，但如果不断地插入和删除元素节点，则二叉树会退化成链表，此时效率退化为`O(n)`。
+
+![二叉搜索树的退化](https://www.hello-algo.com/chapter_tree/binary_search_tree.assets/bst_degradation.png)
 
 ### 二叉搜索树的应用
+* 用作系统中的多级索引，实现高效的查找、插入、删除操作。
+* 作为某些搜索算法的底层数据结构。
+* 用于存储数据流，以保持其有序状态。
 
 ## AVL树
 
