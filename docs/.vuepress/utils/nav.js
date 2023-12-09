@@ -288,7 +288,17 @@ const algorithmLeetCodeSidebar = [
       '/algorithm/leetcode/hashMap/medium/',
       '/algorithm/leetcode/hashMap/hard/'
     ]
-  }
+  },
+  {
+    text: '二叉树',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/tree/menu/',
+      '/algorithm/leetcode/tree/easy/',
+      '/algorithm/leetcode/tree/medium/',
+      '/algorithm/leetcode/tree/hard/'
+    ]
+  },
 ]
 
 module.exports = {
