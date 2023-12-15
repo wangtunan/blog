@@ -299,6 +299,16 @@ const algorithmLeetCodeSidebar = [
       '/algorithm/leetcode/tree/hard/'
     ]
   },
+  {
+    text: '图',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/graph/menu/',
+      '/algorithm/leetcode/graph/easy/',
+      '/algorithm/leetcode/graph/medium/',
+      '/algorithm/leetcode/graph/hard/'
+    ]
+  },
 ]
 
 module.exports = {
