@@ -127,6 +127,40 @@ var canFinish = function (numCourses, prerequisites) {
 ## 208.实现 Trie (前缀树)
 <leetcode-link title="208.实现 Trie (前缀树)" link="https://leetcode.cn/problems/implement-trie-prefix-tree" />
 
+```js
+// she => { s: { h: { e: { isEnd: true } } } }
+var Trie = function () {
+  this.children = {};
+};
+Trie.prototype.insert = function (word) {
+  let curr = this.children;
+  for (const char of word) {
+    if (!curr[char]) {
+      curr[char] = {};
+    }
+    curr = curr[char];
+  }
+  curr.isEnd = true;
+};
+Trie.prototype.search = function (word) {
+  const searchNode = this.searchPrefix(word);
+  return searchNode && searchNode.isEnd === true;
+};
+Trie.prototype.searchPrefix = function (prefix) {
+  let curr = this.children;
+  for (const char of prefix) {
+    if (!curr[char]) {
+      return false;
+    }
+    curr = curr[char];
+  }
+  return curr;
+}
+Trie.prototype.startsWith = function (prefix) {
+  return !!this.searchPrefix(prefix);
+};
+```
+
 ## 994.腐烂的橘子
 <leetcode-link title="994.腐烂的橘子" link="https://leetcode.cn/problems/rotting-oranges" />
 
