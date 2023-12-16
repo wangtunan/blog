@@ -226,6 +226,7 @@ const algorithmBaseSidebar = [
       '/algorithm/base/stackAndQueue/',
       '/algorithm/base/hashMap/',
       '/algorithm/base/tree/',
+      '/algorithm/base/heap/',
       '/algorithm/base/graph/',
       '/algorithm/base/search/',
       '/algorithm/base/sort/'
