@@ -1,0 +1,1 @@
+import{_ as t,o as a,c,a as e,b as o}from"./app-CVBCq-32.js";const s={},n=e("h1",{id:"watch",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#watch","aria-hidden":"true"},"#"),o(" Watch")],-1),r=e("p",null,"Watch介绍",-1),_=[n,r];function h(d,i){return a(),c("div",null,_)}const f=t(s,[["render",h],["__file","watch.html.vue"]]);export{f as default};
