@@ -301,6 +301,16 @@ const algorithmLeetCodeSidebar = [
     ]
   },
   {
+    text: '堆',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/heap/menu/',
+      '/algorithm/leetcode/heap/easy/',
+      '/algorithm/leetcode/heap/medium/',
+      '/algorithm/leetcode/heap/hard/'
+    ]
+  },
+  {
     text: '图',
     collapsable: false,
     children: [
