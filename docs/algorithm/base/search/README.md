@@ -196,3 +196,6 @@ export default function binarySearchRightEdge(nums, target) {
 * 适合需要维护有序数据或范围查找的场景。
 * 在持续增删节点的过程中，二叉搜索树可能产生倾斜，时间复杂度劣化至`O(n)`。
 * 若使用 AVL 树或红黑树，则各项操作可在`O(logn)`效率下稳定运行，但维护树平衡的操作会增加额外的开销
+
+## 参考
+* [Hello 算法 搜索](https://www.hello-algo.com/chapter_searching/)
