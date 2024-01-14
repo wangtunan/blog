@@ -229,7 +229,11 @@ const algorithmBaseSidebar = [
       '/algorithm/base/heap/',
       '/algorithm/base/graph/',
       '/algorithm/base/search/',
-      '/algorithm/base/sort/'
+      '/algorithm/base/sort/',
+      '/algorithm/base/divideAndConquer/',
+      '/algorithm/base/backTrace/',
+      '/algorithm/base/dynamicProgramming/',
+      '/algorithm/base/greedy/'
     ]
   }
 ]
