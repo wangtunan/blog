@@ -1,0 +1,1 @@
+import{_ as t,o as a,c,a as e,b as r}from"./app-4dTJqJJn.js";const o={},s=e("h1",{id:"matcher介绍",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#matcher介绍","aria-hidden":"true"},"#"),r(" matcher介绍")],-1),n=e("p",null,"matcher介绍",-1),_=[s,n];function h(d,i){return a(),c("div",null,_)}const m=t(o,[["render",h],["__file","matcher.html.vue"]]);export{m as default};
