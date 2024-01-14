@@ -191,8 +191,103 @@ function quickSort(nums, left, right) {
 ```
 
 ## 归并排序
+**归并排序(Merge Sort)**：是一种基于分治策略的排序算法，主要包含**划分**和**合并**两个阶段。
+* **划分阶段**：通过递归不断的将数组从中心处分开，将长数组的排序问题转换为短数组的排序问题。
+* **合并阶段**：当子数组长度为1时终止划分，开始合并，持续的将左右两个较短的有序数组合并为一个较长的有序数组，直至结束。
+![归并排序](https://www.hello-algo.com/chapter_sorting/merge_sort.assets/merge_sort_overview.png)
+
+归并排序其算法特性：
+* 时间复杂度为`O(nlogn)`，非适应性排序。划分产生`O(logn)`的递归树，合并的总操纵数为`O(n)`。
+* 空间复杂度为`O(n)`，非原地排序。合并需要借助辅助数组实现，使用`O(n)`大小的额外空间。
+* 稳定排序。
+
+```js
+function merge(nums, left, mid, right) {
+  let temp = new Array(right - left + 1);
+  let i = left;
+  let j = mid + 1;
+  let k = 0;
+  // 依次比较左、右两个数组中的元素
+  while(i <= mid && j <= right) {
+    if (nums[i] <= nums[j]) {
+      temp[k++] = nums[i++];
+    } else {
+      temp[k++] = nums[j++];
+    }
+  }
+  // 如果左数组中还有元素
+  while(i <= mid) {
+    temp[k++] = nums[i++];
+  }
+  // 如果右数组中还有元素
+  while(j <= right) {
+    temp[k++] = nums[j++];
+  }
+  // 临时数组中的元素赋值到原数组
+  for(let k = 0; k < temp.length; k++) {
+    nums[left + k] = temp[k];
+  }
+}
+
+function mergeSort(nums, left, right) {
+  if (left >= right) {
+    return;
+  }
+  const mid = Math.floor((left + right) / 2);
+  // 左数组划分
+  mergeSort(nums, left, mid);
+  // 右数组划分
+  mergeSort(nums, mid + 1, right);
+  // 左、右有序数组合并
+  merge(nums, left, mid, right);
+  return nums;
+}
+```
 
 ## 堆排序
+**堆排序(Heap Sort)**：是一种基于堆数据结构实现的高效排序算法，堆数据结构主要包含**元素建堆操作**和**元素出堆操作**。
+
+堆排序其算法特性如下：
+* 时间复杂度`O(nlogn)`，非自适应排序。建堆操作`O(n)`，从堆中提取最大元素的时间复杂度为`O(logn)`。
+* 空间复杂度`O(1)`，原地排序。
+* 非稳定排序，交换堆顶和堆底元素时，相等元素的相对位置可能发生变化。
+
+```js
+function siftDown(nums, n, i) {
+  while(true) {
+    const left = i * 2 + 1;
+    const right = i * 2 + 2;
+    let max = i;
+    if (left < n && nums[left] > nums[max]) {
+      max = left;
+    }
+    if (right < n && nums[right] > nums[max]) {
+      max = right;
+    }
+    if (max === i) {
+      break;
+    }
+    [nums[max], nums[i]] = [nums[i], nums[max]];
+    i = max;
+  }
+}
+
+function heapSort(nums) {
+  const len = nums.length;
+  // 建堆
+  for(let i = Math.floor(len / 2) - 1; i >= 0; i--) {
+    siftDown(nums, len, i);
+  }
+  // 从堆中取最大元素，循环n - 1轮
+  for(let i = len - 1; i > 0; i--) {
+    // 交换堆顶和堆底元素
+    [nums[0], nums[i]] = [nums[i], nums[0]];
+    // 从根节点开始，重新进行堆化
+    siftDown(nums, i, 0);
+  }
+  return nums
+}
+```
 
 ## 桶排序
 
