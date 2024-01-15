@@ -290,10 +290,147 @@ function heapSort(nums) {
 ```
 
 ## 桶排序
+**桶排序(Bucket Sort)**：非比较元素大小方式实现的排序，是一种分治策略的典型应用。它通过设置一些具有大小顺序的桶，每个桶对应一个数据范围，将数据平均分配到各个桶中。然后，在每个桶内部分别执行排序，最终按照桶的顺序将所有数据合并。
+
+![桶排序](https://www.hello-algo.com/chapter_sorting/bucket_sort.assets/bucket_sort_overview.png)
+
+桶排序算法其算法特性如下：
+* 非常适合用来处理体量很大的数据。
+* 时间复杂度`O(n + k)`，拆分元素到桶中且排序时间复杂度为`O(n)`，合并所有桶中的元素，时间复杂度为`O(k)`，其中`k`为桶的数量。
+* 空间复杂度`O(n + k)`，非原地排序。
+* 桶排序是否稳定取决于排序桶内元素的算法是否稳定。
+
+```js
+function bucketSort(nums) {
+  const len = nums.length;
+  const k = Math.floor(len / 2);
+  const buckets = [];
+  // 初始化桶
+  for(let i = 0; i < k; i++) {
+    buckets.push([]);
+  }
+  // 元素分桶
+  for(let i = 0; i < len; i++) {
+    const num = nums[i];
+    const index = Math.floor(num * k);
+    buckets[index].push(num);
+  }
+  // 对桶中元素进行排序
+  for(let i = 0; i < k; i++) {
+    const bucket = buckets[i];
+    bucket.sort((a, b) => a - b);
+  }
+  // 合并桶中元素
+  let i = 0;
+  for(const bucket of buckets) {
+    for(const num of bucket) {
+      nums[i++] = num;
+    }
+  }
+  return nums;
+}
+```
 
 ## 计数排序
+**计数排序(Counting Sort)**：本质是桶排序的一个特例，它通过统计元素数量来实现排序，通常应用于整数数组。
+
+![计数排序](https://www.hello-algo.com/chapter_sorting/counting_sort.assets/counting_sort_overview.png)
+
+计数排序其算法特性如下：
+* 只适用于非负整数。
+* 适用于数据量大但数据范围较小的情况。
+* 时间复杂度为`O(n + m)`，`n`为原始数组中元素数量，`m`为计数数组中元素数量。
+* 空间复杂度为`O(n + m)`，非原地排序。
+* 稳定排序。
+
+```js
+function countSort(nums) {
+  const len = nums.length;
+  // 统计最大元素
+  let max = 0;
+  for(const num of nums) {
+    max = Math.max(max, num);
+  }
+  // 统计各数字出现的次数
+  const counters = new Array(max + 1).fill(0);
+  for(const num of nums) {
+    counters[num]++;
+  }
+  // 计算前缀和，将出现次数转换为尾索引
+  for(let i = 0; i < max; i++) {
+    counters[i + 1] += counters[i];
+  }
+  // 倒序遍历，将各元素填入结果数组res中
+  const res = []
+  for(let i = len - 1; i >= 0; i--) {
+    const num = nums[i];
+    res[counters[num] - 1] = num;
+    counters[num]--;
+  }
+  // 结果数组res覆盖原始nums数组
+  for(let i = 0; i < len; i++) {
+    nums[i] = res[i];
+  }
+  return nums;
+}
+```
 
 ## 基数排序
+**基数排序(Radix Sort)**：其核心思想和计数排序一致，也通过统计个数来实现排序。在此基础上，基数排序利用数字各位之间的递进关系，依次对每一位进行排序，从而得到最终的排序结果。
+
+![计数排序](https://www.hello-algo.com/chapter_sorting/radix_sort.assets/radix_sort_overview.png)
+
+基数排序其算法特性如下：
+* 时间复杂度`O(nk)`，`n`为数据量，`k`为最大位数。
+* 空间复杂度`O(n + d)`，非原地排序
+* 稳定排序
+
+```js
+function digit(num, exp) {
+  return Math.floor(num / exp) % 10;
+}
+
+function countingSortDigit(nums, exp) {
+  const counter = new Array(10).fill(0);
+  const n = nums.length;
+  // 统计 0~9 各数字的出现次数
+  for (let i = 0; i < n; i++) {
+    const d = digit(nums[i], exp); 
+    counter[d]++;
+  }
+  // 求前缀和，将出现个数转换为数组索引
+  for (let i = 1; i < 10; i++) {
+    counter[i] += counter[i - 1];
+  }
+  // 倒序遍历，根据桶内统计结果，将各元素填入 res
+  const res = new Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    const d = digit(nums[i], exp);
+    const j = counter[d] - 1; 
+    res[j] = nums[i];
+    counter[d]--;
+  }
+  // 使用结果覆盖原数组 nums
+  for (let i = 0; i < n; i++) {
+    nums[i] = res[i];
+  }
+}
+
+function radixSort(nums) {
+  // 获取最大值
+  let max = Number.MIN_VALUE;
+  for(const num of nums) {
+    if (num > max) {
+      max = num;
+    }
+  }
+  // 从低位到高位的顺序遍历
+  for(let exp = 1; exp <= max; exp *= 10) {
+    countingSortDigit(nums, exp);
+  }
+  return nums;
+}
+```
 
 ## 参考
 * [Hello 算法 排序](https://www.hello-algo.com/chapter_sorting/)
