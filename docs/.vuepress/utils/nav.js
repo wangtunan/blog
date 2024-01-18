@@ -324,6 +324,16 @@ const algorithmLeetCodeSidebar = [
       '/algorithm/leetcode/graph/hard/'
     ]
   },
+  {
+    text: '搜索',
+    collapsable: false,
+    children: [
+      '/algorithm/leetcode/search/menu/',
+      '/algorithm/leetcode/search/easy/',
+      '/algorithm/leetcode/search/medium/',
+      '/algorithm/leetcode/search/hard/'
+    ]
+  },
 ]
 
 module.exports = {
