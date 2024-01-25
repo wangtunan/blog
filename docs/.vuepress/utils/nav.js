@@ -231,7 +231,7 @@ const algorithmBaseSidebar = [
       '/algorithm/base/search/',
       '/algorithm/base/sort/',
       '/algorithm/base/divideAndConquer/',
-      '/algorithm/base/backTrace/',
+      '/algorithm/base/backTracking/',
       '/algorithm/base/dynamicProgramming/',
       '/algorithm/base/greedy/'
     ]
