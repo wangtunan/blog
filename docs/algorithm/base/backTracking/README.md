@@ -305,12 +305,76 @@ export const subsetSumHasEqualValue = (nums, target) => {
 ```
 
 ## N皇后问题
+根据国际象棋的规则，皇后可以攻击与其同处一行，一列或一条斜线上的棋子，给定`n`个皇后和`n * n`大小的棋盘，寻找使得所有皇后之间无法互相攻击的摆放方案。
+
+例如，当`n = 4`时，可以有两种摆放方案，如下图：
+![N皇后问题](https://www.hello-algo.com/chapter_backtracking/n_queens_problem.assets/solution_4_queens.png)
+
+下图为展示皇后摆放位置规则：**多个皇后不能同处一行，一列或一条对角线上**。
+
+![N皇后摆放规则](https://www.hello-algo.com/chapter_backtracking/n_queens_problem.assets/n_queens_constraints.png)
 
 ### 逐行放置策略
+皇后的数量和棋盘的行数都为`n`，因此我们可以知道：**棋盘的每一行只允许放置一个皇后**。
+
+按照此规则，意味着我们需要采取逐行放置策略：**从第一行开始，在每行放置一个皇后，直至最后一行结束**。如下图：
+![N皇后逐行放置](https://www.hello-algo.com/chapter_backtracking/n_queens_problem.assets/n_queens_placing.png)
 
 ### 列和对角线剪枝
+* 为了满足列的要求，定义长度为`n`的布尔型数组`cols`，记录每一列是否有皇后。在每次放置前，通过`cols`来进行剪枝操作，并在回溯中动态更新`cols`的状态。
+* 为了满足对角线的约束，我们假设棋盘中某个格子的行列索引为`[row, col]`，则从主对角线上可以发现：**row - col**的值是恒定的，例如：`[1, 1], [2, 2], [3, 3]`和`[1, 2], [2, 3]`。从次对角线上可以发现：**row + col**的值是恒定的，例如：`[1, 3], [2, 2], [3, 1]`和`[1, 2], [2, 1]`。
+
+![N皇后-列和对角线剪枝](https://www.hello-algo.com/chapter_backtracking/n_queens_problem.assets/n_queens_cols_diagonals.png)
+
+分别用长度为`2n - 1`的布尔型数组`diags1`和`diags2`代表主对角线、次对角线上是否存在皇后。
 
 ### 代码实现
+```js
+// n皇后回溯算法
+export const backTracking = (row, n, state, cols, diags1, diags2, res) => {
+  // 放置完所有行，记录解
+  if(row === n) {
+    res.push(state.map(arr => arr.slice()));
+    return;
+  }
+  // 遍历所有列
+  for (let col = 0; col < n; col++) {
+    // 计算该格子对应的主对角线和次对角线
+    const diag1 = row - col + n - 1;
+    const diag2 = row + col;
+    // 剪枝：不允许该格子所在的列，主/次对角线有皇后
+    if(!cols[col] && !diags1[diag1] && !diags2[diag2]) {
+      // 尝试：将皇后放置在该格子
+      state[row][col] = 'Q';
+      cols[col] = true;
+      diags1[diag1] = true;
+      diags2[diag2] = true;
+      // 放置下一行
+      backTracking(row + 1, n, state, cols, diags1, diags2, res);
+      // 回退：将该格子恢复为空位
+      state[row][col] = '#';
+      cols[col] = false;
+      diags1[diag1] = false;
+      diags2[diag2] = false;
+    }
+  }
+};
+// n皇后
+export const nQueue = (n) => {
+  // 初始化n * n的棋盘，Q代表皇后，#代表空位
+  const state = Array.from({ length: n }, () => new Array(n).fill('#'));
+  // 记录列皇后摆放情况
+  const cols = new Array(n).fill(false);
+  // 记录主对角线上皇后摆放情况
+  const diags1 = new Array(2 * n - 1).fill(false);
+  // 记录次对角线上皇后摆放情况
+  const diags2 = new Array(2 * n - 1).fill(false);
+  const res = [];
 
-# 参考
+  backTracking(0, n, state, cols, diags1, diags2, res);
+  return res;
+};
+```
+
+## 参考
 * [Hello 算法 回溯](https://www.hello-algo.com/chapter_backtracking/)
