@@ -113,11 +113,98 @@ function backTracking(state, choices, res) {
 3. 最大团问题
 
 ## 全排列问题
+全排列问题是回溯算法的一个典型应用，它的定义是在给定一个集合(数组或字符串)的情况下，找出其中元素的所有可能的排列。
 
 ### 无相等元素情况
+假设输入一个整数数组，其中不包含重复元素，返回所有可能的排列。
 
+从回溯算法的角度看，我们可以把生成排列的过程想象成一系列选择的结果，回退表示撤销一个选择，之后继续尝试其它选择。
+
+从回溯代码的角度看，候选集合`choices`是输入数组中的所有元素，状态`state`是直至目前已被选择的元素，且同一个元素只能被选择一次。
+
+![无相等元素-全排列](https://www.hello-algo.com/chapter_backtracking/permutations_problem.assets/permutations_i.png)
+
+为了控制一个元素只能被选择一次，在回溯过程中需要进行剪枝操作。我们引入`selected`布尔型数组，其中`selected[i]`表示`choices[i]`是否已被选择，并基于它实现以下剪枝操作：
+* 在做出选择时，将`selected[i]`赋值为`true`，代表它已经被选择。
+* 遍历选择列表`choices`时，跳过所有已被选择元素，即剪枝操作。
+
+![无相等元素-全排列-剪枝](https://www.hello-algo.com/chapter_backtracking/permutations_problem.assets/permutations_i_pruning.png)
+
+其代码实现如下：
+```js
+// 无相同元素全排列回溯算法
+export const backTrackingNoEqualValue = (state, choices, selected, res) => {
+  // 已选择数量等于元素数量时，退出回溯
+  if(state.length === choices.length) {
+    res.push([...state]);
+  }
+  // 遍历元素列表
+  choices.forEach((choice, i) => {
+    // 剪枝：不允许重复元素
+    if(!selected[i]) {
+      // 尝试：做出选择
+      selected[i] = true;
+      state.push(choice);
+      // 下一次选择
+      backTrackingNoEqualValue(state, choices, selected, res);
+      // 回退：撤销选择，恢复到之前的状态
+      selected[i] = false;
+      state.pop();
+    }
+  });
+};
+
+// 无相同元素全排列
+export const permutationsNoEqualValue = (nums) => {
+  const selected = new Array(nums.length).fill(false);
+  const res = [];
+  backTrackingNoEqualValue([], nums, selected, res);
+  return res;
+};
+```
 ### 有相等元素情况
+假设输入一个整数数组，数组中可能包含重复元素，返回所有不重复的排列。
 
+有相同元素和无相同元素的区别是最终的排列是否包含重复结果，为了避免这种情况，应该在剪枝的过程中处理：在遍历的时候，开启一个哈希表，当元素被选择时记录到哈希表中，下次遍历时判断不在此哈希表中的才允许遍历。
+
+![相同元素-全排列-剪枝](https://www.hello-algo.com/chapter_backtracking/permutations_problem.assets/permutations_ii_pruning.png)
+
+其代码实现如下：
+```js
+// 有相同元素全排列回溯算法
+export const backTrackingHasEqualValue = (state, choices, selected, res) => {
+  // 已选择数量等于元素数量时，退出回溯
+  if(state.length === choices.length) {
+    res.push([...state]);
+    return;
+  }
+  // 开启重复项哈希表
+  const duplicated = new Set();
+  // 遍历元素列表
+  choices.forEach((choice, i) => {
+    // 剪枝：不允许重复元素且不允许相等元素
+    if(!selected[i] && !duplicated.has(choice)) {
+      // 尝试：做出选择
+      selected[i] = true;
+      state.push(choice);
+      duplicated.add(choice);
+      // 下一次选择
+      backTrackingHasEqualValue(state, choices, selected, res);
+      // 回退：撤销选择，恢复到之前的状态
+      selected[i] = false;
+      state.pop();
+    }
+  });
+};
+
+// 有相同元素全排列
+export const permutationsHasEqualValue = (nums) => {
+  const selected = new Array(nums.length).fill(false);
+  const res = [];
+  backTrackingHasEqualValue([], nums, selected, res);
+  return res;
+};
+```
 ## 子集和问题
 
 ### 无相等元素情况
