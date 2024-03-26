@@ -113,6 +113,25 @@ export default function climbingStairsDP (n) {
 }
 ```
 
+根据以上代码可以发现：**dp[i]至于dp[i - 1] + dp[i - 2]有关**，因此无须定义`dp`数组，其空间优化代码如下：
+```js
+export default function climbingStairsDP (n) {
+  if (n === 1 || n === 2) {
+    return n
+  }
+  // 初始状态：预设最小问题的解
+  let a = 1
+  let b = 2
+  // 状态转移：从较小子问题逐步求解较大子问题
+  for(let i = 3; i <= n; i++) {
+    let temp = b
+    b = a + b
+    a = temp
+  }
+  return b
+}
+```
+
 以上代码，使用图例表示如下：
 ![动态规划](https://www.hello-algo.com/chapter_dynamic_programming/intro_to_dynamic_programming.assets/climbing_stairs_dp.png)
 
@@ -122,6 +141,51 @@ export default function climbingStairsDP (n) {
 * **状态转移方程**：以上代码中的递推公式：`dp[i] = dp[i - 1] + dp[i - 2]`。
 
 ## DP问题特性
+子问题分解是一种通用的算法思路，在分治，动态规划和回溯中的侧重点不同，如下：
+* 分治算法：分治算法递归的将原问题划分为多个相互独立的子问题，直至最小子问题，并在回溯中合并子问题的解，最终得到原问题的解。
+* 动态规划：动态规划也对问题进行分解，但与分治算法的主要区别是，动态规划中的子问题是相互依赖的，在分解过程中会出现许多重叠的子问题。
+* 回溯算法：回溯算法在尝试和回退中穷举所有可能的解，并通过剪枝避免不必要的搜索分支。原问题的解由一系列决策步骤构成，可以将每个决策步骤之前的子序列看出一个子问题。
+
+实际上，动态规划常用来求解最优化问题，它们不仅包含重叠子问题，还具有另外两大特性：**最优子结构**、**无后效性**。
+
+### 最优子结构
+**最优子结构**的含义：**原问题的最优解是从子问题的最优解构建得来的**。
+
+假设有这样一个问题：给定一个楼梯，每步可以上1阶或者2阶，每一阶楼梯上都贴有一个非负整数，表示在该台阶所需要付出的代价。给定一个非负整数数组`cost`，其中`cost[i]`表示在第`i`个台阶需要付出的代价，`cost[0]`为地面(起始点)，请问最小需要付出多少代价才能到达顶部？
+
+![最优子结构](https://www.hello-algo.com/chapter_dynamic_programming/dp_problem_features.assets/min_cost_cs_example.png)
+
+设`dp[i]`为爬到第`i`阶累计付出的代价，由于第`i`阶只能从`i - 1`或者`i - 2`阶走来，因此`d[i]`只可能等于`dp[i - 1] + cost[i]`或者`dp[i - 2] + cost[i]`。为了尽可能减少代价，应该选择两者中较小的那一个，其公式为：`dp[i] = min(dp[i - 1], dp[i - 2]) + cost[i]`。
+
+其实现代码如下：
+```js
+export default function minCostClimbingStairsDP(cost) {
+  const n = cost.length - 1;
+  if (n === 1 || n === 2) {
+    return cost[n];
+  }
+  // 初始状态：预设最小问题的解
+  let a = cost[1];
+  let b = cost[2];
+  // 状态转移：从较小的子问题逐步求解较大子问题
+  for(let i = 3; i <= n; i++) {
+    let temp = b;
+    b = Math.min(a, b) + cost[i];
+    a = temp;
+  }
+  return b;
+}
+```
+![最优子结构-过程](https://www.hello-algo.com/chapter_dynamic_programming/dp_problem_features.assets/min_cost_cs_dp.png)
+
+### 无后效性
+**无后效性**：无后效性是动态规划能够有效解决问题的重要特性之一，其定义为：**给定一个确定的状态，它的未来发展只与当前状态有关，而与过去的经历的所有状态无关**。
+
+假设有这样一个问题：给定一个`n`阶的楼梯，每步可以上`1`阶或者`2`阶，但不能连续两轮跳`1`阶，请问有多少种方案可以爬到楼顶？
+
+![无后效性](https://www.hello-algo.com/chapter_dynamic_programming/dp_problem_features.assets/climbing_stairs_constraint_example.png)
+
+
 
 ## DP解题思路
 
