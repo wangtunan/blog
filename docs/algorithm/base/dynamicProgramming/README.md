@@ -185,8 +185,36 @@ export default function minCostClimbingStairsDP(cost) {
 
 ![无后效性](https://www.hello-algo.com/chapter_dynamic_programming/dp_problem_features.assets/climbing_stairs_constraint_example.png)
 
+在以上问题中，如果上一轮是跳1阶而来，那么下一轮就必须是2阶。这意味着：下一步选择不能由当前状态独立决定，还和前一个状态有关。
 
+为此，我们需要扩展状态的定义：**状态[i, j]表示处在第i阶并且上一轮跳了j阶，其中j∈{1,2}**。
+* **dp[i,1] = dp[i-1,2]**：上一轮跳了1阶时，上上一轮只能选择跳2阶。
+* **dp[i,2] = dp[i-2,1] + dp[i-2,2]**：上一轮跳2阶时，上上一轮可选择跳1阶或者2阶。
+* **dp[n] = dp[n,1] + dp[n,2]**：两者之和代表爬到`n`阶的方案总数。
 
+![无后效行-状态转移](https://www.hello-algo.com/chapter_dynamic_programming/dp_problem_features.assets/climbing_stairs_constraint_state_transfer.png)
+
+实现代码如下：
+```js
+export default function climbingStairsConstraintDP (n) {
+  if (n === 1 || n === 2) {
+    return 1
+  }
+  // 初始化dp表，用于存储子问题的解
+  const dp = Array.from(new Array(n + 1), () => new Array(3))
+  // 初始状态：预设最小子问题的解
+  dp[1][1] = 1
+  dp[1][2] = 0
+  dp[2][1] = 0
+  dp[2][2] = 1
+  // 状态转移：从较小子问题逐步求解较大子问题
+  for(let i = 3; i <= n; i++) {
+    dp[i][1] = dp[i - 1][2]
+    dp[i][2] = dp[i - 2][1] + dp[i - 2][2]
+  }
+  return dp[n][1] + dp[n][2]
+}
+```
 ## DP解题思路
 
 ## 0-1背包问题
