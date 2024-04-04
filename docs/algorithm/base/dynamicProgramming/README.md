@@ -380,9 +380,27 @@ export const minPathSumDPComp = (grid) => {
 
 ## 0-1背包问题
 
+### 方法一：暴力搜索
+
+### 方法二：记忆化搜索
+
+### 方法三：动态规划
+
 ## 完全背包问题
 
+### 完全背包问题
+
+### 零钱兑换问题Ⅰ
+
+### 零钱兑换问题Ⅱ
+
 ## 编辑距离问题
+
+### 动态规划思路
+
+### 代码实现
+
+### 空间优化
 
 ## 参考
 * [Hello 算法 动态规划](https://www.hello-algo.com/chapter_dynamic_programming/)
