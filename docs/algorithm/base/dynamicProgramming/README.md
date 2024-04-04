@@ -215,7 +215,168 @@ export default function climbingStairsConstraintDP (n) {
   return dp[n][1] + dp[n][2]
 }
 ```
+
 ## DP解题思路
+
+### 问题判断
+如果一个问题包含重叠子问题、最优子结构，并满足无后效性，那么它通常适合使用动态规划求解。然而，我们很难从问题描述中直接提取出这些特性。因此，我们通常会放宽条件，先观察问题是否适合使用回溯解决。
+
+适合用回溯解决的问题通常满足“决策树模型”，这种问题可以使用树形结构来描述，其中每个节点代表一个决策，每条路径代表一个决策序列。
+
+换句话说，如果问题包含明确的决策概念，并且解是通过一系列决策产生的，那么它就满足决策树模型，通常可以使用回溯来解决。
+
+在此基础上，动态规划问题还有一些判断的加分项：
+* 问题包含最大、最小、最多、最少等最优化描述。
+* 问题的状态能够使用一个列表，多维矩阵或者树来表示，并且一个状态与其周围的状态存在递推关系。
+
+相应的，也存在一些减分项：
+* 问题的目标是找出所有可能得解决方案，而不是找出最优解。
+* 问题描述中右明显的排列组合的特征，需要返回具体的多个方案。
+
+### 问题求解步骤
+动态规划的解题流程会因问题的性质和难度有所不同，但通常遵循以下步骤：**描述决策**、**定义状态**、**建立dp表**、**推到状态转移方程**、**确定边界条件等**。
+
+假设有这样一个问题：给定`n * m`的二维网格，网格中每个单元格包含一个非负整数，表示该单元格的代价。机器人从以左上角单元格为起点，每次只能向下或者向右移动一步，直至到达右下角单元格。请返回，从左上角到右下角的最小路径和。
+
+![最小路径和](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_example.png)
+
+**第一步**：思考每轮的决策，定义状态，从而得到`dp`表。
+* **每轮决策**：从当前格子向下或者向右走一步。
+* **定义状态**：当前格子的行列索引为`[i,j]`，向下或者向右后，其对应状态分别为：`[i+1,j]`和`[i,j+1]`。
+* **dp表**：尺寸与网格`grid`相同的矩阵。
+
+![最小路径和-定义状态和dp表](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_solution_state_definition.png)
+
+**第二步**：找出最优子结构，进而推导出状态转移方程。
+* **最优子结构**：对于状态`[i,j]`，它只能从上边格子`[i-1,j]`和左边格子`[i,j-1]`转移而来，因此最优子结构为：到达`[i,j]`的最小路径和由`[i-1,j]`和`[i,j-1]`的最小路径和中较小的那一个决定。
+* **状态转移方程**：根据最优子结构，可以推导出其状态转移方程为：`dp[i,j] = min(dp[i-1,j], dp[i,j-1]) + grid[i,j]`。
+![最小路径和-最优子结构和状态转移方程](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_solution_state_transition.png)
+
+
+**第三步**：确定边界问题和状态转移顺序
+* **边界问题**：处在首行的状态，其只能从其左边的状态得来；处在首列的状态，其只能从其上边的状态得来。因此，首行`i = 0`，首列`j = 0`就是边界条件。
+* **状态转移顺序**：由于每个格子只能由其左方格子和上方格子转移而来，因此我们使用循环来遍历矩阵，外层循环遍历各行，内层循环遍历各列。
+![最小路径和-边界问题和状态转移顺序](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_solution_initial_state.png)
+
+
+**方法一：暴力搜索**：
+
+从状态`[i,j]`开始搜索，不断的分解为更小的状态`[i-1,j]`和`[i,j-1]`，递归函数包括以下要素：
+* **递归参数**：状态`[i,j]`
+* **返回值**：从`[0,0]`到`[i,j]`的最小路径和`dp[i,j]`
+* **终止条件**：当`i=0`且`j=0`时，返回代价`grid[0,0]`
+* **剪枝**：当`i < 0`或者`j < 0`时，返回代价`+∞`，代表不可行。
+
+其实现代码如下：
+```js
+// 方法一：暴力搜索
+export const minPathSumDFS = (grid, i, j) => {
+  // 终止条件
+  if(i === 0 && j === 0) {
+    return grid[0][0];
+  }
+  // 越界
+  if(i < 0 || j < 0) {
+    return Infinity;
+  }
+  // 计算左上角到[i-1,j]的最小路径和
+  const left = minPathSumDFS(grid, i - 1, j);
+  // 计算左上角到[i,j-1]的最小路径和
+  const up = minPathSumDFS(grid, i, j - 1);
+  // 计算左上角到[i,j]的最小路径和
+  return Math.min(left, up) + grid[i][j];
+};
+```
+暴力搜素存在一些重叠子问题，其原因是：存在多条路径可以从左上角到达某个单元格。
+![暴力搜索](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_dfs.png)
+
+
+**方法二：记忆化搜索**：
+
+为了解决暴力搜索中的问题，我们引入和网格`grid`相同大小的`member`记忆网格，用于记录各个问题的解，并将重叠子问题进行剪枝：
+
+其实现代码如下：
+```js
+// 方法二：记忆化搜索
+export const minPathSumMemberDFS = (grid, member, i, j) => {
+  // 终止条件
+  if(i === 0 && j === 0) {
+    return grid[0][0];
+  }
+  // 越界
+  if(i < 0 || j < 0) {
+    return Infinity;
+  }
+  // 剪枝：如果有记录，则直接返回
+  if(member[i][j] !== -1) {
+    return member[i][j];
+  }
+  // 计算左上角到[i-1,j]的最小路径和
+  const left = minPathSumDFS(grid, i - 1, j);
+  // 计算左上角到[i,j-1]的最小路径和
+  const up = minPathSumDFS(grid, i, j - 1);
+  // 记忆化
+  member[i][j] = Math.min(left, up) + grid[i][j];
+  return member[i][j];
+};
+```
+在引入记忆化后，所有子问题的解只需计算一次。
+![记忆化搜索](https://www.hello-algo.com/chapter_dynamic_programming/dp_solution_pipeline.assets/min_path_sum_dfs_mem.png)
+
+**方法三：动态规划**：
+
+基于迭代实现动态规划，其代码如下：
+```js
+// 方法三：动态规划
+export const minPathSumDP = (grid) => {
+  const n = grid.length;
+  const m = grid[0].length;
+  // 初始化dp表
+  const dp = Array.from({ length: n }, () => Array.from({ length: m }, () => 0));
+  dp[0][0] = grid[0][0];
+  // 状态转移：首行
+  for (let j = 1; j < m; j++) {
+    dp[0][j] = dp[0][j - 1] + grid[0][j];
+  }
+  // 状态转移：首列
+  for (let i = 1; i < n; i++) {
+    dp[i][0] = dp[i - 1][0] + grid[i][0];
+  }
+  // 状态转移：其余行和列
+  for (let i = 1; i < n; i++) {
+    for (let j = 1; j < m; j++) {
+      dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+    }
+  }
+  return dp[n - 1][m - 1];
+};
+```
+空间优化：由于每个格子只与其左边和上边的格子有关，因此我们可以只用一个单行数组来实现`dp`表。
+
+```js
+// 方法三：动态规划(空间优化版)
+export const minPathSumDPComp = (grid) => {
+  const n = grid.length;
+  const m = grid[0].length;
+  // 初始化dp表
+  const dp = new Array(m);
+  dp[0] = grid[0][0];
+  // 状态转移：首行
+  for (let j = 1; j < m; j++) {
+    dp[j] = dp[j - 1] + grid[0][j];
+  }
+  // 状态转移：其余行和列
+  for (let i = 1; i < n; i++){
+    // 状态转移：首列
+    dp[0] = dp[0] + grid[i][0];
+    // 状态转移：其余列
+    for (let j = 1; j < m; j++) {
+      dp[j] = Math.min(dp[j], dp[j - 1]) + grid[i][j];
+    }
+  }
+  return dp[m - 1];
+};
+```
 
 ## 0-1背包问题
 
