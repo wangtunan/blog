@@ -380,11 +380,135 @@ export const minPathSumDPComp = (grid) => {
 
 ## 0-1背包问题
 
+假设有这样一个问题：给定`n`个物品，第`i`个物品的重量为`wgt[i - 1]`、价值为`val[i - 1]`，和一个容量为`cap`的背包。每个物品只能选择一次，问在限定背包容量下能放入物品的最大价值。
+
+![0-1背包问题](https://www.hello-algo.com/chapter_dynamic_programming/knapsack_problem.assets/knapsack_example.png)
+
+**第一步**：思考每轮的决策、定义状态、从而得到`dp`表。
+* **每轮决策**：对于每个物品来说，可选择放入和不放入。放入时，背包容量减少，价值增加；不放入时，背包容量不变，价值不变。
+* **定义状态**：`[i, c]`，其中`i`表示物品编号，`c`表示剩余背包容量。即`dp[i, c]`表示第`i`个物品在剩余容量为`c`的背包中的最大价值。
+* **dp表**：`(n + 1) * (c + 1)`的二维表。
+
+**第二步**：找出最优子结构，进而推导出状态转移方程。
+当我们做出物品`i`的决策后，剩余的是前`i - 1`个物品的决策，可分为两种情况：
+1. 不放入物品`i`：背包容量不变，状态变化为`[i - 1, c]`。
+2. 放入物品`i`：背包容量减少`wgt[i - 1]`，价值增加`val[i - 1]`，状态变化为`[i - 1, c - wgt[i - 1]]`。
+
+分析完上述问题后，我们可以得出：
+* **最优子结构**：最大价值`dp[i, c]`等于不放入物品`i`和放入物品`i`两种方案种价值更大的那一个。
+* **状态转移方程**：`dp[i, c] = max(dp[i - 1, c], dp[i - 1, c - wgt[i - 1]] + val[i - 1])`。
+
+**第三步**：确定边界条件和状态转移顺序。
+* **边界条件**：当无物品或无剩余背包容量时，最大价值为`0`，即首行`dp[0, c]`和首列`dp[i, 0]`都等于`0`。
+* **状态转移顺序**：当前状态`[i, c]`从上方状态`[i - 1, c]`和左上方的状态`[i - 1, c - wgt[i - 1]]`转移而来。
+
 ### 方法一：暴力搜索
+暴力搜索包含以下要素：
+* **递归参数**：状态`[i, c]`。
+* **返回值**：子问题的解`dp[i, c]`
+* **终止条件**：当物品编号越界`i = 0`或背包容量为`0`时，终止递归并返回价值`0`。
+* **剪枝**：若当前物品重量超出背包剩余容量，则只能选择不放入。
+```js
+// 方法一：暴力搜索
+export const knapsackDFS = (wgt, val, i, c) => {
+  // 已选完或背包容量为0，则返回价值0
+  if(i === 0 || c === 0) {
+    return 0;
+  }
+  // 物品重量超过背包剩余容量，不放入物品
+  if(wgt[i - 1] > c) {
+    return knapsackDFS(wgt, val, i - 1, c);
+  }
+  // 计算不放入物品i的最大价值
+  const noVal = knapsackDFS(wgt, val, i - 1, c);
+  // 计算放入物品i的最大价值
+  const yesVal = knapsackDFS(wgt, val, i - 1, c - wgt[i - 1]) + val[i - 1];
+  // 返回最大价值
+  return Math.max(noVal, yesVal);
+};
+```
+观察递归树，容易发现其中存在重复子问题，如下图：
+![0-1背包问题-暴力搜索](https://www.hello-algo.com/chapter_dynamic_programming/knapsack_problem.assets/knapsack_dfs.png)
 
 ### 方法二：记忆化搜索
+为了保证重叠子问题只被计算一次，我们可以借助记忆列表`member`，其中`member[i][c]`表示`dp[i][c]`。
+
+记忆化搜索实现代码如下：
+```js
+// 方法二：记忆化搜索
+export const knapsackMemberDFS = (wgt, val, member, i, c) => {
+  // 已选完或背包容量为0，则返回价值0
+  if(i === 0 || c === 0) {
+    return 0;
+  }
+  // 如果已被计算过，则直接返回
+  if(member[i][c] !== -1) {
+    return member[i][c];
+  }
+  // 物品重量超过背包剩余容量，不放入物品
+  if(wgt[i - 1] > c) {
+    return knapsackMemberDFS(wgt, val, member, i - 1, c);
+  }
+  // 计算不放入物品i的最大价值
+  const noVal = knapsackMemberDFS(wgt, val, member,  i - 1, c);
+  // 计算放入物品i的最大价值
+  const yesVal = knapsackMemberDFS(wgt, val, member, i - 1, c - wgt[i - 1]) + val[i - 1];
+  // 存储当前计算结果
+  member[i][c] = Math.max(noVal, yesVal);
+  // 返回最大价值
+  return member[i][c];
+};
+```
 
 ### 方法三：动态规划
+动态规划实质上就是在状态转移的过程中填充`dp`表的过程，其实现代码如下：
+```js
+export const knapsackDP = (wgt, val, cap) => {
+  const n = wgt.length;
+  // 初始dp表
+  const dp = Array.from({ length: n + 1 }, () => new Array(cap + 1).fill(0));
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for (let c = 1; c <= cap; c++) {
+      // 物品重量超过背包剩余容量，不放入物品
+      if(wgt[i - 1] > c) {
+        dp[i][c] = dp[i - 1][c];
+      } else {
+        dp[i][c] = Math.max(
+          dp[i - 1][c],
+          dp[i - 1][c - wgt[i - 1]] + val[i - 1]
+        );
+      }
+    }
+  }
+  return dp[n][cap];
+};
+```
+
+### 空间优化
+可使用一个一维数组，其中内层循环倒序遍历，如下：
+![0-1背包问题-空间优化](https://www.hello-algo.com/chapter_dynamic_programming/knapsack_problem.assets/knapsack_dp_comp_step5.png)
+
+其空间优化代码如下：
+```js
+export const knapsackDPComp = (wgt, val, cap) => {
+  const n = wgt.length;
+  // 初始dp表
+  const dp = new Array(cap + 1).fill(0);
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for(let c = cap; c >= 1; c--) {
+      if(wgt[i - 1] <= c) {
+        dp[c] = Math.max(
+          dp[c],
+          dp[c - wgt[i - 1]] + val[i - 1]
+        );
+      }
+    }
+  }
+  return dp[cap];
+};
+```
 
 ## 完全背包问题
 
