@@ -135,10 +135,6 @@ export default defineUserConfig({
           {
             text: 'SASS',
             link: '/cssPrecompiler/sass/'
-          },
-          {
-            text: 'Sass-Loader源码分析',
-            link: '/cssPrecompiler/sassLoader/'
           }
         ]
       },
@@ -148,10 +144,6 @@ export default defineUserConfig({
           { text: 'Vue应用测试', link: '/test/vueTest' }
         ]
       },
-      {
-        text: 'VuePress',
-        link: '/vuepress/'
-      }
     ],
     sidebar: {
       '/webpack/webpack/': [webpackSidebar],
