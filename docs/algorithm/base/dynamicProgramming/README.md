@@ -511,8 +511,70 @@ export const knapsackDPComp = (wgt, val, cap) => {
 ```
 
 ## 完全背包问题
+完全背包问题和0-1背包问题非常相似，它们的区别仅在于**不限制物品的选择次数**。
 
 ### 完全背包问题
+假设给定`n`个物品，第`i`个物品的重量为`wgt[i-1]`、价值为`val[i-1]`和一个容量为`cap`的背包。每个物品可以重复选取，问在限定背包容量下能放下物品的最大价值。
+![完全背包问题](https://www.hello-algo.com/chapter_dynamic_programming/unbounded_knapsack_problem.assets/unbounded_knapsack_example.png)
+
+#### 动态规划思路
+* 在0-1背包问题中，每种物品只有一个，因此将物品`i`放入背包后，只能从前`i-1`个物品中选择。
+* 在完全背包问题中，每种物品的数量是无限的，因此将物品`i`放入背包后，任然可以从前`i`个物品中选择。
+
+在完全背包问题的规定下，状态`[i, c]`的变化分两种情况。
+* 不放入物品`i`，与0-1背包问题相同，转移至`[i-1, c]`。
+* 放入物品`i`，与0-1背包问题不同，转移至`[i, c-wgt[i-1]]`。
+
+因此，状态转移方程为：`dp[i, c] = max(dp[i-1, c] + dp[i, c-wgt[i-1]] + val[i-1])`
+
+#### 代码实现
+```js
+export const unboundedKnapsackDP = (wgt, val, cap) => {
+  const n = wgt.length;
+  // 初始dp表
+  const dp = Array.from({ length: n + 1 }, () => new Array(cap + 1).fill(0));
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for (let c = 1; c <= cap; c++) {
+      // 物品重量超过背包剩余容量，不放入
+      if(wgt[i - 1] > c) {
+        dp[i][c] = dp[i - 1][c];
+      } else {
+        // 
+        dp[i][c] = Math.max(
+          dp[i - 1][c],
+          dp[i][c - wgt[i - 1]] + val[i - 1]
+        );
+      }
+    }
+  }
+  return dp[n][cap];
+};
+```
+#### 空间优化
+由于当前状态是由左边和上边的状态转移而来，因此空间优化后应该对`dp`表中的每一行进行正序遍历，这个0-1背包问题正好相反。
+```js
+export const unboundedKnapsackComp = (wgt, val, cap) => {
+  const n = wgt.length;
+  // 初始dp表
+  const dp = new Array(cap + 1).fill(0);
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for(let c = 1; c <= cap; c++) {
+      if(wgt[i - 1] <= c) {
+        dp[c] = Math.max(
+          dp[c],
+          dp[c - wgt[i - 1]] + val[i - 1]
+        );
+      }
+    }
+  }
+  return dp[cap];
+};
+```
+![完全背包问题-空间优化](https://www.hello-algo.com/chapter_dynamic_programming/unbounded_knapsack_problem.assets/unbounded_knapsack_dp_comp_step6.png)
+
+
 
 ### 零钱兑换问题Ⅰ
 
