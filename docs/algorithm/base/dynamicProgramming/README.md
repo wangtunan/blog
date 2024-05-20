@@ -577,8 +577,138 @@ export const unboundedKnapsackComp = (wgt, val, cap) => {
 
 
 ### 零钱兑换问题Ⅰ
+给定`n`种硬币，第`i`种硬币的面值为`coins[i - 1]`，目标金额为`amt`，每种硬币可以重复选取，问能够凑出目标金额的最少硬币数量。如果无法凑出，则返回`-1`。
+![零钱兑换问题Ⅰ](https://www.hello-algo.com/chapter_dynamic_programming/unbounded_knapsack_problem.assets/coin_change_example.png)
+
+#### 动态规划思路
+零钱兑换可以看做是完全背包问题的一种特殊情况，两者具有以下联系和不同点。
+* 两道题可以相互转换：**物品**对应**硬币**，**物品重量**对应**硬币面值**，**背包容量**对应**目标金额**。
+* 优化目标相反：完全背包问题是**最大化物品价值**，零钱兑换问题是**最小化硬币数量**。
+* 求解目的不同：完全背包问题是求**不超过**背包最大容量下的解，零钱兑换问题求**恰好**凑到目标金额的解。
+
+**第一步**：思考每轮决策，定义状态，进而得出`dp`表。
+状态`[i, a]`对应的子问题为：前`i`种硬币能够凑出金额`a`的最小硬币数量，记为`dp[i, a]`。二维`dp`表为`(n + 1) * (amt + 1)`。
+
+**第二步**：找出最优子结构，进而推导出状态转移方程。
+本问题和完全背包问题的状态转移方程存在以下差异：
+* 本题求解最小值，所有需要使用`min`代替完全背包问题中的`max`。
+* 优化主体是硬币数量而非商品价值，因此在选中硬币时执行`+1`即可。
+根据以上分析，状态转移方程定义为：`dp[i, a] = min(dp[i - 1, a], dp[i, a - coins[i - 1]] + 1)`
+
+**第三步**：确定边界条件和状态转移顺序。
+当目标金额为`0`时，凑出它的最少硬币数量为`0`，即首列`dp[i, 0]`都为`0`。当无硬币时，无法凑出任意 `> 0`的目标金额，即无效解。
+
+#### 代码实现
+使用`amt + 1`代表无效解，其代码实现如下：
+```js
+export const coinChangeDP = (coins, amt) => {
+  const n = coins.length;
+  const max = amt + 1;
+  // 初始化dp表
+  const dp = Array.from({ length: n + 1 }, () => Array.from({ length: max }, () => 0));
+  // 首行、首列
+  for (let a = 1; a <= amt; a++) {
+    dp[0][a] = max;
+  }
+  // 状态转移：其余行和列
+  for (let i = 1; i <= n; i++) {
+    for (let a = 1; a <= amt; a++) {
+      if(coins[i - 1] > a) {
+        // 目标金额超出，不选择
+        dp[i][a] = dp[i - 1][a];
+      } else {
+        // 不选择和选硬币i这两种方案的较小值
+        dp[i][a] = Math.min(
+          dp[i - 1][a],
+          dp[i][a - coins[i - 1]] + 1
+        );
+      }
+    }
+  }
+  return dp[n][amt] !== max ? dp[n][amt] : -1;
+};
+```
+
+#### 空间优化
+零钱兑换问题的空间优化和完全背包问题一致：
+```js
+export const coinChangeDPComp = (coins, amt) => {
+  const n = coins.length;
+  const max = amt + 1;
+  // 初始化dp表
+  const dp = Array.from({ length: max }, () => max);
+  dp[0] = 0;
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for (let a = 1; a <= amt; a++) {
+      if(coins[i - 1] <= a) {
+        dp[a] = Math.min(
+          dp[a],
+          dp[a - coins[i - 1]] + 1
+        );
+      }
+    }
+  }
+  return dp[amt] !== max ? dp[amt] : -1;
+};
+```
 
 ### 零钱兑换问题Ⅱ
+给定`n`种硬币，第`i`中硬币的面值为`coins[i - 1]`，目标金额为`amt`，每种硬币可以重复选取，问能够凑出目标金额的硬币组合数量。
+![零钱兑换问题Ⅱ](https://www.hello-algo.com/chapter_dynamic_programming/unbounded_knapsack_problem.assets/coin_change_ii_example.png)
+
+#### 动态规划思路
+相较于上一题，本题的目标是求组合数量，因此子问题变为：前`i`中硬币能够凑出金额为`a`的组合数量，而`dp`二维表的尺寸依旧。
+
+状态转移方程为：`dp[i, a] = dp[i - 1, a] + dp[i - 1, a - coins[i - 1]]`。
+
+当目标金额为`0`时，无须选择任何硬币即可凑出目标金额，因此应将首列`dp[i, 0]`赋值为`1`；当无隐蔽时，无法凑出符合条件的金额，即`dp[0, a]`赋值为`0`。
+
+#### 代码实现
+```js
+export const coinChangeIIDP = (coins, amt) => {
+  const n = coins.length;
+  // 初始dp表
+  const dp = Array.from({ length: n + 1 }, () => Array.from({ length: amt + 1 }, () => 0));
+  // 首列
+  for (let i = 0; i <= n; i++) {
+    dp[i][0] = 1;
+  }
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for (let a = 1; a <= amt; a++) {
+      if(coins[i - 1] > a) {
+        // 超出目标金额，不选
+        dp[i][a] = dp[i - 1][a];
+      } else {
+        // 不选和选择i，这两种方案之和
+        dp[i][a] = dp[i - 1][a] + dp[i][a - coins[i - 1]];
+      }
+    }
+  }
+  return dp[n][amt];
+};
+```
+
+#### 空间优化
+```js
+export const coinChangeIIDPComp = (coins, amt) => {
+  const n = coins.length;
+  // 初始dp表
+  const dp = Array.from({ length: amt + 1 }, () => 0);
+  dp[0] = 1;
+  // 状态转移
+  for (let i = 1; i <= n; i++) {
+    for (let a = 1; a <= amt; a++) {
+      if(coins[i - 1] <= a) {
+        // 不选和选择i，这两种方案之和
+        dp[a] = dp[a] + dp[a - coins[i - 1]];
+      }
+    }
+  }
+  return dp[amt];
+};
+```
 
 ## 编辑距离问题
 
