@@ -711,12 +711,114 @@ export const coinChangeIIDPComp = (coins, amt) => {
 ```
 
 ## 编辑距离问题
+**编辑距离问题**：是指狂歌字符串之间互相转换的最小次数，通常用于在信息检索和自然语言处理中度量两个序列的相似度。
+
+假设输入两个字符串`s`和`t`，返回将`s`转换为`t`的最小编辑步数。你可以在字符串中进行三种编辑操作：插入一个字符，删除一个字符和替换一个字符。编辑距离问题可以很自然的用决策树模型来解释，字符串对应树节点，一轮决策对应树的一条边。
+
+![编辑距离问题](https://www.hello-algo.com/chapter_dynamic_programming/edit_distance_problem.assets/edit_distance_example.png)
 
 ### 动态规划思路
+**第一步：思考每轮的决策，定义状态，进而得到dp表**：
+
+每一轮的决策是对字符串`s`进行一次编辑操作，我们希望在编辑操作的过程中，问题的规模逐渐缩小，这样才能构建子问题。
+
+设字符串`s`和`t`的长度分别为`n`和`m`，我们先考虑两字符串尾部的字符`s[n - 1]`和`t[m - 1]`。
+* 若`s[n - 1]`和`t[m - 1]`相同，则可以跳过它们，直接考虑`s[n - 2]`和`t[m - 2]`。
+* 若`s[n - 1]`和`t[m - 1]`不相同，我们需要对`s`进行一次编辑操作(插入，删除或者替换)，使得两字符的尾部字符相同。
+
+因此，将状态定义为字符串`s`和`t`中，分别对应的第`i`和第`j`个字符，记为`[i, j]`。状态`[i, j]`对应的子问题即为：将字符串`s`的前`i`个字符更改为`t`的前`j`个字符所需的最小编辑步数。
+
+至此，得到一个尺寸为`(i + 1) * (j + 1)`的二维`dp`表。
+
+**第二步：找出最优子结构，进而推导出状态转移方程**：
+
+考虑子问题`dp[i, j]`，其对应的两个字符串的尾部字符为`s[i - 1]`和`t[j - 1]`，可根据不同的编辑分三种情况：
+* 在`s[i - 1]`之后添加`t[j - 1]`，则剩余子问题为`dp[i, j - 1]`。
+* 删除`s[i - 1]`，则剩余子问题为`dp[i - 1, j]`。
+* 将`s[i - 1]`替换为`t[j - 1]`，则剩余子问题`dp[i - 1, j - 1]`。
+
+![编辑距离问题-动态规划思路](https://www.hello-algo.com/chapter_dynamic_programming/edit_distance_problem.assets/edit_distance_state_transfer.png)
+
+根据以上分析，其状态转移方程为：`dp[i, 1] = min(dp[i, j - 1], dp[i - 1, j], dp[i - 1, j - 1]) + 1`
+
+**第三步：确定边界条件和状态转移顺序**： 
+* 当两个字符串为空时，编辑步数为0，即`dp[0, 0] = 0`。
+* 当`s`为空但`t`不为空时，最小编辑距离等于`t`的长度，即首行`dp[0, j] = j`。
+* 当`s`不为空但`t`为空时，最小编辑距离等于`s`的长度，即首列`dp[i, 0] = i`。
 
 ### 代码实现
+```js
+// 最少编辑距离问题：DP
+export const editDistanceDP = (s, t) => {
+  const n = s.length;
+  const m = t.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+
+  // 状态转移：首行，首列
+  for (let i = 1; i <= n; i++) {
+    dp[i][0] = i;
+  }
+  for (let j = 1; j <= m; j++) {
+    dp[0][j] = j;
+  }
+
+  // 状态转移：其余行和列
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (s.charAt(i - 1) === t.charAt(j - 1)) {
+        // 字符相等，直接跳过
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        // 最小编辑步数：插入、删除、替换这三种操作的最小编辑步数 + 1
+        dp[i][j] = Math.min(
+          dp[i][j - 1],
+          dp[i - 1][j],
+          dp[i - 1][j - 1]
+        ) + 1;
+      }
+    }
+  }
+
+  return dp[n][m];
+};
+```
+![最小编辑距离-代码实现](https://www.hello-algo.com/chapter_dynamic_programming/edit_distance_problem.assets/edit_distance_dp_step14.png)
 
 ### 空间优化
+由于`dp[i, j]`是由上方`dp[i - 1, j]`，左方`dp[i, j - 1]`和左上方`dp[i - 1, j - 1]`转移而来，而正序遍历会丢失左上方`dp[i - 1, j - 1]`，倒序遍历无法提前构建`dp[i, j - 1]`，因此两种遍历顺序都不可取。
+
+为此，我们使用一个变量`leftUp`来暂时存放左上方的解，从而只考虑左方和上方的解。
+
+```js
+// 最小编辑距离问题：空间优化
+export const editDistanceDPComp = (s, t) => {
+  const n = s.length;
+  const m = t.length;
+  const dp = new Array(m + 1).fill(0);
+
+  // 状态转移：首行
+  for (let j = 1; j <= m; j++) {
+    dp[j] = j;
+  }
+  // 状态转移：其余行
+  for (let i = 1; i <= n; i++) {
+    let leftUp = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= m; j++) {
+      const temp = dp[j];
+      if (s.charAt(i - 1) === t.charAt(j - 1)) {
+        dp[j] = leftUp;
+      } else {
+        dp[j] = Math.min(dp[j - 1], dp[j], leftUp) + 1;
+      }
+      
+      leftUp = temp;
+    }
+  }
+
+  return dp[m];
+};
+```
 
 ## 参考
 * [Hello 算法 动态规划](https://www.hello-algo.com/chapter_dynamic_programming/)
