@@ -1,0 +1,6 @@
+---
+sidebar: auto
+---
+
+# Gin
+Gin
