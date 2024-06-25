@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-4977d07e","path":"/golang/base/","title":"Go基础","lang":"zh-CN","frontmatter":{"sidebar":"auto"},"headers":[],"git":{"updatedTime":1719327758000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"golang/base/README.md"}');export{a as data};
