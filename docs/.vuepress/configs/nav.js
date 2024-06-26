@@ -122,7 +122,7 @@ const booksNav =  [
 // golang导航
 const golangNav = [
   {
-    text: 'Golang',
+    text: 'Golang技术栈',
     children: [
       {
         text: 'Go基础',
