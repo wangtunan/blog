@@ -137,10 +137,125 @@ func main() {
 
 ### 字符型
 字符型用单引号来定义，`byte`和`rune`常用来定义字符型。
+| 类型 | 别名 | 编码 |
+| --- | --- | --- |
+| byte | uint8 的别名 | ASCII |
+| rune | int32 的别名 | UTF-8(ASCII的超集) |    
 
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var (
+		c1 byte = 'a'  // 97
+		c2 byte = 'A'  // 65
+		c3 rune = '中' // 20013
+	)
+	fmt.Printf("c1 val is %v, c2 val is %v, diff is %v\n", c1, c2, c1-c2)
+	fmt.Printf("c3 val is %v\n", c3)
+}
+```
 
 ### 布尔型
+布尔值，只有`true`和`false`两种值。
+| 类型 | bit长度 | 默认值 |
+| --- | --- | --- |
+| bool | 1 bit | false |
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var (
+		b1 = true
+		b2 bool
+	)
+
+	fmt.Printf("b1 val is %v, b2 val is %v \n", b1, b2)
+}
+```
 
 ### 字符串型
+字符串需要通过双引号来定义。
+| 类型 | 说明 | 默认值 |
+| --- | --- | --- |
+| string | 可通过len()查看长度 | "" |
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var (
+		s1 = "abc"
+		s2 string
+	)
+
+	fmt.Printf("s1 val is '%s', s2 val is '%s' \n", s1, s2)
+	fmt.Printf("s1 length is %d, s2 length is %d \n", len(s1), len(s2))
+}
+```
 
 ## 指针
+`Golang`中取地址符使用`&`符号，访问地址指向的值使用`*`，指针类型使用`*类型`，例如`*int`。
+
+参数有如下两种传递方式：
+* 值拷贝：开辟一块新的内存空间，存放原值的副本，副本和原值互不干扰。
+```go
+package main
+
+import "fmt"
+
+func increment(num int) int {
+	num++
+	return num
+}
+
+func main() {
+	num := 3
+	result := increment(num)                              // 值拷贝
+	fmt.Printf("num is %d, result is %d \n", num, result) // 3, 4
+}
+```
+* 值传递：开辟一块新的内存空间，存放原值的内存地址，可以通过原值的内存地址访问到原值。
+```go
+package main
+
+import "fmt"
+
+// *int表示int类型的指针类型
+// *p代表指针指向的值
+func incrementPointer(p *int) int {
+	*p++
+	return *p
+}
+
+func main() {
+	num := 3
+	result := incrementPointer(&num)                      // 值传递
+	fmt.Printf("num is %d, result is %d \n", num, result) // 4, 4
+}
+```
+
+## fmt格式字符
+
+## 运算符
+
+## 流程控制语句
+
+## 函数
+
+## 数组和切片
+
+## map
+
+## 结构体和自定义数据类型
+
+## 方法和接口
+
+## 协程/channel
