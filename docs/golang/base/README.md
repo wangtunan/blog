@@ -327,6 +327,60 @@ func main() {
 
 ## 流程控制语句
 
+### if/else
+`Golang`中的`if`和`else if`不需要使用括号把条件包裹起来：
+```go
+package main
+
+import "fmt"
+
+func main() {
+	age := 18
+	if age < 18 {
+		fmt.Println("未成年")
+	} else if age >= 18 && age < 35 {
+		fmt.Println("青年")
+	} else if age >= 35 && age < 60 {
+		fmt.Println("中年")
+	} else {
+		fmt.Println("老年人")
+	}
+}
+```
+
+### switch/case
+`Golang`中的`switch/case`语句有如下几个特点：
+* 可代替`if/else `写法。
+* `case`分支自动添加`break`。
+* `default`分支可省略。
+* 如果想要贯穿多个`case`，需要使用`fallthrough`
+
+
+以上`if/else`案例等价于：
+```go
+package main
+
+import "fmt"
+
+func main() {
+	age := 18
+
+	switch {
+	case age < 18:
+		fmt.Println("未成年")
+	case age >= 18 && age < 35:
+		fmt.Println("青年")
+	case age >= 35 && age < 60:
+		fmt.Println("中年")
+	default:
+		fmt.Println("老年人")
+	}
+}
+
+```
+
+## for循环
+ 
 ## 函数
 
 ## 数组和切片
