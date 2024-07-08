@@ -348,6 +348,31 @@ func main() {
 }
 ```
 
+`Golang`中的`if`语句可以定义变量，此变量仅在`if/else`各个分支中访问，例如：
+```go
+package main
+
+import "fmt"
+
+func main() {
+	if age := 36; age < 18 {
+		fmt.Println(age)
+		fmt.Println("未成年")
+	} else if age >= 18 && age < 35 {
+		fmt.Println(age)
+		fmt.Println("青年")
+	} else if age >= 35 && age < 60 {
+		fmt.Println(age)
+		fmt.Println("中年")
+	} else {
+		fmt.Println(age)
+		fmt.Println("老年人")
+	}
+	// 错误：age is undefined
+	fmt.Println(age)
+}
+```
+
 ### switch/case
 `Golang`中的`switch/case`语句有如下几个特点：
 * 可代替`if/else `写法。
@@ -380,6 +405,73 @@ func main() {
 ```
 
 ## for循环
+`Golang`的`for`循环中，`break`和`continue`依旧分别表示中断循环和继续下一次循环。
+
+### for循环的三种方式
+```go
+package main
+
+import "fmt"
+
+func main() {
+	// 方式一：初始条件 + 判断条件 + 后续处理 + 循环体
+	for i := 0; i < 10; i++ {
+		fmt.Println(i)
+	}
+	fmt.Println("=========")
+	// 方式二：判断条件 + 循环体
+	i := 0
+	for i < 10 {
+		i++
+		fmt.Println(i)
+	}
+	fmt.Println("=========")
+	// 方式三：仅循环体
+	j := 0
+	for {
+		if j == 10 {
+			break
+		}
+		j++
+		fmt.Println(j)
+	}
+}
+```
+
+### for/range循环
+`Golang`中的`for/range`可同来迭代字符串、数组、切片和`map`对象。
+```go
+package main
+
+import "fmt"
+
+func main() {
+	// 迭代切片(数组)
+	list := []string{"AAA", "BBB", "CCC"}
+	for k, v := range list {
+		fmt.Println(k, v) // k为索引，v为值
+	}
+	fmt.Println("=========")
+
+	// 迭代字符串
+	str := "hello"
+	for k, v := range str {
+		fmt.Println(k, v) // k为索引，v为字符的码值
+	}
+	fmt.Println("=========")
+
+	// 迭代map对象
+	student := map[string]string{
+		"name":    "AAA",
+		"age":     "23",
+		"address": "shanghai",
+	}
+	for k, v := range student {
+		fmt.Println(k, v) // k为键，v为值
+	}
+}
+
+```
  
 ## 函数
 
