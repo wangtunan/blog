@@ -1,0 +1,1 @@
+import{_ as o,o as r,c as t,a as e,b as a}from"./app-3e6e6a3e.js";const c={},s=e("h1",{id:"gorm",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#gorm","aria-hidden":"true"},"#"),a(" Gorm")],-1),n=e("p",null,"Gorm",-1),_=[s,n];function d(i,l){return r(),t("div",null,_)}const h=o(c,[["render",d],["__file","gorm.html.vue"]]);export{h as default};
