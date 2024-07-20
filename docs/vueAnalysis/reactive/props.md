@@ -1,8 +1,10 @@
 # props处理
-介绍完以上前置核心概念后，我们第一个要学习的就是`Vue.js`是如何处理与`props`相关的逻辑的。我们把与`props`相关的逻辑主要分成三个部分，分别是`props`规范化、`props`初始化和`props`更新。
+介绍完以上前置核心概念后，我们第一个要学习的就是`Vue.js`是如何处理与`props`相关的逻辑的。
+
+我们把与`props`相关的逻辑主要分成三个部分，分别是`props`规范化、`props`初始化和`props`更新。
 
 ## props规范化
-在了解规范化之前，我们先来列举一下在日常的开发过程中，我们主要有如下几种撰写组件`props`的方式：
+在了解规范化之前，我们先来列举一下在日常的开发过程中，主要有如下几种撰写组件`props`的方式：
 * 数组形式：`props`可以写成一个数组，但数组中的`key`元素必须为`string`类型。
 ```js
 export default {
@@ -61,7 +63,7 @@ export function mergeOptions (
   return options
 } 
 ```
-我们可以发现，规范化`props`的代码，主要集中在`normalizeProps()`方法中，那么接下来我们详细分析`normalizeProps()`方法：
+可以发现，规范化`props`的代码，主要集中在`normalizeProps()`方法中，那么接下来我们详细分析`normalizeProps()`方法：
 ```js
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props

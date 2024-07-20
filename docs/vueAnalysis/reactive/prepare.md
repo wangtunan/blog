@@ -34,7 +34,7 @@ msg = vm.msg          // get msg
 为了在别的地方方便的使用`Object.defineProperty()`方法，因此我们把其封装成一个`defineReactive`函数。
 
 ## proxy代理
-在我们的开发过程中，我们经常会直接使用`this.xxx`的形式直接访问`props`或者`data`中的值，这是因为`Vue`为`props`和`data`默认做了`proxy`代理。关于什么是`proxy`代理，请先看一个简单的例子：
+在开发过程中，我们经常会使用`this.xxx`的形式直接访问`props`或者`data`中的值，这是因为`Vue`为`props`和`data`默认做了`proxy`代理。关于什么是`proxy`代理，请先看一个简单的例子：
 ```js
 this._data = {
   name: 'AAA',
@@ -73,7 +73,7 @@ const name = this._data.name
 this._data.name = 'BBB'
 ```
 ## $options属性
-在之前的介绍中，我们知道当我们初始化`Vue`实例的时候传递的`options`会根据不同的情况进行配置合并，关于具体的`options`合并策略我们会在之后的章节详细介绍，现阶段我们只需要知道`$options`可以拿到合并后的所有属性，例如`props`、`methods`以及`data`等等。
+在之前的介绍中，我们知道当初始化`Vue`实例的时候，传递的`options`会根据不同的情况进行配置合并，关于详细的`options`合并策略我们会在之后的章节详细介绍，现阶段我们只需要知道`$options`可以拿到合并后的所有属性，例如`props`、`methods`以及`data`等等。
 
 假设我们定义了如下实例：
 ```js
