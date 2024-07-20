@@ -405,7 +405,7 @@ func main() {
 ```
 
 ## for循环
-`Golang`的`for`循环中，`break`和`continue`依旧分别表示中断循环和继续下一次循环。
+在`Golang`的`for`循环中，`break`和`continue`依旧分别表示中断循环和继续下一次循环。
 
 ### for循环的三种方式
 ```go
