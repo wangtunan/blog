@@ -7,7 +7,7 @@ sidebar: auto
 
 ### 原始类型
 ::: tip
-JavaScript 中原始类型有六种，原始类型既只保存原始值，是没有函数可以调用的。
+JavaScript 中原始类型有六种，原始类型既只保存原始值，是没有函数可以调用的类型。
 :::
 
 #### 六种原始类型
@@ -28,7 +28,7 @@ JavaScript 中原始类型有六种，原始类型既只保存原始值，是没
 
 ### 对象类型
 ::: tip
-在 JavaScript 中，除了原始类型，其他的都是对象类型，对象类型存储的是地址，而原始类型存储的是值。
+在 JavaScript 中，除了原始类型，其它的都是对象类型，对象类型存储的是地址，而原始类型存储的是值。
 :::
 ```js
 var a = [];
@@ -36,7 +36,7 @@ var b = a;
 a.push(1);
 console.log(b); // 输出[1]
 ```
-在以上代码中，创建了一个对象类型`a`(数组)，再把`a`的地址赋值给了变量`b`，最后改变`a`的值，打印`b`时，`b`的值也同步发生了改变，因为它们在内存中使用的是同一个地址，改变其中任何一变量的值，都会影响到其他变量。
+在以上代码中，创建了一个数组对象类型`a`，再把`a`的地址赋值给了变量`b`，最后改变`a`的值，打印`b`时，`b`的值也同步发生了改变，因为它们在内存中使用的是同一个地址，改变其中任意变量的值，都会影响到另外一个变量。
 
 #### 对象当做函数参数
 ```js
@@ -58,7 +58,7 @@ console.log(p2.age);  // 输出18
 ```
 **代码分析**：
 1. `testPerson`函数中，`person`传递的是对象`p1`的指针副本
-2. 在函数内部，改变`person`的属性，会同步反映到对象`p1`上，`p1`对象中的`age`属性发生了改变，即值为52
+2. 在函数内部，改变`person`的属性，会同步反映到对象`p1`上，`p1`对象中的`age`属性发生了改变，即值为`52`
 3. `testPerson`函数又返回了一个新的对象，这个对象此时和参数`person`没有任何关系，因为它分配了一个新的内存地址
 4. 以上分析可以用如下图表示
 
@@ -69,7 +69,7 @@ console.log(p2.age);  // 输出18
 
 #### typeof
 ::: tip
-`typeof`能准确判断除`null`以外的原始类型的值，对于对象类型，除了函数会判断成`function`，其他对象类型一律返回`object`
+`typeof`能准确判断除`null`以外的原始类型的值，对于对象类型，除了函数会判断成`function`，其它对象类型一律返回`object`
 :::
 ```js
 typeof 1          // number
@@ -135,7 +135,7 @@ console.log('1'===1); // 输出false
 `==`不像`===`那样严格，对于一般情况，只要值相等，就返回`true`，但`==`还涉及一些类型转换，它的转换规则如下：
 * 两边的类型是否相同，相同的话就比较值的大小，例如`1==2`，返回`false`
 * 类型不相同会进行类型转换
-* 判断的是否是`null`和`undefined`，是的话就返回`true`
+* 判断的是否是`null`和`undefined`，是的话就返回`true`，即`null == undefined`，结果为`true`
 * 判断的类型是否是`String`和`Number`，是的话，把`String`类型转换成`Number`，再进行比较
 * 判断其中一方是否是`Boolean`，是的话就把`Boolean`转换成`Number`，再进行比较
 * 如果其中一方为`Object`，且另一方为`String`、`Number`或者`Symbol`，会将`Object`转换成原始类型后，再进行比较
@@ -147,10 +147,10 @@ console.log('1'===1); // 输出false
 ```
 
 #### 转boolean
-除了`undefined`、`null`、`false`、`0`、`-0`、`NaN`和空字符串转换成`false`以外，其他所有值都转换成`true`，包括所有对象。
+除了`undefined`、`null`、`false`、`0`、`-0`、`NaN`和空字符串转换成`false`以外，其它所有值都转换成`true`，包括所有对象。
 
 #### 对象转原始类型
-对象转原始类型，会调用内置的[ToPrimitive]函数，对于该函数而言，其逻辑如下：
+对象转原始类型，会调用内置的`[Symbol.toPrimitive]`函数，对于该函数而言，其逻辑如下：
 1. 是否已经是原始类型，是则直接返回
 2. 调用`valueOf()`，如果转换为原始类型，则返回
 3. 调用`toString()`，如果转换为原始类型，则返回
@@ -188,8 +188,8 @@ if(a==1 && a==2 && a==3) {
 ```
 **代码分析**：
 1. 重写对象`a`的`valueOf()`方法，使`value`属性每次调用时自增
-2. 当判断`a==1`时，第一次调用`valueOf()`方法，此时`value`等于1，判断`1==1`，继续向下走
-3. 判断`a==2`时，第二次调用`valueOf()`方法，此时`value`等于2，判断`2==2`，继续向下走
+2. 当判断`a==1`时，第一次调用`valueOf()`方法，此时`value`等于1，判断`1==1`，继续向后走
+3. 判断`a==2`时，第二次调用`valueOf()`方法，此时`value`等于2，判断`2==2`，继续向后走
 4. 判断`a==3`时，第三次调用`valueOf()`方法，此时`value`等于3，判断`3==3`，`if`判断结束
 5. `if`条件判断为`true && true && true`，执行`console.log('true')`，打印`true`
 
@@ -202,7 +202,7 @@ if(a==1 && a==2 && a==3) {
 4. 返回新对象 
 
 ### this全解析
-`JavaScript`中的`this`只有如下几种情况，并按他们的优先级从低到高划分如下：
+`JavaScript`中的`this`只有如下几种情况，并按它们的优先级从低到高划分如下：
 1. 独立函数调用，例如`getUserInfo()`，此时`this`指向全局对象`window`
 2. 对象调用，例如`stu.getStudentName()`，此时`this`指向调用的对象`stu`
 3. `call()`、`apply()`和`bind()`改变上下文的方法，`this`指向取决于这些方法的第一个参数，当第一个参数为`null`时，`this`指向全局对象`window`
@@ -356,7 +356,7 @@ for(let i=1;i<=5;i++){
 撰写中......
 
 ### 浅拷贝、深拷贝
-由于`JavaScript`中对象是引用类型，保存的是地址，深、浅拷贝的区别是，当拷贝结束后，在一定程度上改变原对象中的某一个引用类型属性的值，新拷贝出来的对象依然受影响的话，就是浅拷贝，反之就是深拷贝。
+由于`JavaScript`中对象是引用类型，保存的是地址。深、浅拷贝的区别是，当拷贝结束后，在一定程度上改变原对象中的某一个引用类型属性的值，新拷贝出来的对象依然受影响的话，就是浅拷贝，反之就是深拷贝。
 
 #### 浅拷贝的几种实现方法
 ::: tip
@@ -427,10 +427,10 @@ console.log(newObj.name);      // 输出张三
 console.log(newObj.age);       // 输出23
 console.log(newObj.job.money); // 输出12
 
-console.log(newObj.address);   // 报错
+console.log(newObj.address);   // 没有这个属性，undefined
 console.log(newObj.sayHello());// 报错
 ```
-**第二种：** 实现自己简易的深拷贝函数
+**第二种：** 自己实现简易的深拷贝函数
 ```js
 function deepClone(obj) {
   function isObject(o) {
@@ -490,10 +490,13 @@ console.log(newObj.job.money);// 输出12，不受影响
 
 #### 原型链实现继承
 ::: tip
-通过重写子类的原型，并将它指向父类的手段实现。这种方式实现的继承，创建出来的实例既是子类的实例，又是父类的实例。它有如下几种缺陷：
-1. 不能向父类构造函数传参
-2. 父类上的引用类型属性会被所有实例共享，其中一个实例改变时，会影响其他实例
+通过重写子类的原型，并将它指向父类的手段实现。
 :::
+
+这种方式实现的继承，创建出来的实例既是子类的实例，又是父类的实例。它有如下几种缺陷：
+1. 不能向父类构造函数传参
+2. 父类上的引用类型属性会被所有实例共享，其中一个实例改变时，会影响其它实例
+
 ```js
 function Animal() {
   this.colors = ['red','blue'];
@@ -544,8 +547,7 @@ console.log(dog1.eat()); // 报错
 
 #### 组合继承
 ::: tip
-组合继承是组合了原型链继承和借用构造函数继承这两种方法，它保留了两种继承方式的优点，但它并不是百分百完美的：
-* 父类构造函数被调用多次。
+组合继承是组合了原型链继承和借用构造函数继承这两种方法，它保留了两种继承方式的优点，但它并不是百分百完美的：其父类构造函数会被调用多次。
 :::
 ```js
 function Animal(name) {
@@ -569,7 +571,7 @@ console.log(dog2.eat()); // 输出dog2 is eatting
 
 #### 寄生组合继承
 ::: tip
-寄生组合继承是在组合继承的基础上，采用`Object.create()`方法来改造实现
+寄生组合继承是在组合继承的基础上，采用`Object.create()`方法来改造实现的
 :::
 ```js
 function Animal(name) {
@@ -620,19 +622,19 @@ console.log(dog2.eat()); // 输出dog2 is eatting
 ```
 
 ### ES6
-本章节只介绍ES6常考知识点，更多基础知识请直接跳转至[你不知道的JavaScript(中)](/books/javascript/know-down.md)
+本章节只介绍ES6常考知识点，更多基础知识，请直接跳转至[你不知道的JavaScript(中)](/books/javascript/know-down.md)
 #### var、let和const的区别
 ::: tip
-1. `var`声明的变量会提升到作用域的顶部，而`let`和`const`不会进行提升
+1. `var`声明的变量会被提升到作用域的顶部，而`let`和`const`不会进行提升
 2. `var`声明的全局变量会被挂载到全局`window`对象上，而`let`和`const`不会
-3. `var`可以重复声明同一个变量，而`let`和`const`不会
-4. `var`声明的变量作用域范围是函数作用域，而`let`和`const`声明的变量作用域范围是块级作用域。
+3. `var`可以重复声明同一个变量，而`let`和`const`不能
+4. `var`声明的变量作用域范围是函数作用域，而`let`和`const`声明变量的作用域范围是块级作用域。
 5. `const`声明的常量，一旦声明则不能再次赋值，再次赋值会报错(更改对象属性不会，因为对象地址没有变)
 :::
 
 **作用域提升：**
 ```js
-console.log(a);  // 输出undefined
+console.log(a);  // 输出undefined，因为只提升声明部分(var a)，不提升赋值部分(a = 'abc')
 console.log(b);  // 报错
 console.log(PI); // 报错
 var a = 'abc';
@@ -753,7 +755,7 @@ console.log(X,Y,Z); // 输出4,5,6
 
 #### 字符串模板
 ::: tip
-`${内容}`：字符串模板里的内容可以是变量、函数调用以及表达式。
+`${内容}`：字符串模板里的内容可以是变量、函数调用以及合法的表达式。
 :::
 ```js
 // 字符串模板
@@ -900,9 +902,9 @@ console.log(diff2);    // 输出：6,7
 在`Vue2.0+`的版本中，`Vue`使用`Object.definedProperty()`方法来实现数据的响应式，在`Vue3.0`的开发计划中，作者计划使用ES6新增加的`Proxy`代理来实现数据的响应式，它相比于`Object.definedProperty()`有如下几个特点： <br/>
 1. `Proxy`可以一次性为所有属性实现代理，无需遍历，性能更佳
 2. `Proxy`能监听到以前使用`Object.definedProperty()`监听不到的数据变动。
-3. 由于是ES6新增加的特性，所以浏览器兼容性方面比`Object.definedProperty()差`
+3. 由于是ES6新增加的特性，所以浏览器兼容性方面比`Object.definedProperty()`差
 ```js
-let onWatch = function(obj,setBind, getLogger) {
+let onWatch = function(obj, setBind, getLogger) {
   return new Proxy(obj, {
     get(target, property, receiver) {
       getLogger(target, property);
@@ -1062,21 +1064,22 @@ fetch();
 ```
 
 #### setInterval、setTimeout和requestAnimationFrame
-**setTimeout** `setTimeout`延时执行某一段代码，但`setTimeout`由于`EventLoop`的存在，并不百分百是准时的，一个`setTimeout`可能会表示如下的形式：
+
+**setTimeout：** `setTimeout`延时执行某一段代码，但`setTimeout`由于`EventLoop`的存在，并不百分百是准时的，一个`setTimeout`可能会表示如下的形式：
 ```js
 // 延时1s之后，打印hello,world
 setTimeout(() => {
   console.log('hello,world');
 }, 1000)
 ```
-**setInterval：** `setInterval`在指定的时间内，重复执行一段代码，与`setTimeout`类似，它也不是准时的，并且有时候及其不推荐使用`setInterval`定时器，因为它与某些耗时的代码配合使用的话，会存在执行积累的问题，它会等耗时操作结束后，一起一个或者多个执行定时器，存在性能问题。一个`setInterval`可能会表示如下的形式：
+**setInterval：** `setInterval`在指定的时间内，重复执行一段代码，与`setTimeout`类似，它也不是准时的，并且有时候及其不推荐使用`setInterval`定时器，因为它与某些耗时的代码配合使用的话，会存在执行积累的问题，它会等耗时操作结束后，一起执行一个或者多个定时器，存在性能问题。一个`setInterval`可能会表示如下形式：
 ```js
 setInterval(() => {
   console.log('hello,world');
 }, 1000)
 ```
 
-**requestAnimationFrame：** 翻译过来就是请求动画帧，它是html5专门用来设计请求动画的API，它与`setTimeout`相比有如下优势：
+**requestAnimationFrame：** 翻译过来就是请求动画帧，它是`HTML5`专门用来设计请求动画的`API`，它与`setTimeout`相比有如下优势：
 1. 根据不同屏幕的刷新频率，自动调整执行回调函数的时机。
 2. 当窗口处于未激活状态时，`requestAnimationFrame`会停止执行，而`setTimeout`不会
 3. 自带函数节流功能
@@ -1117,7 +1120,7 @@ window.requestAnimationFrame(render);
 ![执行栈](../images/interview/5.gif)
 
 #### EventLoop
-上面讲到函数会在执行栈中执行，那么当遇到异步代码后，该如何处理呢？其实当遇到异步代码的时候，会被挂起在Task队列中，一旦执行栈为空，就会从Task中拿出需要执行的代码执行，所以本质上讲JS中的异步还是同步行为。
+上面讲到函数会在执行栈中执行，那么当遇到异步代码后，该如何处理呢？其实当遇到异步代码的时候，会被挂起在`Task`队列中，一旦执行栈为空，就会从`Task`中拿出需要执行的代码，所以本质上讲`JS`中的异步还是同步行为。
 
 ![EventLoop](../images/interview/6.png)
 如上图，可以看到，不同的异步任务是有区别的，异步任务又可以划分如下：
@@ -1144,7 +1147,7 @@ console.log(5);
 
 **代码分析：**
 1. `console.log(5)`是唯一的同步任务，首先执行，输出5
-2. 将所有异步任务放在Task队列中，挂起
+2. 将所有异步任务放在`Task`队列中，挂起
 3. 同步任务执行完毕，开始执行微任务队列，即`Promise.then`，输出4
 4. 微任务队列执行完毕，执行宏任务队列`setTimeout`
 5. 宏任务队列中首先执行同步任务，再次遇到微任务，放入微任务队列中，输出1
