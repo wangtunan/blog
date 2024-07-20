@@ -1,1 +1,0 @@
-import{_ as n,o as t,c as a,a as e,b as c}from"./app-0688004a.js";const o={},s=e("h1",{id:"gin",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#gin","aria-hidden":"true"},"#"),c(" Gin")],-1),i=e("p",null,"Gin",-1),r=[s,i];function _(d,l){return t(),a("div",null,r)}const f=n(o,[["render",_],["__file","gin.html.vue"]]);export{f as default};
