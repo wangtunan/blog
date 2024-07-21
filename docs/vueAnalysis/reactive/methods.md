@@ -44,7 +44,7 @@ function noop () {}
 
 vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
 ```
-它首先判断了我们定义的`methods`是不是`function`类型，如果不是则赋值为一个`noop`空函数，如果是则把这个方法进行`bind`绑定，其中传入的`vm`为当前实例。这样做的目的是为了把`methods`方法中的`this`指向当前实例，方便我们就能在`methods`方法中通过`this.xxx`的形式很方便的访问到`props`、`data`以及`computed`等与实例相关的属性或方法。
+它首先判断了我们定义的`methods`是不是`function`类型，如果不是则赋值为一个`noop`空函数，如果是则把这个方法进行`bind`绑定，其中传入的`vm`为当前实例。这样做的目的是为了把`methods`方法中的`this`指向当前实例，使得我们能在`methods`方法中通过`this.xxx`的形式，很方便的访问到`props`、`data`以及`computed`等与实例相关的属性或方法。
 
 在开发环境下，它还做了如下几种判断：
 * 必须为`function`类型。

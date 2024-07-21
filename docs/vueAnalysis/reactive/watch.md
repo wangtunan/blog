@@ -141,7 +141,7 @@ Vue.prototype.$watch = function (
 ```
 我们可以发现，`$watch`方法主要做两件事情：**创建Watcher实例**和**返回unwatchFn函数**，接下来我们分别对这两部分的逻辑进行详细的解释。
 
-### 创建Watcher实例
+## 创建Watcher实例
 我们先来看一下`Watcher`构造函数的代码：
 ```js
 // 精简代码
@@ -168,7 +168,7 @@ class Watcher {
 * `computed watcher`：计算属性`watcher`，当我们在定义计算属性的时候，计算属性收集的依赖就是另外一个或者多个变量，当其中一个变量的值发生变量，就会触发计算属性重新进行求值。是否为计算属性`watcher`，使用`options.lazy`为`true`进行区分。
 * `user watcher`：用户自定义`watcher`，多发生在`this.$watch`或者组件`watch`选择配置中，此时收集的依赖就是变量自身，当变量的值发生变化的时候，就会调用`watch`提供的回调函数。是否为用户自定义`watcher`，使用`options.user`为`true`进行区分。
 
-### 返回unwatchFn函数
+## 返回unwatchFn函数
 我们在构造函数中可以发现，它定义了一个`_watchers`变量，然后在每次实例化的时候，把自身添加到这个数组中，这样做的目的是为了方便清除依赖。在之前的介绍中，我们知道`$watch`返回了一个`unwatchFn`函数，它用来取消监听。接下来，我们看一下`teardown()`方法的具体实现。
 ```js
 // Watcher类精简代码

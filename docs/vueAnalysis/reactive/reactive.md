@@ -1,7 +1,7 @@
 # 深入响应式原理
 在介绍完`props`、`data`、`watch`以及`computed`后，我们对响应式原理有了一定的初步认识，在这一章节中我们再次回顾响应式，来探究其实现原理。
 
-在之前的章节中，我们以及介绍过：`Vue.js`通过`Object.defineProperty(obj, key, descriptor)`方法来定义响应式对象，我们可以在[Can I Use](https://www.caniuse.com/?search=Object.defineProperty)网站上搜索到，`IE8`浏览器并不支持这个方法，这就是`Vue.js`不支持`IE8`及其以下版本浏览器的真正原因。
+在之前的章节中，我们已经介绍过：`Vue.js`通过`Object.defineProperty(obj, key, descriptor)`方法来定义响应式对象，我们可以在[Can I Use](https://www.caniuse.com/?search=Object.defineProperty)网站上搜索到，`IE8`浏览器并不支持这个方法，这就是`Vue.js`不支持`IE8`及其以下版本浏览器的真正原因。
 
 在[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)网站上，我们可以发现这个方法支持很多个参数，其中`descriptor`支持许多个可选的属性，对于`Vue.js`实现响应式对象来说，最重要的是`get`和`set`属性。
 ```js
@@ -130,7 +130,7 @@ export default {
 const msg = this._props.msg
 console.log(msg)
 // 单项数据流，只要演示，实际不能修改props的值
-this._props.msg = 'new msg
+this._props.msg = 'new msg'
 
 // 代理后
 const msg = this.msg
