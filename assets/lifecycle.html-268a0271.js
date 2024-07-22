@@ -1,0 +1,1 @@
+import{_ as c,o as t,c as a,a as e,b as o}from"./app-e206ddaf.js";const s={},n=e("h1",{id:"组件生命周期",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#组件生命周期","aria-hidden":"true"},"#"),o(" 组件生命周期")],-1),r=e("p",null,"组件生命周期介绍",-1),_=[n,r];function l(d,i){return t(),a("div",null,_)}const f=c(s,[["render",l],["__file","lifecycle.html.vue"]]);export{f as default};
