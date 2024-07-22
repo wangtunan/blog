@@ -1,7 +1,7 @@
 # 参考和历史
 
 ## 参考
-本篇`Vue3.2.22`源码分析文章由学习[Vue.js 3.0 核心源码解析](https://kaiwu.lagou.com/course/courseInfo.htm?courseId=326&sid=20-h5Url-0#/sale)课程以及参考其他学习视频、博客而来，阅读视频、书籍请支持正版。
+本篇`Vue3.4.33`源码分析文章由学习[Vue.js 3.0 核心源码解析](https://kaiwu.lagou.com/course/courseInfo.htm?courseId=326&sid=20-h5Url-0#/sale)课程以及参考其它学习视频、博客而来，阅读视频、书籍请支持正版。
 
 ## 发展历史
 * 2013年7月，`Vue.js`在`Github`上第一次提交，此时名字叫做`Element`，后来被改名为`Seed.js`，到现在的`Vue.js`。

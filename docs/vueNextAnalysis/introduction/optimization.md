@@ -34,8 +34,8 @@
 ```
 
 这样做的好处有很多：
-* 将不同的模块拆分成单独的package包，每个包下都有各自的API、类型定义以及代码测试，使每个包职责更加明确，开发人员也更容易阅读。
-* 不同的package包，可脱离`Vue`单独使用，例如我们只想使用其响应式能力，则可以单独使用[@vue/reactivity](https://www.npmjs.com/package/@vue/reactivity)。
+* 将不同的模块拆分成单独的`package`包，每个包下都有各自的`API`、类型定义以及代码测试，使每个包职责更加明确，开发人员也更容易阅读。
+* 有些`package`包，甚至可脱离`Vue`单独使用，例如我们只想使用其响应式能力，则可以单独使用[@vue/reactivity](https://www.npmjs.com/package/@vue/reactivity)。
 
 ### 静态类型检查
 在`Vue2`中，类型检查采用的是`Flow`，但在`Vue3`中则使用`TypeScript`来进行重构。
