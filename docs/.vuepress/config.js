@@ -8,6 +8,7 @@ const navConfig = require('./configs/nav.js')
 const { ua } = require('./ua.js')
 const {
   webpackSidebar,
+  rollupSidebar,
   vueAnalysisSidebar,
   vueNextAnalysisSidebar,
   algorithmBaseSidebar,
@@ -55,7 +56,8 @@ export default defineUserConfig({
       ...booksNav
     ],
     sidebar: {
-      '/webpack/webpack/': [webpackSidebar],
+      '/webpack/webpack/': webpackSidebar,
+      '/rollup/': rollupSidebar,
       '/vueAnalysis/': vueAnalysisSidebar,
       '/vueNextAnalysis/': vueNextAnalysisSidebar,
       '/algorithm/base/': algorithmBaseSidebar,

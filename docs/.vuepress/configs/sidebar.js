@@ -1,5 +1,5 @@
 // webpack目录结构
-const webpackSidebar = {
+const webpackSidebar = [{
   text: 'Webpack',
   collapsable: false,
   children: [
@@ -15,7 +15,26 @@ const webpackSidebar = {
     '/webpack/webpack/loader.md',
     '/webpack/webpack/plugin.md'
   ]
-}
+}]
+
+// rollup目录结构
+const rollupSidebar = [{
+  text: 'Rollup',
+  collapsable: false,
+  children: [
+    '/rollup/',
+    '/rollup/concept/',
+    '/rollup/base/',
+    '/rollup/plugins/',
+    '/rollup/babel/',
+    '/rollup/environment/',
+    '/rollup/typescript/',
+    '/rollup/eslint/',
+    '/rollup/jest/',
+    '/rollup/commit/',
+    '/rollup/changelog/',
+  ]
+}]
 
 // Vue源码分析目录结构
 const vueAnalysisSidebar = [
@@ -338,6 +357,7 @@ const algorithmLeetCodeSidebar = [
 
 module.exports = {
   webpackSidebar,
+  rollupSidebar,
   vueAnalysisSidebar,
   vueNextAnalysisSidebar,
   algorithmBaseSidebar,
