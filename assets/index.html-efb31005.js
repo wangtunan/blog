@@ -1,1 +1,0 @@
-import{_ as t,o as a,c,a as e,b as n}from"./app-e206ddaf.js";const o={},s=e("h1",{id:"介绍",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#介绍","aria-hidden":"true"},"#"),n(" 介绍")],-1),r=e("p",null,"组件化介绍",-1),_=[s,r];function d(i,l){return a(),c("div",null,_)}const f=t(o,[["render",d],["__file","index.html.vue"]]);export{f as default};
