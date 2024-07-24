@@ -1,12 +1,20 @@
 # 基础配置
 
-在介绍配置案例之前，我们需要新建一个项目，并且创建一些必要的文件目录，如下：
+在开始之前，我们需要新建一个项目，并且创建一些必要的文件目录，如下：
 
 ```bash
 |-- rollup-learn
 |   |-- src
 |   |   |-- index.js  # 入口文件
 ```
+接着，在`src/index.js`文件撰写如下代码：
+```js
+// src/index.js
+export function helloRollup () {
+  console.log('hello, rollup')
+}
+```
+
 然后使用如下命令创建一个`package.json`文件：
 ```bash
 $ npm init -y
@@ -18,88 +26,43 @@ $ npm init -y
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "rollup -w -c rollup.config.js",
-    "build": "rollup -c rollup.config.js"
+    "dev": "rollup -w -c rollup.config.mjs",
+    "build": "rollup -c rollup.config.mjs"
   },
   "keywords": [],
-  "author": "wangtunan",
-  "license": "MIT"
+  "author": "",
+  "license": "ISC"
 }
 ```
-这样，我们的基础目录已经有了，在之后的小节中，所有案例均基于这个基础的目录结构。
 
-### 基础配置
-根据之前的章节，我们需要安装一些`npm`包，如下：
-```bash
-# 安装rollup核心包
-$ npm install rollup -D
+打包参数说明：
+* `-w`：全称`--watch`，表示监听代码变化，自动打包。
+* `-c`: 全称`--config`，表示指明打包配置文件。
 
-# 安装rollup插件包
-$ npm install @rollup/plugin-commonjs @rollup/plugin-node-resolve -D
-```
-随后，根目录新建`rollup.config.js`，并撰写如下内容：
+接着撰写`rollup.config.mjs`配置文件，如下：
 ```js
-import commonjs from '@rollup/plugin-commonjs'
-import resolve from '@rollup/plugin-node-resolve'
-
 export default {
-  input: 'src/index.js',
+  input: './src/index.js',
   output: [
-    { file: 'dist/vue.js', format: 'umd', name: 'Vue' },
-    { file: 'dist/vue.common.js', format: 'cjs', name: 'Vue', exports: 'auto' },
-    { file: 'dist/vue.esm.js', format: 'es', name: 'Vue' },
-  ],
-  plugins: [
-    commonjs(),
-    resolve()
+    { file: 'dist/vue.cjs.js', format: 'cjs' },
+    { file: 'dist/vue.esm.js', format: 'es' },
+    { file: 'dist/vue.js', format: 'umd', name: 'Vue' }
   ]
 }
 ```
-然后，我们需要在入口文件撰写一些内容:
-```js
-export function add (a, b) {
-  return a + b
-}
+最后，安装依赖`rollup`并执行打包命令:
+```sh
+# 安装依赖(rollup@4.x+版本)
+$ npm install rollup --save-dev
 
-export function minus (a, b) {
-  return a - b
-}
-```
-最后，运行我们在`package.json`文件中定义的`build`命令：
-```bash
+# 运行打包命令
 $ npm run build
 ```
-运行完毕后，会在`dist`目录下生成三个文件，此时的文件目录结构如下：
-
-```bash
-|-- rollup-learn
-|   |-- dist
-|   |   |-- vue.js
-|   |   |-- vue.common.js
-|   |   |-- vue.esm.js
-|   |-- src
-|   |   |-- index.js
-|   |-- rollup.config.js
-|   |-- package.json
+运行完毕后，在`dist`目录下，会出现三个打包文件，目录结构如下：
+```sh
+|-- dist
+|   |-- vue.js     // umd规范打包产物
+|   |-- vue.cjs.js // commonjs规范打包产物
+|   |-- vue.esm.js // esm规范打包产物
 ```
-我们以`vue.esm.js`文件为例，其打包后的文件代码如下：
-```js
-function add (a, b) {
-  return a + b
-}
-
-function minus (a, b) {
-  return a - b
-}
-
-export { add, minus };
-```
-为了让我们`rollup`打包出来的库，能够支持`commonjs`和`esm`这两种方式引入，我们需要修改一下`package.json`，改动如下：
-```json
-{
-  // ... 省略其它
-  "main": "dist/vue.commin.js",
-  "module": "dist/vue.esm.js",
-  // ... 省略其它
-}
-```
+这样，我们的基础目录已经有了，在之后的小节中，所有案例均基于这个基础的目录结构。

@@ -23,16 +23,17 @@ const rollupSidebar = [{
   collapsable: false,
   children: [
     '/rollup/',
-    '/rollup/concept/',
-    '/rollup/base/',
-    '/rollup/plugins/',
-    '/rollup/babel/',
-    '/rollup/environment/',
-    '/rollup/typescript/',
-    '/rollup/eslint/',
-    '/rollup/jest/',
-    '/rollup/commit/',
-    '/rollup/changelog/',
+    '/rollup/concept',
+    '/rollup/base',
+    '/rollup/package',
+    '/rollup/plugins',
+    '/rollup/babel',
+    '/rollup/environment',
+    '/rollup/typescript',
+    '/rollup/eslint',
+    '/rollup/jest',
+    '/rollup/commit',
+    '/rollup/changelog',
   ]
 }]
 
