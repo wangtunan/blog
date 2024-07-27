@@ -18,24 +18,33 @@ const webpackSidebar = [{
 }]
 
 // rollup目录结构
-const rollupSidebar = [{
-  text: 'Rollup',
-  collapsable: false,
-  children: [
-    '/rollup/',
-    '/rollup/concept',
-    '/rollup/base',
-    '/rollup/package',
-    '/rollup/plugins',
-    '/rollup/babel',
-    '/rollup/environment',
-    '/rollup/typescript',
-    '/rollup/eslint',
-    '/rollup/jest',
-    '/rollup/commit',
-    '/rollup/changelog',
-  ]
-}]
+const rollupSidebar = [
+  {
+    text: 'Rollup基础',
+    collapsable: false,
+    children: [
+      '/rollup/',
+      '/rollup/concept',
+      '/rollup/base',
+      '/rollup/config',
+      '/rollup/package',
+      '/rollup/plugins'
+    ]
+  },
+  {
+    text: 'Rollup配置案例',
+    collapsable: false,
+    children: [
+      '/rollup/babel',
+      '/rollup/environment',
+      '/rollup/typescript',
+      '/rollup/eslint',
+      '/rollup/jest',
+      '/rollup/commit',
+      '/rollup/changelog'
+    ]
+  }
+]
 
 // Vue源码分析目录结构
 const vueAnalysisSidebar = [

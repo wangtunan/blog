@@ -1,32 +1,34 @@
-# Babel
-为了让库文件具有更好的兼容性，需要把`ES6`代码在打包的时候转义成`ES5`。
+# Babel转义
 
-要做到这一步，需要我们安装几个`npm`包，如下：
+在上一章节，我们提到了`@rollup/plugin-babel`这个插件，它是用来把`ES6`代码在打包的时候转义成`ES5`的。
+
+下面详细介绍`Rollup`中如何进行`Babel`转义。
+
+首先，需要我们安装几个`npm`包，如下：
 ```bash
-# 安装rollup插件包
+# 安装rollup 相关插件包
+$ npm install @rollup/plugin-commonjs -D
+$ npm install @rollup/plugin-node-resolve -D
 $ npm install @rollup/plugin-babel -D
 
 # 安装babel相关包
 $ npm install @babel/core @babel/preset-env -D
 ```
 
-安装完以上`npm`包后，需要在`rollup.config.js`中使用`babel`插件，如下：
-```js {3,15}
+安装完毕后，需要在`rollup.config.mjs`中使用插件，如下：
+```js
 import commonjs from '@rollup/plugin-commonjs'
-import resolve from '@rollup/plugin-node-resolve'
+import nodeResolve from '@rollup/plugin-node-resolve'
 import babel from '@rollup/plugin-babel'
 
 export default {
-  input: 'src/index.js',
-  output: [
-    { file: 'dist/vue.js', format: 'umd', name: 'Vue' },
-    { file: 'dist/vue.common.js', format: 'cjs', name: 'Vue', exports: 'auto' },
-    { file: 'dist/vue.esm.js', format: 'es', name: 'Vue' },
-  ],
+  ...省略其它
   plugins: [
     commonjs(),
-    resolve(),
-    babel()
+    nodeResolve(),
+    babel({
+      babelHelpers: 'bundled'
+    })
   ]
 }
 ```
@@ -40,7 +42,7 @@ export default {
 }
 ```
 
-为了测试是否正确的处理了`ES6`相关的代码，我们需要改动一下入口文件`index.js`:
+为了测试是否正确的处理了`ES6`相关的代码，我们需要改动一下入口文件`src/index.js`，并添加如下两个函数:
 ```js
 export const add = (a, b) => {
   return a + b

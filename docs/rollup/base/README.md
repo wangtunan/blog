@@ -40,6 +40,9 @@ $ npm init -y
 * `-c`: 全称`--config`，表示指明打包配置文件。
 
 接着撰写`rollup.config.mjs`配置文件，如下：
+::: tip
+对于`.mjs`格式的配置文件，`Rollup`直接支持`import/export`语法，不需要额外转义。
+:::
 ```js
 export default {
   input: './src/index.js',
@@ -50,7 +53,7 @@ export default {
   ]
 }
 ```
-最后，安装依赖`rollup`并执行打包命令:
+最后，安装依赖`Rollup`并执行打包命令:
 ```sh
 # 安装依赖(rollup@4.x+版本)
 $ npm install rollup --save-dev
@@ -65,4 +68,5 @@ $ npm run build
 |   |-- vue.cjs.js // commonjs规范打包产物
 |   |-- vue.esm.js // esm规范打包产物
 ```
+
 这样，我们的基础目录已经有了，在之后的小节中，所有案例均基于这个基础的目录结构。

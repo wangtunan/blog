@@ -1,6 +1,6 @@
 # 环境区分
 
-在`Rollup`中，区分开发环境和生产环境配置十分简单，可以使用不同的配置文件来进行区分
+在`Rollup`中，区分开发环境和生产环境配置十分简单，可以使用不同的配置文件来进行区分即可。
 
 我们规定`rollup.dev.config.js`为开发环境的配置，`rollup.prod.config.js`为生产环境的配置，`rollup.base.config.js`为公共配置。
 
