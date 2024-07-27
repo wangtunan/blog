@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-9f6a0000","path":"/rollup/base/","title":"基础配置","lang":"zh-CN","frontmatter":{},"headers":[{"level":3,"title":"基础配置","slug":"基础配置-1","link":"#基础配置-1","children":[]}],"git":{"updatedTime":1721747742000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"rollup/base/README.md"}');export{e as data};
