@@ -1,13 +1,24 @@
 # 支持TypeScript
 如果要支持`TypeScript`，需要安装几个`npm`包，如下：
 ```bash
-# 安装rollup插件
-$ npm install rollup-plugin-typescript2 -D
-
-# 安装ts相关包
-$ npm install typescript tslib -D
+# 安装rollup插件和其依赖包
+$ npm install @rollup/plugin-typescript tslib -D
 ```
-安装完毕后，把入口文件后缀改为`.ts`，并且分别给`add`和`minus`这两个方法添加类型：
+
+安装完毕后，把`rollup.config.mjs`配置文件中，把入口文件改成改为`.ts`后缀并引入`typescript`插件：
+```ts
+// rollup.config.mjs
+import typescript from '@rollup/plugin-typescript'
+
+export default {
+  ...省略其它
+  input: './src/index.ts',
+  plugins: [
+    typescript()
+  ]
+}
+```
+接着，在`src`目录下新建`math.ts`文件，将`add`和`minus`方法移动过去并填写相关类型：
 ```ts
 export const add = (a: number, b: number): number => {
   return a + b
@@ -17,21 +28,34 @@ export const minus = (a: number, b: number): number => {
   return a - b
 }
 ```
-最后，在`rollup.base.config.js`文件中使用`rollup`插件。
-```js {4,12}
-import commonjs from '@rollup/plugin-commonjs'
-import resolve from '@rollup/plugin-node-resolve'
-import babel from '@rollup/plugin-babel'
-import typescript from 'rollup-plugin-typescript2'
 
-export default {
-  input: 'src/index.ts',
-  plugins: [
-    commonjs(),
-    resolve(),
-    babel(),
-    typescript()
-  ]
+最后，入口文件`src/index.js`改成`src/index.js`，并在其中引用`add和minus方法`：
+```ts
+// src/index.ts
+
+import { add, minus } from './math'
+
+export const helloRollup = (): void => {
+  console.log(add(1, 2))
+  console.log(minus(3, 4))
+  console.log('hello, rollup')
 }
 ```
-再次运行`npm run dev`或者`npm run build`后，在`dist`目录下查看打包后的源码，可以看到已经能正确识别`ts`代码了。
+
+运行`npm run build`命令，在`dist`目录下打包出来的`vue.esm.js`文件代码如下：
+```js
+var add = function (a, b) {
+    return a + b;
+};
+var minus = function (a, b) {
+    return a - b;
+};
+
+var helloRollup = function () {
+    console.log(add(1, 2));
+    console.log(minus(3, 4));
+    console.log('hello, rollup');
+};
+
+export { helloRollup };
+```

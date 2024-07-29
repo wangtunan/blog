@@ -36,8 +36,8 @@ const rollupSidebar = [
     collapsable: false,
     children: [
       '/rollup/babel',
-      '/rollup/environment',
       '/rollup/typescript',
+      '/rollup/environment',
       '/rollup/eslint',
       '/rollup/jest',
       '/rollup/commit',

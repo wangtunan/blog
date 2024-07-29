@@ -24,8 +24,8 @@ import babel from '@rollup/plugin-babel'
 export default {
   ...省略其它
   plugins: [
-    commonjs(),
     nodeResolve(),
+    commonjs(),
     babel({
       babelHelpers: 'bundled'
     })

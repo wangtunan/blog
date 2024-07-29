@@ -4,7 +4,6 @@
 第一种：`JSDoc`形式，如下：
 ```js
 // rollup.config.mjs
-
 /**
  * @type {import('rollup').RollupOptions}
  */
@@ -16,8 +15,7 @@ export default {
 第二种，使用`Rollup`提供的`defineConfig`方法，如下：
 ```js
 // rollup.config.mjs
-
-import {} from 'rollup'
+import { defineConfig } from 'rollup'
 export default defineConfig({
   ...省略
 })

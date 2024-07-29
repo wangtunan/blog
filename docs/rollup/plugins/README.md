@@ -1,5 +1,8 @@
 
 # 常用插件
+::: warning
+注意，`Rollup`中插件的顺序是有要求的，一般会把解析和转换相关的插件写在前面。
+:::
 
 `Rollup`并不像`webpack`那样强大，它需要和其它插件配合使用才能完成特定的功能，常用的插件有：
 * `@rollup/plugin-commonjs`：将`CommonJs`规范的模块转换为`ESM`规范，提供`Rollup`使用。
@@ -12,19 +15,21 @@
 ```js
 // rollup.config.mjs
 import commonjs from '@rollup/plugin-commonjs'
-import resolve from '@rollup/plugin-node-resolve'
+import nodeResolve from '@rollup/plugin-node-resolve'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
+import typescript from '@rollup/plugin-typescript'
 import terser from '@rollup/plugin-terser'
 
 const config =  {
   ...省略其它
   plugins: [
-    commonjs(),
     resolve(),
+    commonjs(),
+    typescript(),
     babel(),
-    terser(),
-    json()
+    json(),
+    terser()
   ]
 }
 
