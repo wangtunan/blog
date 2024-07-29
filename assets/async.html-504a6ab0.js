@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-104c7c95","path":"/vueAnalysis/component/async.html","title":"异步组件","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/component/async.md"}');export{t as data};

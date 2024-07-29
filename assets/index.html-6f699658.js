@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-875c544e","path":"/rollup/changelog/","title":"Changelog","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"rollup/changelog/README.md"}');export{a as data};

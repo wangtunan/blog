@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-74816c06","path":"/vueNextAnalysis/reactivity/readonly.html","title":"readonly","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueNextAnalysis/reactivity/readonly.md"}');export{t as data};

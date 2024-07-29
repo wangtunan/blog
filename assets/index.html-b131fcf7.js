@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-160ff92f","path":"/rollup/config/","title":"配置项类型提示","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"rollup/config/README.md"}');export{t as data};

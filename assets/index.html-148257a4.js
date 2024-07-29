@@ -1,1 +1,0 @@
-import{_ as a,o as t,c as n,a as e,b as o}from"./app-efbb9da8.js";const c={},s=e("h1",{id:"changelog",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#changelog","aria-hidden":"true"},"#"),o(" Changelog")],-1),r=e("p",null,"撰写中。。。",-1),_=[s,r];function d(l,h){return t(),n("div",null,_)}const f=a(c,[["render",d],["__file","index.html.vue"]]);export{f as default};
