@@ -1,1 +1,0 @@
-const t=JSON.parse('{"key":"v-a87981f6","path":"/rollup/concept/","title":"核心概念","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"rollup/concept/README.md"}');export{t as data};

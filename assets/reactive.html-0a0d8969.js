@@ -1,1 +1,0 @@
-const t=JSON.parse('{"key":"v-c378f0b4","path":"/vueNextAnalysis/reactivity/reactive.html","title":"reactive","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1722263512000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueNextAnalysis/reactivity/reactive.md"}');export{t as data};
