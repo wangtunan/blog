@@ -3,6 +3,10 @@ sidebar: auto
 ---
 # Python高级技巧
 
+## 生态全景
+![Python生态](../../images/python/python-family.png)
+
+
 ## 文档
 * [官方文档](https://docs.python.org/zh-cn/3.13/)
 * [第三方库](https://pypi.org/)
