@@ -1,7 +1,7 @@
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
 import { commentPlugin } from 'vuepress-plugin-comment2'
 import { getDirname, path } from '@vuepress/utils'
-import { viteBundler  } from '@vuepress/bundler-vite'
+import { viteBundler } from '@vuepress/bundler-vite'
 import { defaultTheme, defineUserConfig } from 'vuepress'
 const sidebarConfig = require('./configs/sidebar.js')
 const navConfig = require('./configs/nav.js')
@@ -19,7 +19,7 @@ const {
   vueAnalysisNav,
   algorithmNav,
   booksNav,
-  golangNav
+  pythonNav
 } = navConfig
 const __dirname = getDirname(import.meta.url)
 
@@ -52,7 +52,7 @@ export default defineUserConfig({
       ...frontEndNav,
       ...vueAnalysisNav,
       ...algorithmNav,
-      ...golangNav,
+      ...pythonNav,
       ...booksNav
     ],
     sidebar: {

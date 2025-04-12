@@ -77,7 +77,7 @@ const algorithmNav = [
 ]
 
 // 书籍
-const booksNav =  [
+const booksNav = [
   {
     text: '书籍',
     children: [
@@ -128,7 +128,7 @@ const golangNav = [
         text: 'Go基础',
         link: '/golang/base'
       },
-      
+
       {
         text: 'Go框架',
         children: [
@@ -155,10 +155,27 @@ const golangNav = [
   }
 ]
 
+const pythonNav = [
+  {
+    text: 'Python技术栈',
+    children: [
+      {
+        text: '快速入门',
+        link: '/python/base'
+      },
+      {
+        text: '高级技巧',
+        link: '/python/advanced'
+      }
+    ]
+  }
+]
+
 module.exports = {
-  frontEndNav, 
+  frontEndNav,
   vueAnalysisNav,
   algorithmNav,
   booksNav,
-  golangNav
+  golangNav,
+  pythonNav
 }
