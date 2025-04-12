@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-2c644bfe","path":"/vueAnalysis/router/install.html","title":"路由安装","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/router/install.md"}');export{t as data};

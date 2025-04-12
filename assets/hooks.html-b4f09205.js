@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-330d81ee","path":"/vueAnalysis/router/hooks.html","title":"路由hooks钩子函数","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/router/hooks.md"}');export{e as data};

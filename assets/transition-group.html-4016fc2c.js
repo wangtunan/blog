@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-7bc2c1e3","path":"/vueAnalysis/expand/transition-group.html","title":"Transition-Group","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/expand/transition-group.md"}');export{t as data};

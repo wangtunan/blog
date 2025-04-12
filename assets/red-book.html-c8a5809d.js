@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-05fd5da0","path":"/books/javascript/red-book.html","title":"JavaScript高级程序设计","lang":"zh-CN","frontmatter":{"sidebar":"auto"},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"books/javascript/red-book.md"}');export{a as data};
