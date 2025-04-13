@@ -1,1 +1,0 @@
-import{_ as r,o as t,c as n,a as e,b as c}from"./app-ce05a687.js";const o={};function s(l,a){return t(),n("div",null,a[0]||(a[0]=[e("h1",{id:"路由切换",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#路由切换","aria-hidden":"true"},"#"),c(" 路由切换")],-1),e("p",null,"路由切换",-1)]))}const _=r(o,[["render",s],["__file","change.html.vue"]]);export{_ as default};

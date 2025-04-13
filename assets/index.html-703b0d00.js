@@ -1,1 +1,0 @@
-const a=JSON.parse('{"key":"v-09767e32","path":"/rollup/package/","title":"配置package.json","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"rollup/package/README.md"}');export{a as data};

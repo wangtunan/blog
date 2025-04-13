@@ -1,1 +1,0 @@
-const a=JSON.parse('{"key":"v-00c50dad","path":"/webpack/tapable/","title":"Tapable事件流插件","lang":"zh-CN","frontmatter":{"sidebar":"auto"},"headers":[],"git":{"updatedTime":1744474357000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"webpack/tapable/README.md"}');export{a as data};
