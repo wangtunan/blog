@@ -1,0 +1,1 @@
+import{_ as t,o as r,c as n,a as e,b as l}from"./app-c9515a38.js";const s={};function o(c,a){return r(),n("div",null,a[0]||(a[0]=[e("h1",{id:"路由安装",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#路由安装","aria-hidden":"true"},"#"),l(" 路由安装")],-1),e("p",null,"路由安装",-1)]))}const i=t(s,[["render",o],["__file","install.html.vue"]]);export{i as default};

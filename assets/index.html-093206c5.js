@@ -1,0 +1,1 @@
+import{_ as a,o as r,c as n,a as e,b as i}from"./app-c9515a38.js";const o={};function s(c,t){return r(),n("div",null,t[0]||(t[0]=[e("h1",{id:"vite",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#vite","aria-hidden":"true"},"#"),i(" Vite")],-1),e("p",null,"撰写中",-1)]))}const l=a(o,[["render",s],["__file","index.html.vue"]]);export{l as default};

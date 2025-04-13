@@ -1,0 +1,1 @@
+import{_ as r,o as t,c,a as e,b as i}from"./app-c9515a38.js";const n={};function o(s,a){return t(),c("div",null,a[0]||(a[0]=[e("h1",{id:"reactive",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#reactive","aria-hidden":"true"},"#"),i(" reactive")],-1),e("p",null,"reactive介绍",-1)]))}const d=r(n,[["render",o],["__file","reactive.html.vue"]]);export{d as default};

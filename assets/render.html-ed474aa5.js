@@ -1,0 +1,1 @@
+import{_ as n,o as a,c as t,a as e,b as d}from"./app-c9515a38.js";const o={};function s(c,r){return a(),t("div",null,r[0]||(r[0]=[e("h1",{id:"render",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#render","aria-hidden":"true"},"#"),d(" render")],-1),e("p",null,"render介绍",-1)]))}const _=n(o,[["render",s],["__file","render.html.vue"]]);export{_ as default};

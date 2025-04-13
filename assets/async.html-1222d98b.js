@@ -1,0 +1,1 @@
+import{_ as r,o as t,c as n,a as e,b as s}from"./app-c9515a38.js";const c={};function o(l,a){return t(),n("div",null,a[0]||(a[0]=[e("h1",{id:"异步组件",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#异步组件","aria-hidden":"true"},"#"),s(" 异步组件")],-1),e("p",null,"异步组件",-1)]))}const _=r(c,[["render",o],["__file","async.html.vue"]]);export{_ as default};

@@ -1,0 +1,1 @@
+import{_ as a,o as r,c as t,a as e,b as i}from"./app-c9515a38.js";const o={};function s(c,n){return r(),t("div",null,n[0]||(n[0]=[e("h1",{id:"gin",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#gin","aria-hidden":"true"},"#"),i(" Gin")],-1),e("p",null,"Gin",-1)]))}const d=a(o,[["render",s],["__file","gin.html.vue"]]);export{d as default};

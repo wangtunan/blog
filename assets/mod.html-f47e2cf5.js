@@ -1,0 +1,1 @@
+import{_ as a,o as r,c as s,a as e,b as t}from"./app-c9515a38.js";const d={};function l(n,o){return r(),s("div",null,o[0]||(o[0]=[e("h1",{id:"go-modules",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#go-modules","aria-hidden":"true"},"#"),t(" Go Modules")],-1),e("p",null,"Go Modules",-1)]))}const u=a(d,[["render",l],["__file","mod.html.vue"]]);export{u as default};
