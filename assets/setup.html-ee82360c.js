@@ -1,1 +1,0 @@
-import{_ as s,o as a,c as r,a as e,b as n}from"./app-c9515a38.js";const o={};function c(u,t){return a(),r("div",null,t[0]||(t[0]=[e("h1",{id:"setup",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#setup","aria-hidden":"true"},"#"),n(" setup")],-1),e("p",null,"setup介绍",-1)]))}const d=s(o,[["render",c],["__file","setup.html.vue"]]);export{d as default};

@@ -1,1 +1,0 @@
-const a=JSON.parse('{"key":"v-4ad41cb5","path":"/vueAnalysis/vuex/install.html","title":"Vuex安装","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744534853000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/vuex/install.md"}');export{a as data};

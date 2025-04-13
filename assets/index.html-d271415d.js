@@ -1,1 +1,0 @@
-import{_ as n,o as r,c as t,a as e,b as o}from"./app-c9515a38.js";const c={};function l(s,a){return r(),t("div",null,a[0]||(a[0]=[e("h1",{id:"changelog",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#changelog","aria-hidden":"true"},"#"),o(" Changelog")],-1),e("p",null,"撰写中。。。",-1)]))}const i=n(c,[["render",l],["__file","index.html.vue"]]);export{i as default};

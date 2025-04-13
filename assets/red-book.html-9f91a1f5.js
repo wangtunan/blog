@@ -1,1 +1,0 @@
-import{_ as r,o as t,c as o,a,b as c}from"./app-c9515a38.js";const s={};function n(d,e){return t(),o("div",null,e[0]||(e[0]=[a("h1",{id:"javascript高级程序设计",tabindex:"-1"},[a("a",{class:"header-anchor",href:"#javascript高级程序设计","aria-hidden":"true"},"#"),c(" JavaScript高级程序设计")],-1)]))}const l=r(s,[["render",n],["__file","red-book.html.vue"]]);export{l as default};

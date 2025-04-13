@@ -1,1 +1,0 @@
-const t=JSON.parse('{"key":"v-28d8cbcb","path":"/golang/tools/mod.html","title":"Go Modules","lang":"zh-CN","frontmatter":{"sidebar":"auto"},"headers":[],"git":{"updatedTime":1744534853000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"golang/tools/mod.md"}');export{t as data};

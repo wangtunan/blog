@@ -1,1 +1,0 @@
-import{_ as n,o as a,c as r,a as e,b as i}from"./app-c9515a38.js";const o={};function s(c,t){return a(),r("div",null,t[0]||(t[0]=[e("h1",{id:"transition",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#transition","aria-hidden":"true"},"#"),i(" Transition")],-1),e("p",null,"Transition介绍",-1)]))}const d=n(o,[["render",s],["__file","transition.html.vue"]]);export{d as default};

@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-2ed95744","path":"/vueAnalysis/component/register.html","title":"组件注册","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744534853000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueAnalysis/component/register.md"}');export{e as data};

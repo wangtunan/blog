@@ -1,1 +1,0 @@
-const t=JSON.parse('{"key":"v-6fc9cdf8","path":"/vueNextAnalysis/reactivity/watch.html","title":"Watch","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1744534853000,"contributors":[{"name":"wangtunan","email":"why583440138@gmail.com","commits":1}]},"filePathRelative":"vueNextAnalysis/reactivity/watch.md"}');export{t as data};

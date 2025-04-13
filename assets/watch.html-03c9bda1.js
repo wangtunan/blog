@@ -1,1 +1,0 @@
-import{_ as t,o as c,c as r,a as e,b as n}from"./app-c9515a38.js";const o={};function s(h,a){return c(),r("div",null,a[0]||(a[0]=[e("h1",{id:"watch",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#watch","aria-hidden":"true"},"#"),n(" Watch")],-1),e("p",null,"Watch介绍",-1)]))}const d=t(o,[["render",s],["__file","watch.html.vue"]]);export{d as default};

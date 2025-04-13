@@ -1,1 +1,0 @@
-import{_ as o,o as a,c,a as e,b as r}from"./app-c9515a38.js";const d={};function n(s,t){return a(),c("div",null,t[0]||(t[0]=[e("h1",{id:"computed",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#computed","aria-hidden":"true"},"#"),r(" computed")],-1),e("p",null,"computed介绍",-1)]))}const l=o(d,[["render",n],["__file","computed.html.vue"]]);export{l as default};
