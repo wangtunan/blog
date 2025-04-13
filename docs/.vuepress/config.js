@@ -19,7 +19,8 @@ const {
   vueAnalysisNav,
   algorithmNav,
   booksNav,
-  pythonNav
+  pythonNav,
+  llmNav
 } = navConfig
 const __dirname = getDirname(import.meta.url)
 
@@ -53,6 +54,7 @@ export default defineUserConfig({
       ...vueAnalysisNav,
       ...algorithmNav,
       ...pythonNav,
+      ...llmNav,
       ...booksNav
     ],
     sidebar: {

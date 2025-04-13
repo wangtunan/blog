@@ -155,6 +155,7 @@ const golangNav = [
   }
 ]
 
+// python导航
 const pythonNav = [
   {
     text: 'Python技术栈',
@@ -171,11 +172,30 @@ const pythonNav = [
   }
 ]
 
+// llm导航
+const llmNav = [
+  {
+    text: 'LLM',
+    children: [
+      {
+        text: 'RAG',
+        children: [
+          {
+            text: 'RAG基础',
+            link: '/rag/base'
+          }
+        ]
+      }
+    ]
+  }
+]
+
 module.exports = {
   frontEndNav,
   vueAnalysisNav,
   algorithmNav,
   booksNav,
   golangNav,
-  pythonNav
+  pythonNav,
+  llmNav
 }
