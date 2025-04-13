@@ -19,7 +19,7 @@ jobs:
       - name: Set Node Version
         uses: actions/setup-node@v3
         with: 
-          node-version: 16
+          node-version: 20
         
       # 打包
       - name: Build
