@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 
 # 精通Git

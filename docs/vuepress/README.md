@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 # VuePress <Badge text="0.x"/>
 本`blog`配套了一个基于 VuePress 的一个简单的配置案例，此配置案例包含了本`blog`绝大部分配置案例，更多详情请移步这里[VuePress配置案例](https://github.com/wangtunan/vuepress-blog-demo)
@@ -296,7 +296,7 @@ module.exports = {
 
 #### 自动生成侧边栏
 ::: tip 说明
-如果我们仅仅只是希望能根据`.md`中的标题自动生成侧边栏的话，可以设置`sidebar: auto`属性即可
+如果我们仅仅只是希望能根据`.md`中的标题自动生成侧边栏的话，可以设置`sidebar: heading`属性即可
 :::
 如果我们要为所有`.md`都开启自动生成侧边栏的话，需要进行如下配置
 ```js
@@ -310,7 +310,7 @@ module.exports = {
 如果我们只是针对某一个`.md`文件开启自动生成侧边栏的话，需要在`.md`文件的最上方，通过设置`YAML`属性，相关配置如下
 ``` yaml
 ---
-sidebar: auto
+sidebar: heading
 ---
 # Vue.js
 这里是Vue.js文件的内容部分

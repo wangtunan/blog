@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 # 你不知道的javascript中
 

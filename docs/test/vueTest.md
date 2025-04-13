@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 
 # Vue 应用测试

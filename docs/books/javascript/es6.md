@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 
 # 深入理解ES6

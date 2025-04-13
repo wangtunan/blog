@@ -1,27 +1,26 @@
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
-import { commentPlugin } from 'vuepress-plugin-comment2'
+import { commentPlugin } from '@vuepress/plugin-comment'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
-import { defaultTheme, defineUserConfig } from 'vuepress'
-const sidebarConfig = require('./configs/sidebar.js')
-const navConfig = require('./configs/nav.js')
-const { ua } = require('./ua.js')
-const {
-  webpackSidebar,
-  rollupSidebar,
-  vueAnalysisSidebar,
-  vueNextAnalysisSidebar,
-  algorithmBaseSidebar,
-  algorithmLeetCodeSidebar
-} = sidebarConfig
-const {
-  frontEndNav,
-  vueAnalysisNav,
-  algorithmNav,
-  booksNav,
-  pythonNav,
-  llmNav
-} = navConfig
+import { defineUserConfig } from 'vuepress'
+import { defaultTheme } from '@vuepress/theme-default'
+import { baiduAnalyticsPlugin } from '@vuepress/plugin-baidu-analytics'
+
+
+import frontEndNav from './navbar/frontend.js'
+import vueAnalysisNav from './navbar/vueAnalysis.js'
+import algorithmNav from './navbar/algorithm.js'
+import booksNav from './navbar/books.js'
+import pythonNav from './navbar/python.js'
+import llmNav from './navbar/llm.js'
+
+import webpackSidebar from './sidebar/webpack.js'
+import rollupSidebar from './sidebar/rollup.js'
+import vueAnalysisSidebar from './sidebar/vueAnalysis.js'
+import vueNextAnalysisSidebar from './sidebar/vueNextAnalysis.js'
+import algorithmSidebar from './sidebar/algorithm.js'
+import leetCodeSidebar from './sidebar/leetcode.js'
+
 const __dirname = getDirname(import.meta.url)
 
 export default defineUserConfig({
@@ -31,14 +30,8 @@ export default defineUserConfig({
   lang: 'zh-CN',
   head: [
     ['link', { rel: 'icon', href: '/blog/icon.png' }],
-    [...ua]
   ],
   port: 3000,
-  markdown: {
-    code: {
-      lineNumbers: false
-    }
-  },
   theme: defaultTheme({
     editLink: false,
     contributorsText: '贡献者',
@@ -62,8 +55,8 @@ export default defineUserConfig({
       '/rollup/': rollupSidebar,
       '/vueAnalysis/': vueAnalysisSidebar,
       '/vueNextAnalysis/': vueNextAnalysisSidebar,
-      '/algorithm/base/': algorithmBaseSidebar,
-      '/algorithm/leetcode/': algorithmLeetCodeSidebar
+      '/algorithm/base/': algorithmSidebar,
+      '/algorithm/leetcode/': leetCodeSidebar
     }
   }),
   bundler: viteBundler({
@@ -79,6 +72,9 @@ export default defineUserConfig({
     }
   }),
   plugins: [
+    baiduAnalyticsPlugin({
+      id: '1876f64fd31c9aba1a7a5e157813a075'
+    }),
     registerComponentsPlugin({
       componentsDir: path.resolve(__dirname, './components')
     }),

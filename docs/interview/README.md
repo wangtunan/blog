@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 # 前端面试之道
 

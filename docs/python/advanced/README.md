@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sidebar: heading
 ---
 # Python高级技巧
 
