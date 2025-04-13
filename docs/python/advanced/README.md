@@ -108,6 +108,25 @@ def heavy_computation(n):
 
 heavy_computation(10**6) # 函数heavy_computation运行时间：0.0356秒
 ```
+
+### 迭代器
+**迭代器**：用来访问集合元素的一种方式，它从集合的第一个元素开始访问，直到所有的元素被访问完结束，且迭代器只能前进不能后退。
+```py
+# 创建迭代器
+it1 = iter([1, 2, 3, 4])
+it2 = iter([1, 2, 3, 4])
+
+# 自动迭代(自动调用next)
+for x in it1:
+  print(x) # 1 2 3 4
+
+# 手动迭代
+print(next(it2)) # 1
+print(next(it2)) # 2
+print(next(it2)) # 3
+print(next(it2)) # 4
+```
+
 **自定义迭代器**： 可以把一个类作为一个迭代器，只需要在类中实现`__iter__`和`__next__`即可。
 ```py
 # 自定义迭代器
