@@ -8,8 +8,8 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/(已废弃)<br/>
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/d13add3751990882fb078ce20d5b32a1a93e5407.svg)
 
 ## Python
-[Python快速入门](https://wangtunan.github.io/blog/python/base)
-[Python高级技巧](https://wangtunan.github.io/blog/python/advanced)
+[Python快速入门](https://wangtunan.github.io/blog/python/base)<br/>
+[Python高级技巧](https://wangtunan.github.io/blog/python/advanced)<br/>
 
 ## 面试
 [前端面试之道](https://wangtunan.github.io/blog/interview/)
