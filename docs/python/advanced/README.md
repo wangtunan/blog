@@ -262,3 +262,32 @@ edit_file(file_path)
 # 查看文件
 view_file(file_path)
 ```
+
+### 类型定义
+::: tip
+Python中的类型定义是静态类型注解机制，它不影响运行时行为。
+:::
+
+```py
+# 普通变量
+name: str = "Alice"
+age: int = 25
+is_student: bool = True
+
+
+# 复合类型
+numbers: list[int] = [1, 2, 3, 4]
+prices: dict[str, float] = {"apple": 4.5, "banana": 2.8}
+tags: set[str] = { "python", "conda", "pip"}
+
+# 函数参数和返回值
+from typing import Optional
+# 参数多个类型
+# 返回值可选
+def find_user(id: int | str) => Optional[str]:
+  """返回用户名或None"""
+  if id:
+    return "Alice"
+  else:
+    return None
+```
