@@ -7,7 +7,7 @@ const llmNav = [
         text: 'RAG',
         children: [
           {
-            text: 'RAG基础',
+            text: 'RAG',
             link: '/rag/base/'
           }
         ]
