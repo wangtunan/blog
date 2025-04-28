@@ -24,7 +24,10 @@ const ragSidebar = [
     children: [
       '/rag/loader/',
       '/rag/loader/document/',
-      '/rag/loader/text/'
+      '/rag/loader/text/',
+      '/rag/loader/json/',
+      '/rag/loader/html/',
+      '/rag/loader/markdown/'
     ]
   }
 ]
