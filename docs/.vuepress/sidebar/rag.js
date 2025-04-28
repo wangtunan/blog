@@ -23,6 +23,7 @@ const ragSidebar = [
     collapsable: false,
     children: [
       '/rag/loader/',
+      '/rag/loader/document/',
       '/rag/loader/text/'
     ]
   }
