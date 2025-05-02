@@ -27,7 +27,24 @@ const ragSidebar = [
       '/rag/loader/text/',
       '/rag/loader/json/',
       '/rag/loader/html/',
-      '/rag/loader/markdown/'
+      '/rag/loader/markdown/',
+      '/rag/loader/csv/',
+      '/rag/loader/ocr/',
+      '/rag/loader/pdf/'
+    ]
+  },
+  {
+    text: 'RAG文本切块',
+    collapsable: false,
+    children: [
+      '/rag/chunking/'
+    ]
+  },
+  {
+    text: 'RAG向量嵌入',
+    collapsable: false,
+    children: [
+      '/rag/embedding/'
     ]
   }
 ]
