@@ -40,6 +40,8 @@ export default defineUserConfig({
     repo: 'https://github.com/wangtunan/blog',
     repoLabel: 'Github',
     navbar: [
+      ...llmNav,
+      ...pythonNav,
       {
         text: '前端面试之道',
         link: '/interview/'
@@ -47,8 +49,6 @@ export default defineUserConfig({
       ...frontEndNav,
       ...vueAnalysisNav,
       ...algorithmNav,
-      ...pythonNav,
-      ...llmNav,
       ...booksNav
     ],
     sidebar: {
