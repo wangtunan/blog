@@ -30,7 +30,8 @@ const ragSidebar = [
       '/rag/loader/markdown/',
       '/rag/loader/csv/',
       '/rag/loader/ocr/',
-      '/rag/loader/pdf/'
+      '/rag/loader/pdf/',
+      '/rag/loader/db/'
     ]
   },
   {
