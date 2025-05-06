@@ -1,11 +1,8 @@
 # 简单文本导入
-::: tip
-需要安装依赖 `pip install langchain-community`
-:::
 
 ## TextLoader
 ::: tip
-[Text Loader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.text.TextLoader.html)
+[TextLoader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.text.TextLoader.html)
 :::
 
 ```py
@@ -36,7 +33,7 @@ print(documents)
 
 ## DirectoryLoader
 ::: tip
-[Directory Loader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.directory.DirectoryLoader.html)
+[DirectoryLoader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.directory.DirectoryLoader.html)
 :::
 
 可使用`DirectoryLoader`一次性加载某个目录下所有`txt`文件。

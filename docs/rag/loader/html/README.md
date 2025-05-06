@@ -1,6 +1,6 @@
 # HTML网页数据
 ::: tip
-[WebBase Loader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.web_base.WebBaseLoader.html)
+[WebBaseLoader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.web_base.WebBaseLoader.html)
 :::
 
 ## 选型方案对比
@@ -38,7 +38,7 @@ print(document.page_content)
 
 ## RSSFeedLoader
 ::: tip
-[RSSLoader 文档](https://python.langchain.com/docs/integrations/document_loaders/rss/)
+[RSSFeedLoader 文档](https://python.langchain.com/docs/integrations/document_loaders/rss/)
 :::
 
 首先需要安装必要的包：

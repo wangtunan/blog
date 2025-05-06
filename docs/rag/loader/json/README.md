@@ -1,6 +1,6 @@
 # JSON
 ::: tip
-[JSON Loader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html)
+[JSONLoader文档](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html)
 :::
 
 `JSON`格式的数据也可以使用`TextLoader`来加载，但与`JSONLoader`相比，它有以下两大缺点：
