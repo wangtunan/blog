@@ -38,7 +38,9 @@ const ragSidebar = [
     text: 'RAG文本切块',
     collapsable: false,
     children: [
-      '/rag/chunking/'
+      '/rag/chunking/',
+      '/rag/chunking/methods/',
+      '/rag/chunking/advanced/'
     ]
   },
   {
