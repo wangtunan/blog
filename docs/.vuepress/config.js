@@ -5,6 +5,7 @@ import { viteBundler } from '@vuepress/bundler-vite'
 import { defineUserConfig } from 'vuepress'
 import { defaultTheme } from '@vuepress/theme-default'
 import { baiduAnalyticsPlugin } from '@vuepress/plugin-baidu-analytics'
+import { markdownMathPlugin } from '@vuepress/plugin-markdown-math'
 
 
 import frontEndNav from './navbar/frontend.js'
@@ -88,6 +89,9 @@ export default defineUserConfig({
       categoryId: 'DIC_kwDOCpB0CM4CZkha',
       mapping: "pathname",
       lang: 'zh-CN'
+    }),
+    markdownMathPlugin({
+      type: 'katex',
     })
   ]
 })

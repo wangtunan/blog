@@ -19,8 +19,10 @@
     "@vuepress/bundler-vite": "^2.0.0-rc.21",
     "@vuepress/plugin-baidu-analytics": "^2.0.0-rc.94",
     "@vuepress/plugin-comment": "^2.0.0-rc.94",
+    "@vuepress/plugin-markdown-math": "^2.0.0-rc.94",
     "@vuepress/plugin-register-components": "^2.0.0-rc.94",
     "@vuepress/theme-default": "^2.0.0-rc.94",
+    "katex": "^0.16.22",
     "sass-embedded": "^1.86.3"
   }
 }

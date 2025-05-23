@@ -4,8 +4,7 @@ const ragSidebar = [
     text: 'RAG基础',
     collapsable: false,
     children: [
-      '/rag/base/',
-      '/rag/base/concept/'
+      '/rag/base/'
     ]
   },
   {
@@ -46,7 +45,8 @@ const ragSidebar = [
     text: 'RAG向量嵌入',
     collapsable: false,
     children: [
-      '/rag/embedding/'
+      '/rag/embedding/',
+      '/rag/embedding/similarity/'
     ]
   }
 ]
