@@ -39,8 +39,7 @@ const ragSidebar = [
     collapsable: false,
     children: [
       '/rag/chunking/',
-      '/rag/chunking/methods/',
-      '/rag/chunking/advanced/'
+      '/rag/chunking/methods/'
     ]
   },
   {
