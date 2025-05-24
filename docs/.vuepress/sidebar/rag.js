@@ -18,7 +18,7 @@ const ragSidebar = [
     ]
   },
   {
-    text: 'RAG数据导入',
+    text: '数据导入(Loader)',
     collapsable: false,
     children: [
       '/rag/loader/',
@@ -34,7 +34,7 @@ const ragSidebar = [
     ]
   },
   {
-    text: 'RAG文本切块',
+    text: '文本切块(Chunking)',
     collapsable: false,
     children: [
       '/rag/chunking/',
@@ -42,7 +42,7 @@ const ragSidebar = [
     ]
   },
   {
-    text: 'RAG向量嵌入',
+    text: '向量嵌入(Embedding)',
     collapsable: false,
     children: [
       '/rag/embedding/',
@@ -50,6 +50,13 @@ const ragSidebar = [
       '/rag/embedding/sparse/',
       '/rag/embedding/dense/',
       '/rag/embedding/hybrid/',
+    ]
+  },
+  {
+    text: '向量存储(VectorStore)',
+    collapsable: false,
+    children: [
+      '/rag/vectorStore/'
     ]
   }
 ]
