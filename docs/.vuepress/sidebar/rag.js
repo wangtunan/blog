@@ -46,7 +46,10 @@ const ragSidebar = [
     collapsable: false,
     children: [
       '/rag/embedding/',
-      '/rag/embedding/similarity/'
+      '/rag/embedding/similarity/',
+      '/rag/embedding/sparse/',
+      '/rag/embedding/dense/',
+      '/rag/embedding/hybrid/',
     ]
   }
 ]
