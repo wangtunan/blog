@@ -56,7 +56,9 @@ const ragSidebar = [
     text: '向量存储(VectorStore)',
     collapsable: false,
     children: [
-      '/rag/vectorStore/'
+      '/rag/vectorStore/',
+      '/rag/vectorStore/chroma/',
+      '/rag/vectorStore/milvus/'
     ]
   }
 ]

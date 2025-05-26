@@ -9,6 +9,11 @@
     "gitee",
     "Repobeats",
     "langchain",
-    "langgraph"
+    "langgraph",
+    "milvus",
+    "Faiss",
+    "Qdrant",
+    "mathrm",
+    "numpy"
   ]
 }
