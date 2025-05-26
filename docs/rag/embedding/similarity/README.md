@@ -103,6 +103,9 @@ print(manhattan_dist)  # 输出 9.0
 ```
 
 ## 雅卡尔指数
+::: tip
+[雅卡尔指数 维基百科](https://zh.wikipedia.org/wiki/%E9%9B%85%E5%8D%A1%E5%B0%94%E6%8C%87%E6%95%B0)
+:::
 
 **雅卡尔指数(Jaccard)**：用于比较二进制向量或集合，如用户兴趣标签匹配。
 
@@ -123,6 +126,10 @@ J(A,B) = 2 / 4 = 0.5
 ```
 
 ## 皮尔逊相关系数
+::: tip
+[皮尔逊相关系数 维基百科](https://zh.wikipedia.org/wiki/%E7%9A%AE%E5%B0%94%E9%80%8A%E7%A7%AF%E7%9F%A9%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0)
+:::
+
 **皮尔逊相关系数(Pearson Correlation)**：衡量线性相关性(范围[-1, 1])，适用于评分预测，例如电影推荐。
 
 公式：

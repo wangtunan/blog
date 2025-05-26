@@ -10,7 +10,7 @@
 
 ## Embedding类型
 
-* `Word Embedding`: 将单词映射为向量，例如`Word2Vec`、`GloVe`，。
+* `Word Embedding`: 将单词映射为向量，例如`Word2Vec`、`GloVe`。
 * `Image Embedding`: 用`CNN`提取图像的向量表示，例如`ResNet`的特征向量。
 * `Graph Embedding`: 将图中的节点/边表示为向量，例如：`Node2Vec`、`GNN`。
 * 用户/商品嵌入(推荐系统)：将用户/商品表示为向量，用于预测偏好，例如：矩阵分解、深度学习。
@@ -28,7 +28,7 @@
 | 分类 | 模型 | 维度 |
 | --- | --- | --- |
 | **词嵌入** | `Word2Vec`、`GloVe`、`FastText` | 50/100/200/300/ |
-| **推荐系统** | `YouTube`推荐 | 256 |
+| **推荐系统** | YouTube推荐 | 256 |
 | **预训练模型** | `BERT-base`、`BERT-large` | 768、1024 |
 | **图像嵌入** | `ResNet-50` | 2048 |
 
@@ -55,5 +55,5 @@
 * 模型：`LoRA`(2021)、`CLIP`(2021 OpenAI)、`Flamingo`(2022 DeepMind)。
 
 **API和应用时代**
-* 特点：支持全语言、支持超长文本、适配向量数据库
-* 模型：`BGE`(2023 BAAI)、`text-embedding-3`(2024 OpenAI)、
+* 特点：支持全语言、支持超长文本、适配向量数据库。
+* 模型：`BGE`(2023 BAAI)、`text-embedding-3`(2024 OpenAI)。

@@ -42,7 +42,7 @@ const ragSidebar = [
     ]
   },
   {
-    text: '向量嵌入(Embedding)',
+    text: '数据嵌入(Embedding)',
     collapsable: false,
     children: [
       '/rag/embedding/',
