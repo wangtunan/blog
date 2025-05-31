@@ -144,3 +144,30 @@ collection.delete(
   }
 )
 ```
+
+## 查询集合(Query Collection)
+::: tip
+[Collection Query API 文档](https://docs.trychroma.com/reference/python/collection#query) <br/>
+[Collection Get API 文档](https://docs.trychroma.com/reference/python/collection#get)
+:::
+```py
+# 根据查询内容查询
+result = collection.query(
+  query_texts=["Vue.js"],
+  n_results=1 # 仅返回最匹配的一项
+)
+
+# 根据id查询
+result = collection.get(
+  ids=["id1", "id2", "id3"],
+  where={
+    "version": "3.0"
+  }
+)
+```
+
+## 元数据过滤(Metadata Filter)
+
+## 自定义Embedding
+
+## 多模态(MultiModal)
