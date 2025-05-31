@@ -6,6 +6,7 @@ import { defineUserConfig } from 'vuepress'
 import { defaultTheme } from '@vuepress/theme-default'
 import { baiduAnalyticsPlugin } from '@vuepress/plugin-baidu-analytics'
 import { markdownMathPlugin } from '@vuepress/plugin-markdown-math'
+import { prismjsPlugin } from '@vuepress/plugin-prismjs'
 
 
 import frontEndNav from './navbar/frontend.js'
@@ -92,6 +93,9 @@ export default defineUserConfig({
     }),
     markdownMathPlugin({
       type: 'katex',
+    }),
+    prismjsPlugin({
+      lineNumbers: false
     })
   ]
 })
