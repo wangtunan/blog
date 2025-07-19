@@ -11,9 +11,9 @@ $ pip install chromadb
 ```
 
 ## 客户端
-`Chroma`中的客户端一份分为如下几种类型：
-* **临时客户端(Ephemeral Client)**：数据存储在本地内存中，适合快速严重一些特性。
-* **持久化客户端(Persistent Client)**：数据存储在本地硬盘中，在`Chroma`其中时自动加载硬盘已经存储的数据。
+`Chroma`中的客户端一般分为如下几种类型：
+* **临时客户端(Ephemeral Client)**：数据存储在本地内存中，适合快速验证一些特性。
+* **持久化客户端(Persistent Client)**：数据存储在本地硬盘中，`Chroma`在启动时，自动加载硬盘已经存储的数据。
 * **客户端-服务端模式(Client Server Mode)**：服务端和客户端可分离。
 
 ### 临时客户端
@@ -167,6 +167,51 @@ result = collection.get(
 ```
 
 ## 元数据过滤(Metadata Filter)
+在查询时，可以对元数据(`metadata`)进行过滤，在`Chroma`中支持的操作符如下：
+| 类型     | 操作符 | 含义  | 示例                   |
+| ----- | ------ | ---- | -------------------------- |
+| 数值比较 | `$eq`  | 等于   | `"age": { "$eq": 25 }`     |
+| 数值比较 | `$ne`  | 不等于  | `"status": { "$ne": "A" }` |
+| 数值比较 | `$gt`  | 大于   | `"score": { "$gt": 70 }`   |
+| 数值比较 | `$gte` | 大于等于 | `"score": { "$gte": 70 }`  |
+| 数值比较 | `$lt`  | 小于   | `"price": { "$lt": 100 }`  |
+| 数值比较 | `$lte` | 小于等于 | `"price": { "$lte": 100 }` |
+| 集合判断 | `$in`  | 在集合内（包含） | `"tags": { "$in": ["red", "blue"] }`   |
+| 集合判断 | `$nin` | 不在集合内    | `"tags": { "$nin": ["green", "yellow"] }` |
+| 逻辑判断 | `$and` | 与  | `"$and": [{ "age": { "$gt": 20 } }, { "status": "A" }]`  |
+| 逻辑判断 | `$or`  | 或  | `"$or": [{ "status": "A" }, { "score": { "$lt": 60 } }]` |
+| 逻辑判断 | `$not` | 非  | `"age": { "$not": { "$gte": 18 } }`                      |
+
+```py
+collection.add(
+  documents=["Vue.js", "React.js", "Svelte.js"],
+  metadatas=[
+    { "framework": "FE", "version": "2.7", "age": 8 },
+    { "framework": "FE", "version": "18.0", "age": 10 },
+    { "framework": "FE", "version": "5.0", "age": 12 }
+  ],
+  ids=["id1", "id2", "id3"]
+)
+
+version_result = collection.get(
+  where={
+    "version": {
+      "$in": ["5.0", "18.0"]
+    },
+  }
+)
+
+print(version_result.get('ids')) # ['id2', 'id3']
+
+age_result = collection.get(
+  where={
+    "age": {
+      "$gte": 12
+    },
+  }
+)
+print(age_result.get('ids')) # ['id3']
+```
 
 ## 自定义Embedding
 
