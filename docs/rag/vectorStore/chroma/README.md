@@ -214,5 +214,77 @@ print(age_result.get('ids')) # ['id3']
 ```
 
 ## 自定义Embedding
+`Chroma`中默认的`Embedding`模型是`all-MiniLM-L6-v2`，但其允许提供自定义`Embedding`模型，以`BAAI/bge-m3`为例。
+
+首先安装以下包：
+```sh
+$ pip install transformers
+$ pip install torch
+```
+
+创建`bge_m3_embedding.py`，其代码如下：
+```py
+from chromadb.utils.embedding_functions import EmbeddingFunction
+from transformers import AutoTokenizer, AutoModel
+import torch
+
+class BGE_M3_Embedding(EmbeddingFunction):
+  def __init__(self, model_name="BAAI/bge-m3", device=None):
+    self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+    self.model = AutoModel.from_pretrained(model_name).to(self.device).eval()
+
+  def __call__(self, texts):
+    if isinstance(texts, str):
+      texts = [texts]
+    # 批量编码
+    inputs = self.tokenizer(
+      texts,
+      return_tensors="pt",
+      truncation=True,
+      padding=True,
+      max_length=512
+    ).to(self.device)
+    # 前向传播
+    with torch.no_grad():
+      outputs = self.model(**inputs)
+      # Mean Pooling
+      embeddings = outputs.last_hidden_state.mean(dim=1)
+    # 转成 list of list
+    return embeddings.cpu().tolist()
+
+```
+
+在`main.py`中使用`BGE_M3_Embedding`：
+```py
+from bge_m3_embedding import BGE_M3_Embedding
+
+# 创建 Collection
+collection = client.get_or_create_collection(
+  name="my_bge_m3_collection",
+  embedding_function=BGE_M3_Embedding()
+)
+
+# 添加数据
+collection.add(
+  ids=["doc1", "doc2"],
+  documents=[
+    "OpenAI develops advanced AI models.",
+    "BAAI's bge-m3 is a state-of-the-art embedding model."
+  ],
+  metadatas=[
+    {"source": "openai"},
+    {"source": "baai"}
+  ]
+)
+
+# 查询相似文档
+results = collection.query(
+  query_texts=["Who is embedding model?"],
+  n_results=1
+)
+
+print(results.get('ids')) # ['doc2']
+```
 
 ## 多模态(MultiModal)
