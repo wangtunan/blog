@@ -11,7 +11,16 @@ const llmNav = [
             link: '/rag/base/'
           }
         ]
-      }
+      },
+      // {
+      //   text: 'MCP',
+      //   children: [
+      //     {
+      //       text: 'MCP',
+      //       link: '/mcp/base/'
+      //     }
+      //   ]
+      // }
     ]
   }
 ]

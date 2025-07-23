@@ -60,7 +60,38 @@ const ragSidebar = [
       '/rag/vectorStore/chroma/',
       '/rag/vectorStore/milvus/'
     ]
-  }
+  },
+  {
+    text: '索引前处理(PreRetrieval)',
+    collapsable: false,
+    children: [
+      '/rag/preRetrieval/',
+      '/rag/preRetrieval/text2SQL/',
+      '/rag/preRetrieval/text2Cypher/',
+      '/rag/preRetrieval/metadataFilter/'
+    ]
+  },
+  {
+    text: '索引优化(Indexing)',
+    collapsable: false,
+    children: [
+      '/rag/indexing/'
+    ]
+  },
+  {
+    text: '索引后处理(PostRetrieval)',
+    collapsable: false,
+    children: [
+      '/rag/postRetrieval/'
+    ]
+  },
+  {
+    text: '评估RAG体系(Evaluation)',
+    collapsable: false,
+    children: [
+      '/rag/evaluation/'
+    ]
+  },
 ]
 
 export default ragSidebar
