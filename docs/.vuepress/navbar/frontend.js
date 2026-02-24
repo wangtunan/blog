@@ -43,7 +43,7 @@ const frontEndNav = [
         children: [
           {
             text: 'Vue应用测试',
-            link: '/test/vueTest/'
+            link: '/test/'
           }
         ]
       }

@@ -13,11 +13,11 @@ const golangNav = [
         children: [
           {
             text: 'Gin',
-            link: '/golang/framework/gin/'
+            link: '/golang/framework/gin'
           },
           {
             text: 'Gorm',
-            link: '/golang/framework/gorm/'
+            link: '/golang/framework/gorm'
           }
         ]
       },
@@ -26,7 +26,7 @@ const golangNav = [
         children: [
           {
             text: 'Go Modules',
-            link: '/golang/mod/'
+            link: '/golang/mod'
           }
         ]
       }
