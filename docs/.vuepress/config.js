@@ -23,6 +23,7 @@ import vueNextAnalysisSidebar from './sidebar/vueNextAnalysis.js'
 import algorithmSidebar from './sidebar/algorithm.js'
 import leetCodeSidebar from './sidebar/leetcode.js'
 import ragSidebar from './sidebar/rag.js'
+import agentSidebar from './sidebar/agent.js'
 
 const __dirname = getDirname(import.meta.url)
 
@@ -60,7 +61,8 @@ export default defineUserConfig({
       '/vueNextAnalysis/': vueNextAnalysisSidebar,
       '/algorithm/base/': algorithmSidebar,
       '/algorithm/leetcode/': leetCodeSidebar,
-      '/rag/': ragSidebar
+      '/rag/': ragSidebar,
+      '/agent/': agentSidebar
     }
   }),
   bundler: viteBundler({

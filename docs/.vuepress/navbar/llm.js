@@ -18,6 +18,10 @@ const llmNav = [
           {
             text: 'RAG',
             link: '/rag/base/'
+          },
+          {
+            text: 'Agent',
+            link: '/agent/introduction/'
           }
         ]
       },
