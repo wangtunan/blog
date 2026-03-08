@@ -4,7 +4,16 @@ const llmNav = [
     text: 'LLM',
     children: [
       {
-        text: 'RAG',
+        text: 'LLM基础',
+        children: [
+          {
+            text: '名词缩写',
+            link: '/llm/abbreviation/'
+          }
+        ]
+      },
+      {
+        text: 'LLM应用',
         children: [
           {
             text: 'RAG',
@@ -12,15 +21,6 @@ const llmNav = [
           }
         ]
       },
-      // {
-      //   text: 'MCP',
-      //   children: [
-      //     {
-      //       text: 'MCP',
-      //       link: '/mcp/base/'
-      //     }
-      //   ]
-      // }
     ]
   }
 ]
