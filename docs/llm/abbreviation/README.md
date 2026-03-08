@@ -12,6 +12,7 @@ sidebar: heading
 | **DL**  | Deep Learning                   | 深度学习   |
 | **LLM** | Large Language Model            | 大语言模型  |
 | **AGI** | Artificial General Intelligence | 通用人工智能 |
+| **AIGC** | AI Generated Content | AI 生成内容(文本、图片、视频、音频、代码、3D模型等) |
 | **NLP** | Natural Language Processing     | 自然语言处理 |
 | **CV**  | Computer Vision                 | 计算机视觉  |
 | **ASR** | Automatic Speech Recognition    | 语音识别   |
