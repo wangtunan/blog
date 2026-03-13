@@ -7,8 +7,9 @@ Gitee国内镜像：http://wangtunan.gitee.io/blog/(已废弃)<br/>
 ## 仓库活跃度
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/d13add3751990882fb078ce20d5b32a1a93e5407.svg)
 
-## RAG
+## LLM
 [RAG基础](https://wangtunan.github.io/blog/rag/base/)
+[Agent基础](https://wangtunan.github.io/blog/agent/introduction/)
 
 ## Python
 [Python快速入门](https://wangtunan.github.io/blog/python/base)<br/>
