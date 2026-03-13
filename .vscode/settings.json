@@ -17,6 +17,7 @@
     "numpy",
     "chromadb",
     "katex",
-    "metadatas"
+    "metadatas",
+    "Agentic"
   ]
 }
