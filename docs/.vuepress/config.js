@@ -45,10 +45,6 @@ export default defineUserConfig({
     navbar: [
       ...llmNav,
       ...pythonNav,
-      {
-        text: '前端面试之道',
-        link: '/interview/'
-      },
       ...frontEndNav,
       ...vueAnalysisNav,
       ...algorithmNav,

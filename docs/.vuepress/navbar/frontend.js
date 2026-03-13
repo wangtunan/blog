@@ -4,6 +4,15 @@ const frontEndNav = [
     text: '前端技术栈',
     children: [
       {
+        text: '面试',
+        children: [
+          {
+            text: '前端面试之道',
+            link: '/interview/'
+          }
+        ]
+      },
+      {
         text: '打包工具',
         children: [
           {
